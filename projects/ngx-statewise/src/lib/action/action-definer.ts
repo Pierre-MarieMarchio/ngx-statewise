@@ -2,62 +2,44 @@ import { SingleAction, EmptyPayloadFn, ValuePayloadFn } from './action-type';
 import { emptyPayload } from './action-utils';
 import { createAction } from './action-creator';
 
-export function defineAction<T extends string>(
+function DefinedAction<T extends string, P>(
   type: T,
-  payloadFn: EmptyPayloadFn
-): () => { type: T };
-export function defineAction<T extends string, P>(
-  type: T,
-  payloadFn: ValuePayloadFn<P>
-): (payload: P) => { type: T; payload: P };
-export function defineAction<T extends string, P>(
-  type: T,
-  payloadFn: EmptyPayloadFn | ValuePayloadFn<P>
-) {
+  payloadFn: SingleAction<P>
+): P extends undefined
+  ? () => { type: T }
+  : (payload: P) => { type: T; payload: P } {
   if (payloadFn === emptyPayload) {
-    return () => createAction(type);
+    return (() => createAction(type)) as any;
+  } else {
+    return ((payload: P) =>
+      createAction(type, (payloadFn as ValuePayloadFn<P>)(payload))) as any;
   }
-  return (payload: P) => createAction(type, payloadFn(payload));
 }
 
-export function defineActionsGroupe<
+export function defineActionsGroup<
   Source extends string,
-  ReqPayload,
-  SuccessPayload,
-  FailurePayload
+  Events extends Record<string, SingleAction<any>>
 >(config: {
   source: Source;
-  events: {
-    request: SingleAction<ReqPayload>;
-    success: SingleAction<SuccessPayload>;
-    failure: SingleAction<FailurePayload>;
-  };
+  events: Events;
 }): {
-  request: ReqPayload extends undefined
-    ? () => { type: `${Source}_REQUEST` }
-    : (payload: ReqPayload) => {
-        type: `${Source}_REQUEST`;
-        payload: ReqPayload;
-      };
-  success: SuccessPayload extends undefined
-    ? () => { type: `${Source}_SUCCESS` }
-    : (payload: SuccessPayload) => {
-        type: `${Source}_SUCCESS`;
-        payload: SuccessPayload;
-      };
-  failure: FailurePayload extends undefined
-    ? () => { type: `${Source}_FAILURE` }
-    : (payload: FailurePayload) => {
-        type: `${Source}_FAILURE`;
-        payload: FailurePayload;
+  [K in keyof Events]: Events[K] extends EmptyPayloadFn
+    ? () => { type: `${Uppercase<Source>}_${Uppercase<string & K>}` }
+    : (payload: Parameters<Events[K]>[0]) => {
+        type: `${Uppercase<Source>}_${Uppercase<string & K>}`;
+        payload: Parameters<Events[K]>[0];
       };
 } {
   const { source, events } = config;
-  return {
-    request: createDefinedAction(`${source}_REQUEST`, events.request),
-    success: createDefinedAction(`${source}_SUCCESS`, events.success),
-    failure: createDefinedAction(`${source}_FAILURE`, events.failure),
-  } as any;
+
+  const result = {} as any;
+
+  for (const key in events) {
+    const type = `${source}_${key}`.toUpperCase();
+    result[key] = DefinedAction(type, events[key]);
+  }
+
+  return result;
 }
 
 export function defineSingleAction<Source extends string, ActionPayload>(
@@ -72,20 +54,6 @@ export function defineSingleAction<Source extends string, ActionPayload>(
       };
 } {
   return {
-    action: createDefinedAction(`${source}_ACTION`, payload),
+    action: DefinedAction(`${source}_ACTION`, payload),
   } as any;
-}
-
-function createDefinedAction<T extends string, P>(
-  type: T,
-  payloadFn: SingleAction<P>
-): P extends undefined
-  ? () => { type: T }
-  : (payload: P) => { type: T; payload: P } {
-  if (payloadFn === emptyPayload) {
-    return (() => createAction(type)) as any;
-  } else {
-    return ((payload: P) =>
-      createAction(type, (payloadFn as ValuePayloadFn<P>)(payload))) as any;
-  }
 }
