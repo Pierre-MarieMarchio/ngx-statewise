@@ -9,7 +9,7 @@ import {
 import { Action } from '../action';
 import { EffectHandler } from './effect-handler';
 
-export function createEffect<P, R>(
+export function createEffect<P>(
   actionT: string,
   handler: (payload: P) => Observable<Action>
 ): Observable<Action> {
