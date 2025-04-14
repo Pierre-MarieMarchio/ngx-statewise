@@ -130,8 +130,8 @@ export class AuthEffects {
   private readonly authTokenService = inject(AuthTokenService);
   private readonly router = inject(Router);
   
-  public readonly loginEffect = createEffect<LoginSubmit, Action>(
-    'LOGIN_REQUEST',  // Triggered by the request action
+  public readonly loginEffect = createEffect(
+    loginActions.request,  // Triggered by the request action
     (payload) => {
       return this.authRepository.login(payload).pipe(
         map((res) => {
@@ -146,7 +146,7 @@ export class AuthEffects {
   );
   
   public readonly logoutEffect = createEffect(
-    'LOGOUT_ACTION',
+    logoutAction.action,
     () => {
       this.router.navigate(['/']);
       return EMPTY;  // No additional action needed
@@ -271,7 +271,7 @@ export class TodoEffects {
   private readonly todoService = inject(TodoService);
   
   public readonly loadTodosEffect = createEffect(
-    'TODO_LOAD',
+    todoActions.load,
     () => {
       return this.todoService.getTodos().pipe(
         map(todos => todoActions.loadSuccess(todos)),
@@ -280,8 +280,8 @@ export class TodoEffects {
     }
   );
   
-  public readonly addTodoEffect = createEffect<Todo, Action>(
-    'TODO_ADD',
+  public readonly addTodoEffect = createEffect(
+    todoActions.add,
     (todo) => {
       return this.todoService.addTodo(todo).pipe(
         map(() => todoActions.load()),
@@ -298,34 +298,39 @@ export class TodoEffects {
 @Component({
   selector: 'app-todo-list',
   template: `
-    <div *ngIf="isLoading()">Loading...</div>
-    <div *ngIf="error()">{{ error() }}</div>
+    @if (isLoading()) {
+      <div>Loading...</div>
+    }
+    @if (error()) {
+      <div>{{ error() }}</div>
+    }
     <ul>
-      <li *ngFor="let todo of todos()" 
-          [class.selected]="todo.id === todoManager.selectedTodoId"
-          (click)="selectTodo(todo.id)">
-        {{ todo.title }}
-        <button (click)="removeTodo(todo.id)">Delete</button>
-      </li>
+      @for (todo of todos(); track todo.id) {
+        <li [class.selected]="todo.id === todoManager.selectedTodoId"
+            (click)="selectTodo(todo.id)">
+          {{ todo.title }}
+          <button (click)="removeTodo(todo.id)">Delete</button>
+        </li>
+      }
     </ul>
     <button (click)="loadTodos()">Refresh</button>
   `,
 })
 export class TodoListComponent {
   private todoManager = inject(TodoManager);
-  
+ 
   public todos = this.todoManager.todos;
   public isLoading = this.todoManager.isLoading;
   public error = this.todoManager.error;
-  
+ 
   loadTodos(): void {
     this.todoManager.loadTodos();
   }
-  
+ 
   removeTodo(id: number): void {
     this.todoManager.removeTodo(id);
   }
-  
+ 
   selectTodo(id: number): void {
     this.todoManager.selectTodo(id);
   }
