@@ -1,10 +1,35 @@
 {
   "name": "ngx-statewise",
   "version": "0.1.0",
+  "description": "A lightweight and intuitive state management for Angular. Simpler than NgRx, more structured than DIY.",
   "peerDependencies": {
     "@angular/common": "^19.2.0",
     "@angular/core": "^19.2.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pierre-MarieMarchio/ngx-statewise"
+  },
+  "keywords": [
+    "angular",
+    "ngx",
+    "state",
+    "state-management",
+    "store",
+    "angular-state",
+    "angular-store",
+    "effects",
+    "actions",
+    "state-updates",
+    "lightweight",
+    "rxjs",
+    "stateful",
+    "ngrx-alternative",
+    "ngxs-alternative",
+    "typescript",
+    "angular-library"
+  ],
+  "license": "GPL-3.0",
   "dependencies": {
     "tslib": "^2.3.0"
   },
