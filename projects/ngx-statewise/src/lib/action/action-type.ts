@@ -35,3 +35,19 @@ export type Action = {
   type: string;
   payload?: any;
 };
+
+
+/**
+ * Type-level transformation: converts a camelCase or PascalCase string type to snake_case.
+ *
+ * @template S - The input string type.
+ * @example
+ * type A = CamelToSnakeCase<'loadFailure'> // 'load_failure'
+ * type B = CamelToSnakeCase<'UserLogin'>   // 'user_login'
+ */
+export type CamelToSnakeCase<S extends string> =
+  S extends `${infer Head}${infer Tail}`
+    ? Tail extends Uncapitalize<Tail>
+      ? `${Lowercase<Head>}${CamelToSnakeCase<Tail>}`
+      : `${Lowercase<Head>}_${CamelToSnakeCase<Tail>}`
+    : S;

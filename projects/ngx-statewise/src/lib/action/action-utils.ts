@@ -20,3 +20,14 @@ export const emptyPayload: EmptyPayloadFn = () => undefined;
 export function payload<T>(): ValuePayloadFn<T> {
   return (p: T) => p;
 }
+
+/**
+ * Converts a camelCase or PascalCase string to SCREAMING_SNAKE_CASE.
+ *
+ * @param str - The input string in camelCase or PascalCase.
+ * @returns The transformed string in SCREAMING_SNAKE_CASE format.
+ *
+ */
+export function toScreamingSnakeCase(str: string): string {
+  return str.replace(/([a-z])([A-Z])/g, '$1_$2').toUpperCase();
+}

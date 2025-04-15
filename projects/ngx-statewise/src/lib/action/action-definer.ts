@@ -1,5 +1,5 @@
-import { SingleAction, EmptyPayloadFn, ValuePayloadFn } from './action-type';
-import { emptyPayload } from './action-utils';
+import { SingleAction, EmptyPayloadFn, ValuePayloadFn, CamelToSnakeCase } from './action-type';
+import { emptyPayload, toScreamingSnakeCase } from './action-utils';
 import { createAction } from './action-creator';
 
 /**
@@ -45,9 +45,11 @@ export function defineActionsGroup<
   events: Events;
 }): {
   [K in keyof Events]: Events[K] extends EmptyPayloadFn
-    ? () => { type: `${Uppercase<Source>}_${Uppercase<string & K>}` }
+    ? () => {
+        type: `${Uppercase<Source>}_${Uppercase<CamelToSnakeCase<string & K>>}`;
+      }
     : (payload: Parameters<Events[K]>[0]) => {
-        type: `${Uppercase<Source>}_${Uppercase<string & K>}`;
+        type: `${Uppercase<Source>}_${Uppercase<CamelToSnakeCase<string & K>>}`;
         payload: Parameters<Events[K]>[0];
       };
 } {
@@ -56,7 +58,7 @@ export function defineActionsGroup<
   const result = {} as any;
 
   for (const key in events) {
-    const type = `${source}_${key}`.toUpperCase();
+    const type = `${source.toUpperCase()}_${toScreamingSnakeCase(key)}`;
     result[key] = DefinedAction(type, events[key]);
   }
 
