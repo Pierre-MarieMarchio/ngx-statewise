@@ -1,6 +1,6 @@
 {
   "name": "ngx-statewise",
-  "version": "0.1.0",
+  "vesrion": "0.1.0",
   "peerDependencies": {
     "@angular/common": "^19.2.0",
     "@angular/core": "^19.2.0"
