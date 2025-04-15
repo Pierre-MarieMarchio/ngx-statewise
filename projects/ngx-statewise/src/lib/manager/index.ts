@@ -1,1 +1,1 @@
-export * from './manager-dispatch';
+export {dispatch} from './manager-dispatch';
