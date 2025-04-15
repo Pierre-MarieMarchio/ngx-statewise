@@ -42,7 +42,6 @@ export class EffectHandler {
    * @param {Action} action - The action to dispatch.
    */
   public emit(action: Action): void {
-    console.log('Emitting action:', action.type);
     this._actions.next(action);
   }
 
