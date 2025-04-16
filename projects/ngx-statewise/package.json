@@ -1,6 +1,6 @@
 {
   "name": "ngx-statewise",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "A lightweight and intuitive state management for Angular. Simpler than NgRx, more structured than DIY.",
   "peerDependencies": {
     "@angular/common": "^19.2.0",

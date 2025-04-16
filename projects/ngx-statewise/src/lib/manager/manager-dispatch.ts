@@ -43,16 +43,15 @@ export class StateStore {
    * @param {IUpdator<S>} updator - The state container and action-to-reducer map.
    */
   public dispatch<S>(action: Action, updator: IUpdator<S>): void {
-
-    update(updator.state, action, updator.updators);
-    EffectHandler.getInstance().emit(action);
-
     const subscription = this.effectActionsSubject.subscribe((resultAction) => {
       if (resultAction.type !== action.type) {
         update(updator.state, resultAction, updator.updators);
         subscription.unsubscribe();
       }
     });
+
+    update(updator.state, action, updator.updators);
+    EffectHandler.getInstance().emit(action);
   }
 }
 
