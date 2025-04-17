@@ -1,16 +1,30 @@
-import { UpdatorRegistry, Updator } from './updator-interfaces';
+import { IUpdator } from './updator-interfaces';
 
-export function createHandlerRegistry<S>(): UpdatorRegistry<S> {
-  return {};
+
+const globalUpdatorRegistry = new Map<string, IUpdator<any>>();
+
+/**
+ * Enregistre un `updator` pour une seule action.
+ */
+export function registerUpdator<S>(
+  actionType: string,
+  updator: IUpdator<S>
+): void {
+  globalUpdatorRegistry.set(actionType, updator);
 }
 
-export function UpdatorHandler<S, P = any>(
-  registry: UpdatorRegistry<S>,
-  actionType: string,
-  handler: Updator<S, P>
-): UpdatorRegistry<S> {
-  return {
-    ...registry,
-    [actionType]: handler,
-  };
+/**
+ * Enregistre un `updator` pour toutes les actions qu’il gère.
+ */
+export function registerFullUpdator<S>(updator: IUpdator<S>): void {
+  Object.keys(updator.updators).forEach((actionType) => {
+    registerUpdator(actionType, updator);
+  });
+}
+
+/**
+ * Récupère l’`updator` correspondant à un type d’action.
+ */
+export function getUpdator<S>(actionType: string): IUpdator<S> | undefined {
+  return globalUpdatorRegistry.get(actionType);
 }

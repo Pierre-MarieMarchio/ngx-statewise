@@ -9,7 +9,6 @@ import {
 /**
  * Registers and instantiates a set of effect classes at application startup.
  *
- *
  * @param effectClasses - An array of class types to be instantiated during app initialization
  * @returns An EnvironmentProviders object that can be added to the application configuration
  */
@@ -26,3 +25,4 @@ export function provideEffects(
     }),
   ]);
 }
+

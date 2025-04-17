@@ -7,9 +7,12 @@ export function update<S>(
   updators: UpdatorRegistry<S>
 ): void {
   const handler = updators[action.type];
+  console.log('handler ', handler);
   if (handler) {
-    handler(state, action.payload);
+    handler(state, action.payload); 
+    
   } else {
     console.warn(`No handler for action type: ${action.type}`);
   }
 }
+

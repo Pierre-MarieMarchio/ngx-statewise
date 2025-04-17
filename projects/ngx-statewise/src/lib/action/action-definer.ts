@@ -54,14 +54,11 @@ export function defineActionsGroup<
       };
 } {
   const { source, events } = config;
-
   const result = {} as any;
-
   for (const key in events) {
     const type = `${source.toUpperCase()}_${toScreamingSnakeCase(key)}`;
     result[key] = DefinedAction(type, events[key]);
   }
-
   return result;
 }
 

@@ -1,5 +1,5 @@
-import { Subject, Observable, filter } from 'rxjs';
 import { Action } from '../action';
+import { WritableSignal, signal, Signal, computed } from '@angular/core';
 
 /**
  * Singleton class responsible for managing and dispatching actions
@@ -7,7 +7,16 @@ import { Action } from '../action';
  */
 export class EffectHandler {
   private static _instance: EffectHandler;
-  private readonly _actions = new Subject<Action>();
+
+  // Use a signal to store the latest action
+  private readonly _latestAction: WritableSignal<Action | null> = signal(null);
+
+  // Store all dispatched actions (useful for debugging)
+  private readonly _actionHistory: WritableSignal<Action[]> = signal([]);
+
+  // Map of registered effect handlers by action type
+  private readonly _effectHandlers: Map<string, ((action: Action) => void)[]> =
+    new Map();
 
   /**
    * Private constructor to prevent external instantiation.
@@ -28,12 +37,17 @@ export class EffectHandler {
   }
 
   /**
-   * Returns an observable stream of all dispatched actions.
-   *
-   * @returns {Observable<Action>} Observable emitting all actions.
+   * Returns a signal with the latest action
    */
-  public get actions(): Observable<Action> {
-    return this._actions.asObservable();
+  public get latestAction(): Signal<Action | null> {
+    return this._latestAction.asReadonly();
+  }
+
+  /**
+   * Returns a signal with the action history
+   */
+  public get actionHistory(): Signal<Action[]> {
+    return this._actionHistory.asReadonly();
   }
 
   /**
@@ -42,19 +56,51 @@ export class EffectHandler {
    * @param {Action} action - The action to dispatch.
    */
   public emit(action: Action): void {
-    this._actions.next(action);
+    // Update the latest action signal
+
+    console.log('in emit', action);
+    
+
+    this._latestAction.set(action);
+
+    console.log("this._latestAction ", this._latestAction());
+    
+
+    // Add to history
+    this._actionHistory.update((history) => [...history, action]);
+
+    // Notify registered handlers for this action type
+    const handlers = this._effectHandlers.get(action.type);
+    if (handlers) {
+      handlers.forEach((handler) => handler(action));
+    }
   }
 
   /**
-   * Returns an observable that emits only actions matching the specified type.
+   * Registers a handler for a specific action type
+   *
+   * @param {string} actionType - The type of action to handle
+   * @param {Function} handler - The function to call when this action type is emitted
+   */
+  public registerHandler(
+    actionType: string,
+    handler: (action: Action) => void
+  ): void {
+    const handlers = this._effectHandlers.get(actionType) || [];
+    this._effectHandlers.set(actionType, [...handlers, handler]);
+  }
+
+  /**
+   * Creates a computed signal that filters actions by type
    *
    * @template T - A subtype of Action to narrow down the type.
    * @param {string} actionType - The type of action to filter by.
-   * @returns {Observable<T>} Observable emitting actions of the given type.
+   * @returns {Signal<T | null>} Signal emitting the latest action of the given type.
    */
-  public ofType<T extends Action>(actionType: string): Observable<T> {
-    return this.actions.pipe(
-      filter((action): action is T => action.type === actionType)
-    );
+  public ofType<T extends Action>(actionType: string): Signal<T | null> {
+    return computed(() => {
+      const action = this._latestAction();
+      return action?.type === actionType ? (action as T) : null;
+    });
   }
 }

@@ -36,7 +36,6 @@ export type Action = {
   payload?: any;
 };
 
-
 /**
  * Type-level transformation: converts a camelCase or PascalCase string type to snake_case.
  *
