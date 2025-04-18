@@ -3,14 +3,14 @@ import { emptyPayload, toScreamingSnakeCase } from './action-utils';
 import { createAction } from './action-creator';
 
 /**
- * Creates a creator from a type and a payload handler.
+ * Creates an action creator from a type and a payload handler.
  *
- * @param type - The action type.
- * @param payloadFn - A function describing the payload signature.
+ * @param type - Action type string.
+ * @param payloadFn - Function that defines the payload shape.
  *
- * @returns A function that returns an action:
- * - If `P` is `undefined`, returns a function `() => { type }`
- * - Otherwise, returns a function `(payload: P) => { type, payload }`
+ * @returns An action creator function:
+ * - If no payload is required, returns: `() => { type }`
+ * - If payload is required, returns: `(payload) => { type, payload }`
  */
 function DefinedAction<T extends string, P>(
   type: T,
@@ -25,20 +25,20 @@ function DefinedAction<T extends string, P>(
       createAction(type, (payloadFn as ValuePayloadFn<P>)(payload));
   }
 
-  fn.type = type; 
+  fn.type = type;
   return fn;
 }
 
 /**
- * Generates a group of actions based on a source and a set of events.
+ * Generates a group of action creators from a source and event definitions.
  *
- * @param config - Configuration object:
- *   - `source`: A string prefix for action types.
- *   - `events`: An object describing event names and their payload handlers.
+ * @param config - Object containing:
+ * - `source`: Prefix for all action types.
+ * - `events`: Object where keys are event names and values are payload handlers.
  *
- * @returns An object where each key is an action creator function:
- * - If no payload, the function returns `{ type: `${SOURCE}_${EVENT}` }`
- * - If payload exists, the function returns `{ type: `${SOURCE}_${EVENT}`, payload }`
+ * @returns An object of action creators:
+ * - If no payload: `() => { type: 'SOURCE_EVENT' }`
+ * - If payload: `(payload) => { type: 'SOURCE_EVENT', payload }`
  */
 export function defineActionsGroup<
   Source extends string,
@@ -66,14 +66,14 @@ export function defineActionsGroup<
 }
 
 /**
- * Creates a single action with a fixed name `${SOURCE}_ACTION`.
+ * Creates a single action creator named `${SOURCE}_ACTION`.
  *
- * @param source - The source used to prefix the action type.
- * @param payload - The payload handler function.
+ * @param source - Prefix for the action type.
+ * @param payload - Payload handler function.
  *
- * @returns An object containing one action creator:
- * - If no payload: `() => { type: `${SOURCE}_ACTION` }`
- * - With payload: `(payload) => { type: `${SOURCE}_ACTION`, payload }`
+ * @returns An object with an `action` creator:
+ * - If no payload: `() => { type: 'SOURCE_ACTION' }`
+ * - If payload: `(payload) => { type: 'SOURCE_ACTION', payload }`
  */
 export function defineSingleAction<Source extends string, ActionPayload>(
   source: Source,

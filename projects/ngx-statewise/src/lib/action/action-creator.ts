@@ -1,13 +1,16 @@
 /**
- * Creates a typed action object.
+ * Creates a typed Redux-style action object.
  *
- * Overload 1: Action without payload.
- * Overload 2: Action with payload.
+ * - If only `type` is provided, returns: `{ type }`.
+ * - If `payload` is provided, returns: `{ type, payload }`.
  *
- * @param type - The action type.
- * @param payload - (Optional) The payload to attach to the action.
+ * @typeParam T - Action type (string literal).
+ * @typeParam P - Payload type (optional).
  *
- * @returns An action object with a `type` property and optionally a `payload` property.
+ * @param type - The action's type identifier.
+ * @param payload - Optional data to include in the action.
+ *
+ * @returns An action object with a `type` and optionally a `payload`.
  */
 export function createAction<T extends string>(type: T): { type: T };
 export function createAction<T extends string, P>(

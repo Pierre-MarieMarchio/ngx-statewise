@@ -1,35 +1,35 @@
 /**
- * A function that represents an action with no payload.
+ * Represents an action with no payload.
  *
- * @returns `undefined` (used as a placeholder for empty actions).
+ * @returns `undefined` — used as a placeholder for actions without data.
  */
 export type EmptyPayloadFn = () => undefined;
 
 /**
- * A function that receives a payload and returns it.
+ * Function that receives and returns a typed payload.
  *
  * @template T - The payload type.
- * @param payload - The payload data.
+ * @param payload - The input data.
  * @returns The same payload.
  */
 export type ValuePayloadFn<T> = (payload: T) => T;
 
 /**
- * Represents a payload function that adapts to the type:
- * - If `T` is `undefined`, it's an `EmptyPayloadFn`.
- * - Otherwise, it's a `ValuePayloadFn<T>`.
+ * Defines a payload function based on the payload type:
+ * - If `T` is `undefined`, resolves to `EmptyPayloadFn`.
+ * - Otherwise, resolves to `ValuePayloadFn<T>`.
  *
- * @template T - The payload type.
+ * @template T - Payload type.
  */
 export type SingleAction<T> = T extends undefined
   ? EmptyPayloadFn
   : ValuePayloadFn<T>;
 
 /**
- * Base action type used in the system.
+ * Base structure for all actions.
  *
- * - Always has a `type` string.
- * - Optionally has a `payload` (type `any`).
+ * @property type - The action type string.
+ * @property payload - Optional data attached to the action.
  */
 export type Action = {
   type: string;
@@ -37,9 +37,10 @@ export type Action = {
 };
 
 /**
- * Type-level transformation: converts a camelCase or PascalCase string type to snake_case.
+ * Converts a CamelCase or PascalCase string to snake_case.
  *
- * @template S - The input string type.
+ * @template S - Input string type.
+ *
  * @example
  * type A = CamelToSnakeCase<'loadFailure'> // 'load_failure'
  * type B = CamelToSnakeCase<'UserLogin'>   // 'user_login'

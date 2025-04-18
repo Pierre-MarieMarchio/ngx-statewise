@@ -7,10 +7,10 @@ import {
 } from '@angular/core';
 
 /**
- * Registers and instantiates a set of effect classes at application startup.
+ * Registers and instantiates a list of effect classes at application startup.
  *
- * @param effectClasses - An array of class types to be instantiated during app initialization
- * @returns An EnvironmentProviders object that can be added to the application configuration
+ * @param effectClasses - Array of effect class types to initialize.
+ * @returns EnvironmentProviders to include in your application bootstrap.
  */
 export function provideEffects(
   effectClasses: Type<any>[]
@@ -25,4 +25,3 @@ export function provideEffects(
     }),
   ]);
 }
-

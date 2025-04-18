@@ -1,21 +1,20 @@
 import { Action, EmptyPayloadFn, ValuePayloadFn } from './action-type';
 
+
 /**
- * Utility function representing an empty payload.
- *
- * Used for actions that do not carry any data.
+ * Represents an empty payload for actions without data.
  *
  * @returns `undefined`
  */
 export const emptyPayload: EmptyPayloadFn = () => undefined;
 
 /**
- * Utility function to define a typed payload handler.
+ * Creates a typed identity function for payloads.
  *
- * Returns a function that simply returns the payload it receives.
+ * Useful to define payload handlers with a specific type.
  *
- * @template T - The type of the payload.
- * @returns A function that takes and returns a payload of type `T`.
+ * @template T - The expected payload type.
+ * @returns A function that returns the same payload it receives.
  */
 export function payload<T>(): ValuePayloadFn<T> {
   return (p: T) => p;
@@ -24,18 +23,30 @@ export function payload<T>(): ValuePayloadFn<T> {
 /**
  * Converts a camelCase or PascalCase string to SCREAMING_SNAKE_CASE.
  *
- * @param str - The input string in camelCase or PascalCase.
- * @returns The transformed string in SCREAMING_SNAKE_CASE format.
+ * @param str - The input string.
+ * @returns The same string converted to SCREAMING_SNAKE_CASE.
  *
+ * @example
+ * toScreamingSnakeCase('loadFailure') // 'LOAD_FAILURE'
+ * toScreamingSnakeCase('UserLogin')   // 'USER_LOGIN'
  */
 export function toScreamingSnakeCase(str: string): string {
   return str.replace(/([a-z])([A-Z])/g, '$1_$2').toUpperCase();
 }
 
+/**
+ * Extracts the action type string from an action creator or object.
+ *
+ * @param action - Either an action creator (function with `.type`) or an action object.
+ * @returns The `type` string.
+ *
+ * @example
+ * ofType(someActionCreator) // 'SOME_ACTION'
+ * ofType({ type: 'MY_ACTION' }) // 'MY_ACTION'
+ */
 export function ofType<T extends (...args: any[]) => Action>(action: T): string;
 export function ofType(action: { type: string }): string;
 export function ofType(action: any): string {
-
   if (typeof action === 'function') {
     return action.type;
   }
