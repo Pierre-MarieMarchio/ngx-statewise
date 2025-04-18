@@ -4,8 +4,15 @@ import { dispatch } from '../manager';
 import { ofType } from '../action/action-utils';
 import { Action } from '../action/action-type';
 import { getUpdator } from '../updator/updator-registery';
+import { firstValueFrom, isObservable, Observable } from 'rxjs';
 
-type SWEffects = Promise<Action | Action[] | void> | Action | Action[] | void;
+type SWEffects =
+  | Promise<Observable<Action | Action[]> | Action | Action[] | void>
+  | Observable<Action | Action[]>
+  | Action
+  | Action[]
+  | void;
+
 
 /**
  * Creates an effect that reacts to a specific action and executes a handler.
@@ -69,18 +76,41 @@ function handleEffectResults(
       })
   );
 }
-/**
- * Crée et exécute une promesse pour un handler d'effet
- */
+
+async function resolveEffectResult(
+  result: SWEffects
+): Promise<(Action | void)[]> {
+  if (result instanceof Promise) {
+    const awaited = await result;
+
+    // Handle case where Promise resolves to an Observable
+    if (isObservable(awaited)) {
+      const resolvedObs = await firstValueFrom(awaited);
+      return Array.isArray(resolvedObs) ? resolvedObs : [resolvedObs];
+    }
+
+    // Handle other Promise results
+    return Array.isArray(awaited) ? awaited : [awaited];
+  } else if (isObservable(result)) {
+    const resolved = await firstValueFrom(result);
+    return Array.isArray(resolved) ? resolved : [resolved];
+  } else if (Array.isArray(result)) {
+    return result;
+  } else {
+    // Direct Action or void
+    return [result];
+  }
+}
+
 function createEffectPromise(
-  handler: (payload?: any) => SWEffects,
+  handler: (payload?: any) => SWEffects | Observable<any>,
   action: Action,
   actionType: string
 ): Promise<void> {
   return (async () => {
     try {
-      const result = await handler(action.payload);
-      const results = Array.isArray(result) ? result : [result];
+      const rawResult = handler(action.payload);
+      const results = await resolveEffectResult(rawResult);
       await handleEffectResults(results, actionType);
     } catch (error) {
       console.error(`Effect for ${actionType} failed:`, error);
