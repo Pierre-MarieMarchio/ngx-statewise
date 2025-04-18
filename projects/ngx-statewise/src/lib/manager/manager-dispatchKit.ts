@@ -35,8 +35,6 @@ export function dispatchAsync<T extends Action, S>(
   action: T,
   updator: IUpdator<S>
 ): Promise<void> {
-
   dispatch(action, updator);
-
   return EffectHandler.getInstance().waitForEffects(action.type);
 }

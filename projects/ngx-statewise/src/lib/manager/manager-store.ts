@@ -38,12 +38,7 @@ export class StateStore {
    * @param updator - The state updator function that modifies the state.
    */
   public dispatch<S>(action: Action, updator: IUpdator<S>): void {
-    console.log('in dispatch', action.type);
-
-    // Update the state based on the action
     update(updator.state, action, updator.updators);
-
-    // Emit the action to trigger effects
     this._EffectHandler.emit(action);
   }
 
@@ -58,10 +53,7 @@ export class StateStore {
    * @returns A promise that resolves when all effects related to the action are completed.
    */
   public dispatshAsync<S>(action: Action, updator: IUpdator<S>): Promise<void> {
-    // Dispatch the action and update the state
     this.dispatch<S>(action, updator);
-
-    // Wait for any effects triggered by the action to complete
     return this._EffectHandler.waitForEffects(action.type);
   }
 }

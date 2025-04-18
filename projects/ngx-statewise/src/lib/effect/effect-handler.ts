@@ -59,13 +59,8 @@ export class EffectHandler {
    * @param action - The action to dispatch.
    */
   public emit(action: Action): void {
-    console.log('in emit', action);
-
     this._latestAction.set(action);
-    console.log('this._latestAction ', this._latestAction());
-
     this._actionHistory.update((history) => [...history, action]);
-
     const handlers = this._effectHandlers.get(action.type);
     if (handlers) {
       handlers.forEach((handler) => handler(action));
