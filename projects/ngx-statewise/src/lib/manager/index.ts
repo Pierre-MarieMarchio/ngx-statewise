@@ -1,1 +1,1 @@
-export {dispatch} from './manager-dispatch';
+export * from './manager-dispatchKit';

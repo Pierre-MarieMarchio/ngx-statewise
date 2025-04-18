@@ -1,7 +1,7 @@
 import { EffectHandler } from '../effect/effect-handler';
 import { Action } from '../action';
 import { IUpdator } from '../updator/updator-interfaces';
-import { registerFullUpdator, update } from '../updator';
+import { update } from '../updator';
 
 /**
  * Singleton class that coordinates state updates and effect handling
@@ -9,6 +9,7 @@ import { registerFullUpdator, update } from '../updator';
  */
 export class StateStore {
   private static instance: StateStore;
+  private readonly _EffectHandler: EffectHandler = EffectHandler.getInstance();
 
   private constructor() {}
 
@@ -22,20 +23,16 @@ export class StateStore {
   public dispatch<S>(action: Action, updator: IUpdator<S>): void {
     console.log('in dispatch', action.type);
 
-    console.log(updator.updators);
-    
     // D'abord mettre à jour l'état
     update(updator.state, action, updator.updators);
 
     // Puis émettre l'action pour déclencher les effects
-    EffectHandler.getInstance().emit(action);
+    this._EffectHandler.emit(action);
+  }
+
+  public dispatshAsync<S>(action: Action, updator: IUpdator<S>): Promise<void> {
+    this.dispatch<S>(action, updator);
+    return this._EffectHandler.waitForEffects(action.type);
   }
 }
 
-export function dispatch<T extends Action, S>(
-  action: T,
-  updator: IUpdator<S>
-): void {
-  registerFullUpdator(updator); 
-  StateStore.getInstance().dispatch(action, updator);
-}

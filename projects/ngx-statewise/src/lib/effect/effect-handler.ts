@@ -8,20 +8,12 @@ import { WritableSignal, signal, Signal, computed } from '@angular/core';
 export class EffectHandler {
   private static _instance: EffectHandler;
 
-  // Use a signal to store the latest action
   private readonly _latestAction: WritableSignal<Action | null> = signal(null);
-
-  // Store all dispatched actions (useful for debugging)
   private readonly _actionHistory: WritableSignal<Action[]> = signal([]);
-
-  // Map of registered effect handlers by action type
   private readonly _effectHandlers: Map<string, ((action: Action) => void)[]> =
     new Map();
+  private readonly _pendingEffects: Map<string, Promise<void>[]> = new Map();
 
-  /**
-   * Private constructor to prevent external instantiation.
-   * Use `getInstance()` to access the singleton instance.
-   */
   private constructor() {}
 
   /**
@@ -59,12 +51,10 @@ export class EffectHandler {
     // Update the latest action signal
 
     console.log('in emit', action);
-    
 
     this._latestAction.set(action);
 
-    console.log("this._latestAction ", this._latestAction());
-    
+    console.log('this._latestAction ', this._latestAction());
 
     // Add to history
     this._actionHistory.update((history) => [...history, action]);
@@ -102,5 +92,32 @@ export class EffectHandler {
       const action = this._latestAction();
       return action?.type === actionType ? (action as T) : null;
     });
+  }
+
+  public registerPendingEffect(
+    actionType: string,
+    promise: Promise<void>
+  ): void {
+    const pendingEffects = this._pendingEffects.get(actionType) || [];
+    this._pendingEffects.set(actionType, [...pendingEffects, promise]);
+
+    // Nettoyage une fois terminé
+    promise.finally(() => {
+      const currentPending = this._pendingEffects.get(actionType) || [];
+      this._pendingEffects.set(
+        actionType,
+        currentPending.filter((p) => p !== promise)
+      );
+    });
+  }
+
+  public async waitForEffects(actionType: string): Promise<void> {
+    const pending = this._pendingEffects.get(actionType) || [];
+    await Promise.all(pending);
+  }
+
+  public async waitForAllEffects(): Promise<void> {
+    const allPromises = Array.from(this._pendingEffects.values()).flat();
+    await Promise.all(allPromises);
   }
 }

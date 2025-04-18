@@ -1,3 +1,3 @@
-export * from './effect-creator';
-export * from './effect-provider';
-export * from './effect-handler';
+export { createEffect } from './effect-creator';
+export { provideEffects } from './effect-provider';
+
