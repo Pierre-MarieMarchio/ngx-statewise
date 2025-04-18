@@ -1,4 +1,4 @@
-import { EmptyPayloadFn, ValuePayloadFn } from './action-type';
+import { Action, EmptyPayloadFn, ValuePayloadFn } from './action-type';
 
 /**
  * Utility function representing an empty payload.
@@ -30,4 +30,14 @@ export function payload<T>(): ValuePayloadFn<T> {
  */
 export function toScreamingSnakeCase(str: string): string {
   return str.replace(/([a-z])([A-Z])/g, '$1_$2').toUpperCase();
+}
+
+export function ofType<T extends (...args: any[]) => Action>(action: T): string;
+export function ofType(action: { type: string }): string;
+export function ofType(action: any): string {
+
+  if (typeof action === 'function') {
+    return action.type;
+  }
+  return action.type;
 }

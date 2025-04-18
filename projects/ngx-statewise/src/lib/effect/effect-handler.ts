@@ -1,5 +1,5 @@
-import { Action } from '../action';
-import { WritableSignal, signal, Signal, computed } from '@angular/core';
+import { WritableSignal, signal, Signal } from '@angular/core';
+import { Action } from '../action/action-type';
 
 /**
  * Singleton class responsible for managing and dispatching actions
@@ -80,19 +80,7 @@ export class EffectHandler {
     this._effectHandlers.set(actionType, [...handlers, handler]);
   }
 
-  /**
-   * Creates a computed signal that filters actions by type
-   *
-   * @template T - A subtype of Action to narrow down the type.
-   * @param {string} actionType - The type of action to filter by.
-   * @returns {Signal<T | null>} Signal emitting the latest action of the given type.
-   */
-  public ofType<T extends Action>(actionType: string): Signal<T | null> {
-    return computed(() => {
-      const action = this._latestAction();
-      return action?.type === actionType ? (action as T) : null;
-    });
-  }
+
 
   public registerPendingEffect(
     actionType: string,

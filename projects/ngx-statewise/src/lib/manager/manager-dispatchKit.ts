@@ -1,8 +1,9 @@
-
-import { Action } from "../action";
+import { Action } from "../action/action-type";
 import { EffectHandler } from "../effect/effect-handler";
+import { IUpdator } from "../updator/updator-interfaces";
+import { registerFullUpdator } from "../updator/updator-registery";
 
-import { IUpdator, registerFullUpdator } from "../updator";
+
 import { StateStore } from "./manager-store";
 
 export function dispatch<T extends Action, S>(

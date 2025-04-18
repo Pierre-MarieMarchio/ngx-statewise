@@ -1,7 +1,9 @@
-import { Action } from '../action';
+
 import { EffectHandler } from './effect-handler';
-import { getUpdator } from '../updator';
 import { dispatch } from '../manager';
+import { ofType } from '../action/action-utils';
+import { Action } from '../action/action-type';
+import { getUpdator } from '../updator/updator-registery';
 
 type SWEffects = Promise<Action | Action[] | void> | Action | Action[] | void;
 
@@ -15,7 +17,6 @@ export function createEffect<T extends (payload: any) => Action>(
   action: T,
   handler: (payload: Parameters<T>[0]) => SWEffects
 ): void;
-
 /**
  * Overload for actions without payload.
  *
@@ -26,7 +27,6 @@ export function createEffect(
   action: () => Action,
   handler: () => SWEffects
 ): void;
-
 /**
  * Actual implementation that handles both use cases.
  *
@@ -37,9 +37,8 @@ export function createEffect(
   action: () => Action,
   handler: (payload?: any) => SWEffects
 ): void {
-  const dummyAction = (action as Function)({} as any);
-  const actionType = dummyAction.type;
   const effectHandler = EffectHandler.getInstance();
+  const actionType = ofType(action);
 
   effectHandler.registerHandler(actionType, async (action: Action) => {
     const effectPromise = createEffectPromise(handler, action, actionType);
@@ -47,7 +46,6 @@ export function createEffect(
     return effectPromise;
   });
 }
-
 /**
  * Traite les résultats d'un handler d'effet et dispatche les actions résultantes
  */
@@ -71,7 +69,6 @@ function handleEffectResults(
       })
   );
 }
-
 /**
  * Crée et exécute une promesse pour un handler d'effet
  */
@@ -90,7 +87,3 @@ function createEffectPromise(
     }
   })();
 }
-
-/**
- * Crée un effet qui réagit à une action spécifique.
- */

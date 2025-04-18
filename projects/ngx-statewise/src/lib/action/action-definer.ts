@@ -15,15 +15,18 @@ import { createAction } from './action-creator';
 function DefinedAction<T extends string, P>(
   type: T,
   payloadFn: SingleAction<P>
-): P extends undefined
-  ? () => { type: T }
-  : (payload: P) => { type: T; payload: P } {
+): any {
+  let fn: any;
+
   if (payloadFn === emptyPayload) {
-    return (() => createAction(type)) as any;
+    fn = () => createAction(type);
   } else {
-    return ((payload: P) =>
-      createAction(type, (payloadFn as ValuePayloadFn<P>)(payload))) as any;
+    fn = (payload: P) =>
+      createAction(type, (payloadFn as ValuePayloadFn<P>)(payload));
   }
+
+  fn.type = type; 
+  return fn;
 }
 
 /**

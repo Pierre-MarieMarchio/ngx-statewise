@@ -1,4 +1,4 @@
-import { Action } from '../action';
+import { Action } from '../action/action-type';
 import { UpdatorRegistry } from './updator-interfaces';
 
 export function update<S>(
@@ -9,8 +9,7 @@ export function update<S>(
   const handler = updators[action.type];
   console.log('handler ', handler);
   if (handler) {
-    handler(state, action.payload); 
-    
+    handler(state, action.payload);
   } else {
     console.warn(`No handler for action type: ${action.type}`);
   }

@@ -1,7 +1,7 @@
 import { EffectHandler } from '../effect/effect-handler';
-import { Action } from '../action';
 import { IUpdator } from '../updator/updator-interfaces';
-import { update } from '../updator';
+import { Action } from '../action/action-type';
+import { update } from '../updator/updator-utils';
 
 /**
  * Singleton class that coordinates state updates and effect handling
@@ -23,10 +23,7 @@ export class StateStore {
   public dispatch<S>(action: Action, updator: IUpdator<S>): void {
     console.log('in dispatch', action.type);
 
-    // D'abord mettre à jour l'état
     update(updator.state, action, updator.updators);
-
-    // Puis émettre l'action pour déclencher les effects
     this._EffectHandler.emit(action);
   }
 

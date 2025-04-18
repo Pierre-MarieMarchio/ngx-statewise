@@ -7,4 +7,3 @@ export function waitForAllEffects(): Promise<void> {
 export function waitForEffect(actionType: string): Promise<void> {
   return EffectHandler.getInstance().waitForEffects(actionType);
 }
-
