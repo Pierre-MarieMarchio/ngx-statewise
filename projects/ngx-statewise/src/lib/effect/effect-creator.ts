@@ -16,7 +16,7 @@ import { UpdatorRegistry } from '../updator/updator-registery';
  * - Or `void`.
  */
 type SWEffects =
-  | Promise<Observable<Action | Action[]> | Action | Action[] | void>
+  | Promise<Observable<Action > | Action | Action[] | void>
   | Observable<Action | Action[]>
   | Action
   | Action[]
@@ -65,6 +65,30 @@ export function createEffect(
 }
 
 /**
+ * Wraps an effect handler into a Promise and manages execution flow.
+ *
+ * @param handler - The effect handler function.
+ * @param action - The triggering action object.
+ * @param actionType - Type of the triggering action (for tracking/logging).
+ * @returns A Promise representing the complete lifecycle of the effect.
+ */
+function createEffectPromise(
+  handler: (payload?: any) => SWEffects | Observable<any>,
+  action: Action,
+  actionType: string
+): Promise<void> {
+  return (async () => {
+    try {
+      const rawResult = handler(action.payload);
+      const results = await resolveEffectResult(rawResult);
+      await handleEffectResults(results, actionType);
+    } catch (error) {
+      console.error(`Effect for ${actionType} failed:`, error);
+    }
+  })();
+}
+
+/**
  * Handles the result of an effect handler and dispatches the corresponding actions.
  *
  * @param results - List of actions returned by the handler.
@@ -77,6 +101,7 @@ function handleEffectResults(
 ): Promise<void[]> {
   return Promise.all(
     results
+      .flat()
       .filter((a): a is Action => !!a)
       .map(async (resultAction) => {
         const updator = UpdatorRegistry.getInstance().getUpdator(
@@ -85,9 +110,6 @@ function handleEffectResults(
         if (updator) {
           dispatch(resultAction, updator);
         } else {
-          console.warn(
-            `[createEffect] No updator for action "${resultAction.type}", emitting only`
-          );
           ActionDispatcher.getInstance().emit(resultAction);
         }
       })
@@ -117,7 +139,7 @@ async function resolveEffectResult(
       return Array.isArray(resolvedObs) ? resolvedObs : [resolvedObs];
     }
 
-    return Array.isArray(awaited) ? awaited : [awaited];
+    return Array.isArray(awaited) ? awaited.flat() : [awaited];
   } else if (isObservable(result)) {
     const resolved = await firstValueFrom(result);
     return Array.isArray(resolved) ? resolved : [resolved];
@@ -128,26 +150,4 @@ async function resolveEffectResult(
   }
 }
 
-/**
- * Wraps an effect handler into a Promise and manages execution flow.
- *
- * @param handler - The effect handler function.
- * @param action - The triggering action object.
- * @param actionType - Type of the triggering action (for tracking/logging).
- * @returns A Promise representing the complete lifecycle of the effect.
- */
-function createEffectPromise(
-  handler: (payload?: any) => SWEffects | Observable<any>,
-  action: Action,
-  actionType: string
-): Promise<void> {
-  return (async () => {
-    try {
-      const rawResult = handler(action.payload);
-      const results = await resolveEffectResult(rawResult);
-      await handleEffectResults(results, actionType);
-    } catch (error) {
-      console.error(`Effect for ${actionType} failed:`, error);
-    }
-  })();
-}
+
