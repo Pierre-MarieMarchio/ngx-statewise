@@ -16,7 +16,7 @@ import { UpdatorRegistry } from '../updator/updator-registery';
  * - Or `void`.
  */
 type SWEffects =
-  | Promise<Observable<Action > | Action | Action[] | void>
+  | Promise<Observable<Action> | Action | Action[] | void>
   | Observable<Action | Action[]>
   | Action
   | Action[]
@@ -59,6 +59,8 @@ export function createEffect(
 
   actionDispatcher.registerHandler(actionType, async (action: Action) => {
     const effectPromise = createEffectPromise(handler, action, actionType);
+    console.log('registering', actionType, effectPromise);
+
     effectHandler.register(actionType, effectPromise);
     return effectPromise;
   });
@@ -81,7 +83,15 @@ function createEffectPromise(
     try {
       const rawResult = handler(action.payload);
       const results = await resolveEffectResult(rawResult);
-      await handleEffectResults(results, actionType);
+      console.log('createEffectPromise:', results, actionType);
+
+      // Get promises for all sub-actions that might be dispatched
+      const subActionPromises = await handleEffectResults(results, actionType);
+
+      // Wait for all sub-action effects to complete as well
+      if (subActionPromises.length > 0) {
+        await Promise.all(subActionPromises);
+      }
     } catch (error) {
       console.error(`Effect for ${actionType} failed:`, error);
     }
@@ -93,27 +103,31 @@ function createEffectPromise(
  *
  * @param results - List of actions returned by the handler.
  * @param actionType - Type of the triggering action (for logging/updating).
- * @returns A Promise that resolves when all results are processed.
+ * @returns A Promise that resolves to an array of promises for sub-action effects.
  */
-function handleEffectResults(
+async function handleEffectResults(
   results: (Action | void)[],
   actionType: string
-): Promise<void[]> {
-  return Promise.all(
-    results
-      .flat()
-      .filter((a): a is Action => !!a)
-      .map(async (resultAction) => {
-        const updator = UpdatorRegistry.getInstance().getUpdator(
-          resultAction.type
-        );
-        if (updator) {
-          dispatch(resultAction, updator);
-        } else {
-          ActionDispatcher.getInstance().emit(resultAction);
-        }
-      })
-  );
+): Promise<Promise<void>[]> {
+  const subActionPromises: Promise<void>[] = [];
+  
+  // Process each action and collect promises for sub-effects
+  for (const result of results.flat().filter((a): a is Action => !!a)) {
+    const updator = UpdatorRegistry.getInstance().getUpdator(result.type);
+    if (updator) {
+      dispatch(result, updator);
+    } else {
+      ActionDispatcher.getInstance().emit(result);
+    }
+    
+    // Get pending promises for this action type
+    const pendingPromises = EffectManager.getInstance().getPendingPromises(result.type);
+    if (pendingPromises.length > 0) {
+      subActionPromises.push(pendingPromises[0]);
+    }
+  }
+  
+  return subActionPromises;
 }
 
 /**
@@ -149,5 +163,3 @@ async function resolveEffectResult(
     return [result];
   }
 }
-
-

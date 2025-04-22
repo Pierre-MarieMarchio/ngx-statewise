@@ -1,40 +1,95 @@
-import { Action } from "../action/action-type";
-import { EffectManager } from "../effect/effect-manager";
-import { IUpdator } from "../updator/updator-interfaces";
-import { UpdatorRegistry } from "../updator/updator-registery";
-import { StateStore } from "./manager-store";
+import { ActionDispatcher } from '../action/action-dispatcher';
+import { Action } from '../action/action-type';
+import { EffectManager } from '../effect/effect-manager';
+import { IUpdator } from '../updator/updator-interfaces';
+import { UpdatorRegistry } from '../updator/updator-registery';
+import { StateStore } from './manager-store';
+
+
+type DispatchOptions = {
+  overwrite?: boolean;
+};
 
 /**
- * Dispatches an action and associates it with an updator for state management.
+ * Dispatches an action with optional updator registration.
  *
- * This function triggers the action and ensures that the specified updator is registered,
- * allowing the state to be updated based on the action.
+ * This function provides a flexible way to dispatch actions:
+ * - If only an action is provided, it will be dispatched through the ActionDispatcher
+ * - If an updator is also provided, it will be registered (if needed) and used to update state
  *
- * @param action - The action to be dispatched.
- * @param updator - The state updator function that modifies the state based on the action.
+ * @template T - The action type.
+ * @template S - The state type (inferred from updator if provided).
+ * @param action - The action to dispatch.
+ * @param updator - Optional updator to handle state updates for this action.
+ * @param options - Configuration options:
+ *   - `overwrite`: If true, allows overwriting an existing updator registration. Default is false.
  */
+export function dispatch<T extends Action>(action: T): void;
 export function dispatch<T extends Action, S>(
   action: T,
-  updator: IUpdator<S>
+  updator: IUpdator<S>,
+  options?: DispatchOptions
+): void;
+export function dispatch<T extends Action, S>(
+  action: T,
+  updator?: IUpdator<S>,
+  options: DispatchOptions = {}
 ): void {
-  UpdatorRegistry.getInstance().registerFullUpdator(updator);
-  StateStore.getInstance().dispatch(action, updator);
+  if (updator) {
+    UpdatorRegistry.getInstance().registerUpdator(
+      action.type,
+      updator,
+      options
+    );
+    StateStore.getInstance().dispatch(action, updator);
+  } else {
+    const registry = UpdatorRegistry.getInstance();
+    const registeredUpdator = registry.getUpdator(action.type);
+
+    if (registeredUpdator) {
+      StateStore.getInstance().dispatch(action, registeredUpdator);
+    } else {
+      ActionDispatcher.getInstance().emit(action);
+    }
+  }
 }
 
 /**
- * Dispatches an action asynchronously and waits for the associated effects to resolve.
+ * Asynchronously dispatches an action and waits for effects to complete.
  *
- * This function dispatches the action, registers the updator, and ensures that all related
- * effects are completed before the promise resolves.
+ * Similar to `dispatch`, but returns a Promise that resolves when all associated
+ * effects are completed. Supports both global and local updators.
  *
- * @param action - The action to be dispatched.
- * @param updator - The state updator function that modifies the state based on the action.
- * @returns A promise that resolves when all effects associated with the action are completed.
+ * @template T - The action type.
+ * @template S - The state type (inferred from updator if provided).
+ * @param action - The action to dispatch.
+ * @param updator - Optional updator to handle state updates for this action.
+ * @param options - Configuration options:
+ *   - `overwrite`: If true, allows overwriting an existing updator registration. Default is false.
+ * @returns A Promise that resolves when all effects for this action are completed.
  */
+export function dispatchAsync<T extends Action>(action: T): Promise<void>;
 export function dispatchAsync<T extends Action, S>(
   action: T,
-  updator: IUpdator<S>
+  updator: IUpdator<S>,
+  options?: DispatchOptions
+): Promise<void>;
+export function dispatchAsync<T extends Action, S>(
+  action: T,
+  updator?: IUpdator<S>,
+  options: DispatchOptions = {}
 ): Promise<void> {
-  dispatch(action, updator);
-  return EffectManager.getInstance().waitFor(action.type);
+  if (updator) {
+    UpdatorRegistry.getInstance().registerFullUpdator(updator);
+    return StateStore.getInstance().dispatshAsync(action, updator);
+  } else {
+    const registry = UpdatorRegistry.getInstance();
+    const registeredUpdator = registry.getUpdator(action.type);
+    if (registeredUpdator) {
+      return StateStore.getInstance().dispatshAsync(action, registeredUpdator);
+    } else {
+      ActionDispatcher.getInstance().emit(action);
+      return EffectManager.getInstance().waitFor(action.type);
+    }
+  }
 }
