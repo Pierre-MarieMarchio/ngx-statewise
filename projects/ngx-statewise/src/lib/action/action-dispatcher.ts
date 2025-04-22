@@ -1,5 +1,6 @@
 import { WritableSignal, Signal, signal } from '@angular/core';
 import { Action } from './action-type';
+import { EffectManager } from '../effect/effect-manager';
 
 export class ActionDispatcher {
   private static _instance: ActionDispatcher;
@@ -50,8 +51,22 @@ export class ActionDispatcher {
    * @param action - The action to dispatch.
    */
   public emit(action: Action): void {
+    // Créer une promesse vide pour les actions sans handler
+    // Si l'action n'a pas d'effet défini explicitement
+    if (
+      !this._handlers.has(action.type) ||
+      this._handlers.get(action.type)?.length === 0
+    ) {
+      // Pour les actions sans handler (effet), créer une promesse vide
+      const emptyPromise = Promise.resolve();
+      EffectManager.getInstance().register(action.type, emptyPromise);
+    }
+
+    // Mettre à jour les signaux comme dans votre implémentation originale
     this._latestAction.set(action);
     this._actionHistory.update((history) => [...history, action]);
+
+    // Exécuter tous les handlers enregistrés pour ce type d'action
     this._handlers.get(action.type)?.forEach((handler) => handler(action));
   }
 

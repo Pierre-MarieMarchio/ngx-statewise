@@ -34,7 +34,6 @@ export function createEffect<T extends (payload: any) => Action>(
   action: T,
   handler: (payload: Parameters<T>[0]) => SWEffects
 ): void;
-
 /**
  * Registers an effect for an action without payload.
  *
@@ -45,7 +44,6 @@ export function createEffect(
   action: () => Action,
   handler: () => SWEffects
 ): void;
-
 /**
  * Internal implementation of `createEffect`, handling both payload and no-payload cases.
  */
@@ -145,7 +143,9 @@ async function handleEffectResults(
 async function resolveEffectResult(
   result: SWEffects
 ): Promise<(Action | void)[]> {
-  if (result instanceof Promise) {
+  if (result === undefined || result === null) {
+    return [undefined];
+  } else if (result instanceof Promise) {
     const awaited = await result;
 
     if (isObservable(awaited)) {
