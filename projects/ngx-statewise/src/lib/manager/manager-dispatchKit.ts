@@ -1,5 +1,5 @@
 import { Action } from "../action/action-type";
-import { EffectHandler } from "../effect/effect-handler";
+import { EffectManager } from "../effect/effect-manager";
 import { IUpdator } from "../updator/updator-interfaces";
 import { UpdatorRegistry } from "../updator/updator-registery";
 import { StateStore } from "./manager-store";
@@ -36,5 +36,5 @@ export function dispatchAsync<T extends Action, S>(
   updator: IUpdator<S>
 ): Promise<void> {
   dispatch(action, updator);
-  return EffectHandler.getInstance().waitForEffects(action.type);
+  return EffectManager.getInstance().waitFor(action.type);
 }

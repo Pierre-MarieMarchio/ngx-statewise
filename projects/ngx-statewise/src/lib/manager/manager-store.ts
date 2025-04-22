@@ -1,18 +1,14 @@
-import { EffectHandler } from '../effect/effect-handler';
 import { IUpdator } from '../updator/updator-interfaces';
 import { Action } from '../action/action-type';
 import { update } from '../updator/updator-utils';
+import { EffectManager } from '../effect/effect-manager';
+import { ActionDispatcher } from '../action/action-dispatcher';
 
-/**
- * Singleton class responsible for coordinating state updates and handling effects
- * in response to dispatched actions.
- *
- * Manages the central flow of actions and updates the state using registered
- * updators, while also triggering effects via the EffectHandler.
- */
 export class StateStore {
   private static instance: StateStore;
-  private readonly _EffectHandler: EffectHandler = EffectHandler.getInstance();
+  private readonly _EffectManager: EffectManager = EffectManager.getInstance();
+  private readonly _ActionDispatcher: ActionDispatcher =
+    ActionDispatcher.getInstance();
 
   private constructor() {}
 
@@ -39,7 +35,7 @@ export class StateStore {
    */
   public dispatch<S>(action: Action, updator: IUpdator<S>): void {
     update(updator.state, action, updator.updators);
-    this._EffectHandler.emit(action);
+    this._ActionDispatcher.emit(action);
   }
 
   /**
@@ -54,6 +50,6 @@ export class StateStore {
    */
   public dispatshAsync<S>(action: Action, updator: IUpdator<S>): Promise<void> {
     this.dispatch<S>(action, updator);
-    return this._EffectHandler.waitForEffects(action.type);
+    return this._EffectManager.waitFor(action.type);
   }
 }

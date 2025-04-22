@@ -1,10 +1,10 @@
-
-import { EffectHandler } from './effect-handler';
 import { dispatch } from '../manager';
 import { ofType } from '../action/action-utils';
 import { Action } from '../action/action-type';
-import { getUpdator } from '../updator/updator-registery';
 import { firstValueFrom, isObservable, Observable } from 'rxjs';
+import { EffectManager } from './effect-manager';
+import { ActionDispatcher } from '../action/action-dispatcher';
+import { UpdatorRegistry } from '../updator/updator-registery';
 
 /**
  * Supported return types for an effect handler.
@@ -53,12 +53,13 @@ export function createEffect(
   action: () => Action,
   handler: (payload?: any) => SWEffects
 ): void {
-  const effectHandler = EffectHandler.getInstance();
+  const effectHandler = EffectManager.getInstance();
+  const actionDispatcher = ActionDispatcher.getInstance();
   const actionType = ofType(action);
 
-  effectHandler.registerHandler(actionType, async (action: Action) => {
+  actionDispatcher.registerHandler(actionType, async (action: Action) => {
     const effectPromise = createEffectPromise(handler, action, actionType);
-    effectHandler.registerPendingEffect(actionType, effectPromise);
+    effectHandler.register(actionType, effectPromise);
     return effectPromise;
   });
 }
@@ -78,14 +79,16 @@ function handleEffectResults(
     results
       .filter((a): a is Action => !!a)
       .map(async (resultAction) => {
-        const updator = getUpdator(resultAction.type);
+        const updator = UpdatorRegistry.getInstance().getUpdator(
+          resultAction.type
+        );
         if (updator) {
           dispatch(resultAction, updator);
         } else {
           console.warn(
             `[createEffect] No updator for action "${resultAction.type}", emitting only`
           );
-          EffectHandler.getInstance().emit(resultAction);
+          ActionDispatcher.getInstance().emit(resultAction);
         }
       })
   );

@@ -1,4 +1,5 @@
-import { EffectHandler } from "./effect-handler";
+import { EffectManager } from "./effect-manager";
+
 
 /**
  * Waits for all currently pending effects to resolve.
@@ -9,7 +10,7 @@ import { EffectHandler } from "./effect-handler";
  * @returns A promise that resolves when all pending effects are completed.
  */
 export function waitForAllEffects(): Promise<void> {
-  return EffectHandler.getInstance().waitForAllEffects();
+  return EffectManager.getInstance().waitForAll();
 }
 
 /**
@@ -22,5 +23,5 @@ export function waitForAllEffects(): Promise<void> {
  * @returns A promise that resolves when all pending effects for the specified action type are completed.
  */
 export function waitForEffect(actionType: string): Promise<void> {
-  return EffectHandler.getInstance().waitForEffects(actionType);
+  return EffectManager.getInstance().waitFor(actionType);
 }
