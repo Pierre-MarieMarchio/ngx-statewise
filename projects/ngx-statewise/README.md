@@ -66,7 +66,7 @@ export class AuthStates {
 
 You can still define state as regular properties if you prefer not to use signals. However, you will need to manually update your components when the state changes. Signals make state updates automatic and reactive, which simplifies component reactivity.
 
-````typescript
+```typescript
 @Injectable({
   providedIn: 'root',
 })
@@ -77,7 +77,7 @@ export class AuthStates {
   public isLoading = false;
   public hasError = false;
 }
-
+```
 #### Key Notes
 
 - Signals are reactive and recommended for most use cases. Components will auto-update when signal values change.
@@ -115,7 +115,7 @@ export const loginActions = defineActionsGroup({
     retry: payload<number>(),  // Becomes LOGIN_RETRY
   },
 });
-````
+```
 
 In the above example:
 
