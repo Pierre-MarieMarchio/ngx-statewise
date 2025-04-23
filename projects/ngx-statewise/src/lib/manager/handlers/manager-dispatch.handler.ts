@@ -1,21 +1,21 @@
-import { Action } from '../action/action-type';
-import { ActionDispatcher } from '../action/action-dispatcher';
-import { EffectManager } from '../effect/effect-manager';
-import { IUpdator } from '../updator/updator-interfaces';
+import { Action } from '../../action/action-type';
+import { ActionDispatcher } from '../../action/action-dispatcher';
+import { EffectManager } from '../../effect/effect-manager';
+import { IUpdator } from '../../updator/updator-interfaces';
 import {
   registerLocalUpdator,
   getLocalUpdator,
-} from '../updator/updator-localRegisteries';
-import { StateStore } from './manager-store';
-import { UpdatorGlobalRegistry } from '../updator/updator-globalRegistery';
+} from '../../updator/updator-localRegisteries';
+import { StateStore } from '../manager-store';
+import { UpdatorGlobalRegistry } from '../../updator/updator-globalRegistery';
 
-export class DispatchService {
+export class DispatchHandler {
   private readonly store = StateStore.getInstance();
   private readonly dispatcher = ActionDispatcher.getInstance();
   private readonly effects = EffectManager.getInstance();
   private readonly globalRegistery = UpdatorGlobalRegistry.getInstance();
 
-  public dispatch<T extends Action, S>(
+  public handle<T extends Action, S>(
     action: T,
     contextOrUpdator?: object | IUpdator<S>
   ): void {

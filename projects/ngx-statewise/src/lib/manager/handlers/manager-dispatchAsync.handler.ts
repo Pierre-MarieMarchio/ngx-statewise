@@ -1,21 +1,21 @@
-import { Action } from '../action/action-type';
-import { EffectManager } from '../effect/effect-manager';
-import { IUpdator } from '../updator/updator-interfaces';
+import { Action } from '../../action/action-type';
+import { EffectManager } from '../../effect/effect-manager';
+import { IUpdator } from '../../updator/updator-interfaces';
 import {
   registerLocalUpdator,
   getLocalUpdator,
-} from '../updator/updator-localRegisteries';
-import { StateStore } from './manager-store';
-import { UpdatorGlobalRegistry } from '../updator/updator-globalRegistery';
-import { ActionDispatcher } from '../action/action-dispatcher';
+} from '../../updator/updator-localRegisteries';
+import { StateStore } from '../manager-store';
+import { UpdatorGlobalRegistry } from '../../updator/updator-globalRegistery';
+import { ActionDispatcher } from '../../action/action-dispatcher';
 
-export class DispatchAsyncService {
+export class DispatchAsyncHandler {
   private readonly store = StateStore.getInstance();
   private readonly dispatcher = ActionDispatcher.getInstance(); // direct
   private readonly effects = EffectManager.getInstance();
   private readonly globalRegistery = UpdatorGlobalRegistry.getInstance();
 
-  public dispatchAsync<T extends Action, S>(
+  public handle<T extends Action, S>(
     action: T,
     contextOrUpdator?: object | IUpdator<S>
   ): Promise<void> {

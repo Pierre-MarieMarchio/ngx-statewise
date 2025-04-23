@@ -1,7 +1,7 @@
 import { Action } from '../action/action-type';
 import { IUpdator } from '../updator/updator-interfaces';
-import { DispatchService } from './manager-dispatchService';
-import { DispatchAsyncService } from './manager-dispatchAsyncService';
+import { DispatchHandler } from './handlers/manager-dispatch.handler';
+import { DispatchAsyncHandler } from './handlers/manager-dispatchAsync.handler';
 
 /**
  * Dispatches an action with optional updator registration.
@@ -18,14 +18,14 @@ import { DispatchAsyncService } from './manager-dispatchAsyncService';
 export function dispatch<T extends Action>(action: T, context?: object): void;
 export function dispatch<T extends Action, S>(
   action: T,
-  updator: IUpdator<S>,
+  updator: IUpdator<S>
 ): void;
 export function dispatch<T extends Action, S>(
   action: T,
   contextOrUpdator?: object | IUpdator<S>
 ): void {
-  const dispatchService = new DispatchService();
-  dispatchService.dispatch(action, contextOrUpdator);
+  const dispatchHandler = new DispatchHandler();
+  dispatchHandler.handle(action, contextOrUpdator);
 }
 
 /**
@@ -52,7 +52,6 @@ export function dispatchAsync<T extends Action, S>(
   action: T,
   contextOrUpdator?: object | IUpdator<S>
 ): Promise<void> {
-  const dispatchAsyncService = new DispatchAsyncService();
-  return dispatchAsyncService.dispatchAsync(action, contextOrUpdator);
+  const dispatchAsyncService = new DispatchAsyncHandler();
+  return dispatchAsyncService.handle(action, contextOrUpdator);
 }
- 
