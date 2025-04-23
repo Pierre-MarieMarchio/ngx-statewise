@@ -16,7 +16,7 @@ export interface IUpdator<S> {
    * A registry of updators, where each action type is associated with a function
    * that modifies the state.
    */
-  readonly updators: UpdatorRegistry<S>;
+  readonly updators: UpdatorGlobalRegistry<S>;
 }
 
 /**
@@ -38,7 +38,7 @@ export type Updator<S, P = any> = (state: S, payload?: P) => void;
  *
  * @template S - The type of the state.
  */
-export interface UpdatorRegistry<S> {
+export interface UpdatorGlobalRegistry<S> {
   /**
    * Maps action types to their corresponding `Updator` function.
    *

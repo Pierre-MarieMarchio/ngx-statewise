@@ -2,6 +2,8 @@ export class EffectManager {
   private static _instance: EffectManager;
   private readonly _pending: Map<string, Promise<void>[]> = new Map();
   private readonly _actionRelations: Map<string, Set<string>> = new Map();
+  private readonly actionContextMap = new Map<string, object>();
+
   private constructor() {}
 
   public static getInstance(): EffectManager {
@@ -105,7 +107,6 @@ export class EffectManager {
     await Promise.all(allPromisesToWait);
 
     console.log('promises resolved');
-    
   }
 
   /**
@@ -114,5 +115,17 @@ export class EffectManager {
   public async waitForAll(): Promise<void> {
     const all = Array.from(this._pending.values()).flat();
     await Promise.all(all);
+  }
+
+  public setContextForAction(actionType: string, context: object) {
+    this.actionContextMap.set(actionType, context);
+  }
+
+  public getContextForAction(actionType: string): object | undefined {
+    return this.actionContextMap.get(actionType);
+  }
+
+  public clearContext(actionType: string) {
+    this.actionContextMap.delete(actionType);
   }
 }

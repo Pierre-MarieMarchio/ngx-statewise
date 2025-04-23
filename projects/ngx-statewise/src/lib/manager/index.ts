@@ -1,1 +1,1 @@
-export {dispatch, dispatchAsync} from './manager-dispatchKit';
+export {dispatch, dispatchAsync} from './manager-utils';
