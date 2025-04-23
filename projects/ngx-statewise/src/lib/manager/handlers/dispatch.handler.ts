@@ -1,22 +1,20 @@
 import { Action } from '../../action/action-type';
 import { ActionDispatcher } from '../../action/action-dispatcher';
 import { EffectManager } from '../../effect/effect-manager';
-import { IUpdator } from '../../updator/updator-interfaces';
-import {
-  registerLocalUpdator,
-  getLocalUpdator,
-} from '../../updator/updator-localRegisteries';
-import { StateStore } from '../store/state-store';
-import { UpdatorGlobalRegistry } from '../../updator/updator-globalRegistery';
+import { IUpdator } from '../../updator/interfaces/updator.interfaces';
+import { LocalUpdatorRegistry } from '../../updator/registries/local-updators.registery';
+import { CoordinatorService } from '../services/coordinator.service';
+import { GlobalUpdatorsRegistry } from '../../updator/registries/global-updators.registery';
 import { inject, Injectable } from '@angular/core';
 import { withInjectionContext } from '../../../internal/injection-utils';
 
 @Injectable({ providedIn: 'root' })
 class DispatchHandler {
-  private readonly store = inject(StateStore);
+  private readonly coordinator = inject(CoordinatorService);
   private readonly dispatcher = ActionDispatcher.getInstance();
   private readonly effects = EffectManager.getInstance();
-  private readonly globalRegistery = UpdatorGlobalRegistry.getInstance();
+  private readonly globalRegistery = inject(GlobalUpdatorsRegistry);
+  private readonly localUpdatorsRegistery = inject(LocalUpdatorRegistry);
 
   public handle<T extends Action, S>(
     action: T,
@@ -47,23 +45,24 @@ class DispatchHandler {
     type: string
   ): IUpdator<S> | null {
     return context && !this.asUpdator(context)
-      ? getLocalUpdator(context as object, type) || null
+      ? this.localUpdatorsRegistery.getLocalUpdator(context as object, type) ||
+          null
       : null;
   }
 
   private useExplicit<T extends Action, S>(action: T, updator: IUpdator<S>) {
-    registerLocalUpdator(updator, updator);
-    this.store.dispatch(action, updator);
+    this.localUpdatorsRegistery.registerLocalUpdator(updator, updator);
+    this.coordinator.dispatch(action, updator);
   }
 
   private useLocal<T extends Action, S>(action: T, updator: IUpdator<S>) {
-    this.store.dispatch(action, updator);
+    this.coordinator.dispatch(action, updator);
   }
 
   private useFallback<T extends Action>(action: T) {
     const globalUpdator = this.globalRegistery.getUpdator<any>(action.type);
     if (globalUpdator) {
-      this.store.dispatch(action, globalUpdator);
+      this.coordinator.dispatch(action, globalUpdator);
     } else {
       this.dispatcher.emit(action);
     }

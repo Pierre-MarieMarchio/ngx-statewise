@@ -1,22 +1,20 @@
 import { Action } from '../../action/action-type';
 import { EffectManager } from '../../effect/effect-manager';
-import { IUpdator } from '../../updator/updator-interfaces';
-import {
-  registerLocalUpdator,
-  getLocalUpdator,
-} from '../../updator/updator-localRegisteries';
-import { StateStore } from '../store/state-store';
-import { UpdatorGlobalRegistry } from '../../updator/updator-globalRegistery';
+import { IUpdator } from '../../updator/interfaces/updator.interfaces';
+import { LocalUpdatorRegistry } from '../../updator/registries/local-updators.registery';
+import { CoordinatorService } from '../services/coordinator.service';
+import { GlobalUpdatorsRegistry } from '../../updator/registries/global-updators.registery';
 import { ActionDispatcher } from '../../action/action-dispatcher';
 import { inject, Injectable } from '@angular/core';
 import { withInjectionContext } from '../../../internal/injection-utils';
 
 @Injectable({ providedIn: 'root' })
 class DispatchAsyncHandler {
-  private readonly store = inject(StateStore);
+  private readonly coordinator = inject(CoordinatorService);
   private readonly dispatcher = ActionDispatcher.getInstance();
   private readonly effects = EffectManager.getInstance();
-  private readonly globalRegistery = UpdatorGlobalRegistry.getInstance();
+  private readonly globalUpdatorsRegistery = inject(GlobalUpdatorsRegistry);
+  private readonly localUpdatorsRegistery = inject(LocalUpdatorRegistry);
 
   public handle<T extends Action, S>(
     action: T,
@@ -26,9 +24,9 @@ class DispatchAsyncHandler {
 
     const explicit = this.asUpdator(contextOrUpdator);
     if (explicit) {
-      registerLocalUpdator(explicit, explicit);
+      this.localUpdatorsRegistery.registerLocalUpdator(explicit, explicit);
       return this.execWithCleanup(
-        this.store.dispatshAsync(action, explicit),
+        this.coordinator.dispatchAsync(action, explicit),
         action.type
       );
     }
@@ -36,15 +34,15 @@ class DispatchAsyncHandler {
     const local = this.asLocal(contextOrUpdator, action.type);
     if (local) {
       return this.execWithCleanup(
-        this.store.dispatshAsync(action, local),
+        this.coordinator.dispatchAsync(action, local),
         action.type
       );
     }
 
-    const globalUpd = this.globalRegistery.getUpdator<S>(action.type);
+    const globalUpd = this.globalUpdatorsRegistery.getUpdator<S>(action.type);
     if (globalUpd) {
       return this.execWithCleanup(
-        this.store.dispatshAsync(action, globalUpd),
+        this.coordinator.dispatchAsync(action, globalUpd),
         action.type
       );
     }
@@ -68,7 +66,8 @@ class DispatchAsyncHandler {
     type: string
   ): IUpdator<S> | null {
     return context && !this.asUpdator(context)
-      ? getLocalUpdator(context as object, type) || null
+      ? this.localUpdatorsRegistery.getLocalUpdator(context as object, type) ||
+          null
       : null;
   }
 

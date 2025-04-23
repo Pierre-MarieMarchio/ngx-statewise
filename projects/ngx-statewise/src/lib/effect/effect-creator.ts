@@ -4,8 +4,10 @@ import { Action } from '../action/action-type';
 import { firstValueFrom, isObservable, Observable } from 'rxjs';
 import { EffectManager } from './effect-manager';
 import { ActionDispatcher } from '../action/action-dispatcher';
-import { UpdatorGlobalRegistry } from '../updator/updator-globalRegistery';
-import { getLocalUpdator } from '../updator/updator-localRegisteries';
+import { GlobalUpdatorsRegistry } from '../updator/registries/global-updators.registery';
+
+import { inject } from '@angular/core';
+import { LocalUpdatorRegistry } from '../updator/registries/local-updators.registery';
 
 /**
  * Supported return types for an effect handler.
@@ -119,7 +121,10 @@ async function handleEffectResults(
     let used = false;
 
     if (context) {
-      const local = getLocalUpdator(context, result.type);
+      const local = inject(LocalUpdatorRegistry).getLocalUpdator(
+        context,
+        result.type
+      );
       if (local) {
         dispatch(result, context);
         used = true;
@@ -127,9 +132,7 @@ async function handleEffectResults(
     }
 
     if (!used) {
-      const globalUpdator = UpdatorGlobalRegistry.getInstance().getUpdator(
-        result.type
-      );
+      const globalUpdator = inject(GlobalUpdatorsRegistry).getUpdator(result.type);
       if (globalUpdator) {
         dispatch(result, globalUpdator);
       } else {

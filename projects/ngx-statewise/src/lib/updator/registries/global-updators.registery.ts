@@ -1,25 +1,14 @@
-import { IUpdator } from './updator-interfaces';
+import { Injectable } from '@angular/core';
+import { IUpdator } from '../interfaces/updator.interfaces';
 
-export class UpdatorGlobalRegistry {
-  private static _instance: UpdatorGlobalRegistry;
-
+@Injectable({ providedIn: 'root' })
+export class GlobalUpdatorsRegistry {
   private readonly _updatorRegistry: Map<string, IUpdator<any>> = new Map();
 
   private constructor() {}
 
-  public static getInstance(): UpdatorGlobalRegistry {
-    if (!UpdatorGlobalRegistry._instance) {
-      UpdatorGlobalRegistry._instance = new UpdatorGlobalRegistry();
-    }
-    return UpdatorGlobalRegistry._instance;
-  }
-
-  public registerUpdator<S>(
-    actionType: string,
-    updator: IUpdator<S>,
-    options: { overwrite?: boolean } = {}
-  ): void {
-    if (this._updatorRegistry.has(actionType) && !options.overwrite) {
+  public registerUpdator<S>(actionType: string, updator: IUpdator<S>): void {
+    if (this._updatorRegistry.has(actionType)) {
       return;
     }
     this._updatorRegistry.set(actionType, updator);

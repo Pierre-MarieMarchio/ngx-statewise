@@ -1,10 +1,11 @@
 import {
   EnvironmentProviders,
+  inject,
   makeEnvironmentProviders,
   provideAppInitializer,
 } from '@angular/core';
-import { IUpdator } from '../updator/updator-interfaces';
-import { UpdatorGlobalRegistry } from '../updator/updator-globalRegistery';
+import { IUpdator } from '../updator/interfaces/updator.interfaces';
+import { GlobalUpdatorsRegistry } from '../updator/registries/global-updators.registery';
 
 /**
  * Registers an array of updators globally at application startup.
@@ -22,7 +23,7 @@ export function provideUpdators(
 ): EnvironmentProviders {
   return makeEnvironmentProviders([
     provideAppInitializer(() => {
-      const registry = UpdatorGlobalRegistry.getInstance();
+      const registry = inject(GlobalUpdatorsRegistry);
       updators.forEach((updator) => registry.registerFullUpdator(updator));
     }),
   ]);

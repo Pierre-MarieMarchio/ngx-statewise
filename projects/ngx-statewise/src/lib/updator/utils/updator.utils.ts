@@ -1,5 +1,5 @@
-import { Action } from '../action/action-type';
-import { UpdatorGlobalRegistry } from './updator-interfaces';
+import { Action } from '../../action/action-type';
+import { UpdatorGlobalRegistry } from '../interfaces/updator.interfaces';
 
 /**
  * Updates the given state based on the action and the corresponding `updator`.
@@ -19,7 +19,7 @@ export function update<S>(
   updators: UpdatorGlobalRegistry<S>
 ): void {
   const handler = updators[action.type];
-  
+
   if (handler) {
     handler(state, action.payload);
   } else {

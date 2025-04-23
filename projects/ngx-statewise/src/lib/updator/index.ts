@@ -1,5 +1,5 @@
 export type {
   IUpdator,
   UpdatorGlobalRegistry as UpdatorRegistry,
-} from './updator-interfaces';
-export { registerLocalUpdator } from './updator-localRegisteries';
+} from './interfaces/updator.interfaces';
+export { registerLocalUpdator } from './registries/local-updators.registery';
