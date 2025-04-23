@@ -1,8 +1,8 @@
-import { IUpdator } from '../updator/updator-interfaces';
-import { Action } from '../action/action-type';
-import { update } from '../updator/updator-utils';
-import { EffectManager } from '../effect/effect-manager';
-import { ActionDispatcher } from '../action/action-dispatcher';
+import { IUpdator } from '../../updator/updator-interfaces';
+import { Action } from '../../action/action-type';
+import { update } from '../../updator/updator-utils';
+import { EffectManager } from '../../effect/effect-manager';
+import { ActionDispatcher } from '../../action/action-dispatcher';
 import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })

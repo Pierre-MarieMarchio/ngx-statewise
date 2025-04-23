@@ -5,13 +5,14 @@ import {
   registerLocalUpdator,
   getLocalUpdator,
 } from '../../updator/updator-localRegisteries';
-import { StateStore } from '../manager-store';
+import { StateStore } from '../store/state-store';
 import { UpdatorGlobalRegistry } from '../../updator/updator-globalRegistery';
 import { ActionDispatcher } from '../../action/action-dispatcher';
 import { inject, Injectable } from '@angular/core';
+import { withInjectionContext } from '../../../internal/injection-utils';
 
 @Injectable({ providedIn: 'root' })
-export class DispatchAsyncHandler {
+class DispatchAsyncHandler {
   private readonly store = inject(StateStore);
   private readonly dispatcher = ActionDispatcher.getInstance();
   private readonly effects = EffectManager.getInstance();
@@ -81,4 +82,34 @@ export class DispatchAsyncHandler {
       this.effects.clearContext(type);
     }
   }
+}
+
+/**
+ * Asynchronously dispatches an action and waits for effects to complete.
+ *
+ * Similar to `dispatch`, but returns a Promise that resolves when all associated
+ * effects are completed. Supports both global and local updators.
+ *
+ * @template T - The action type.
+ * @template S - The state type (inferred from updator if provided).
+ * @param action - The action to dispatch.
+ * @param updator - Optional updator to handle state updates for this action.
+ * @returns A Promise that resolves when all effects for this action are completed.
+ */
+export async function dispatchAsync<T extends Action>(
+  action: T,
+  context?: object
+): Promise<void>;
+export async function dispatchAsync<T extends Action, S>(
+  action: T,
+  updator: IUpdator<S>
+): Promise<void>;
+export function dispatchAsync<T extends Action, S>(
+  action: T,
+  contextOrUpdator?: object | IUpdator<S>
+): Promise<void> {
+  return withInjectionContext(() => {
+    const dispatchAsyncService = inject(DispatchAsyncHandler);
+    return dispatchAsyncService.handle(action, contextOrUpdator);
+  });
 }

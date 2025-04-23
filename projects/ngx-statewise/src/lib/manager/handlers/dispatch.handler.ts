@@ -6,12 +6,13 @@ import {
   registerLocalUpdator,
   getLocalUpdator,
 } from '../../updator/updator-localRegisteries';
-import { StateStore } from '../manager-store';
+import { StateStore } from '../store/state-store';
 import { UpdatorGlobalRegistry } from '../../updator/updator-globalRegistery';
 import { inject, Injectable } from '@angular/core';
+import { withInjectionContext } from '../../../internal/injection-utils';
 
 @Injectable({ providedIn: 'root' })
-export class DispatchHandler {
+class DispatchHandler {
   private readonly store = inject(StateStore);
   private readonly dispatcher = ActionDispatcher.getInstance();
   private readonly effects = EffectManager.getInstance();
@@ -67,4 +68,31 @@ export class DispatchHandler {
       this.dispatcher.emit(action);
     }
   }
+}
+
+/**
+ * Dispatches an action with optional updator registration.
+ *
+ * This function provides a flexible way to dispatch actions:
+ * - If only an action is provided, it will be dispatched through the ActionDispatcher
+ * - If an updator is also provided, it will be registered (if needed) and used to update state
+ *
+ * @template T - The action type.
+ * @template S - The state type (inferred from updator if provided).
+ * @param action - The action to dispatch.
+ * @param updator - Optional updator to handle state updates for this action.
+ */
+export function dispatch<T extends Action>(action: T, context?: object): void;
+export function dispatch<T extends Action, S>(
+  action: T,
+  updator: IUpdator<S>
+): void;
+export function dispatch<T extends Action, S>(
+  action: T,
+  contextOrUpdator?: object | IUpdator<S>
+): void {
+  withInjectionContext(() => {
+    const dispatchHandler = inject(DispatchHandler);
+    dispatchHandler.handle(action, contextOrUpdator);
+  });
 }

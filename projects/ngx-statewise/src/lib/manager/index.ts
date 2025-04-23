@@ -1,1 +1,2 @@
-export {dispatch, dispatchAsync} from './manager-utils';
+export { dispatch } from './handlers/dispatch.handler';
+export { dispatchAsync } from './handlers/dispatchAsync.handler';
