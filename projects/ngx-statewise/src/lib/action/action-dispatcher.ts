@@ -1,6 +1,7 @@
-import { WritableSignal, Signal, signal } from '@angular/core';
+import { WritableSignal, Signal, signal, inject } from '@angular/core';
 import { Action } from './action-type';
-import { EffectManager } from '../effect/effect-manager';
+import { PendingEffectRegistry } from '../effect/registries/pending-effect.registery';
+
 
 export class ActionDispatcher {
   private static _instance: ActionDispatcher;
@@ -10,6 +11,7 @@ export class ActionDispatcher {
   private readonly _handlers: Map<string, ((action: Action) => void)[]> =
     new Map();
 
+  private readonly pendingEffectRegistry = inject(PendingEffectRegistry);
   private constructor() {}
 
   /**
@@ -59,7 +61,7 @@ export class ActionDispatcher {
     ) {
       // Pour les actions sans handler (effet), créer une promesse vide
       const emptyPromise = Promise.resolve();
-      EffectManager.getInstance().register(action.type, emptyPromise);
+      this.pendingEffectRegistry.register(action.type, emptyPromise);
     }
 
     // Mettre à jour les signaux comme dans votre implémentation originale

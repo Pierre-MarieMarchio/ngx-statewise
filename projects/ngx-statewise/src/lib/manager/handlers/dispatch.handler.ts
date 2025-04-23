@@ -1,18 +1,19 @@
 import { Action } from '../../action/action-type';
 import { ActionDispatcher } from '../../action/action-dispatcher';
-import { EffectManager } from '../../effect/effect-manager';
+
 import { IUpdator } from '../../updator/interfaces/updator.interfaces';
 import { LocalUpdatorRegistry } from '../../updator/registries/local-updators.registery';
 import { CoordinatorService } from '../services/coordinator.service';
 import { GlobalUpdatorsRegistry } from '../../updator/registries/global-updators.registery';
 import { inject, Injectable } from '@angular/core';
 import { withInjectionContext } from '../../../internal/injection-utils';
+import { ActionContextRegistery } from '../../effect/registries/action-context.registery';
 
 @Injectable({ providedIn: 'root' })
-class DispatchHandler {
+export class DispatchHandler {
   private readonly coordinator = inject(CoordinatorService);
   private readonly dispatcher = ActionDispatcher.getInstance();
-  private readonly effects = EffectManager.getInstance();
+  private readonly actionContext = inject(ActionContextRegistery);
   private readonly globalRegistery = inject(GlobalUpdatorsRegistry);
   private readonly localUpdatorsRegistery = inject(LocalUpdatorRegistry);
 
@@ -32,7 +33,7 @@ class DispatchHandler {
   }
 
   private setContext(type: string, context?: object | IUpdator<any>) {
-    if (context) this.effects.setContextForAction(type, context);
+    if (context) this.actionContext.set(type, context);
   }
 
   private asUpdator<S>(updator?: object | IUpdator<S>): IUpdator<S> | null {
@@ -45,13 +46,12 @@ class DispatchHandler {
     type: string
   ): IUpdator<S> | null {
     return context && !this.asUpdator(context)
-      ? this.localUpdatorsRegistery.getLocalUpdator(context as object, type) ||
-          null
+      ? this.localUpdatorsRegistery.get(context as object, type) || null
       : null;
   }
 
   private useExplicit<T extends Action, S>(action: T, updator: IUpdator<S>) {
-    this.localUpdatorsRegistery.registerLocalUpdator(updator, updator);
+    this.localUpdatorsRegistery.register(updator, updator);
     this.coordinator.dispatch(action, updator);
   }
 

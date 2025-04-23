@@ -1,2 +1,2 @@
-export { createEffect } from './effect-creator';
-export { waitForEffect, waitForAllEffects} from './effect-utils';
+export { createEffect } from './utils/create-effect.utils';
+export { waitForEffect, waitForAllEffects } from './utils/pending-effect.utils';

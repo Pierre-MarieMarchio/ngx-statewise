@@ -1,5 +1,4 @@
 import { Action } from '../../action/action-type';
-import { EffectManager } from '../../effect/effect-manager';
 import { IUpdator } from '../../updator/interfaces/updator.interfaces';
 import { LocalUpdatorRegistry } from '../../updator/registries/local-updators.registery';
 import { CoordinatorService } from '../services/coordinator.service';
@@ -7,12 +6,15 @@ import { GlobalUpdatorsRegistry } from '../../updator/registries/global-updators
 import { ActionDispatcher } from '../../action/action-dispatcher';
 import { inject, Injectable } from '@angular/core';
 import { withInjectionContext } from '../../../internal/injection-utils';
+import { ActionContextRegistery } from '../../effect/registries/action-context.registery';
+import { PendingEffectRegistry } from '../../effect/registries/pending-effect.registery';
 
 @Injectable({ providedIn: 'root' })
-class DispatchAsyncHandler {
+export class DispatchAsyncHandler {
   private readonly coordinator = inject(CoordinatorService);
   private readonly dispatcher = ActionDispatcher.getInstance();
-  private readonly effects = EffectManager.getInstance();
+  private readonly pendingEffect = inject(PendingEffectRegistry);
+  private readonly actionContext = inject(ActionContextRegistery);
   private readonly globalUpdatorsRegistery = inject(GlobalUpdatorsRegistry);
   private readonly localUpdatorsRegistery = inject(LocalUpdatorRegistry);
 
@@ -24,7 +26,7 @@ class DispatchAsyncHandler {
 
     const explicit = this.asUpdator(contextOrUpdator);
     if (explicit) {
-      this.localUpdatorsRegistery.registerLocalUpdator(explicit, explicit);
+      this.localUpdatorsRegistery.register(explicit, explicit);
       return this.execWithCleanup(
         this.coordinator.dispatchAsync(action, explicit),
         action.type
@@ -48,11 +50,14 @@ class DispatchAsyncHandler {
     }
 
     this.dispatcher.emit(action);
-    return this.execWithCleanup(this.effects.waitFor(action.type), action.type);
+    return this.execWithCleanup(
+      this.pendingEffect.waitFor(action.type),
+      action.type
+    );
   }
 
   private setContext(type: string, context?: object | IUpdator<any>) {
-    if (context) this.effects.setContextForAction(type, context);
+    if (context) this.actionContext.set(type, context);
   }
 
   private asUpdator<S>(updator?: object | IUpdator<S>): IUpdator<S> | null {
@@ -66,8 +71,7 @@ class DispatchAsyncHandler {
     type: string
   ): IUpdator<S> | null {
     return context && !this.asUpdator(context)
-      ? this.localUpdatorsRegistery.getLocalUpdator(context as object, type) ||
-          null
+      ? this.localUpdatorsRegistery.get(context as object, type) || null
       : null;
   }
 
@@ -78,7 +82,7 @@ class DispatchAsyncHandler {
     try {
       return await promise;
     } finally {
-      this.effects.clearContext(type);
+      this.actionContext.clear(type);
     }
   }
 }
