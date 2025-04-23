@@ -3,8 +3,8 @@ import {
   makeEnvironmentProviders,
   provideAppInitializer,
 } from '@angular/core';
-import { IUpdator } from './updator-interfaces';
-import { UpdatorGlobalRegistry } from './updator-globalRegistery';
+import { IUpdator } from '../updator/updator-interfaces';
+import { UpdatorGlobalRegistry } from '../updator/updator-globalRegistery';
 
 /**
  * Registers an array of updators globally at application startup.

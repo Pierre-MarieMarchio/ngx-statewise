@@ -1,7 +1,9 @@
+import { inject } from '@angular/core';
 import { Action } from '../action/action-type';
 import { IUpdator } from '../updator/updator-interfaces';
 import { DispatchHandler } from './handlers/manager-dispatch.handler';
 import { DispatchAsyncHandler } from './handlers/manager-dispatchAsync.handler';
+import { withInjectionContext } from '../../internal/injection-utils';
 
 /**
  * Dispatches an action with optional updator registration.
@@ -24,8 +26,10 @@ export function dispatch<T extends Action, S>(
   action: T,
   contextOrUpdator?: object | IUpdator<S>
 ): void {
-  const dispatchHandler = new DispatchHandler();
-  dispatchHandler.handle(action, contextOrUpdator);
+  withInjectionContext(() => {
+    const dispatchHandler = inject(DispatchHandler);
+    dispatchHandler.handle(action, contextOrUpdator);
+  });
 }
 
 /**
@@ -52,6 +56,8 @@ export function dispatchAsync<T extends Action, S>(
   action: T,
   contextOrUpdator?: object | IUpdator<S>
 ): Promise<void> {
-  const dispatchAsyncService = new DispatchAsyncHandler();
-  return dispatchAsyncService.handle(action, contextOrUpdator);
+  return withInjectionContext(() => {
+    const dispatchAsyncService = inject(DispatchAsyncHandler);
+    return dispatchAsyncService.handle(action, contextOrUpdator);
+  });
 }

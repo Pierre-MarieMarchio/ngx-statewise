@@ -8,10 +8,12 @@ import {
 import { StateStore } from '../manager-store';
 import { UpdatorGlobalRegistry } from '../../updator/updator-globalRegistery';
 import { ActionDispatcher } from '../../action/action-dispatcher';
+import { inject, Injectable } from '@angular/core';
 
+@Injectable({ providedIn: 'root' })
 export class DispatchAsyncHandler {
-  private readonly store = StateStore.getInstance();
-  private readonly dispatcher = ActionDispatcher.getInstance(); // direct
+  private readonly store = inject(StateStore);
+  private readonly dispatcher = ActionDispatcher.getInstance();
   private readonly effects = EffectManager.getInstance();
   private readonly globalRegistery = UpdatorGlobalRegistry.getInstance();
 
