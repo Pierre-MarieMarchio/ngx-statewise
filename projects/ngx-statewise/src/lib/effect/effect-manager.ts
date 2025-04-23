@@ -1,6 +1,7 @@
 export class EffectManager {
   private static _instance: EffectManager;
   private readonly _pending: Map<string, Promise<void>[]> = new Map();
+  private readonly _actionRelations: Map<string, Set<string>> = new Map();
   private constructor() {}
 
   public static getInstance(): EffectManager {
@@ -8,6 +9,41 @@ export class EffectManager {
       this._instance = new EffectManager();
     }
     return this._instance;
+  }
+
+  /**
+   * Enregistre une relation parent-enfant entre deux actions
+   * Quand parentActionType déclenche childActionType
+   */
+  public registerActionRelation(
+    parentActionType: string,
+    childActionType: string
+  ): void {
+    if (!this._actionRelations.has(parentActionType)) {
+      this._actionRelations.set(parentActionType, new Set());
+    }
+    this._actionRelations.get(parentActionType)?.add(childActionType);
+  }
+
+  /**
+   * Récupère récursivement tous les types d'actions enfants d'une action donnée
+   */
+  private getAllRelatedActionTypes(
+    actionType: string,
+    visited = new Set<string>()
+  ): Set<string> {
+    if (visited.has(actionType)) {
+      return visited; // Éviter les boucles infinies
+    }
+
+    visited.add(actionType);
+    const children = this._actionRelations.get(actionType) || new Set<string>();
+
+    for (const childType of children) {
+      this.getAllRelatedActionTypes(childType, visited);
+    }
+
+    return visited;
   }
 
   /**
@@ -51,10 +87,25 @@ export class EffectManager {
    * @param actionType - The action type whose effects must be resolved.
    */
   public async waitFor(actionType: string): Promise<void> {
-    const pending = this._pending.get(actionType) || [];
-    console.log('wait for pending:', pending);
-    console.log('wait for this._pending:', this._pending);
-    await Promise.all(pending);
+    // Récupérer tous les types d'actions liés (incluant l'action elle-même)
+    const allRelatedTypes = this.getAllRelatedActionTypes(actionType);
+    console.log(
+      `Waiting for actions: ${Array.from(allRelatedTypes).join(', ')}`
+    );
+
+    // Collecter toutes les promesses pour tous les types d'actions liés
+    const allPromisesToWait: Promise<void>[] = [];
+    for (const type of allRelatedTypes) {
+      const promises = this._pending.get(type) || [];
+      allPromisesToWait.push(...promises);
+    }
+
+    // Attendre toutes les promesses
+    console.log(`Total promises to wait: ${allPromisesToWait.length}`);
+    await Promise.all(allPromisesToWait);
+
+    console.log('promises resolved');
+    
   }
 
   /**

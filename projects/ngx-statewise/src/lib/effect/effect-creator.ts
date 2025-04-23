@@ -108,23 +108,27 @@ async function handleEffectResults(
   actionType: string
 ): Promise<Promise<void>[]> {
   const subActionPromises: Promise<void>[] = [];
-  
+  const effectManager = EffectManager.getInstance();
+
   // Process each action and collect promises for sub-effects
   for (const result of results.flat().filter((a): a is Action => !!a)) {
+    // Enregistrer la relation entre l'action parent et l'action enfant
+    effectManager.registerActionRelation(actionType, result.type);
+
     const updator = UpdatorRegistry.getInstance().getUpdator(result.type);
     if (updator) {
       dispatch(result, updator);
     } else {
       ActionDispatcher.getInstance().emit(result);
     }
-    
+
     // Get pending promises for this action type
-    const pendingPromises = EffectManager.getInstance().getPendingPromises(result.type);
+    const pendingPromises = effectManager.getPendingPromises(result.type);
     if (pendingPromises.length > 0) {
       subActionPromises.push(pendingPromises[0]);
     }
   }
-  
+
   return subActionPromises;
 }
 
