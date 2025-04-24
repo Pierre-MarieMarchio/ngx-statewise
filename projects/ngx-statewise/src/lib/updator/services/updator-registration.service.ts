@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { withInjectionContext } from '../../../internals/injection-utils';
+import { withInjectionContext } from '../../injector/injection-utils';
 import { LocalUpdatorRegistry } from '../../registries/local-updators.registery';
 import { IUpdator } from '../interfaces/updator.interfaces';
 

@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { withInjectionContext } from '../../../internals/injection-utils';
+import { withInjectionContext } from '../../injector/injection-utils';
 import { PendingEffectRegistry } from '../../registries/pending-effect.registery';
 
 /**

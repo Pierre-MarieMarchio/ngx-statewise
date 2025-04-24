@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { withInjectionContext } from '../../../internals/injection-utils';
+import { withInjectionContext } from '../../injector/injection-utils';
 import { Action } from '../../action/interfaces/action-type';
 import { IUpdator } from '../../updator';
 import { DispatchHandler } from './handlers/dispatch.handler';

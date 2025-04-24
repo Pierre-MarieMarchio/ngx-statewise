@@ -3,7 +3,7 @@ import {
   inject,
   provideEnvironmentInitializer,
 } from '@angular/core';
-import { setRootInjector } from '../../internals/root-injector';
+import { setRootInjector } from '../injector/root-injector';
 
 export function provideStatewise() {
   return provideEnvironmentInitializer(() => {
