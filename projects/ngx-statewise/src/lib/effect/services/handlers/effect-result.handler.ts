@@ -1,12 +1,12 @@
-import { Injectable, inject } from "@angular/core";
-import { ActionDispatcher } from "../../action/action-dispatcher";
-import { Action } from "../../action/action-type";
-import { DispatchHandler } from "../../manager/handlers/dispatch.handler";
-import { GlobalUpdatorsRegistry } from "../../updator/registries/global-updators.registery";
-import { LocalUpdatorRegistry } from "../../updator/registries/local-updators.registery";
-import { ActionContextRegistery } from "../registries/action-context.registery";
-import { EffectRelationRegistery } from "../registries/effect-relation.registery";
-import { PendingEffectRegistry } from "../registries/pending-effect.registery";
+import { Injectable, inject } from '@angular/core';
+import { ActionDispatcher } from '../../../action/action-dispatcher';
+import { Action } from '../../../action/action-type';
+import { GlobalUpdatorsRegistry } from '../../../registries/global-updators.registery';
+import { ActionContextRegistery } from '../../../registries/action-context.registery';
+import { EffectRelationRegistery } from '../../../registries/effect-relation.registery';
+import { PendingEffectRegistry } from '../../../registries/pending-effect.registery';
+import { LocalUpdatorRegistry } from '../../../registries/local-updators.registery';
+import { DispatchHandler } from '../../../manager/services/handlers/dispatch.handler';
 
 @Injectable({ providedIn: 'root' })
 export class EffectResultHandler {

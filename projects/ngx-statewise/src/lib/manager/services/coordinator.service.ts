@@ -4,7 +4,7 @@ import { update } from '../../updator/utils/updator.utils';
 
 import { ActionDispatcher } from '../../action/action-dispatcher';
 import { inject, Injectable } from '@angular/core';
-import { PendingEffectRegistry } from '../../effect/registries/pending-effect.registery';
+import { PendingEffectRegistry } from '../../registries/pending-effect.registery';
 
 @Injectable({ providedIn: 'root' })
 export class CoordinatorService {

@@ -1,6 +1,6 @@
-import { inject, Injectable } from '@angular/core';
-import { IUpdator } from '../interfaces/updator.interfaces';
-import { withInjectionContext } from '../../../internal/injection-utils';
+import { Injectable } from "@angular/core";
+import { IUpdator } from "../updator";
+
 
 @Injectable({ providedIn: 'root' })
 export class LocalUpdatorRegistry {
@@ -27,11 +27,4 @@ export class LocalUpdatorRegistry {
 
     return undefined;
   }
-}
-
-export function registerLocalUpdator<S>(manager: object, updator: IUpdator<S>) {
-  withInjectionContext(() => {
-    const localUpdatorRegistry = inject(LocalUpdatorRegistry);
-    localUpdatorRegistry.register(manager, updator);
-  });
 }

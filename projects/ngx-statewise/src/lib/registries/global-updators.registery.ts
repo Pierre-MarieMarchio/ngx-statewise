@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IUpdator } from '../interfaces/updator.interfaces';
+import { IUpdator } from '../updator/interfaces/updator.interfaces';
 
 @Injectable({ providedIn: 'root' })
 export class GlobalUpdatorsRegistry {

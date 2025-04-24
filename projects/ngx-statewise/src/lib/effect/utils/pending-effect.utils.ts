@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { withInjectionContext } from '../../../internal/injection-utils';
-import { PendingEffectRegistry } from '../registries/pending-effect.registery';
+import { PendingEffectRegistry } from '../../registries/pending-effect.registery';
 
 /**
  * Waits for all currently pending effects to resolve.

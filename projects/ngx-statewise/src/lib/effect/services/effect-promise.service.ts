@@ -1,12 +1,12 @@
-import { Injectable, inject } from "@angular/core";
-import { Observable } from "rxjs";
-import { Action } from "../../action/action-type";
-import { SWEffects } from "../interfaces/SWEffects.types";
-import { EffectResultResolver } from "./effect-result.resolver";
-import { EffectResultHandler } from "./effect-result.handler";
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Action } from '../../action/action-type';
+import { SWEffects } from '../interfaces/SWEffects.types';
+import { EffectResultResolver } from './resolvers/effect-result.resolver';
+import { EffectResultHandler } from './handlers/effect-result.handler';
 
 @Injectable({ providedIn: 'root' })
-export class EffectPromiseHandler {
+export class EffectPromiseService {
   private readonly effectResultResolver = inject(EffectResultResolver);
   private readonly effectResultHandler = inject(EffectResultHandler);
 
@@ -19,8 +19,6 @@ export class EffectPromiseHandler {
       try {
         const rawResult = handler(action.payload);
         const results = await this.effectResultResolver.resolve(rawResult);
-        console.log('createEffectPromise:', results, actionType);
-
         const subActionPromises = await this.effectResultHandler.handle(
           results,
           actionType

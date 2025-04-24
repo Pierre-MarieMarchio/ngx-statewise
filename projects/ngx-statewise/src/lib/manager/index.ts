@@ -1,2 +1,2 @@
-export { dispatch } from './handlers/dispatch.handler';
-export { dispatchAsync } from './handlers/dispatchAsync.handler';
+export { dispatch } from './services/dispatch.service';
+export { dispatchAsync } from './services/dispatchAsync.service';

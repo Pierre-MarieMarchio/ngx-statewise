@@ -5,7 +5,7 @@ import {
   provideAppInitializer,
 } from '@angular/core';
 import { IUpdator } from '../updator/interfaces/updator.interfaces';
-import { GlobalUpdatorsRegistry } from '../updator/registries/global-updators.registery';
+import { GlobalUpdatorsRegistry } from '../registries/global-updators.registery';
 
 /**
  * Registers an array of updators globally at application startup.

@@ -1,16 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { ActionDispatcher } from '../../action/action-dispatcher';
 import { Action } from '../../action/action-type';
-import { PendingEffectRegistry } from '../registries/pending-effect.registery';
+import { PendingEffectRegistry } from '../../registries/pending-effect.registery';
 import { SWEffects } from '../interfaces/SWEffects.types';
 import { ofType } from '../../action';
-import { EffectService } from './effect.service';
+import { EffectPromiseService } from './effect-promise.service';
 
 @Injectable({ providedIn: 'root' })
 export class EffectRegistrationService {
   private readonly actionDispatcher = ActionDispatcher.getInstance();
   private readonly pendingEffectRegistry = inject(PendingEffectRegistry);
-  private readonly effectService = inject(EffectService);
+  private readonly effectPromiseService = inject(EffectPromiseService);
 
   public registerEffect<T extends (...args: any[]) => Action>(
     actionCreator: T,
@@ -21,13 +21,11 @@ export class EffectRegistrationService {
     this.actionDispatcher.registerHandler(
       actionType,
       async (action: Action) => {
-        const effectPromise = this.effectService.createEffectPromise(
+        const effectPromise = this.effectPromiseService.createPromise(
           handler,
           action,
           actionType
         );
-        console.log('registering', actionType, effectPromise);
-
         this.pendingEffectRegistry.register(actionType, effectPromise);
         return effectPromise;
       }

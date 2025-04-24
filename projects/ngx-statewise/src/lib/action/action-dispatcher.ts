@@ -1,7 +1,6 @@
 import { WritableSignal, Signal, signal, inject } from '@angular/core';
 import { Action } from './action-type';
-import { PendingEffectRegistry } from '../effect/registries/pending-effect.registery';
-
+import { PendingEffectRegistry } from '../registries/pending-effect.registery';
 
 export class ActionDispatcher {
   private static _instance: ActionDispatcher;
