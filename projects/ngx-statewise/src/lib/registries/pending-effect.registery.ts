@@ -21,7 +21,7 @@ export class PendingEffectRegistry {
     return promise;
   }
 
-  public getPending(actionType: string): Promise<void>[] {
+  public get(actionType: string): Promise<void>[] {
     return this.pending.get(actionType) || [];
   }
 

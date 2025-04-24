@@ -1,8 +1,8 @@
 import { inject } from '@angular/core';
-import { Action } from '../../action/action-type';
+import { Action } from '../../action/interfaces/action-type';
 import { EffectRegistrationService } from '../services/effect-registration.service';
 import { SWEffects } from '../interfaces/SWEffects.types';
-import { withInjectionContext } from '../../../internal/injection-utils';
+import { withInjectionContext } from '../../../internals/injection-utils';
 
 /**
  * Registers an effect that listens to a specific action and executes a handler.

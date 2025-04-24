@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Action } from '../../action/action-type';
+import { Action } from '../../action/interfaces/action-type';
 import { SWEffects } from '../interfaces/SWEffects.types';
 import { EffectResultResolver } from './resolvers/effect-result.resolver';
 import { EffectResultHandler } from './handlers/effect-result.handler';
@@ -33,3 +33,4 @@ export class EffectPromiseService {
     })();
   }
 }
+

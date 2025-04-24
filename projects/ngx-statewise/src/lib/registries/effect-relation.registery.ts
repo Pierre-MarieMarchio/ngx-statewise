@@ -1,10 +1,10 @@
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class EffectRelationRegistery {
   private readonly actionRelations: Map<string, Set<string>> = new Map();
 
-  public registerRelation(parent: string, child: string): void {
+  public register(parent: string, child: string): void {
     if (!this.actionRelations.has(parent)) {
       this.actionRelations.set(parent, new Set());
     }

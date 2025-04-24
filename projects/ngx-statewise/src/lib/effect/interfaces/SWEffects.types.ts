@@ -1,5 +1,5 @@
-import { Observable } from "rxjs";
-import { Action } from "../../action/action-type";
+import { Observable } from 'rxjs';
+import { Action } from '../../action/interfaces/action-type';
 
 export type SWEffects =
   | Promise<Observable<Action> | Action | Action[] | void>

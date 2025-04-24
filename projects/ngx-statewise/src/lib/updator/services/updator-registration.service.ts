@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { withInjectionContext } from '../../../internal/injection-utils';
+import { withInjectionContext } from '../../../internals/injection-utils';
 import { LocalUpdatorRegistry } from '../../registries/local-updators.registery';
 import { IUpdator } from '../interfaces/updator.interfaces';
 
@@ -12,12 +12,11 @@ export class UpdatorRegistrationService {
   }
 }
 
-
 /**
  * Registers a local updater for a given manager context.
- * 
+ *
  * This function should be used within an Angular injection context (e.g. during component initialization).
- * 
+ *
  * @template S - The state type handled by the updater.
  * @param {object} manager - The local context object (e.g., a component or a service) to associate the updater with.
  * @param {IUpdator<S>} updator - The updater instance defining actions and their update logic for the given state.

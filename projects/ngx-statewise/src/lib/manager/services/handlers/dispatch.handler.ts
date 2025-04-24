@@ -1,14 +1,15 @@
 import { inject, Injectable } from '@angular/core';
-import { ActionDispatcher } from '../../../action/action-dispatcher';
+
 import { CoordinatorService } from '../coordinator.service';
 import { UpdatorResolver } from '../resolvers/updator.resolver';
 import { IUpdator } from '../../../updator';
-import { Action } from '../../../action/action-type';
+import { Action } from '../../../action/interfaces/action-type';
+import { ActionDispatcherService } from '../../../action/services/action-dispatcher.service';
 
 @Injectable({ providedIn: 'root' })
 export class DispatchHandler {
   private readonly coordinator = inject(CoordinatorService);
-  private readonly dispatcher = ActionDispatcher.getInstance();
+  private readonly actionDispatcher =  inject(ActionDispatcherService);
   private readonly updatorResolver = inject(UpdatorResolver);
 
   public handle<T extends Action, S>(
@@ -23,7 +24,7 @@ export class DispatchHandler {
     if (updator) {
       this.coordinator.dispatch(action, updator);
     }
-    
-    this.dispatcher.emit(action);
+
+    this.actionDispatcher.emit(action);
   }
 }

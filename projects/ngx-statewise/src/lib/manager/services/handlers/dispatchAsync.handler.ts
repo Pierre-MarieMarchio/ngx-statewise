@@ -1,16 +1,17 @@
 import { inject, Injectable } from '@angular/core';
-import { ActionDispatcher } from '../../../action/action-dispatcher';
+
 import { ActionContextRegistery } from '../../../registries/action-context.registery';
 import { PendingEffectRegistry } from '../../../registries/pending-effect.registery';
 import { CoordinatorService } from '../coordinator.service';
 import { UpdatorResolver } from '../resolvers/updator.resolver';
-import { Action } from '../../../action/action-type';
+import { Action } from '../../../action/interfaces/action-type';
 import { IUpdator } from '../../../updator';
+import { ActionDispatcherService } from '../../../action/services/action-dispatcher.service';
 
 @Injectable({ providedIn: 'root' })
 export class DispatchAsyncHandler {
   private readonly coordinator = inject(CoordinatorService);
-  private readonly dispatcher = ActionDispatcher.getInstance();
+  private readonly actionDispatcher =  inject(ActionDispatcherService);
   private readonly pendingEffect = inject(PendingEffectRegistry);
   private readonly actionContext = inject(ActionContextRegistery);
   private readonly updatorResolver = inject(UpdatorResolver);
@@ -30,8 +31,8 @@ export class DispatchAsyncHandler {
         action.type
       );
     }
-    
-    this.dispatcher.emit(action);
+
+    this.actionDispatcher.emit(action);
     return this.execWithCleanup(
       this.pendingEffect.waitFor(action.type),
       action.type

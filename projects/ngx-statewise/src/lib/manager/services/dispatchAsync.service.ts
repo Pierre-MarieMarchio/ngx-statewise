@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { withInjectionContext } from '../../../internal/injection-utils';
-import { Action } from '../../action/action-type';
+import { withInjectionContext } from '../../../internals/injection-utils';
+import { Action } from '../../action/interfaces/action-type';
 import { IUpdator } from '../../updator';
 import { DispatchAsyncHandler } from './handlers/dispatchAsync.handler';
 

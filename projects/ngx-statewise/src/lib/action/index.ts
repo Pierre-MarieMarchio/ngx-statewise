@@ -1,2 +1,2 @@
-export { emptyPayload, payload, ofType} from './action-utils';
-export { defineActionsGroup, defineSingleAction } from './action-definer';
+export { emptyPayload, payload, ofType } from './utils/action.utils';
+export { defineActionsGroup, defineSingleAction } from './services/action.service';

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { isObservable, firstValueFrom } from 'rxjs';
-import { Action } from '../../../action/action-type';
+import { Action } from '../../../action/interfaces/action-type';
 import { SWEffects } from '../../interfaces/SWEffects.types';
 
 @Injectable({ providedIn: 'root' })

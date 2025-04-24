@@ -1,4 +1,4 @@
-import { Action } from '../../action/action-type';
+import { Action } from '../../action/interfaces/action-type';
 import { UpdatorGlobalRegistry } from '../interfaces/updator.interfaces';
 
 /**

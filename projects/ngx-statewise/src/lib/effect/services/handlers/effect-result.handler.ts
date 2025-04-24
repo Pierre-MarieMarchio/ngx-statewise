@@ -1,15 +1,17 @@
 import { Injectable, inject } from '@angular/core';
-import { ActionDispatcher } from '../../../action/action-dispatcher';
-import { Action } from '../../../action/action-type';
+
+import { Action } from '../../../action/interfaces/action-type';
 import { GlobalUpdatorsRegistry } from '../../../registries/global-updators.registery';
 import { ActionContextRegistery } from '../../../registries/action-context.registery';
 import { EffectRelationRegistery } from '../../../registries/effect-relation.registery';
 import { PendingEffectRegistry } from '../../../registries/pending-effect.registery';
 import { LocalUpdatorRegistry } from '../../../registries/local-updators.registery';
 import { DispatchHandler } from '../../../manager/services/handlers/dispatch.handler';
+import { ActionDispatcherService } from '../../../action/services/action-dispatcher.service';
 
 @Injectable({ providedIn: 'root' })
 export class EffectResultHandler {
+  private readonly actionDispatcher = inject(ActionDispatcherService);
   private readonly pendingEffectRegistry = inject(PendingEffectRegistry);
   private readonly actionContextRegistry = inject(ActionContextRegistery);
   private readonly effectRelationRegistry = inject(EffectRelationRegistery);
@@ -25,10 +27,7 @@ export class EffectResultHandler {
     const context = this.actionContextRegistry.get(parentActionType);
 
     for (const result of results.flat().filter((a): a is Action => !!a)) {
-      this.effectRelationRegistry.registerRelation(
-        parentActionType,
-        result.type
-      );
+      this.effectRelationRegistry.register(parentActionType, result.type);
 
       let used = this.tryUseLocalUpdator(result, context);
 
@@ -37,7 +36,7 @@ export class EffectResultHandler {
       }
 
       if (!used) {
-        ActionDispatcher.getInstance().emit(result);
+        this.actionDispatcher.emit(result);
       }
 
       this.collectPendingPromises(result, subActionPromises);
@@ -73,7 +72,7 @@ export class EffectResultHandler {
     action: Action,
     subActionPromises: Promise<void>[]
   ): void {
-    const pending = this.pendingEffectRegistry.getPending(action.type);
+    const pending = this.pendingEffectRegistry.get(action.type);
     if (pending.length) {
       subActionPromises.push(pending[0]);
     }

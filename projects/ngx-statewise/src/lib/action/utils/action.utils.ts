@@ -1,5 +1,8 @@
-import { Action, EmptyPayloadFn, ValuePayloadFn } from './action-type';
-
+import {
+  Action,
+  EmptyPayloadFn,
+  ValuePayloadFn,
+} from '../interfaces/action-type';
 
 /**
  * Represents an empty payload for actions without data.
