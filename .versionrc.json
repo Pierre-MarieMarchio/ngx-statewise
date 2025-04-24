@@ -1,0 +1,19 @@
+{
+  "bumpFiles": [
+    {
+      "filename": "projects/ngx-statewise/package.json",
+      "type": "json"
+    }
+  ],
+  "packageFiles": [
+    {
+      "filename": "projects/ngx-statewise/package.json",
+      "type": "json"
+    }
+  ],
+  "skip": {
+    "tag": true,
+    "commit": true,
+    "changelog": true
+  }
+}
