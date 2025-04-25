@@ -9,6 +9,7 @@
     "test": "ng test",
     "prepare": "husky"
   },
+  "type": "module",
   "private": true,
   "dependencies": {
     "@angular/cdk": "^19.2.9",
