@@ -34,6 +34,3 @@ jobs:
         run: |
           chmod +x ./scripts/version-by-branch.sh
           ./scripts/version-by-branch.sh
-      
-      - name: Push changes and tags
-        run: git push --follow-tags
