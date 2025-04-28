@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write 
-  packages: write  
-  id-token: write  
+  contents: write
+  packages: write
+  id-token: write
 
 jobs:
   version:
@@ -20,36 +20,36 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22.13.1'
-          cache: 'npm'
-      
+          node-version: "22.13.1"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm ci
 
       - name: Install Angular CLI
-        run: npm install -g @angular/cli 
-      
+        run: npm install -g @angular/cli
+
       - name: Configure Git user
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions@github.com"
-      
+
       - name: Determine changed libraries
         id: changed-libs
         run: |
           npx lerna changed --json > changed-libs.json
           cat changed-libs.json
           echo "changed_libraries=$(cat changed-libs.json | jq -r '.[].name' | paste -sd ',' -)" >> $GITHUB_ENV
-    
+
       - name: Run versioning script
         run: |
           chmod +x ./scripts/version-by-branch.sh
           ./scripts/version-by-branch.sh
-      
+
       - name: Push changes and tags
         run: git push --follow-tags
 
@@ -63,7 +63,10 @@ jobs:
           else
             echo "No libraries to build."
           fi
-      
+
+      - name: Set up NPM auth
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
       - name: Publish changed libraries to NPM
         run: |
           if [ -n "$changed_libraries" ]; then
