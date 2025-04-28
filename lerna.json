@@ -5,7 +5,7 @@
     "version": {
       "conventionalCommits": true,
       "allowBranch": ["main", "next"],
-      "push": false
+      "push": true
     }
   },
   "$schema": "node_modules/lerna/schemas/lerna-schema.json"
