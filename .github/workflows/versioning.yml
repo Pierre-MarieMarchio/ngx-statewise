@@ -32,5 +32,5 @@ jobs:
       
       - name: Run versioning script
         run: |
-          ./scripts/version-by-branch.sh
+          chmod +x ./scripts/version-by-branch.sh
           ./scripts/version-by-branch.sh
