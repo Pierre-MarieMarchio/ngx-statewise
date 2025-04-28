@@ -29,6 +29,9 @@ jobs:
       
       - name: Install dependencies
         run: npm ci
+
+      - name: Install Angular CLI
+        run: npm install -g @angular/cli 
       
       - name: Configure Git user
         run: |
@@ -71,12 +74,9 @@ jobs:
               if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
                 NPM_TAG="latest"
               elif [[ "$GITHUB_REF" == "refs/heads/next" ]]; then
-                NPM_TAG="next"
-              else
                 NPM_TAG="beta"
               fi
 
-              # Publication sur NPM avec le tag approprié
               npm publish --tag $NPM_TAG
               cd -  # Retourner à la racine du repo
             done
