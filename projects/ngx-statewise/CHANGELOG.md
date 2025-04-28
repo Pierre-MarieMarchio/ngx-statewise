@@ -1,0 +1,11 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# 0.4.0-beta.0 (2025-04-28)
+
+
+### Features
+
+* added automatic versionnig ([3d67ac2](https://github.com/Pierre-MarieMarchio/ngx-statewise/commit/3d67ac26f27a5039a422249b8e13eb88c2706d27))
