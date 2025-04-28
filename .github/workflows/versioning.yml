@@ -35,6 +35,13 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions@github.com"
       
+      - name: Determine changed libraries
+        id: changed-libs
+        run: |
+          npx lerna changed --json > changed-libs.json
+          cat changed-libs.json
+          echo "changed_libraries=$(cat changed-libs.json | jq -r '.[].name' | paste -sd ',' -)" >> $GITHUB_ENV
+    
       - name: Run versioning script
         run: |
           chmod +x ./scripts/version-by-branch.sh
@@ -42,3 +49,39 @@ jobs:
       
       - name: Push changes and tags
         run: git push --follow-tags
+
+      - name: Build changed libraries
+        run: |
+          if [ -n "$changed_libraries" ]; then
+            for lib in $(echo $changed_libraries | tr "," "\n"); do
+              echo "Building $lib..."
+              ng build $lib --prod  # Construction de la lib Angular
+            done
+          else
+            echo "No libraries to build."
+          fi
+      
+      - name: Publish changed libraries to NPM
+        run: |
+          if [ -n "$changed_libraries" ]; then
+            for lib in $(echo $changed_libraries | tr "," "\n"); do
+              echo "Publishing $lib to NPM..."
+              cd dist/$lib
+              
+              if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
+                NPM_TAG="latest"
+              elif [[ "$GITHUB_REF" == "refs/heads/next" ]]; then
+                NPM_TAG="next"
+              else
+                NPM_TAG="beta"
+              fi
+
+              # Publication sur NPM avec le tag approprié
+              npm publish --tag $NPM_TAG
+              cd -  # Retourner à la racine du repo
+            done
+          else
+            echo "No libraries to publish."
+          fi
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
