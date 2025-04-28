@@ -1,0 +1,39 @@
+name: Automatic Versioning
+
+on:
+  push:
+    branches: [main, next]
+  workflow_dispatch:
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Configure Git user
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+      
+      - name: Run versioning script
+        run: |
+          chmod +x ./scripts/version-by-branch.sh
+          ./scripts/version-by-branch.sh
+      
+      - name: Push changes and tags
+        run: git push --follow-tags

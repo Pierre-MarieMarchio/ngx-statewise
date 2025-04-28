@@ -1,5 +1,12 @@
 {
   "version": "independent",
   "packages": ["projects/*"],
-  "npmClient": "npm"
+  "command": {
+    "version": {
+      "conventionalCommits": true,
+      "allowBranch": ["main", "next"],
+      "push": false
+    }
+  },
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json"
 }
