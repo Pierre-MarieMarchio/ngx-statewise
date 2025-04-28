@@ -55,7 +55,7 @@ jobs:
           if [ -n "$changed_libraries" ]; then
             for lib in $(echo $changed_libraries | tr "," "\n"); do
               echo "Building $lib..."
-              ng build $lib --prod  # Construction de la lib Angular
+              ng build $lib 
             done
           else
             echo "No libraries to build."
