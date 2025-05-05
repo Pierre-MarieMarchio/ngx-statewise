@@ -9,7 +9,7 @@ import { ActionDispatcherService } from '../../../action/services/action-dispatc
 @Injectable({ providedIn: 'root' })
 export class DispatchHandler {
   private readonly coordinator = inject(CoordinatorService);
-  private readonly actionDispatcher =  inject(ActionDispatcherService);
+  private readonly actionDispatcher = inject(ActionDispatcherService);
   private readonly updatorResolver = inject(UpdatorResolver);
 
   public handle<T extends Action, S>(
@@ -20,11 +20,10 @@ export class DispatchHandler {
       action.type,
       contextOrUpdator
     );
-
     if (updator) {
       this.coordinator.dispatch(action, updator);
+    } else {
+      this.actionDispatcher.emit(action);
     }
-
-    this.actionDispatcher.emit(action);
   }
 }
