@@ -8,7 +8,7 @@ try {
   switch (currentBranch) {
     case "next":
       console.log("Creating prerelease versions on the next branch");
-      execSync('npm run version:beta-release', {
+      execSync("npm run version:beta-release", {
         stdio: "inherit",
       });
       break;
