@@ -8,7 +8,10 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "prepare": "husky",
-    "release": "lerna exec --concurrency 1 -- npx --no-install semantic-release -e semantic-release-monorepo"
+    "// --- RELEASE MANAGEMENT ---": "version bumping and prerelease commands",
+    "version:beta-graduate": "lerna version --conventional-commits --conventional-graduate --no-push --no-git-tag-version --yes && git add . && git commit -m \"chore(release): prepare next beta version release\"",
+    "version:beta-release": "npx lerna version --conventional-commits --conventional-prerelease --preid beta --message \"chore(release): publish beta version\" --yes",
+    "version:stable-release": "npx lerna version --conventional-commits --conventional-graduate --message \"chore(realease): publish stable version\" --yes"
   },
   "type": "module",
   "private": true,
