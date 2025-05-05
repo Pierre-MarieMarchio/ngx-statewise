@@ -8,7 +8,7 @@ try {
   switch (currentBranch) {
     case "next":
       console.log("Creating prerelease versions on the next branch");
-      execSync('echo "Creating stable releases on the next branch"', {
+      execSync('version:beta-release"', {
         stdio: "inherit",
       });
       break;

@@ -51,7 +51,9 @@ jobs:
       - name: Build changed libraries
         run: node .scripts/build-changed-libs.js
 
+      - name: Set up NPM auth
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
       - name: Publish changed libraries to NPM
         run: node .scripts/publish-changed-libs.js
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
