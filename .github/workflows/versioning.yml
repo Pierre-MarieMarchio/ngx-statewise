@@ -28,11 +28,10 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
-
-      - name: Install Angular CLI
-        run: npm install -g @angular/cli
-
+        run: |
+          npm ci
+          npm install -g @angular/cli
+          
       - name: Configure Git user
         run: |
           git config --global user.name "GitHub Actions"
@@ -47,44 +46,12 @@ jobs:
 
       - name: Run versioning script
         run: |
-          chmod +x ./scripts/version-by-branch.sh
-          ./scripts/version-by-branch.sh
-
-      - name: Push changes and tags
-        run: git push --follow-tags
+          node .scripts/versioning.js
 
       - name: Build changed libraries
-        run: |
-          if [ -n "$changed_libraries" ]; then
-            for lib in $(echo $changed_libraries | tr "," "\n"); do
-              echo "Building $lib..."
-              ng build $lib 
-            done
-          else
-            echo "No libraries to build."
-          fi
-
-      - name: Set up NPM auth
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+        run: node .scripts/build-changed-libs.js
 
       - name: Publish changed libraries to NPM
-        run: |
-          if [ -n "$changed_libraries" ]; then
-            for lib in $(echo $changed_libraries | tr "," "\n"); do
-              echo "Publishing $lib to NPM..."
-              cd dist/$lib
-              
-              if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
-                NPM_TAG="latest"
-              elif [[ "$GITHUB_REF" == "refs/heads/next" ]]; then
-                NPM_TAG="beta"
-              fi
-
-              npm publish --tag $NPM_TAG
-              cd -  # Retourner à la racine du repo
-            done
-          else
-            echo "No libraries to publish."
-          fi
+        run: node .scripts/publish-changed-libs.js
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
