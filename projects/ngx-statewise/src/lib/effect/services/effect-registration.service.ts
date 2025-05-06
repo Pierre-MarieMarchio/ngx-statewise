@@ -4,11 +4,11 @@ import { PendingEffectRegistry } from '../../registries/pending-effect.registery
 import { SWEffects } from '../interfaces/SWEffects.types';
 import { ofType } from '../../action';
 import { EffectPromiseService } from './effect-promise.service';
-import { ActionDispatcherService } from '../../action/services/action-dispatcher.service';
+import { ActionEffectRegistry } from '../../registries/global-effect.registery';
 
 @Injectable({ providedIn: 'root' })
 export class EffectRegistrationService {
-  private readonly actionDispatcher = inject(ActionDispatcherService);
+  private readonly globalEffectRegistry = inject(ActionEffectRegistry);
   private readonly pendingEffectRegistry = inject(PendingEffectRegistry);
   private readonly effectPromiseService = inject(EffectPromiseService);
 
@@ -18,7 +18,7 @@ export class EffectRegistrationService {
   ): void {
     const actionType = ofType(actionCreator);
 
-    this.actionDispatcher.registerEffect(actionType, async (action: Action) => {
+    this.globalEffectRegistry.register(actionType, async (action: Action) => {
       const effectPromise = this.effectPromiseService.createPromise(
         handler,
         action,
