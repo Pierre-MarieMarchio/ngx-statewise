@@ -1,6 +1,6 @@
-import { inject, Injectable } from "@angular/core";
-import { ActionEffectRegistry } from "../../../registries/action-effect.registery";
-import { Action } from "../../interfaces/action-type";
+import { inject, Injectable } from '@angular/core';
+import { ActionEffectRegistry } from '../../../registries/global-effect.registery';
+import { Action } from '../../interfaces/action-type';
 
 @Injectable({ providedIn: 'root' })
 export class ActionEffectHandlerr {
