@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.3-beta.0](https://github.com/Pierre-MarieMarchio/ngx-statewise/compare/ngx-statewise@0.6.2-beta.0...ngx-statewise@0.6.3-beta.0) (2025-05-06)
+
+**Note:** Version bump only for package ngx-statewise
+
+
+
+
+
 ## [0.6.2](https://github.com/Pierre-MarieMarchio/ngx-statewise/compare/ngx-statewise@0.6.2-beta.0...ngx-statewise@0.6.2) (2025-05-06)
 
 **Note:** Version bump only for package ngx-statewise
