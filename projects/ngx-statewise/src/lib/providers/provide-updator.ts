@@ -3,6 +3,7 @@ import {
   inject,
   makeEnvironmentProviders,
   provideAppInitializer,
+  Type,
 } from '@angular/core';
 import { IUpdator } from '../updator/interfaces/updator.interfaces';
 import { GlobalUpdatorsRegistry } from '../registries/global-updators.registery';
@@ -14,17 +15,21 @@ import { GlobalUpdatorsRegistry } from '../registries/global-updators.registery'
  * application initialization phase, making them available throughout the application
  * without needing to register them with each dispatch call.
  *
- * @param updators - An array of updator objects to be registered globally.
+ * @param updators - An array of Updator class to be registered globally.
  * @returns Angular EnvironmentProviders to be included in your application bootstrap.
  *
  */
 export function provideUpdators(
-  updators: IUpdator<any>[]
+  updatorClasses: Type<IUpdator<any>>[]
 ): EnvironmentProviders {
   return makeEnvironmentProviders([
+    ...updatorClasses, // ensure classes are registered as providers
     provideAppInitializer(() => {
       const registry = inject(GlobalUpdatorsRegistry);
-      updators.forEach((updator) => registry.registerFullUpdator(updator));
+      updatorClasses.forEach((cls) => {
+        const instance = inject(cls);
+        registry.registerFullUpdator(instance);
+      });
     }),
   ]);
 }
