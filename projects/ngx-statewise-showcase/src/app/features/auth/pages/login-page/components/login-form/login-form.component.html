@@ -1,0 +1,56 @@
+<form [formGroup]="loginForm" (ngSubmit)="handleSubmit()">
+  <div class="login-card" appearance="outlined">
+    <div>
+      <div class="text-xl">
+        <h2 class="mb-3">Connectez-vous à votre compte</h2>
+      </div>
+
+      <div>
+        <p class="mb-0">Bienvenue de retour !</p>
+        <p class="mt-0">Entrez vos identifiants pour continuer.</p>
+      </div>
+    </div>
+    <div class="mt-6">
+      <div class="row">
+        <mat-form-field
+          class="full-width"
+          subscriptSizing="dynamic"
+          appearance="outline"
+        >
+          <mat-label>Adresse e-mail</mat-label>
+          <input formControlName="email" matInput type="email" />
+        </mat-form-field>
+      </div>
+      <div class="row">
+        <mat-form-field
+          class="full-width"
+          subscriptSizing="dynamic"
+          appearance="outline"
+        >
+          <mat-label>Mot de passe</mat-label>
+          <input
+            formControlName="password"
+            [type]="isPasswordHided() ? 'password' : 'text'"
+            matInput
+          />
+          <button
+            class="mr-2"
+            type="button"
+            mat-icon-button
+            matSuffix
+            (click)="hidePassword($event)"
+          >
+            <mat-icon>{{
+              isPasswordHided() ? "visibility_off" : "visibility"
+            }}</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="mt-10">
+      <button type="submit" class="primary-btn full-width" mat-fab extended>
+        <span class="d-flex center text-xl gap-3">Se connecter</span>
+      </button>
+    </div>
+  </div>
+</form>

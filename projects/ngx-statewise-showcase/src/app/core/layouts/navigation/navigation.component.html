@@ -1,0 +1,30 @@
+<div class="side-nav-content side-nav-container side-nav-border">
+  <mat-nav-list>
+    <a
+      mat-item
+      class="nav-groupe-icon text-secondary"
+      [routerLink]="''"
+      routerLinkActive="active-link"
+      [routerLinkActiveOptions]="{exact: true}"
+    >
+      <mat-icon class="nav-icon icon-outlined" matListItemIcon>home</mat-icon>
+      <span>home</span>
+    </a>
+    @for (item of navigationItem; track $index) {
+    <a
+      mat-item
+      class="nav-groupe-icon text-secondary"
+      [routerLink]="item.route"
+      routerLinkActive="active-link"
+    >
+      <mat-icon class="nav-icon icon-outlined" matListItemIcon>{{
+        item.icon
+      }}</mat-icon>
+      <span>{{ item.label }}</span>
+    </a>
+    }
+  </mat-nav-list>
+  <div class="bottom-toggles mb-5">
+    <dm-toggle />
+  </div>
+</div>

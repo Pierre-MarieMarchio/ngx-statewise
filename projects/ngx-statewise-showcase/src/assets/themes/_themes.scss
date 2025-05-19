@@ -1,0 +1,54 @@
+@use "@angular/material" as mat;
+
+.light {
+  background-color: var(--mat-sys-background);
+  color: var(--mat-sys-on-background);
+
+  --text-secondary: #746e7c;
+  --Icon-active : #0f0f11;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$magenta-palette,
+        tertiary: mat.$violet-palette,
+        theme-type: light,
+      ),
+    ),
+    $overrides: ("on-background": #333, "background": white)
+  );
+}
+
+.dark {
+  background-color: var(--mat-sys-background);
+  color: var(--mat-sys-on-background);
+
+  --text-secondary: rgb(164, 160, 170);
+  --Icon-active : #f3f3f3;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$magenta-palette,
+        tertiary: mat.$violet-palette,
+        theme-type: dark,
+      ),
+    ),
+    $overrides: (
+      "on-background": #f3f3f3,
+      "on-surface-variant": #f3f3f3,
+      "background": #0f0f11
+    )
+  );
+}
+
+.light,
+.dark {
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+.text-secondary {
+   color: var(--text-secondary);
+}
+
+.icon-outlined {
+  font-family: 'Material Icons Outlined';
+}
