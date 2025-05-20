@@ -30,8 +30,8 @@ export const appConfig: ApplicationConfig = {
     { provide: AUTH_MANAGER, useExisting: AuthManager },
     
     provideAppInitializer(async () => {
-      // const authManager = inject(AUTH_MANAGER);
-      // await authManager.authenticate();
+      const authManager = inject(AUTH_MANAGER);
+      await authManager.authenticate();
     }),
   ],
 };

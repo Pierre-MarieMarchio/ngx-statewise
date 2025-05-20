@@ -1,0 +1,25 @@
+.sign-in-btn {
+  position: absolute;
+  margin: 1rem;
+  top: 0;
+}
+
+.landing-page-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+
+  .landing-page-logo {
+    width: auto;
+    max-width: 80%;
+    height: auto;
+  }
+
+  .sign-up-btn {
+    position: absolute;
+    margin: 1rem;
+    bottom: 10vh;
+  }
+}

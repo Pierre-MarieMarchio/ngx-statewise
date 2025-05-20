@@ -1,5 +1,18 @@
-<div class="d-flex-col center">
-  <app-logo />
-  <app-signup-btn />
+<button class="primary-btn sign-in-btn" routerLink="/login" mat-stroked-button>
+  <span class="d-flex center text-base gap-3">sign in</span>
+</button>
 
+<div class="landing-page-container">
+  <img
+    class="landing-page-logo"
+    src="landing-page-logo.png"
+    alt="ngx-statewise"
+  />
+  <button
+    class="primary-btn sign-up-btn"
+    routerLink="/signup"
+    mat-stroked-button
+  >
+    <span class="d-flex center text-base gap-3">signup here</span>
+  </button>
 </div>

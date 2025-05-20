@@ -15,8 +15,8 @@ import { ThemeService } from './theme.service';
     MatButtonModule,
   ],
   template: `
-    <button (click)="togleTheme()" mat-icon-button class="m-1 text-secondary">
-      <mat-icon class="text-secondary icon-outlined">{{
+    <button (click)="togleTheme()" mat-icon-button class="m-1 color-secondary">
+      <mat-icon class="color-secondary icon-outlined">{{
         themeService.themeSignal() === 'dark'
           ? 'dark_mode_outlined'
           : 'light_mode'

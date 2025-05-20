@@ -4,8 +4,8 @@
   background-color: var(--mat-sys-background);
   color: var(--mat-sys-on-background);
 
-  --text-secondary: #746e7c;
-  --Icon-active : #0f0f11;
+  --color-secondary: #746e7c;
+  --Icon-active: #0f0f11;
   @include mat.theme(
     (
       color: (
@@ -22,8 +22,8 @@
   background-color: var(--mat-sys-background);
   color: var(--mat-sys-on-background);
 
-  --text-secondary: rgb(164, 160, 170);
-  --Icon-active : #f3f3f3;
+  --color-secondary: rgb(164, 160, 170);
+  --Icon-active: #f3f3f3;
   @include mat.theme(
     (
       color: (
@@ -45,10 +45,12 @@
   transition: background-color 0.5s ease, color 0.5s ease;
 }
 
-.text-secondary {
-   color: var(--text-secondary);
+.color-secondary {
+  color: var(--color-secondary);
 }
 
 .icon-outlined {
-  font-family: 'Material Icons Outlined';
+  font-family: "Material Symbols Outlined";
+  font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24, 'STRK' 3 !important;
+ 
 }
