@@ -1,12 +1,14 @@
 import { HttpResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { LocalStorageService } from '@app/core/services/local-storage.service';
+import { AuthRepositoryService } from './auth-repository.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthTokenService extends LocalStorageService {
   private readonly ACCESS_TOKEN_KEY = 'access_token';
+  private readonly authRepository = inject(AuthRepositoryService);
 
   public setAccessToken(value: string): void {
     this.setItem(this.ACCESS_TOKEN_KEY, value);
@@ -27,4 +29,6 @@ export class AuthTokenService extends LocalStorageService {
     }
     return newToken;
   }
+
+
 }

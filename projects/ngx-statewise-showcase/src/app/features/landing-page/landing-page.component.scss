@@ -1,8 +1,4 @@
-.sign-in-btn {
-  position: absolute;
-  margin: 1rem;
-  top: 0;
-}
+
 
 .landing-page-container {
   display: flex;
@@ -17,9 +13,13 @@
     height: auto;
   }
 
-  .sign-up-btn {
+  .sign-in-btn {
     position: absolute;
     margin: 1rem;
     bottom: 10vh;
   }
+}
+
+button {
+  cursor: pointer;
 }

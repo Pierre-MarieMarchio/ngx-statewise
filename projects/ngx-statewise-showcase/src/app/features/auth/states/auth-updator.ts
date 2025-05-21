@@ -35,12 +35,7 @@ export class AuthUpdator implements IUpdator<AuthStates> {
       state.asError.set(true);
       state.isLoading.set(false);
     },
-    [ofType(logoutAction.action)]: (state) => {
-      state.user.set(null);
-      state.isLoggedIn.set(false);
-      state.asError.set(false);
-      state.isLoading.set(false);
-    },
+
     [ofType(authenticateActions.request)]: (state) => {
       state.isLoading.set(true);
       state.asError.set(false);
@@ -51,8 +46,12 @@ export class AuthUpdator implements IUpdator<AuthStates> {
       state.isLoading.set(false);
     },
     [ofType(authenticateActions.failure)]: (state) => {
+      state.isLoading.set(false);
+    },
+    [ofType(logoutAction.action)]: (state) => {
       state.user.set(null);
       state.isLoggedIn.set(false);
+      state.asError.set(false);
       state.isLoading.set(false);
     },
   };

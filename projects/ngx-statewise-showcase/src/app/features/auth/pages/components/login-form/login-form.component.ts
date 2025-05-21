@@ -10,12 +10,14 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { LoginSubmit } from '../../../../interfaces/form-submits.interfaces';
+import { LoginSubmit } from '../../../interfaces/form-submits.interfaces';
+
 
 @Component({
   selector: 'app-login-form',
@@ -26,6 +28,7 @@ import { LoginSubmit } from '../../../../interfaces/form-submits.interfaces';
     MatIconModule,
     MatButtonModule,
     ReactiveFormsModule,
+    RouterModule,
   ],
   templateUrl: './login-form.component.html',
   styleUrl: './login-form.component.scss',

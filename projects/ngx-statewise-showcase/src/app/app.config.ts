@@ -13,10 +13,9 @@ import {
 import { routes } from './app.routes';
 import { accessTokenInterceptor } from './features/auth/interceptors/access-token.interceptor';
 import { provideEffects, provideStatewise } from 'ngx-statewise';
-import { AuthEffects } from './features/auth/managers/auth-effects';
-import { AuthManager } from './features/auth/managers/auth-manager';
+import { AuthEffects } from './features/auth/states/auth-effects';
+import { AuthManager } from './features/auth/states/auth-manager';
 import { AUTH_MANAGER } from '@shared/token-provider/auth-manager/auth-manager.token';
-
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -28,7 +27,7 @@ export const appConfig: ApplicationConfig = {
     provideEffects([AuthEffects]),
 
     { provide: AUTH_MANAGER, useExisting: AuthManager },
-    
+
     provideAppInitializer(async () => {
       const authManager = inject(AUTH_MANAGER);
       await authManager.authenticate();

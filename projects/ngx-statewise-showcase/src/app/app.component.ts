@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject,} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ThemeService, } from './shared/dark-mode/theme.service';
@@ -14,5 +14,12 @@ import { NavigationComponent } from "./core/layouts/navigation/navigation.compon
 })
 export class AppComponent {
   title = 'Todo-App';
-  public readonly themeService = inject(ThemeService);
+  private readonly themeService = inject(ThemeService);
+  
+  constructor() {
+    effect(() => {
+      const theme = this.themeService.themeSignal();
+      document.body.className = `${theme} mat-typography`;
+    });
+  }
 }

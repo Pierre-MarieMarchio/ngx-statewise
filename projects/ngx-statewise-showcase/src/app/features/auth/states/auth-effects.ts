@@ -13,7 +13,7 @@ import {
   AuthTokenHelperService,
 } from '../services';
 import { MatDialog } from '@angular/material/dialog';
-import { SignupSucessDialogComponent } from '../pages/signup-page/components/signup-sucess-dialog/signup-sucess-dialog.component';
+import { AuthNotificationService } from '../services/auth-notification.service';
 
 @Injectable({
   providedIn: 'root',
@@ -24,6 +24,7 @@ export class AuthEffects {
   private readonly authTokenHelper = inject(AuthTokenHelperService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly notification = inject(AuthNotificationService);
 
   public readonly loginRequestEffect = createEffect(
     loginActions.request,
@@ -41,8 +42,15 @@ export class AuthEffects {
   public readonly loginSuccessEffect = createEffect(
     loginActions.success,
     () => {
-      this.dialog.open(SignupSucessDialogComponent);
       this.router.navigate(['/']);
+      this.notification.loginSuccess();
+    }
+  );
+
+  public readonly loginFailureEffect = createEffect(
+    loginActions.failure,
+    () => {
+      this.notification.loginFailure();
     }
   );
 
@@ -84,11 +92,16 @@ export class AuthEffects {
   public readonly authenticateFailureEffect = createEffect(
     authenticateActions.failure,
     () => {
-      this.router.navigate(['/']);
+      if (this.router.url !== '/') {
+        this.notification.AuthenticateFailure();
+      }
+      return logoutAction.action();
     }
   );
 
-  public readonly logoutEffect = createEffect(logoutAction.action, () => {
+  public readonly logoutEffect = createEffect(logoutAction.action, async () => {
+    await firstValueFrom(this.authRepository.logout());
+    this.authToken.clearAccessToken();
     this.router.navigate(['/']);
   });
 }

@@ -41,6 +41,15 @@ export class AuthRepositoryService {
     return response;
   }
 
+  public logout(): Observable<HttpResponse<void>> {
+    const response = this.http.post<void>(
+      `${this.API_BASE_URL}/Auth/logout`,
+      null,
+      { observe: 'response', withCredentials: true }
+    );
+    return response;
+  }
+
   public authenticate(): Observable<HttpResponse<AuthenticateResponses>> {
     const response = this.http.post<AuthenticateResponses>(
       `${this.API_BASE_URL}/Auth/Authenticate`,

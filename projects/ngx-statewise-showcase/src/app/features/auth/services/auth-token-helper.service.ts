@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { jwtDecode } from 'jwt-decode';
 import { AccessToken } from '../interfaces/auth-accessToken.interface';
-import { authenticateActions } from '../managers/auth-actions';
 
 @Injectable({ providedIn: 'root' })
 export class AuthTokenHelperService {
