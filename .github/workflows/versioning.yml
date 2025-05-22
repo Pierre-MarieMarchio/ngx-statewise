@@ -31,7 +31,7 @@ jobs:
         run: |
           npm ci
           npm install -g @angular/cli
-          
+
       - name: Configure Git user
         run: |
           git config --global user.name "GitHub Actions"
@@ -40,20 +40,22 @@ jobs:
       - name: Determine changed libraries
         id: changed-libs
         run: |
-          npx lerna changed --json > changed-libs.json
-          cat changed-libs.json
-          echo "changed_libraries=$(cat changed-libs.json | jq -r '.[].name' | paste -sd ',' -)" >> $GITHUB_ENV
+          node .scripts/determine-changed-libs.js
+          echo "changed_libraries=$(cat changed-libs-output.txt)" >> $GITHUB_OUTPUT
 
       - name: Run versioning script
+        if: steps.changed-libs.outputs.changed_libraries != ''
         run: |
           node .scripts/versioning.js
 
       - name: Build changed libraries
+        if: steps.changed-libs.outputs.changed_libraries != ''
         run: node .scripts/build-changed-libs.js
 
       - name: Set up NPM auth
+        if: steps.changed-libs.outputs.changed_libraries != ''
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
       - name: Publish changed libraries to NPM
+        if: steps.changed-libs.outputs.changed_libraries != ''
         run: node .scripts/publish-changed-libs.js
-
