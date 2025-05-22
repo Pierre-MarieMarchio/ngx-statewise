@@ -1,0 +1,14 @@
+@use "../variables" as *;
+
+@for $i from 0 through 50 {
+    .m-#{$i} { margin: $i * $ds-spacing-unit; }
+    .p-#{$i} { padding: $i * $ds-spacing-unit; }
+    .mt-#{$i} { margin-top: $i * $ds-spacing-unit; }
+    .mb-#{$i} { margin-bottom: $i * $ds-spacing-unit; }
+    .ml-#{$i} { margin-left: $i * $ds-spacing-unit; }
+    .mr-#{$i} { margin-right: $i * $ds-spacing-unit; }
+    .pt-#{$i} { padding-top: $i * $ds-spacing-unit; }
+    .pb-#{$i} { padding-bottom: $i * $ds-spacing-unit; }
+    .pl-#{$i} { padding-left: $i * $ds-spacing-unit; }
+    .pr-#{$i} { padding-right: $i * $ds-spacing-unit; }
+}

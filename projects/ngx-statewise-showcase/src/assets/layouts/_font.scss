@@ -1,0 +1,21 @@
+@use "../variables" as *;
+
+$font-sizes: (
+  xs: $ds-font-size-base * 0.75,
+  sm: $ds-font-size-base * 0.875,
+  base: $ds-font-size-base,
+  lg: $ds-font-size-base * 1.25,
+  xl: $ds-font-size-base * 1.5,
+  '2xl': $ds-font-size-base * 1.875, 
+  '3xl': $ds-font-size-base * 2.25, 
+  '4xl': $ds-font-size-base * 2.75,
+  '5xl': $ds-font-size-base * 3.25, 
+  '6xl': $ds-font-size-base * 3.75, 
+  '7xl': $ds-font-size-base * 4.25, 
+  '8xl': $ds-font-size-base * 4.75, 
+  '9xl': $ds-font-size-base * 5.25 
+);
+
+@each $key, $value in $font-sizes {
+  .text-#{$key} { font-size: $value; }
+}
