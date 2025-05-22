@@ -31,7 +31,7 @@ jobs:
         run: |
           npm ci
           npm install -g @angular/cli
-          
+
       - name: Configure Git user
         run: |
           git config --global user.name "GitHub Actions"
@@ -42,15 +42,6 @@ jobs:
         run: |
           node .scripts/determine-changed-libs.js
           echo "changed_libraries=$(cat changed-libs-output.txt)" >> $GITHUB_OUTPUT
-          if [[ "$OUTPUT" == *"No changed packages"* ]]; then
-            echo "changed_libraries=" >> $GITHUB_ENV
-            echo "No packages changed."
-          else
-            echo "$OUTPUT" > changed-libs.json
-            LIBS=$(echo "$OUTPUT" | jq -r '.[].name' | paste -sd "," -)
-            echo "changed_libraries=$LIBS" >> $GITHUB_ENV
-            echo "$LIBS" > changed-libs-output.txt
-          fi
 
       - name: Run versioning script
         if: steps.changed-libs.outputs.changed_libraries != ''
@@ -68,4 +59,3 @@ jobs:
       - name: Publish changed libraries to NPM
         if: steps.changed-libs.outputs.changed_libraries != ''
         run: node .scripts/publish-changed-libs.js
-
