@@ -31,7 +31,7 @@ jobs:
         run: |
           npm ci
           npm install -g @angular/cli
-          
+
       - name: Configure Git user
         run: |
           git config --global user.name "GitHub Actions"
@@ -59,4 +59,3 @@ jobs:
       - name: Publish changed libraries to NPM
         if: steps.changed-libs.outputs.changed_libraries != ''
         run: node .scripts/publish-changed-libs.js
-
