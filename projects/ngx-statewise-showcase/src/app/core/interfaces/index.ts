@@ -1,0 +1,1 @@
+export type { NavigationItem } from "./navigationItem.interface";
