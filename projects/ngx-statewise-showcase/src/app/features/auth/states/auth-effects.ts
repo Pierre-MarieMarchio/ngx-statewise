@@ -3,7 +3,7 @@ import { firstValueFrom } from 'rxjs';
 import {
   authenticateActions,
   loginActions,
-  logoutAction,
+  logoutActions,
 } from './auth-actions';
 import { Router } from '@angular/router';
 import { createEffect } from 'ngx-statewise';
@@ -12,8 +12,8 @@ import {
   AuthTokenService,
   AuthTokenHelperService,
 } from '../services';
-import { MatDialog } from '@angular/material/dialog';
 import { AuthNotificationService } from '../services/auth-notification.service';
+import { TokenService } from '@app/core/services/token.service';
 
 @Injectable({
   providedIn: 'root',
@@ -23,15 +23,18 @@ export class AuthEffects {
   private readonly authToken = inject(AuthTokenService);
   private readonly authTokenHelper = inject(AuthTokenHelperService);
   private readonly router = inject(Router);
-  private readonly dialog = inject(MatDialog);
   private readonly notification = inject(AuthNotificationService);
+  private readonly tokenFactory = inject(TokenService);
 
   public readonly loginRequestEffect = createEffect(
     loginActions.request,
     async (payload) => {
       try {
         const res = await firstValueFrom(this.authRepository.login(payload));
+
         this.authToken.setAccessToken(res.body?.accessToken!);
+        this.authToken.setRefreshToken(this.tokenFactory.generateJWT());
+
         return loginActions.success(res.body!);
       } catch {
         return loginActions.failure();
@@ -58,6 +61,11 @@ export class AuthEffects {
     authenticateActions.request,
     async () => {
       const accessToken = this.authToken.getAccessToken();
+      const refreshToken = this.authToken.getRefreshToken();
+
+      if (!refreshToken) {
+        return authenticateActions.failure();
+      }
 
       if (!accessToken) {
         try {
@@ -95,13 +103,42 @@ export class AuthEffects {
       if (this.router.url !== '/') {
         this.notification.AuthenticateFailure();
       }
-      return logoutAction.action();
+
+      const refreshToken = this.authToken.getRefreshToken();
+      if (!refreshToken) {
+        return;
+      }
+
+      return logoutActions.request();
     }
   );
 
-  public readonly logoutEffect = createEffect(logoutAction.action, async () => {
-    await firstValueFrom(this.authRepository.logout());
-    this.authToken.clearAccessToken();
-    this.router.navigate(['/']);
-  });
+  public readonly logoutRequestEffect = createEffect(
+    logoutActions.request,
+    async () => {
+      try {
+        await firstValueFrom(this.authRepository.logout());
+        return logoutActions.success();
+      } catch (error) {
+        console.error('Authentication error:', error);
+        return logoutActions.failure();
+      }
+    }
+  );
+
+  public readonly logoutSuccessEffect = createEffect(
+    logoutActions.success,
+    async () => {
+      this.authToken.clearAccessToken();
+      this.authToken.clearRefreshToken();
+      this.router.navigate(['/']);
+    }
+  );
+
+  public readonly logoutFailureEffect = createEffect(
+    logoutActions.failure,
+    async () => {
+      this.notification.logoutFailure();
+    }
+  );
 }

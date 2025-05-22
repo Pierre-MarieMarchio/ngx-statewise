@@ -5,7 +5,7 @@ import { AuthStates } from './auth-states';
 import {
   authenticateActions,
   loginActions,
-  logoutAction,
+  logoutActions,
 } from './auth-actions';
 import { AuthUpdator } from './auth-updator';
 import { dispatch, dispatchAsync, registerLocalUpdator } from 'ngx-statewise';
@@ -24,7 +24,7 @@ export class AuthManager implements IAuthManager {
   public readonly user = this.authStates.user;
   public readonly isLoggedIn = this.authStates.isLoggedIn;
   public readonly isLoading = this.authStates.isLoading;
-  public readonly asError = this.authStates.asError;
+
 
   public async login(credential: LoginSubmit): Promise<void> {
     await dispatchAsync(loginActions.request(credential), this);
@@ -39,6 +39,6 @@ export class AuthManager implements IAuthManager {
   }
 
   public logout(): void {
-    dispatch(logoutAction.action(), this);
+    dispatch(logoutActions.request(), this);
   }
 }

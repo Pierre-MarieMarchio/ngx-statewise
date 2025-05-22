@@ -3,7 +3,6 @@ import { User } from '../interfaces/auth-user.interface';
 import { LoginSubmit } from '../interfaces/form-submits.interfaces';
 import {
   defineActionsGroup,
-  defineSingleAction,
   emptyPayload,
   payload,
 } from 'ngx-statewise';
@@ -26,4 +25,11 @@ export const authenticateActions = defineActionsGroup({
   },
 });
 
-export const logoutAction = defineSingleAction('LOGOUT', emptyPayload);
+export const logoutActions = defineActionsGroup({
+  source: 'LOGOUT',
+  events: {
+    request: emptyPayload,
+    success: emptyPayload,
+    failure: emptyPayload,
+  },
+});

@@ -6,7 +6,7 @@ import { User } from '../interfaces/auth-user.interface';
 import {
   authenticateActions,
   loginActions,
-  logoutAction,
+  logoutActions,
 } from './auth-actions';
 
 @Injectable({
@@ -18,8 +18,8 @@ export class AuthUpdator implements IUpdator<AuthStates> {
   public readonly updators: UpdatorRegistry<AuthStates> = {
     [ofType(loginActions.request)]: (state) => {
       state.isLoading.set(true);
-      state.asError.set(false);
     },
+
     [ofType(loginActions.success)]: (state, payload: LoginResponses) => {
       state.user.set({
         userId: payload.userId,
@@ -29,29 +29,34 @@ export class AuthUpdator implements IUpdator<AuthStates> {
       state.isLoggedIn.set(true);
       state.isLoading.set(false);
     },
+
     [ofType(loginActions.failure)]: (state) => {
       state.user.set(null);
       state.isLoggedIn.set(false);
-      state.asError.set(true);
       state.isLoading.set(false);
     },
 
     [ofType(authenticateActions.request)]: (state) => {
       state.isLoading.set(true);
-      state.asError.set(false);
     },
+
     [ofType(authenticateActions.success)]: (state, payload: User) => {
       state.user.set(payload);
       state.isLoggedIn.set(true);
       state.isLoading.set(false);
     },
+
     [ofType(authenticateActions.failure)]: (state) => {
       state.isLoading.set(false);
     },
-    [ofType(logoutAction.action)]: (state) => {
+
+    [ofType(logoutActions.request)]: (state) => {
+      state.isLoading.set(true);
+    },
+
+    [ofType(logoutActions.success)]: (state) => {
       state.user.set(null);
       state.isLoggedIn.set(false);
-      state.asError.set(false);
       state.isLoading.set(false);
     },
   };

@@ -37,4 +37,12 @@ export class AuthNotificationService {
       verticalPosition: this.verticalPosition,
     });
   }
+
+  logoutFailure() {
+    this.snackBar.open('Logout failed please retry :', 'Close', {
+      duration: 3000,
+      horizontalPosition: this.horizontalPosition,
+      verticalPosition: this.verticalPosition,
+    });
+  }
 }

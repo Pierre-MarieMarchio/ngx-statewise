@@ -4,7 +4,7 @@
       <a class="side-nav-logo" mat-item [routerLink]="''">
         <img class="side-nav-logo-img" src="icon-logo.png" alt="" />
       </a>
-      @if(logedInDisplay()) { @for (item of navigationItem; track $index) {
+      @if(logedInDisplay()) { @for (item of navigationitems; track $index) {
       <a
         mat-item
         class="nav-groupe-icon color-secondary"

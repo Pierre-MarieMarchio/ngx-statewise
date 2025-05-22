@@ -16,13 +16,14 @@ import { provideEffects, provideStatewise } from 'ngx-statewise';
 import { AuthEffects } from './features/auth/states/auth-effects';
 import { AuthManager } from './features/auth/states/auth-manager';
 import { AUTH_MANAGER } from '@shared/token-provider/auth-manager/auth-manager.token';
+import { fakeApiInterceptor } from './core/fake-api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(withFetch(), withInterceptors([accessTokenInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([fakeApiInterceptor, accessTokenInterceptor])),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-
+    
     provideStatewise(),
     provideEffects([AuthEffects]),
 

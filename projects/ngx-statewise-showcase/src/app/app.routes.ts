@@ -2,10 +2,11 @@ import { Routes } from '@angular/router';
 import { LandingPageComponent } from './features/landing-page/landing-page.component';
 import { LoginPageComponent } from './features/auth/pages/login-page.component';
 import { loggedInGuard } from './features/auth/guards/logged-in.guard';
-import { HomeComponent } from './features/dashbord/pages/home/home.component';
-import { Test1Component } from './features/dashbord/pages/test1/test1.component';
-import { Test2Component } from './features/dashbord/pages/test2/test2.component';
+import { HomeComponent } from './features/dashbord/pages/dashbord.component';
 import { loggedOutGuard } from './features/auth/guards/logged-out.guard';
+import { TaskPageComponent } from './features/tasks/pages/task-page.component';
+import { ProjectsPageComponent } from './features/projects/pages/projects-page.component';
+import { TeamsPageComponent } from './features/teams/pages/teams-page.component';
 
 export const routes: Routes = [
   {
@@ -27,20 +28,20 @@ export const routes: Routes = [
     canActivate: [loggedOutGuard],
   },
   {
-    path: 'test1',
-    component: Test1Component,
+    path: 'task',
+    component: TaskPageComponent,
     title: 'TodoList - Commencez à cocher',
     canActivate: [loggedOutGuard],
   },
   {
-    path: 'test2',
-    component: Test2Component,
+    path: 'project',
+    component: ProjectsPageComponent,
     title: 'TodoList - Commencez à cocher',
     canActivate: [loggedOutGuard],
   },
   {
-    path: 'test3',
-    component: Test2Component,
+    path: 'team',
+    component: TeamsPageComponent,
     title: 'TodoList - Commencez à cocher',
     canActivate: [loggedOutGuard],
   },

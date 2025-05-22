@@ -6,7 +6,6 @@ export interface IAuthManager {
   user: Signal<User | null>;
   isLoggedIn: Signal<boolean>;
   isLoading: Signal<boolean>;
-  asError: Signal<boolean>;
 
   login(credential: LoginSubmit): Promise<void>;
   authenticate(): Promise<void>;

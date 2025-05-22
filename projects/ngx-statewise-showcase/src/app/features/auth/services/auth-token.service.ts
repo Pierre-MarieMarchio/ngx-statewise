@@ -1,25 +1,37 @@
 import { HttpResponse } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { LocalStorageService } from '@app/core/services/local-storage.service';
-import { AuthRepositoryService } from './auth-repository.service';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthTokenService extends LocalStorageService {
-  private readonly ACCESS_TOKEN_KEY = 'access_token';
-  private readonly authRepository = inject(AuthRepositoryService);
+
+
 
   public setAccessToken(value: string): void {
-    this.setItem(this.ACCESS_TOKEN_KEY, value);
+    this.setItem(environment.ACCESS_TOKEN_KEY, value);
   }
 
   public getAccessToken(): string {
-    return this.getItem(this.ACCESS_TOKEN_KEY) as string;
+    return this.getItem(environment.ACCESS_TOKEN_KEY) as string;
   }
 
   public clearAccessToken(): void {
-    this.removeItem(this.ACCESS_TOKEN_KEY);
+    this.removeItem(environment.ACCESS_TOKEN_KEY);
+  }
+
+  public setRefreshToken(value: string): void {
+    this.setItem(environment.REFRESH_TOKEN_KEY, value);
+  }
+
+  public getRefreshToken(): string {
+    return this.getItem(environment.REFRESH_TOKEN_KEY) as string;
+  }
+
+  public clearRefreshToken(): void {
+    this.removeItem(environment.REFRESH_TOKEN_KEY);
   }
 
   public setNewAccessTokenFromResponse(res: HttpResponse<any>): string {
@@ -29,6 +41,4 @@ export class AuthTokenService extends LocalStorageService {
     }
     return newToken;
   }
-
-
 }
