@@ -1,0 +1,4 @@
+export const environment = {
+  PRODUCTION: "BOOLEAN",
+  API_BASE_URL: 'YOUR_API_BASE_URL',
+};

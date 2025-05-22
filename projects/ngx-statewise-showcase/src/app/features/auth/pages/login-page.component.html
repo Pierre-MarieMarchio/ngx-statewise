@@ -1,0 +1,5 @@
+@if (this.authManager.isLoading()) {
+<mat-progress-bar class="loader" mode="indeterminate"></mat-progress-bar>
+}
+
+<app-login-form class="d-flex center" (formSubmit)="onFormSubmit($event)" />

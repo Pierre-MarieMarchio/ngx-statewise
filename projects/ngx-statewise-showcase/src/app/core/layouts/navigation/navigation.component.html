@@ -1,0 +1,33 @@
+<div class="side-nav-container">
+  <div class="side-nav-content">
+    <mat-nav-list>
+      <a class="side-nav-logo" mat-item [routerLink]="''">
+        <img class="side-nav-logo-img" src="icon-logo.png" alt="" />
+      </a>
+      @if(logedInDisplay()) { @for (item of navigationitems; track $index) {
+      <a
+        mat-item
+        class="nav-groupe-icon color-secondary"
+        [routerLink]="item.route"
+        routerLinkActive="active-link"
+      >
+        <mat-icon class="nav-icon icon-outlined" matListItemIcon>
+          {{ item.icon }}
+        </mat-icon>
+        <span>{{ item.label }}</span>
+      </a>
+      } }
+    </mat-nav-list>
+  </div>
+  <div class="footer-toggles">
+    @if(logedInDisplay()) {
+    <div class="footer-groupe-button color-secondary">
+      <button (click)="handleLogout()" disableRipple="true" class=".no-hover-button" mat-icon-button>
+        <mat-icon class="footer-icon color-secondary icon-outlined"> logout </mat-icon>
+      </button>
+      <span>logout</span>
+    </div>
+    }
+    <dm-toggle />
+  </div>
+</div>
