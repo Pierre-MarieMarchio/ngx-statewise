@@ -11,19 +11,22 @@ import {
   withInterceptors,
 } from '@angular/common/http';
 import { routes } from './app.routes';
-import { accessTokenInterceptor } from './features/auth/interceptors/access-token.interceptor';
+import { accessTokenInterceptor } from './feature/auth/interceptors/access-token.interceptor';
 import { provideEffects, provideStatewise } from 'ngx-statewise';
-import { AuthEffects } from './features/auth/states/auth-effects';
-import { AuthManager } from './features/auth/states/auth-manager';
-import { AUTH_MANAGER } from '@shared/token-provider/auth-manager/auth-manager.token';
+import { AuthEffects } from './feature/auth/states/auth/auth-effects';
+import { AuthManager } from './feature/auth/states/auth/auth-manager';
+import { AUTH_MANAGER } from '@shared/app-common/tokens/auth-manager/auth-manager.token';
 import { fakeApiInterceptor } from './core/fake-api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(withFetch(), withInterceptors([fakeApiInterceptor, accessTokenInterceptor])),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([fakeApiInterceptor, accessTokenInterceptor])
+    ),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    
+
     provideStatewise(),
     provideEffects([AuthEffects]),
 

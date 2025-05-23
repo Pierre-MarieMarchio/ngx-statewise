@@ -146,12 +146,10 @@ class UsersDB {
 }
 
 export class TasksDB {
-  private findAll(): Task[] {
-    return TASKS;
-  }
+  private tasks: Task[] = [...TASKS];
 
   findByIdForUser(taskId: string, user: User): Task | undefined {
-    const task = this.findAll().find((t) => t.id === taskId);
+    const task = this.tasks.find((t) => t.id === taskId);
     if (!task) return undefined;
     if (user.role === 'admin' || task.organizationId === user.organizationId)
       return task;
@@ -159,26 +157,61 @@ export class TasksDB {
   }
 
   findByProjectIdForUser(projectId: string, user: User): Task[] {
-    if (user.role === 'admin') {
-      return this.findAll().filter((task) => task.projectId === projectId);
-    }
-    return this.findAll().filter(
+    return this.tasks.filter(
       (task) =>
         task.projectId === projectId &&
-        task.organizationId === user.organizationId
+        (user.role === 'admin' || task.organizationId === user.organizationId)
     );
   }
 
   findByOrganizationId(organizationId: string): Task[] {
-    return this.findAll().filter(
-      (task) => task.organizationId === organizationId
-    );
+    return this.tasks.filter((task) => task.organizationId === organizationId);
   }
 
   findByUserOrganization(user: User): Task[] {
-    if (user.role === 'admin') return this.findAll();
-    return this.findAll().filter(
+    if (user.role === 'admin') return this.tasks;
+    return this.tasks.filter(
       (task) => task.organizationId === user.organizationId
     );
+  }
+
+  create(task: Task, user: User): Task | undefined {
+    if (user.role !== 'admin' && task.organizationId !== user.organizationId)
+      return undefined;
+    this.tasks.push(task);
+    return task;
+  }
+
+  update(taskId: string, data: Partial<Task>, user: User): Task | undefined {
+    const index = this.tasks.findIndex((t) => t.id === taskId);
+    if (index === -1) return undefined;
+
+    const existingTask = this.tasks[index];
+    if (
+      user.role !== 'admin' &&
+      existingTask.organizationId !== user.organizationId
+    )
+      return undefined;
+
+    const updatedTask = {
+      ...existingTask,
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.tasks[index] = updatedTask;
+    return updatedTask;
+  }
+
+  delete(taskId: string, user: User): boolean {
+    const index = this.tasks.findIndex((t) => t.id === taskId);
+    if (index === -1) return false;
+
+    const task = this.tasks[index];
+    if (user.role !== 'admin' && task.organizationId !== user.organizationId)
+      return false;
+
+    this.tasks.splice(index, 1);
+    return true;
   }
 }

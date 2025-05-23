@@ -1,12 +1,12 @@
 import { Routes } from '@angular/router';
-import { LandingPageComponent } from './features/landing-page/landing-page.component';
-import { LoginPageComponent } from './features/auth/pages/login-page.component';
-import { loggedInGuard } from './features/auth/guards/logged-in.guard';
-import { HomeComponent } from './features/dashbord/pages/dashbord.component';
-import { loggedOutGuard } from './features/auth/guards/logged-out.guard';
-import { TaskPageComponent } from './features/tasks/pages/task-page.component';
-import { ProjectsPageComponent } from './features/projects/pages/projects-page.component';
-import { TeamsPageComponent } from './features/teams/pages/teams-page.component';
+import { LandingPageComponent } from './feature/landing-page/landing-page.component';
+import { LoginPageComponent } from './feature/auth/pages/login-page.component';
+import { loggedInGuard } from './feature/auth/guards/logged-in.guard';
+import { HomeComponent } from './feature/dashbord/pages/dashbord.component';
+import { loggedOutGuard } from './feature/auth/guards/logged-out.guard';
+import { TaskPageComponent } from './feature/project-management/pages/task-page/task-page.component';
+import { ProjectsPageComponent } from './feature/project-management/pages/project-pages/projects-page.component';
+import { TeamsPageComponent } from './feature/project-management/pages/team-page/teams-page.component';
 
 export const routes: Routes = [
   {

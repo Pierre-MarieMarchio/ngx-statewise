@@ -1,9 +1,11 @@
 import { Component, effect, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ThemeService } from './shared/dark-mode/theme.service';
-import { NavigationComponent } from './core/layouts/navigation/navigation.component';
+import { ThemeService } from './shared/reusable/dark-mode/theme.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { NavigationComponent } from './core/layouts';
+import { navigationItems } from './config/navigation.configuration';
+
 
 @Component({
   selector: 'app-root',
@@ -17,8 +19,9 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  title = 'Todo-App';
+  public readonly title = 'Ngx-statewise';
   private readonly themeService = inject(ThemeService);
+  public readonly navigationItems = navigationItems;
 
   constructor() {
     effect(() => {
