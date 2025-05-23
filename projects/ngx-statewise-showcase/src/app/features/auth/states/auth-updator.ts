@@ -25,6 +25,8 @@ export class AuthUpdator implements IUpdator<AuthStates> {
         userId: payload.userId,
         userName: payload.userName,
         email: payload.email,
+        role: payload.role,
+        organizationId: payload.organizationId,
       });
       state.isLoggedIn.set(true);
       state.isLoading.set(false);

@@ -5,7 +5,7 @@ import {
 } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 
-import { USERS } from './db.data';
+import {  User, USERS } from './db.data';
 
 type RequestHandlers = Record<
   string,
@@ -24,7 +24,7 @@ export class FakeApi {
         'http://localhost:8080/api/Auth/logout': () => this.handleLogout(),
         'http://localhost:8080/api/Auth/Authenticate': () =>
           this.handleAuthenticate(),
-      }
+      },
     };
 
     const { method, url } = this.request;
@@ -70,6 +70,8 @@ export class FakeApi {
     return this.respondSuccess({
       userId: user.id,
       username: user.username,
+      role: user.role,
+      organizationId: user.organizationId,
       email: user.email,
       accessToken: user.accessToken,
       expirationTime: 3600,
@@ -117,7 +119,7 @@ export class FakeApi {
 }
 
 class UsersDB {
-  findAll() {
+  private findAll() {
     return USERS;
   }
 
@@ -133,5 +135,12 @@ class UsersDB {
 
   findByRefreshToken(refreshToken: string) {
     return this.findAll().find((user) => user.refreshToken === refreshToken);
+  }
+
+  findByOrganizationId(user: User, organizationId: string): User[] {
+    if (user.role === 'admin') return this.findAll();
+    return this.findAll().filter(
+      (user) => user.organizationId === organizationId
+    );
   }
 }

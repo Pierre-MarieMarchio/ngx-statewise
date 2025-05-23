@@ -1,12 +1,8 @@
-export interface SignupResponses {
-  id: string;
-  email: string;
-  userName: string;
-}
-
 export interface LoginResponses {
   userId: string;
   userName: string;
+  role: string;
+  organizationId: string;
   email: string;
   accessToken: string;
   expirationTime: number;
