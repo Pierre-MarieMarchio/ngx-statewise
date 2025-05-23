@@ -5,7 +5,7 @@ import {
 } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 
-import {  User, USERS } from './db.data';
+import { Task, TASKS, User, USERS } from './db.data';
 
 type RequestHandlers = Record<
   string,
@@ -69,7 +69,7 @@ export class FakeApi {
 
     return this.respondSuccess({
       userId: user.id,
-      username: user.username,
+      userName: user.username,
       role: user.role,
       organizationId: user.organizationId,
       email: user.email,
@@ -141,6 +141,44 @@ class UsersDB {
     if (user.role === 'admin') return this.findAll();
     return this.findAll().filter(
       (user) => user.organizationId === organizationId
+    );
+  }
+}
+
+export class TasksDB {
+  private findAll(): Task[] {
+    return TASKS;
+  }
+
+  findByIdForUser(taskId: string, user: User): Task | undefined {
+    const task = this.findAll().find((t) => t.id === taskId);
+    if (!task) return undefined;
+    if (user.role === 'admin' || task.organizationId === user.organizationId)
+      return task;
+    return undefined;
+  }
+
+  findByProjectIdForUser(projectId: string, user: User): Task[] {
+    if (user.role === 'admin') {
+      return this.findAll().filter((task) => task.projectId === projectId);
+    }
+    return this.findAll().filter(
+      (task) =>
+        task.projectId === projectId &&
+        task.organizationId === user.organizationId
+    );
+  }
+
+  findByOrganizationId(organizationId: string): Task[] {
+    return this.findAll().filter(
+      (task) => task.organizationId === organizationId
+    );
+  }
+
+  findByUserOrganization(user: User): Task[] {
+    if (user.role === 'admin') return this.findAll();
+    return this.findAll().filter(
+      (task) => task.organizationId === user.organizationId
     );
   }
 }
