@@ -1,21 +1,21 @@
 import { inject, Injectable } from '@angular/core';
 import { IUpdator, ofType, UpdatorRegistry } from 'ngx-statewise';
-import { AuthStates } from './auth-states';
+import { AuthState } from './auth.state';
 import {
   loginActions,
   authenticateActions,
   logoutActions,
-} from './auth-actions';
+} from './auth.action';
 import { LoginResponses } from '../../models';
 import { User } from '@shared/app-common/models';
 
 @Injectable({
   providedIn: 'root',
 })
-export class AuthUpdator implements IUpdator<AuthStates> {
-  public readonly state = inject(AuthStates);
+export class AuthUpdator implements IUpdator<AuthState> {
+  public readonly state = inject(AuthState);
 
-  public readonly updators: UpdatorRegistry<AuthStates> = {
+  public readonly updators: UpdatorRegistry<AuthState> = {
     [ofType(loginActions.request)]: (state) => {
       state.isLoading.set(true);
     },

@@ -1,1 +1,1 @@
-export {AuthManager} from "./auth/auth-manager"
+export { AuthManager } from './auth/auth.manager';

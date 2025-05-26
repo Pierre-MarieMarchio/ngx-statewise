@@ -1,12 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { dispatch, dispatchAsync, registerLocalUpdator } from 'ngx-statewise';
-import { AuthStates } from './auth-states';
+import { AuthState } from './auth.state';
 import {
   authenticateActions,
   loginActions,
   logoutActions,
-} from './auth-actions';
-import { AuthUpdator } from './auth-updator';
+} from './auth.action';
+import { AuthUpdator } from './auth.updator';
 import { IAuthManager } from '@shared/app-common/tokens';
 import { LoginSubmit } from '../../models';
 
@@ -14,7 +14,7 @@ import { LoginSubmit } from '../../models';
   providedIn: 'root',
 })
 export class AuthManager implements IAuthManager {
-  private readonly authStates = inject(AuthStates);
+  private readonly authStates = inject(AuthState);
   private readonly authUpdator = inject(AuthUpdator);
 
   constructor() {

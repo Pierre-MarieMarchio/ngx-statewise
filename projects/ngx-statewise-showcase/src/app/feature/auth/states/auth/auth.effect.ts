@@ -4,7 +4,7 @@ import {
   authenticateActions,
   loginActions,
   logoutActions,
-} from './auth-actions';
+} from './auth.action';
 import { Router } from '@angular/router';
 import { createEffect } from 'ngx-statewise';
 import { TokenService } from '@app/core/services/token.service';
@@ -18,7 +18,7 @@ import {
 @Injectable({
   providedIn: 'root',
 })
-export class AuthEffects {
+export class AuthEffect {
   private readonly authRepository = inject(AuthRepositoryService);
   private readonly authToken = inject(AuthTokenService);
   private readonly authTokenHelper = inject(AuthTokenHelperService);
