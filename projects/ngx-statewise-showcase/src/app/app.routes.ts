@@ -12,37 +12,37 @@ export const routes: Routes = [
   {
     path: '',
     component: LandingPageComponent,
-    title: 'TodoList - Commencez à cocher',
+    title: 'Ngx-Statewise',
     canActivate: [loggedInGuard],
   },
   {
     path: 'login',
     component: LoginPageComponent,
-    title: 'TodoList - Commencez à cocher',
+    title: 'Ngx-Statewise',
     canActivate: [loggedInGuard],
   },
   {
     path: 'home',
     component: HomeComponent,
-    title: 'TodoList - Commencez à cocher',
+    title: 'Ngx-Statewise',
     canActivate: [loggedOutGuard],
   },
   {
     path: 'task',
     component: TaskPageComponent,
-    title: 'TodoList - Commencez à cocher',
+    title: 'Ngx-Statewise',
     canActivate: [loggedOutGuard],
   },
   {
     path: 'project',
     component: ProjectsPageComponent,
-    title: 'TodoList - Commencez à cocher',
+    title: 'Ngx-Statewise',
     canActivate: [loggedOutGuard],
   },
   {
     path: 'team',
     component: TeamsPageComponent,
-    title: 'TodoList - Commencez à cocher',
+    title: 'Ngx-Statewise',
     canActivate: [loggedOutGuard],
   },
 ];
