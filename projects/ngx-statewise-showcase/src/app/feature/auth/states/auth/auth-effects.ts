@@ -60,8 +60,6 @@ export class AuthEffects {
   public readonly authenticateRequestEffect = createEffect(
     authenticateActions.request,
     async () => {
-      console.log("auth");
-      
       const accessToken = this.authToken.getAccessToken();
       const refreshToken = this.authToken.getRefreshToken();
 
@@ -71,7 +69,6 @@ export class AuthEffects {
       }
 
       if (!accessToken) {
-        console.log('!acces to ');
         try {
           const res = await firstValueFrom(this.authRepository.authenticate());
           const newToken = this.authToken.setNewAccessTokenFromResponse(res);
@@ -87,12 +84,10 @@ export class AuthEffects {
           return authenticateActions.failure();
         }
       } else {
-        console.log('acc to ');
         const decoded = this.authTokenHelper.decode(accessToken);
         const now = Math.floor(Date.now() / 1000);
 
         if (!decoded || (decoded.exp && decoded.exp < now)) {
-          console.log(decoded, decoded!.exp, now );
           return authenticateActions.failure();
         }
 
