@@ -5,13 +5,12 @@ import { environment } from '../../../../environments/environment';
 import { User } from '@shared/app-common/models/auth-user.model';
 import { Task } from '../models/task.model';
 
-
 @Injectable({
   providedIn: 'root',
 })
 export class TaskRepositoryService {
   private readonly http = inject(HttpClient);
-  private readonly API_BASE_URL = `${environment.API_BASE_URL}/tasks`;
+  private readonly API_BASE_URL = `${environment.API_BASE_URL}/Task`;
 
   getAll(user: User): Observable<Task[]> {
     const params = this.buildAccessParams(user);
@@ -43,9 +42,10 @@ export class TaskRepositoryService {
 
   private buildAccessParams(user: User): HttpParams {
     let params = new HttpParams();
-    if (user.role !== 'admin') {
-      params = params.set('organizationId', user.organizationId);
-    }
+
+    params = params.set('userid', user.userId);
+    console.log('params', params);
+
     return params;
   }
 }

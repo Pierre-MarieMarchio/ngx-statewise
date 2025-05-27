@@ -24,15 +24,27 @@ export const USERS: User[] = [
   },
   {
     id: '8e85a3a0-1640-42df-0943-08dd7cc96d0f',
-    username: 'user',
-    email: 'user@user',
+    username: 'user1',
+    email: 'user1@user',
     role: 'contributor',
-    password: 'user',
+    password: 'user1',
     organizationId: 'org-1',
     accessToken:
       'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjhlODVhM2EwLTE2NDAtNDJkZi0wOTQzLTA4ZGQ3Y2M5NmQwZiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJ1c2VyIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoidXNlckB1c2VyIiwiQXNwTmV0LklkZW50aXR5LlNlY3VyaXR5U3RhbXAiOiJVR1BCNVlTUFdDU09XVkxVR1hDRFJSR1lNRFFPRkI2WCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6ImNvbnRyaWJ1dG9yIiwib3JnYW5pemF0aW9uSWQiOiJvcmctMSIsImV4cCI6OTk0Nzk5NjYxMSwiYXVkIjoiQ29yZUlkZW50aXR5VXNlciIsImlzcyI6IkNvcmVJZGVudGl0eSJ9.X2e5gSwAVp0J-qhiI8i-ask3VR9uffrYka3GmROAev0',
     refreshToken:
       'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjhlODVhM2EwLTE2NDAtNDJkZi0wOTQzLTA4ZGQ3Y2M5NmQwZiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJ1c2VyIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoidXNlckB1c2VyIiwiQXNwTmV0LklkZW50aXR5LlNlY3VyaXR5U3RhbXAiOiJVR1BCNVlTUFdDU09XVkxVR1hDRFJSR1lNRFFPRkI2QSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6ImNvbnRyaWJ1dG9yIiwib3JnYW5pemF0aW9uSWQiOiJvcmctMSIsImV4cCI6OTc0Nzk5NjYxMSwiYXVkIjoiQ29yZUlkZW50aXR5VXNlciIsImlzcyI6IkNvcmVJZGVudGl0eSJ9.C09x1Yd8lxL5nEFZkh8_4VMfEpCr9PRKL4NgGU-xi6I',
+  },
+  {
+    id: '7e85a3a0-1640-42df-0943-08dd7cc96d0f',
+    username: 'user2',
+    email: 'user2@user',
+    role: 'contributor',
+    password: 'user2',
+    organizationId: 'org-2',
+    accessToken:
+      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjdlODVhM2EwLTE2NDAtNDJkZi0wOTQzLTA4ZGQ3Y2M5NmQwZiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJ1c2VyIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoidXNlckB1c2VyIiwiQXNwTmV0LklkZW50aXR5LlNlY3VyaXR5U3RhbXAiOiJVR1BCNVlTUFdDU09XVkxVR1hDRFJSR1lNRFFPRkI2WCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6ImNvbnRyaWJ1dG9yIiwib3JnYW5pemF0aW9uSWQiOiJvcmctMiIsImV4cCI6OTk0Nzk5NjYxMSwiYXVkIjoiQ29yZUlkZW50aXR5VXNlciIsImlzcyI6IkNvcmVJZGVudGl0eSJ9.hNvWWMsq_RfCEc2K1dF-U9dFkrs7oCpboJj6hiaUlME',
+    refreshToken:
+      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjdlODVhM2EwLTE2NDAtNDJkZi0wOTQzLTA4ZGQ3Y2M5NmQwZiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJ1c2VyIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoidXNlckB1c2VyIiwiQXNwTmV0LklkZW50aXR5LlNlY3VyaXR5U3RhbXAiOiJVR1BCNVlTUFdDU09XVkxVR1hDRFJSR1lNRFFPRkI2QSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6ImNvbnRyaWJ1dG9yIiwib3JnYW5pemF0aW9uSWQiOiJvcmctMiIsImV4cCI6OTc0Nzk5NjYxMSwiYXVkIjoiQ29yZUlkZW50aXR5VXNlciIsImlzcyI6IkNvcmVJZGVudGl0eSJ9.-mBw5R_PyoS2bQFcRCbFWcKrGOFGqFwivONoONKoyX4',
   },
 ];
 
@@ -114,6 +126,32 @@ export const TASKS: Task[] = [
       '9e85a3a0-1640-42df-0943-08dd7cc96d0f',
       '8e85a3a0-1640-42df-0943-08dd7cc96d0f',
     ],
+    dueDate: '2025-05-25T16:30:00.000Z',
+    priority: 'high',
+    createdAt: '2025-05-19T08:15:00.000Z',
+    updatedAt: '2025-05-22T10:00:00.000Z',
+  },
+  {
+    id: 'task-6',
+    projectId: 'project-3',
+    organizationId: 'org-2',
+    title: 'Create mocks for json-server',
+    description: 'Setup db.json with sample projects, tasks, and users.',
+    status: 'in-progress',
+    assignedUserIds: ['7e85a3a0-1640-42df-0943-08dd7cc96d0f'],
+    dueDate: '2025-05-25T16:30:00.000Z',
+    priority: 'high',
+    createdAt: '2025-05-19T08:15:00.000Z',
+    updatedAt: '2025-05-22T10:00:00.000Z',
+  },
+  {
+    id: 'task-7',
+    projectId: 'project-3',
+    organizationId: 'org-2',
+    title: 'Add error handling in ProjectService',
+    description: 'Setup db.json with sample projects, tasks, and users.',
+    status: 'in-progress',
+    assignedUserIds: ['7e85a3a0-1640-42df-0943-08dd7cc96d0f'],
     dueDate: '2025-05-25T16:30:00.000Z',
     priority: 'high',
     createdAt: '2025-05-19T08:15:00.000Z',

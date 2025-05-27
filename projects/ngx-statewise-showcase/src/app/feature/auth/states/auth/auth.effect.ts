@@ -14,6 +14,7 @@ import {
   AuthTokenHelperService,
   AuthNotificationService,
 } from '../../services';
+import { TASK_MANAGER } from '@shared/app-common/tokens/task-manager/task-manager.token';
 
 @Injectable({
   providedIn: 'root',
@@ -25,6 +26,8 @@ export class AuthEffect {
   private readonly router = inject(Router);
   private readonly notification = inject(AuthNotificationService);
   private readonly tokenFactory = inject(TokenService);
+
+  private readonly taskManager = inject(TASK_MANAGER);
 
   public readonly loginRequestEffect = createEffect(
     loginActions.request,
@@ -118,7 +121,11 @@ export class AuthEffect {
     logoutActions.request,
     async () => {
       try {
-        await firstValueFrom(this.authRepository.logout());
+        await Promise.all([
+          this.taskManager.reset(),
+          firstValueFrom(this.authRepository.logout()),
+        ]);
+
         return logoutActions.success();
       } catch (error) {
         console.error('Authentication error:', error);
@@ -129,16 +136,17 @@ export class AuthEffect {
 
   public readonly logoutSuccessEffect = createEffect(
     logoutActions.success,
-    async () => {
+    () => {
       this.authToken.clearAccessToken();
       this.authToken.clearRefreshToken();
+
       this.router.navigate(['/']);
     }
   );
 
   public readonly logoutFailureEffect = createEffect(
     logoutActions.failure,
-    async () => {
+    () => {
       this.notification.logoutFailure();
     }
   );

@@ -1,11 +1,10 @@
 .side-nav-container {
-  width: 10vw;
-  max-width: 110px;
-  min-width: 80px;
-  height: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  width: var(--ma-variable);
+  height: 100%;
   border-right: 1px solid #232125;
   
   .side-nav-content {

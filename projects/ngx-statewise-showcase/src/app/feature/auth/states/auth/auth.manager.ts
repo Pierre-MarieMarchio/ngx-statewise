@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { dispatch, dispatchAsync, registerLocalUpdator } from 'ngx-statewise';
 import { AuthState } from './auth.state';
 import {
@@ -21,9 +21,9 @@ export class AuthManager implements IAuthManager {
     registerLocalUpdator(this, this.authUpdator);
   }
 
-  public readonly user = this.authStates.user;
-  public readonly isLoggedIn = this.authStates.isLoggedIn;
-  public readonly isLoading = this.authStates.isLoading;
+  public readonly user = computed(() => this.authStates.user());
+  public readonly isLoggedIn = computed(() => this.authStates.isLoggedIn());
+  public readonly isLoading = computed(() => this.authStates.isLoading());
 
   public async login(credential: LoginSubmit): Promise<void> {
     await dispatchAsync(loginActions.request(credential), this);

@@ -14,6 +14,7 @@ type RequestHandlers = Record<
 
 export class FakeApi {
   private readonly usersDB = new UsersDB();
+  private readonly taskDB = new TaskDB();
 
   constructor(private readonly request: HttpRequest<Record<string, unknown>>) {}
 
@@ -24,6 +25,9 @@ export class FakeApi {
         'http://localhost:8080/api/Auth/logout': () => this.handleLogout(),
         'http://localhost:8080/api/Auth/Authenticate': () =>
           this.handleAuthenticate(),
+      },
+      GET: {
+        'http://localhost:8080/api/Task': () => this.handleGetAllTask(),
       },
     };
 
@@ -98,6 +102,18 @@ export class FakeApi {
     return this.respondSuccess({});
   }
 
+  private handleGetAllTask(): HttpResponse<unknown> {
+    const userId = this.request.params.get('userid');
+
+    if (!userId) return this.respond400Error('userId is missing');
+    const user = this.usersDB.findByUserId(userId)
+
+    if (!user) return this.respond400Error('user does not exist');
+    const tasks = this.taskDB.findByUserOrganization(user)
+
+    return this.respondSuccess(tasks);
+  }
+
   private respondSuccess(body: unknown): HttpResponse<unknown> {
     const { headers, url } = this.request;
     return new HttpResponse({ status: 200, headers, url, body });
@@ -119,33 +135,35 @@ export class FakeApi {
 }
 
 class UsersDB {
-  private findAll() {
-    return USERS;
-  }
+  private users: User[] = [...USERS]
 
   findByUsernameAndPassword(email: string, password: string) {
-    return this.findAll().find(
+    return this.users.find(
       (user) => user.email === email && user.password === password
     );
   }
 
   findByAccessToken(accessToken: string) {
-    return this.findAll().find((user) => user.accessToken === accessToken);
+    return this.users.find((user) => user.accessToken === accessToken);
   }
 
   findByRefreshToken(refreshToken: string) {
-    return this.findAll().find((user) => user.refreshToken === refreshToken);
+    return this.users.find((user) => user.refreshToken === refreshToken);
   }
 
   findByOrganizationId(user: User, organizationId: string): User[] {
-    if (user.role === 'admin') return this.findAll();
-    return this.findAll().filter(
+    if (user.role === 'admin') return this.users;
+    return this.users.filter(
       (user) => user.organizationId === organizationId
     );
   }
+
+  findByUserId(id: string) {
+    return this.users.find((user) => user.id === id);
+  }
 }
 
-export class TasksDB {
+export class TaskDB {
   private tasks: Task[] = [...TASKS];
 
   findByIdForUser(taskId: string, user: User): Task | undefined {
