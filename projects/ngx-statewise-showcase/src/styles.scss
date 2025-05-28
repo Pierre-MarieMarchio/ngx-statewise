@@ -1,5 +1,24 @@
 @use "./assets/fonts";
 @use "./assets/themes";
-@use "./assets/layouts";
 @use "./assets/styles";
 
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.page {
+  margin-top: auto;
+  margin-bottom: auto;
+  width: 100%;
+  height: 100%;
+}
+
+:root {
+  --nav-width: clamp(80px, 10vw, 110px);
+  --hauteur-restante: calc(100vh - var(--nav-width));
+}
