@@ -1,9 +1,13 @@
 <mat-sidenav-container>
-  <mat-sidenav #sidenav fixedInViewport="fixed" position="end" mode="over"  class="side-panel-content">
-
-    
+  <mat-sidenav
+    #sidenav
+    fixedInViewport="fixed"
+    position="end"
+    mode="over"
+    class="side-panel-content"
+  >
+    <ng-content select="[slot=panel-content]"></ng-content>
   </mat-sidenav>
-
   <mat-sidenav-content class="view-content">
     <ng-content></ng-content>
   </mat-sidenav-content>

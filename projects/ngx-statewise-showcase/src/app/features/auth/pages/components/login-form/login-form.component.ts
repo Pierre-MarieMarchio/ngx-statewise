@@ -16,8 +16,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { LoginSubmit } from '@app/feature/auth/models';
-
+import { LoginSubmit } from '@app/features/auth/models';
 
 @Component({
   selector: 'app-login-form',

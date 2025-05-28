@@ -1,10 +1,13 @@
 .side-panel-content {
   width: 60vw !important;
+  border-radius: 0px !important;
+  padding: 1rem;
 }
 
 .view-content {
+  box-sizing: border-box;
   height: 100vh;
+  padding: 1rem;
   overflow-y: auto;
   overflow-x: auto;
 }
-

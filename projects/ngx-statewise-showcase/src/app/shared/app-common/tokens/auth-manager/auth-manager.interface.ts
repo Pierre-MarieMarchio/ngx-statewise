@@ -1,5 +1,5 @@
 import { Signal } from '@angular/core';
-import { LoginSubmit } from '../../../../feature/auth/models/form-submits.model';
+import { LoginSubmit } from '../../../../features/auth/models/form-submits.model';
 import { User } from '../../models/auth-user.model';
 
 export interface IAuthManager {

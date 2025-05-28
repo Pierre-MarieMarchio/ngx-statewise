@@ -10,9 +10,6 @@ import { LoginSubmit } from '../models';
   imports: [LoginFormComponent, MatProgressBarModule],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',
-  host: {
-    class: 'mt-20',
-  },
 })
 export class LoginPageComponent {
   public readonly authManager = inject(AuthManager);
