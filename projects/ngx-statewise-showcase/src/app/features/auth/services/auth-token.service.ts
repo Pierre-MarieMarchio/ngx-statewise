@@ -1,14 +1,12 @@
 import { HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { LocalStorageService } from '@app/core/services/local-storage.service';
 import { environment } from '../../../../environments/environment';
+import { LocalStorageService } from '@app/core/services';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthTokenService extends LocalStorageService {
-
-
 
   public setAccessToken(value: string): void {
     this.setItem(environment.ACCESS_TOKEN_KEY, value);

@@ -1,0 +1,20 @@
+.mat-mdc-row.mdc-data-table__row {
+  background-color: var(--mat-sys-background);
+  color: var(--color-secondary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+  &:hover {
+    color: var(--mat-sys-on-background);
+    background-color: var(--mat-table-row-item-hover-state-layer-color);
+  }
+
+  &:active {
+    color: var(--mat-sys-on-background);
+    background-color: var(--mat-table-row-item-hover-state-layer-color);
+  }
+  
+
+  &.clickable-row {
+    cursor: pointer;
+  }
+}

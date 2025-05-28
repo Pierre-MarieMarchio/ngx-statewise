@@ -1,0 +1,20 @@
+.side-panel-content {
+  width: 60vw !important;
+  border-radius: 0px !important;
+  padding: 1rem;
+}
+
+.view-content {
+  box-sizing: border-box;
+  height: 100vh;
+  padding: 1rem;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+:host-context(.light) .side-panel-container,
+:host-context(.dark) .side-panel-container {
+  transition: background-color 0.5s ease, color 0.5s ease !important;
+  background-color: var(--mat-sys-background);
+  color: var(--mat-sys-on-background);
+}

@@ -1,3 +1,4 @@
-export * from "./auth-repository.service";
-export * from './auth-token-helper.service';
-export * from './auth-token.service';
+export {AuthRepositoryService} from "./auth-repository.service";
+export {AuthTokenHelperService} from './auth-token-helper.service';
+export {AuthTokenService} from './auth-token.service';
+export {AuthNotificationService} from './auth-notification.service';
