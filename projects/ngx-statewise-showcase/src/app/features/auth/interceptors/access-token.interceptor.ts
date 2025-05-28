@@ -1,9 +1,8 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { AuthTokenService } from '../services/auth-token.service';
 import { catchError, EMPTY, from, switchMap, throwError } from 'rxjs';
-
-import { AuthManager } from '../states/auth-manager';
+import { AuthTokenService } from '../services';
+import { AuthManager } from '../states';
 
 export const accessTokenInterceptor: HttpInterceptorFn = (req, next) => {
   const authManager = inject(AuthManager);

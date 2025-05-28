@@ -42,15 +42,14 @@
 
 .light,
 .dark {
-  transition: background-color 0.5s ease, color 0.5s ease;
+  transition: background-color 0.5s ease, color 0.5s ease !important;
 }
 
 .color-secondary {
   color: var(--color-secondary);
 }
 
-.icon-outlined {
+mat-icon {
   font-family: "Material Symbols Outlined";
-  font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24, 'STRK' 3 !important;
- 
+  font-variation-settings: "FILL" 0, "wght" 200, "GRAD" 0, "opsz" 24, "STRK" 3 !important;
 }
