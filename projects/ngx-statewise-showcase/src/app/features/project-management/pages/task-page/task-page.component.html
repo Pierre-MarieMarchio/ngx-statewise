@@ -1,49 +1,47 @@
 <app-side-panel #taskPanel>
-  <div class="tasks-list">
-    <h3>Liste des tâches</h3>
-    @for (item of this.taskManager.tasks(); track item.id) {
-    <div class="task-card" (click)="selectTask(item)">
-      <h4>{{ item.title }}</h4>
-      <p class="task-preview">{{ item.description | slice : 0 : 100 }}...</p>
-      <span class="users-count"
-        >{{ item.assignedUserIds!.length }} utilisateur(s)</span
-      >
-    </div>
-    }
-  </div>
+  <h1 class="task-page-header">TASK</h1>
+
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">view_list</mat-icon>
+        All Tasks
+      </ng-template>
+      <app-all-task-list
+        (taskSelected)="selectTask($event)"
+        [tasks]="this.taskManager.tasks()!"
+      />
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">person</mat-icon>
+        My Tasks
+      </ng-template>
+      Content 2</mat-tab
+    >
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">construction</mat-icon>
+        By Projects
+      </ng-template>
+      Content 2</mat-tab
+    >
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">view_kanban</mat-icon>
+        Kanban
+      </ng-template>
+      Content 2</mat-tab
+    >
+  </mat-tab-group>
 
   <div slot="panel-content">
-    @if (selectedTask()) {
-    <div class="task-details">
-      <div class="panel-header">
-        <h3>Détails de la tâche</h3>
-        <button class="close-btn" (click)="closeSideNav()">×</button>
-      </div>
-
-      <div class="task-content">
-        <h2>{{ selectedTask()!.title }}</h2>
-        <p class="description">{{ selectedTask()!.description }}</p>
-
-        <div class="assigned-section">
-          <h4>Utilisateurs assignés :</h4>
-          <div class="assigned-users">
-            @for (user of selectedTask()!.assignedUserIds; track $index) {
-            <span class="user-tag">{{ user }}</span>
-            }
-          </div>
-        </div>
-
-        <!-- Ajoutez d'autres détails selon vos besoins -->
-        <div class="actions">
-          <button class="btn-primary">Modifier</button>
-          <button class="btn-secondary">Supprimer</button>
-        </div>
-      </div>
-    </div>
-    } @else {
-    <div class="no-selection">
-      <p>Sélectionnez une tâche pour voir ses détails</p>
-    </div>
-    }
+    <app-task-details
+      [selectedTask]="selectedTask()"
+      (close)="closeSideNav()"
+    />
   </div>
 </app-side-panel>

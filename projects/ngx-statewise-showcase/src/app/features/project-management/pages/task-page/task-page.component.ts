@@ -1,12 +1,21 @@
 import { Component, inject, signal, ViewChild } from '@angular/core';
-import { SlicePipe } from '@angular/common';
-import { TaskManager } from '../../states';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatIconModule } from '@angular/material/icon';
 import { SidePanelComponent } from '@app/core/layouts/side-panel/side-panel.component';
-import { Task } from '../../models/task.model';
+import { TaskManager } from '../../states';
+import { TaskDetailsComponent, AllTaskListComponent } from './components';
+import { Task } from '../../models';
+
 
 @Component({
   selector: 'app-task-page',
-  imports: [SidePanelComponent, SlicePipe],
+  imports: [
+    SidePanelComponent,
+    AllTaskListComponent,
+    TaskDetailsComponent,
+    MatIconModule,
+    MatTabsModule,
+  ],
   templateUrl: './task-page.component.html',
   styleUrl: './task-page.component.scss',
   host: {
@@ -25,11 +34,7 @@ export class TaskPageComponent {
   }
 
   private init(): void {
-    this.taskManager.getAllTask();
-  }
-
-  public openSideNav(): void {
-    this.taskPanel.open();
+    this.taskManager.getAll();
   }
 
   public closeSideNav(): void {

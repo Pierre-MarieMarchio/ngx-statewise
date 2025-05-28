@@ -1,12 +1,16 @@
 .content {
   display: flex;
-  flex-grow: 1;
-  min-height: 100vh;
+  max-height: 100vh;
   width: 100%;
 }
 
 .nav-content {
+  box-sizing: border-box;
   display: flex;
-  height: 100vh;
-  width: calc(100% - var(--ma-variable));
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  width: calc(100% - var(--nav-width));
+  overflow-y: auto;
+  overflow-x: auto;
 }

@@ -20,8 +20,12 @@ export class TaskManager implements ITaskManager {
   public readonly isError = this.taskStates.isError.asReadonly();
   public readonly isLoading = this.taskStates.isLoading.asReadonly();
 
-  public getAllTask(): void {
+  public getAll(): void {
     dispatch(getAllTaskActions.request(), this);
+  }
+
+  public async getAllAsync(): Promise<void> {
+    await dispatchAsync(getAllTaskActions.request(), this);
   }
 
   public async reset(): Promise<void> {

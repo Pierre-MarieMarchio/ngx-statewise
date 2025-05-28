@@ -6,6 +6,7 @@ export interface ITaskManager {
   isError: Signal<boolean>;
   isLoading: Signal<boolean>;
 
-  getAllTask(): void;
+  getAll(): void;
+  getAllAsync(): Promise<void>;
   reset(): Promise<void>;
 }
