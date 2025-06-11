@@ -17,9 +17,9 @@ import { AuthEffect } from './features/auth/states/auth/auth.effect';
 import { AuthManager } from './features/auth/states/auth/auth.manager';
 import { AUTH_MANAGER } from '@shared/app-common/tokens/auth-manager/auth-manager.token';
 import { fakeApiInterceptor } from './core/fake-api';
-import { TaskEffect } from './features/project-management/states/task/task.effect';
 import { TASK_MANAGER } from '@shared/app-common/tokens/task-manager/task-manager.token';
-import { TaskManager } from './features/project-management/states';
+import { TaskEffect, TaskManager } from './features/task/states';
+
 
 export const appConfig: ApplicationConfig = {
   providers: [

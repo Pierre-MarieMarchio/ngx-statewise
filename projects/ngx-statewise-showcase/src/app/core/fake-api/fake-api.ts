@@ -21,13 +21,13 @@ export class FakeApi {
   handleRequest(): Observable<HttpResponse<unknown>> {
     const requestsMapHandlers: RequestHandlers = {
       POST: {
-        'http://localhost:8080/api/Auth/login': () => this.handleLogin(),
-        'http://localhost:8080/api/Auth/logout': () => this.handleLogout(),
-        'http://localhost:8080/api/Auth/Authenticate': () =>
+        'http://localhost/api/Auth/login': () => this.handleLogin(),
+        'http://localhost/api/Auth/logout': () => this.handleLogout(),
+        'http://localhost/api/Auth/Authenticate': () =>
           this.handleAuthenticate(),
       },
       GET: {
-        'http://localhost:8080/api/Task': () => this.handleGetAllTask(),
+        'http://localhost/api/Task': () => this.handleGetAllTask(),
       },
     };
 

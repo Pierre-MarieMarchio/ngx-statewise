@@ -2,9 +2,9 @@ import { Routes } from '@angular/router';
 import { LandingPageComponent } from './features/landing-page/landing-page.component';
 import { LoginPageComponent } from './features/auth/pages/login-page.component';
 import { HomeComponent } from './features/dashbord/pages/dashbord.component';
-import { ProjectsPageComponent, TaskPageComponent, TeamsPageComponent } from './features/project-management/pages';
+import { TaskPageComponent } from './features/task/pages';
 import { loggedInGuard, loggedOutGuard } from './features/auth/guards';
-
+import { ProjectsPageComponent, TeamsPageComponent } from './features/project-management/pages';
 
 export const routes: Routes = [
   {

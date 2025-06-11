@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { createEffect } from 'ngx-statewise';
 import { getAllTaskActions } from './task.action';
 import { firstValueFrom } from 'rxjs';
-import { TaskRepositoryService } from '../../services/task-repository.service';
+import { TaskRepositoryService } from '../../../task/services/task-repository.service';
 import { AUTH_MANAGER } from '@shared/app-common/tokens';
 
 @Injectable({
@@ -15,8 +15,8 @@ export class TaskEffect {
   public readonly getAllTaskRequestEffect = createEffect(
     getAllTaskActions.request,
     async () => {
-      console.log("coucouc");
-      
+      console.log('coucouc');
+
       try {
         console.log('effect');
         const user = this.authManager.user();
