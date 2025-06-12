@@ -11,6 +11,9 @@
   overflow-y: auto;
   overflow-x: auto;
 }
+.panel-content{
+  height: 100vh;
+}
 
 :host-context(.light) .side-panel-container,
 :host-context(.dark) .side-panel-container {

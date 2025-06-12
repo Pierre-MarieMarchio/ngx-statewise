@@ -3,8 +3,10 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { SidePanelComponent } from '@app/core/layouts/side-panel/side-panel.component';
 import { TaskManager } from '../../states'
-import { TaskDetailsComponent, AllTaskListComponent } from '../../components';
+import { TaskDetailsComponent, AllTaskListComponent, PersonalTaskListComponent } from '../../components';
 import { Task } from '../../models';
+import { ProjectTaskListComponent } from "../../components/project-task-list/project-task-list.component";
+
 
 
 @Component({
@@ -15,7 +17,9 @@ import { Task } from '../../models';
     TaskDetailsComponent,
     MatIconModule,
     MatTabsModule,
-  ],
+    PersonalTaskListComponent,
+    ProjectTaskListComponent
+],
   templateUrl: './task-page.component.html',
   styleUrl: './task-page.component.scss',
   host: {
@@ -28,14 +32,6 @@ export class TaskPageComponent {
   public readonly taskManager = inject(TaskManager);
 
   public selectedTask = signal<Task | null>(null);
-
-  ngOnInit(): void {
-    this.init();
-  }
-
-  private init(): void {
-    this.taskManager.getAll();
-  }
 
   public closeSideNav(): void {
     this.taskPanel.close();

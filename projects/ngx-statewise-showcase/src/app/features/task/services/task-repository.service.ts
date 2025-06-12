@@ -42,10 +42,7 @@ export class TaskRepositoryService {
 
   private buildAccessParams(user: User): HttpParams {
     let params = new HttpParams();
-
     params = params.set('userid', user.userId);
-    console.log('params', params);
-
     return params;
   }
 }

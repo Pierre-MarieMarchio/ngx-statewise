@@ -15,19 +15,20 @@ import {
   AuthNotificationService,
 } from '../../services';
 import { TASK_MANAGER } from '@shared/app-common/tokens/task-manager/task-manager.token';
+import { PROJECT_MANAGER } from '@shared/app-common/tokens';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthEffect {
+  private readonly projectManager = inject(PROJECT_MANAGER);
+  private readonly taskManager = inject(TASK_MANAGER);
   private readonly authRepository = inject(AuthRepositoryService);
   private readonly authToken = inject(AuthTokenService);
   private readonly authTokenHelper = inject(AuthTokenHelperService);
   private readonly router = inject(Router);
   private readonly notification = inject(AuthNotificationService);
   private readonly tokenFactory = inject(TokenService);
-
-  private readonly taskManager = inject(TASK_MANAGER);
 
   public readonly loginRequestEffect = createEffect(
     loginActions.request,
@@ -48,6 +49,8 @@ export class AuthEffect {
   public readonly loginSuccessEffect = createEffect(
     loginActions.success,
     () => {
+      this.projectManager.getAll();
+      this.taskManager.getAll();
       this.router.navigate(['/']);
       this.notification.loginSuccess();
     }
@@ -67,7 +70,6 @@ export class AuthEffect {
       const refreshToken = this.authToken.getRefreshToken();
 
       if (!refreshToken) {
-        console.log('!ref to ');
         return authenticateActions.failure();
       }
 
@@ -123,6 +125,7 @@ export class AuthEffect {
       try {
         await Promise.all([
           this.taskManager.reset(),
+          this.projectManager.reset(),
           firstValueFrom(this.authRepository.logout()),
         ]);
 

@@ -4,7 +4,8 @@ import { LoginPageComponent } from './features/auth/pages/login-page.component';
 import { HomeComponent } from './features/dashbord/pages/dashbord.component';
 import { TaskPageComponent } from './features/task/pages';
 import { loggedInGuard, loggedOutGuard } from './features/auth/guards';
-import { ProjectsPageComponent, TeamsPageComponent } from './features/project-management/pages';
+import { TeamsPageComponent } from './features/project-management/pages';
+import { ProjectsPageComponent } from './features/project/pages';
 
 export const routes: Routes = [
   {

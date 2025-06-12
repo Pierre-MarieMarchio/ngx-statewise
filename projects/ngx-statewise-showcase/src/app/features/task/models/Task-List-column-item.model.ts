@@ -1,6 +1,6 @@
 import { Task } from './task.model';
 
-export interface TaskColumn {
+export interface TaskListColumnItem {
   columnDef: string;
   header: string;
   cell: (element: Task) => string;

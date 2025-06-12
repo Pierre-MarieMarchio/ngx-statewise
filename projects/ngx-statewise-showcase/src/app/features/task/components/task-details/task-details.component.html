@@ -1,6 +1,6 @@
 @if (selectedTask()) {
 <div>
-  <div >
+  <div>
     <h3>Task details</h3>
     <button class="close-btn" (click)="onCloseClick()">x</button>
   </div>
@@ -9,7 +9,7 @@
     <h2>{{ selectedTask()!.title }}</h2>
     <p class="description">{{ selectedTask()!.description }}</p>
 
-    <div >
+    <div>
       <h4>users :</h4>
       <div>
         @for (user of selectedTask()!.assignedUserIds; track $index) {
@@ -18,7 +18,7 @@
       </div>
     </div>
 
-    <div >
+    <div>
       <button>Modify</button>
       <button>delete</button>
     </div>
@@ -26,6 +26,6 @@
 </div>
 } @else {
 <div>
-  <p>error : select a task </p>
+  <p>error : select a task</p>
 </div>
 }

@@ -1,32 +1,32 @@
 import { inject, Injectable } from '@angular/core';
+import { AUTH_MANAGER } from '@shared/app-common/tokens';
 import { createEffect } from 'ngx-statewise';
 import { firstValueFrom } from 'rxjs';
-import { getAllTaskActions } from './task.action';
-import { TaskRepositoryService } from '../../../task/services';
-import { AUTH_MANAGER } from '@shared/app-common/tokens';
+import { getAllProjectsActions } from './project.action';
+import { ProjectRepositoryService } from '../../services';
 
 @Injectable({
   providedIn: 'root',
 })
-export class TaskEffect {
-  private readonly taskRepository = inject(TaskRepositoryService);
+export class ProjectEffect {
+  private readonly projectRepository = inject(ProjectRepositoryService);
   private readonly authManager = inject(AUTH_MANAGER);
 
   public readonly getAllTaskRequestEffect = createEffect(
-    getAllTaskActions.request,
+    getAllProjectsActions.request,
     async () => {
       try {
         const user = this.authManager.user();
         if (user) {
           const response = await firstValueFrom(
-            this.taskRepository.getAll(user)
+            this.projectRepository.getAll(user)
           );
-          return getAllTaskActions.success(response);
+          return getAllProjectsActions.success(response);
         }
-        return getAllTaskActions.failure();
+        return getAllProjectsActions.failure();
       } catch (error) {
         console.error(error);
-        return getAllTaskActions.failure();
+        return getAllProjectsActions.failure();
       }
     }
   );

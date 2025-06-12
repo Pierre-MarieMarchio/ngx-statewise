@@ -5,7 +5,7 @@ import {
 } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 
-import { Task, TASKS, User, USERS } from './db.data';
+import { Project, PROJECT, Task, TASKS, User, USERS } from './db.data';
 
 type RequestHandlers = Record<
   string,
@@ -15,6 +15,7 @@ type RequestHandlers = Record<
 export class FakeApi {
   private readonly usersDB = new UsersDB();
   private readonly taskDB = new TaskDB();
+  private readonly projectDB = new ProjectDB();
 
   constructor(private readonly request: HttpRequest<Record<string, unknown>>) {}
 
@@ -28,6 +29,7 @@ export class FakeApi {
       },
       GET: {
         'http://localhost/api/Task': () => this.handleGetAllTask(),
+        'http://localhost/api/Project': () => this.handleGetAllProject(),
       },
     };
 
@@ -56,7 +58,6 @@ export class FakeApi {
 
     if (!body) return this.respond400Error();
 
-    // validate body
     const password = body['password'];
     if (!password) return this.respond400Error('password type is missing');
     const email = body['email'];
@@ -106,12 +107,24 @@ export class FakeApi {
     const userId = this.request.params.get('userid');
 
     if (!userId) return this.respond400Error('userId is missing');
-    const user = this.usersDB.findByUserId(userId)
+    const user = this.usersDB.findByUserId(userId);
 
     if (!user) return this.respond400Error('user does not exist');
-    const tasks = this.taskDB.findByUserOrganization(user)
+    const tasks = this.taskDB.findByUserOrganization(user);
 
     return this.respondSuccess(tasks);
+  }
+
+  private handleGetAllProject(): HttpResponse<unknown> {
+    const userId = this.request.params.get('userid');
+
+    if (!userId) return this.respond400Error('userId is missing');
+    const user = this.usersDB.findByUserId(userId);
+
+    if (!user) return this.respond400Error('user does not exist');
+    const projects = this.projectDB.findByUserOrganization(user);
+
+    return this.respondSuccess(projects);
   }
 
   private respondSuccess(body: unknown): HttpResponse<unknown> {
@@ -135,7 +148,7 @@ export class FakeApi {
 }
 
 class UsersDB {
-  private users: User[] = [...USERS]
+  private readonly users: User[] = [...USERS];
 
   findByUsernameAndPassword(email: string, password: string) {
     return this.users.find(
@@ -153,9 +166,7 @@ class UsersDB {
 
   findByOrganizationId(user: User, organizationId: string): User[] {
     if (user.role === 'admin') return this.users;
-    return this.users.filter(
-      (user) => user.organizationId === organizationId
-    );
+    return this.users.filter((user) => user.organizationId === organizationId);
   }
 
   findByUserId(id: string) {
@@ -231,5 +242,30 @@ export class TaskDB {
 
     this.tasks.splice(index, 1);
     return true;
+  }
+}
+
+export class ProjectDB {
+  private readonly project: Project[] = [...PROJECT];
+
+  findByIdForUser(ProjectId: string, user: User): Project | undefined {
+    const task = this.project.find((t) => t.id === ProjectId);
+    if (!task) return undefined;
+    if (user.role === 'admin' || task.organizationId === user.organizationId)
+      return task;
+    return undefined;
+  }
+
+  findByOrganizationId(organizationId: string): Project[] {
+    return this.project.filter(
+      (project) => project.organizationId === organizationId
+    );
+  }
+
+  findByUserOrganization(user: User): Project[] {
+    if (user.role === 'admin') return this.project;
+    return this.project.filter(
+      (project) => project.organizationId === user.organizationId
+    );
   }
 }

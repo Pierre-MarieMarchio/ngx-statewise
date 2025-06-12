@@ -1,5 +1,5 @@
-<div class="all-task-list-container">
-  <table mat-table [dataSource]="this.tasks()!">
+<div class="personal-task-list-container">
+  <table mat-table [dataSource]="tasks()">
     @for (column of columns; track column) {
     <ng-container [matColumnDef]="column.columnDef">
       <th mat-header-cell *matHeaderCellDef>

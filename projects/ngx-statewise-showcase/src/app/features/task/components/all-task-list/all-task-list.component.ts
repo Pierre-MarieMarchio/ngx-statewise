@@ -1,7 +1,6 @@
 import { Component, inject, input, output } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
-import { Task } from '@app/features/task/models';
-import { TaskColumn } from '@app/features/task/models/column-item';
+import { Task, TaskListColumnItem } from '@app/features/task/models';
 import { AUTH_MANAGER } from '@shared/app-common/tokens';
 
 @Component({
@@ -15,10 +14,10 @@ export class AllTaskListComponent {
   public tasks = input<Task[]>();
   public taskSelected = output<Task>();
 
-  public columns: TaskColumn[] = [];
+  public columns: TaskListColumnItem[] = [];
   public displayedColumns: string[] = [];
 
-  private readonly allColumns: TaskColumn[] = [
+  private readonly allColumns: TaskListColumnItem[] = [
     {
       columnDef: 'title',
       header: 'Title',

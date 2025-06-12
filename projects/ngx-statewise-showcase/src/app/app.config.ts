@@ -11,15 +11,17 @@ import {
   withInterceptors,
 } from '@angular/common/http';
 import { routes } from './app.routes';
-import { accessTokenInterceptor } from './features/auth/interceptors/access-token.interceptor';
+import { accessTokenInterceptor } from './features/auth/interceptors';
 import { provideEffects, provideStatewise } from 'ngx-statewise';
-import { AuthEffect } from './features/auth/states/auth/auth.effect';
-import { AuthManager } from './features/auth/states/auth/auth.manager';
-import { AUTH_MANAGER } from '@shared/app-common/tokens/auth-manager/auth-manager.token';
 import { fakeApiInterceptor } from './core/fake-api';
-import { TASK_MANAGER } from '@shared/app-common/tokens/task-manager/task-manager.token';
+import { AuthEffect, AuthManager } from './features/auth/states';
 import { TaskEffect, TaskManager } from './features/task/states';
-
+import { ProjectEffect, ProjectManager } from './features/project/states';
+import {
+  AUTH_MANAGER,
+  PROJECT_MANAGER,
+  TASK_MANAGER,
+} from '@shared/app-common/tokens';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -29,12 +31,12 @@ export const appConfig: ApplicationConfig = {
     ),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-
     provideStatewise(),
-    provideEffects([AuthEffect, TaskEffect]),
+    provideEffects([AuthEffect, TaskEffect, ProjectEffect]),
 
     { provide: AUTH_MANAGER, useExisting: AuthManager },
     { provide: TASK_MANAGER, useExisting: TaskManager },
+    { provide: PROJECT_MANAGER, useExisting: ProjectManager },
 
     provideAppInitializer(async () => {
       const authManager = inject(AUTH_MANAGER);

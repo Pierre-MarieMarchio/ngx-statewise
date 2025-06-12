@@ -67,8 +67,9 @@ export const TASKS: Task[] = [
     id: 'task-1',
     projectId: 'project-1',
     organizationId: 'org-1',
-    title: 'Create the Dashboard component',
-    description: 'Implement a dashboard view with project stats and list.',
+    title: 'Develop Dashboard UI with Project Insights',
+    description:
+      'Design and implement a dashboard to show key project metrics and recent activity.',
     status: 'in-progress',
     assignedUserIds: ['9e85a3a0-1640-42df-0943-08dd7cc96d0f'],
     dueDate: '2025-06-01T23:59:59.999Z',
@@ -80,8 +81,9 @@ export const TASKS: Task[] = [
     id: 'task-2',
     projectId: 'project-1',
     organizationId: 'org-1',
-    title: 'Integrate ngx-statewise in the Project module',
-    description: 'Define state, actions, and effects for Project entity.',
+    title: 'Set Up State Management for Project Module',
+    description:
+      'Define state models, actions, and effects using ngx-statewise for the Project module.',
     status: 'todo',
     assignedUserIds: ['8e85a3a0-1640-42df-0943-08dd7cc96d0f'],
     dueDate: '2025-06-05T18:00:00.000Z',
@@ -93,8 +95,9 @@ export const TASKS: Task[] = [
     id: 'task-3',
     projectId: 'project-2',
     organizationId: 'org-1',
-    title: 'Create the Task list component',
-    description: 'Display tasks in a table with filters and actions.',
+    title: 'Build Task Table with Filters and Actions',
+    description:
+      'Display tasks in a paginated table with filter and action controls.',
     status: 'done',
     assignedUserIds: ['8e85a3a0-1640-42df-0943-08dd7cc96d0f'],
     dueDate: '2025-05-22T17:00:00.000Z',
@@ -106,8 +109,9 @@ export const TASKS: Task[] = [
     id: 'task-4',
     projectId: 'project-1',
     organizationId: 'org-1',
-    title: 'Add error handling in ProjectService',
-    description: 'Show toast message and log errors in devtools.',
+    title: 'Implement Error Handling in ProjectService',
+    description:
+      'Add error notifications using toast and log errors to dev console.',
     status: 'todo',
     assignedUserIds: [],
     dueDate: '2025-06-07T12:00:00.000Z',
@@ -119,8 +123,9 @@ export const TASKS: Task[] = [
     id: 'task-5',
     projectId: 'project-2',
     organizationId: 'org-1',
-    title: 'Create mocks for json-server',
-    description: 'Setup db.json with sample projects, tasks, and users.',
+    title: 'Create Mock API with JSON Server',
+    description:
+      'Build a db.json file containing sample projects, tasks, and users for development.',
     status: 'in-progress',
     assignedUserIds: [
       '9e85a3a0-1640-42df-0943-08dd7cc96d0f',
@@ -135,12 +140,13 @@ export const TASKS: Task[] = [
     id: 'task-6',
     projectId: 'project-3',
     organizationId: 'org-2',
-    title: 'Create mocks for json-server',
-    description: 'Setup db.json with sample projects, tasks, and users.',
+    title: 'Prepare Development Data Set for API Testing',
+    description:
+      'Provide realistic mock data via JSON server for frontend integration tests.',
     status: 'in-progress',
     assignedUserIds: ['7e85a3a0-1640-42df-0943-08dd7cc96d0f'],
     dueDate: '2025-05-25T16:30:00.000Z',
-    priority: 'high',
+    priority: 'medium',
     createdAt: '2025-05-19T08:15:00.000Z',
     updatedAt: '2025-05-22T10:00:00.000Z',
   },
@@ -148,13 +154,75 @@ export const TASKS: Task[] = [
     id: 'task-7',
     projectId: 'project-3',
     organizationId: 'org-2',
-    title: 'Add error handling in ProjectService',
-    description: 'Setup db.json with sample projects, tasks, and users.',
-    status: 'in-progress',
+    title: 'Add Global Error Handling in Services',
+    description:
+      'Introduce a consistent error-handling strategy with user feedback and logging.',
+    status: 'todo',
     assignedUserIds: ['7e85a3a0-1640-42df-0943-08dd7cc96d0f'],
     dueDate: '2025-05-25T16:30:00.000Z',
     priority: 'high',
     createdAt: '2025-05-19T08:15:00.000Z',
     updatedAt: '2025-05-22T10:00:00.000Z',
+  },
+  {
+    id: 'task-8',
+    projectId: 'project-4',
+    organizationId: 'org-2',
+    title: 'Log Errors and Display Toast Messages',
+    description:
+      'Provide user-friendly error messages and write errors to console for debugging.',
+    status: 'todo',
+    assignedUserIds: [],
+    dueDate: '2025-05-25T16:30:00.000Z',
+    priority: 'medium',
+    createdAt: '2025-05-19T08:15:00.000Z',
+    updatedAt: '2025-05-22T10:00:00.000Z',
+  },
+  {
+    id: 'task-9',
+    projectId: 'project-5',
+    organizationId: 'org-3',
+    title: 'Implement Task Viewer Component',
+    description:
+      'Create a dedicated component to list and filter user tasks effectively.',
+    status: 'todo',
+    assignedUserIds: [],
+    dueDate: '2025-05-25T16:30:00.000Z',
+    priority: 'medium',
+    createdAt: '2025-05-19T08:15:00.000Z',
+    updatedAt: '2025-05-22T10:00:00.000Z',
+  },
+];
+
+export interface Project {
+  id: string;
+  organizationId: string;
+  title: string;
+}
+export const PROJECT: Project[] = [
+  {
+    id: 'project-5',
+    organizationId: 'org-3',
+    title: 'project-5',
+  },
+  {
+    id: 'project-4',
+    organizationId: 'org-2',
+    title: 'project-4',
+  },
+  {
+    id: 'project-3',
+    organizationId: 'org-2',
+    title: 'project-3',
+  },
+  {
+    id: 'project-2',
+    organizationId: 'org-1',
+    title: 'project-2',
+  },
+  {
+    id: 'project-1',
+    organizationId: 'org-1',
+    title: 'project-1',
   },
 ];
