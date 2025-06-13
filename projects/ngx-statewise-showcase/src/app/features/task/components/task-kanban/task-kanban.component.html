@@ -1,0 +1,58 @@
+<div class="kanban-task-container">
+  <mat-grid-list
+    class="kanban-task-section kanban-task-header-section"
+    cols="3"
+    gutterSize="1rem"
+    rowHeight="3rem"
+  >
+    @for (col of columns(); track col.id) {
+    <mat-grid-tile class="kanban-task-column-header">
+      <div class="kanban-task-header">
+        <h2>{{ col.id }}</h2>
+      </div>
+    </mat-grid-tile>
+    }
+  </mat-grid-list>
+
+  <div class="kanban-task-body">
+    @for (col of columns(); track col.id) {
+    <div
+      class="kanban-task-column"
+      cdkDropList
+      [id]="'dropList-' + col.id"
+      [cdkDropListData]="col.tasks || []"
+      [cdkDropListConnectedTo]="getConnectedDropListIds()"
+    >
+      @for (task of col.tasks; track task.id) {
+      <mat-card cdkDrag [cdkDragData]="task" appearance="outlined" class="task-card">
+        <mat-card-header>
+          <mat-card-title>{{ task.title }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ task.description }}</p>
+        </mat-card-content>
+      </mat-card>
+      }
+    </div>
+    }
+  </div>
+
+  <div class="kanban-task-body">
+    @for (col of columns(); track col.id) {
+
+    <div class="kanban-task-column">
+      @for (task of col.tasks; track task.id) {
+      <mat-card appearance="outlined" class="task-card">
+        <mat-card-header>
+          <mat-card-title>{{ task.title }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ task.description }}</p>
+        </mat-card-content>
+      </mat-card>
+      }
+    </div>
+
+    }
+  </div>
+</div>

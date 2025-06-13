@@ -1,2 +1,2 @@
 export type {Task} from "./task.model"
-export type { TaskListColumnItem } from './Task-List-column-item.model';
+export type { TaskListColumnItem } from './task-list-column-item.model';

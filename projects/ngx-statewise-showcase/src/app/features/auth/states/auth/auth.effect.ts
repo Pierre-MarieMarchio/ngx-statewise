@@ -119,6 +119,14 @@ export class AuthEffect {
     }
   );
 
+  public readonly authenticateSuccessEffect = createEffect(
+    authenticateActions.success,
+    () => {
+      this.projectManager.getAll();
+      this.taskManager.getAll();
+    }
+  );
+
   public readonly logoutRequestEffect = createEffect(
     logoutActions.request,
     async () => {

@@ -1,4 +1,5 @@
 .personal-task-list-container {
-  margin: 1rem;
-  min-height: calc(100vh - 203px);
+  box-sizing: border-box;
+  padding-top: 1rem;
+  min-height: calc(100vh - 187px);
 }

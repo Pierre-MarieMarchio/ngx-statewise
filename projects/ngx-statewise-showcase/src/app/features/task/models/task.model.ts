@@ -1,13 +1,15 @@
+import { TaskPriority, TaskStatus } from '@shared/app-common/models';
+
 export interface Task {
   id: string;
   projectId: string;
   organizationId: string;
   title: string;
   description?: string;
-  status: 'todo' | 'in-progress' | 'done';
+  status: TaskStatus;
   assignedUserIds?: string[];
   dueDate?: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: TaskPriority;
   createdAt: string;
   updatedAt: string;
 }

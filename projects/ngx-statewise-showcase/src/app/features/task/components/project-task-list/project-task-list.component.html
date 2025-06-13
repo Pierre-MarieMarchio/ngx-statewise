@@ -1,11 +1,14 @@
 <div class="project-task-list-container">
   <mat-accordion displayMode="flat" multi>
+
     @for (project of this.projectManager.projects(); track $index) {
     <mat-expansion-panel>
       <mat-expansion-panel-header>
         <mat-panel-title> {{ project.title }}</mat-panel-title>
       </mat-expansion-panel-header>
+
       <table mat-table [dataSource]="getFilteredTasks(project.id)">
+
         @for (column of columns; track column) {
         <ng-container [matColumnDef]="column.columnDef">
           <th mat-header-cell *matHeaderCellDef>
@@ -24,8 +27,11 @@
           (click)="selectTask(item)"
           *matRowDef="let item; columns: displayedColumns"
         ></tr>
+
       </table>
+
     </mat-expansion-panel>
     }
+    
   </mat-accordion>
 </div>

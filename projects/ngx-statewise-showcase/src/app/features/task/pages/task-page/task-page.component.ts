@@ -3,9 +3,10 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { SidePanelComponent } from '@app/core/layouts/side-panel/side-panel.component';
 import { TaskManager } from '../../states'
-import { TaskDetailsComponent, AllTaskListComponent, PersonalTaskListComponent } from '../../components';
+import { TaskDetailsComponent, AllTaskListComponent, PersonalTaskListComponent, ProjectTaskListComponent } from '../../components';
 import { Task } from '../../models';
-import { ProjectTaskListComponent } from "../../components/project-task-list/project-task-list.component";
+import { TaskKanbanComponent } from "../../components/task-kanban/task-kanban.component";
+
 
 
 
@@ -18,7 +19,8 @@ import { ProjectTaskListComponent } from "../../components/project-task-list/pro
     MatIconModule,
     MatTabsModule,
     PersonalTaskListComponent,
-    ProjectTaskListComponent
+    ProjectTaskListComponent,
+    TaskKanbanComponent
 ],
   templateUrl: './task-page.component.html',
   styleUrl: './task-page.component.scss',

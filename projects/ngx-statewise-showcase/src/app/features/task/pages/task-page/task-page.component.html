@@ -25,7 +25,7 @@
       <mat-tab>
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">construction</mat-icon>
-          By Projects
+          Projects
         </ng-template>
         <app-project-task-list
           (taskSelected)="selectTask($event)"
@@ -37,8 +37,8 @@
           <mat-icon class="tab-icon">view_kanban</mat-icon>
           Kanban
         </ng-template>
-        Content Kanban</mat-tab
-      >
+        <app-task-kanban [tasks]="this.taskManager.tasks()!"
+      /></mat-tab>
     </mat-tab-group>
   </div>
 
