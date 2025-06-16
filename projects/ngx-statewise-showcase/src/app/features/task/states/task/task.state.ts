@@ -5,7 +5,7 @@ import { Task } from "@app/core/fake-api/db.data";
   providedIn: 'root',
 })
 export class TaskState {
-  public tasks = signal<Task[] | null>(null);
+  public tasks = signal<Task[] >([]);
   public isLoading = signal(false);
   public isError = signal(false);
 }

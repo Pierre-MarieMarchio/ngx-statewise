@@ -2,8 +2,9 @@ import { inject, Injectable } from '@angular/core';
 import { TaskState } from './task.state';
 import { TaskUpdator } from './task.updator';
 import { dispatch, dispatchAsync, registerLocalUpdator } from 'ngx-statewise';
-import { getAllTaskActions, taskReset } from './task.action';
+import { getAllTaskActions, taskReset, updateTaskActions } from './task.action';
 import { ITaskManager } from '@shared/app-common/tokens/task-manager/task-manager.interface';
+import { Task } from '../../models';
 
 @Injectable({
   providedIn: 'root',
@@ -26,6 +27,10 @@ export class TaskManager implements ITaskManager {
 
   public async getAllAsync(): Promise<void> {
     await dispatchAsync(getAllTaskActions.request(), this);
+  }
+
+  public update(task: Task): void {
+    dispatch(updateTaskActions.request(task), this);
   }
 
   public async reset(): Promise<void> {

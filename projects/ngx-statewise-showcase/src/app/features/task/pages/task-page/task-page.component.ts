@@ -6,6 +6,7 @@ import { TaskManager } from '../../states'
 import { TaskDetailsComponent, AllTaskListComponent, PersonalTaskListComponent, ProjectTaskListComponent } from '../../components';
 import { Task } from '../../models';
 import { TaskKanbanComponent } from "../../components/task-kanban/task-kanban.component";
+import { TASK_MANAGER } from '@shared/app-common/tokens';
 
 
 
@@ -20,8 +21,8 @@ import { TaskKanbanComponent } from "../../components/task-kanban/task-kanban.co
     MatTabsModule,
     PersonalTaskListComponent,
     ProjectTaskListComponent,
-    TaskKanbanComponent
-],
+    TaskKanbanComponent,
+  ],
   templateUrl: './task-page.component.html',
   styleUrl: './task-page.component.scss',
   host: {
@@ -31,7 +32,7 @@ import { TaskKanbanComponent } from "../../components/task-kanban/task-kanban.co
 export class TaskPageComponent {
   @ViewChild('taskPanel') taskPanel!: SidePanelComponent;
 
-  public readonly taskManager = inject(TaskManager);
+  public readonly taskManager = inject(TASK_MANAGER);
 
   public selectedTask = signal<Task | null>(null);
 
@@ -46,5 +47,9 @@ export class TaskPageComponent {
   public selectTask(task: Task): void {
     this.selectedTask.set(task);
     this.taskPanel.open();
+  }
+
+  public onTaskChanged(updatedTask: Task): void {
+    this.taskManager.update(updatedTask);
   }
 }

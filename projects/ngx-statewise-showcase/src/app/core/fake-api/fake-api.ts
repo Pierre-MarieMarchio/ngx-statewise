@@ -31,6 +31,9 @@ export class FakeApi {
         'http://localhost/api/Task': () => this.handleGetAllTask(),
         'http://localhost/api/Project': () => this.handleGetAllProject(),
       },
+      PATCH: {
+        'http://localhost/api/Task': () => this.handleUpdateTask(),
+      },
     };
 
     const { method, url } = this.request;
@@ -104,7 +107,7 @@ export class FakeApi {
   }
 
   private handleGetAllTask(): HttpResponse<unknown> {
-    const userId = this.request.params.get('userid');
+    const userId = this.request.params.get('userId');
 
     if (!userId) return this.respond400Error('userId is missing');
     const user = this.usersDB.findByUserId(userId);
@@ -115,8 +118,20 @@ export class FakeApi {
     return this.respondSuccess(tasks);
   }
 
+  private handleUpdateTask(): HttpResponse<unknown> {
+    const { body } = this.request;
+    const userId = this.request.params.get('userId');
+    const taskId = this.request.params.get('taskId');
+
+    console.log(body);
+    console.log(taskId);
+    console.log(userId);
+
+    return this.respondSuccess(body);
+  }
+
   private handleGetAllProject(): HttpResponse<unknown> {
-    const userId = this.request.params.get('userid');
+    const userId = this.request.params.get('userId');
 
     if (!userId) return this.respond400Error('userId is missing');
     const user = this.usersDB.findByUserId(userId);

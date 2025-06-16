@@ -37,7 +37,7 @@
           <mat-icon class="tab-icon">view_kanban</mat-icon>
           Kanban
         </ng-template>
-        <app-task-kanban [tasks]="this.taskManager.tasks()!"
+        <app-task-kanban [tasks]="this.taskManager.tasks()!" (taskChanged)="onTaskChanged($event)"
       /></mat-tab>
     </mat-tab-group>
   </div>

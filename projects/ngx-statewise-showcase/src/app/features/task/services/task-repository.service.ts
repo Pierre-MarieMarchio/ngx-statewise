@@ -18,8 +18,9 @@ export class TaskRepositoryService {
   }
 
   getById(taskId: string, user: User): Observable<Task> {
-    const params = this.buildAccessParams(user);
-    return this.http.get<Task>(`${this.API_BASE_URL}/${taskId}`, { params });
+    let params = this.buildAccessParams(user);
+    params = params.set('taskId', taskId);
+    return this.http.get<Task>(`${this.API_BASE_URL}`, { params });
   }
 
   getByProjectId(projectId: string, user: User): Observable<Task[]> {
@@ -32,17 +33,23 @@ export class TaskRepositoryService {
     return this.http.post<Task>(this.API_BASE_URL, task);
   }
 
-  update(taskId: string, data: Partial<Task>): Observable<Task> {
-    return this.http.patch<Task>(`${this.API_BASE_URL}/${taskId}`, data);
+  update(taskId: string, data: Partial<Task>, user: User): Observable<Task> {
+    let params = this.buildAccessParams(user);
+    params = params.set('taskId', taskId);
+    return this.http.patch<Task>(`${this.API_BASE_URL}`, data, {
+      params,
+    });
   }
 
-  delete(taskId: string): Observable<void> {
-    return this.http.delete<void>(`${this.API_BASE_URL}/${taskId}`);
+  delete(user: User, taskId: string): Observable<void> {
+    let params = this.buildAccessParams(user);
+    params = params.set('taskId', taskId);
+    return this.http.delete<void>(`${this.API_BASE_URL}`, {params} );
   }
 
   private buildAccessParams(user: User): HttpParams {
     let params = new HttpParams();
-    params = params.set('userid', user.userId);
+    params = params.set('userId', user.userId);
     return params;
   }
 }

@@ -8,5 +8,6 @@ export interface ITaskManager {
 
   getAll(): void;
   getAllAsync(): Promise<void>;
+  update(task: Task): void
   reset(): Promise<void>;
 }

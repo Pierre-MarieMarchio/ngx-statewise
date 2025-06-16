@@ -15,4 +15,13 @@ export const getAllTaskActions = defineActionsGroup({
   },
 });
 
+export const updateTaskActions = defineActionsGroup({
+  source: 'Update_Task',
+  events: {
+    request: payload<Task>(),
+    success: payload<Task>(),
+    failure: emptyPayload,
+  },
+});
+
 export const taskReset = defineSingleAction('TASK_RESET', emptyPayload);

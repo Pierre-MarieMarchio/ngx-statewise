@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { createEffect } from 'ngx-statewise';
 import { firstValueFrom } from 'rxjs';
-import { getAllTaskActions } from './task.action';
+import { getAllTaskActions, updateTaskActions } from './task.action';
 import { TaskRepositoryService } from '../../../task/services';
 import { AUTH_MANAGER } from '@shared/app-common/tokens';
 
@@ -27,6 +27,25 @@ export class TaskEffect {
       } catch (error) {
         console.error(error);
         return getAllTaskActions.failure();
+      }
+    }
+  );
+
+  public readonly updateTaskRequestEffect = createEffect(
+    updateTaskActions.request,
+    async (payload) => {
+      try {
+        const user = this.authManager.user();
+        if (user) {
+          const response = await firstValueFrom(
+            this.taskRepository.update(payload.id, payload, user)
+          );
+          return updateTaskActions.success(response);
+        }
+        return updateTaskActions.failure();
+      } catch (error) {
+        console.error(error);
+        return updateTaskActions.failure();
       }
     }
   );

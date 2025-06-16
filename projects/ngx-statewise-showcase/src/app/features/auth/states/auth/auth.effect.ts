@@ -73,32 +73,32 @@ export class AuthEffect {
         return authenticateActions.failure();
       }
 
-      if (!accessToken) {
-        try {
-          const res = await firstValueFrom(this.authRepository.authenticate());
-          const newToken = this.authToken.setNewAccessTokenFromResponse(res);
-          const decoded = this.authTokenHelper.decode(newToken);
-
-          return decoded
-            ? authenticateActions.success(
-                this.authTokenHelper.getPayload(decoded)
-              )
-            : authenticateActions.failure();
-        } catch (error) {
-          console.error('Authentication error:', error);
-          return authenticateActions.failure();
-        }
-      } else {
+      if (accessToken) {
         const decoded = this.authTokenHelper.decode(accessToken);
         const now = Math.floor(Date.now() / 1000);
 
-        if (!decoded || (decoded.exp && decoded.exp < now)) {
+        if (!decoded || decoded.exp < now) {
           return authenticateActions.failure();
         }
 
         return authenticateActions.success(
           this.authTokenHelper.getPayload(decoded)
         );
+      }
+
+      try {
+        const res = await firstValueFrom(this.authRepository.authenticate());
+        const newToken = this.authToken.setNewAccessTokenFromResponse(res);
+        const decoded = this.authTokenHelper.decode(newToken);
+
+        return decoded
+          ? authenticateActions.success(
+              this.authTokenHelper.getPayload(decoded)
+            )
+          : authenticateActions.failure();
+      } catch (error) {
+        console.error('Authentication error:', error);
+        return authenticateActions.failure();
       }
     }
   );

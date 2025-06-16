@@ -19,7 +19,7 @@ export class ProjectRepositoryService {
 
   private buildAccessParams(user: User): HttpParams {
     let params = new HttpParams();
-    params = params.set('userid', user.userId);
+    params = params.set('userId', user.userId);
     return params;
   }
 }
