@@ -25,21 +25,7 @@
       (cdkDropListDropped)="onTaskDrop($event)"
     >
       @for (task of col.tasks; track task.id) {
-      <mat-card
-        cdkDrag
-        [cdkDragData]="task"
-        appearance="outlined"
-        class="task-card"
-      >
-
-        <mat-card-header>
-          <mat-card-title>{{ task.title }}</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <p>{{ task.description }}</p>
-        </mat-card-content>
-
-      </mat-card>
+      <app-task-kanban-card [task]="task" />
       }
     </div>
     }

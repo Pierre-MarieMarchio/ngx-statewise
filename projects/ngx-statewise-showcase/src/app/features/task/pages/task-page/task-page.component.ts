@@ -2,7 +2,6 @@ import { Component, inject, signal, ViewChild } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { SidePanelComponent } from '@app/core/layouts/side-panel/side-panel.component';
-import { TaskManager } from '../../states'
 import { TaskDetailsComponent, AllTaskListComponent, PersonalTaskListComponent, ProjectTaskListComponent } from '../../components';
 import { Task } from '../../models';
 import { TaskKanbanComponent } from "../../components/task-kanban/task-kanban.component";

@@ -11,28 +11,27 @@ import {
 import { Task } from '../../models';
 import { STATUSES, TaskStatus } from '@shared/app-common/models';
 import { MatGridListModule } from '@angular/material/grid-list';
-import { MatCardModule } from '@angular/material/card';
+
 import { MatButtonModule } from '@angular/material/button';
 import {
   CdkDragDrop,
   moveItemInArray,
   transferArrayItem,
-  CdkDrag,
   CdkDropList,
 } from '@angular/cdk/drag-drop';
 import { MatIconModule } from '@angular/material/icon';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
+import { TaskKanbanCardComponent } from "../task-kanban-card/task-kanban-card.component";
 
 @Component({
   selector: 'app-task-kanban',
   imports: [
     MatGridListModule,
-    MatCardModule,
     MatButtonModule,
     MatIconModule,
     CdkDropList,
-    CdkDrag,
-  ],
+    TaskKanbanCardComponent
+],
   templateUrl: './task-kanban.component.html',
   styleUrl: './task-kanban.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
