@@ -1,35 +1,57 @@
 <div class="kanban-task-container">
-  <mat-grid-list
-    class="kanban-task-section kanban-task-header-section"
-    cols="3"
-    gutterSize="1rem"
-    rowHeight="3rem"
-  >
-    @for (col of columns(); track col.id) {
-    <mat-grid-tile class="kanban-task-column-header">
-      <div class="kanban-task-header">
-        <h2>{{ col.id }}</h2>
-      </div>
-    </mat-grid-tile>
-    }
-  </mat-grid-list>
-
-  <div class="kanban-task-body">
-    @for (col of columns(); track col.id) {
-    <div
-      class="kanban-task-column"
-      cdkDropList
-      [id]="'dropList-' + col.id"
-      [cdkDropListData]="col.tasks || []"
-      [cdkDropListConnectedTo]="getConnectedDropListIds()"
-      (cdkDropListDropped)="onTaskDrop($event)"
+  <mat-accordion class="project-accordion" displayMode="flat" multi>
+    @for (project of this.projectManager.projects(); track $index) {
+    <mat-expansion-panel
+      togglePosition="before"
+      class="kanban-project-task-expansion-panel"
     >
-      @for (task of col.tasks; track task.id) {
-      <app-task-kanban-card [task]="task" />
-      }
-    </div>
-    }
-  </div>
+      <mat-expansion-panel-header>
+        <mat-panel-title [class]="'tag-' + project.color">
+          {{ project.title }}</mat-panel-title
+        >
+      </mat-expansion-panel-header>
+      <mat-grid-list
+        class="kanban-task-header-section"
+        cols="3"
+        gutterSize="1rem"
+        rowHeight="2rem"
+      >
+        @for (col of columns(); track col.id) {
+        <mat-grid-tile class="kanban-task-column-header">
+          <div class="kanban-task-header">
+            <h3>{{ col.id }}</h3>
+          </div>
+        </mat-grid-tile>
+        }
+      </mat-grid-list>
+      <div class="kanban-task-body">
+        @for (col of columns(); track col.id) {
+        <div
+          class="kanban-task-column"
+          cdkDropList
+          [id]="'dropList_' + col.id + '_' + project.id"
+          [cdkDropListData]="
+            getProjectFilteredTasks(project.id, col.tasks) || []
+          "
+          [cdkDropListConnectedTo]="getConnectedDropListIds(project.id)"
+          (cdkDropListDropped)="onTaskDrop($event)"
+        >
+          @for (task of getProjectFilteredTasks(project.id, col.tasks); track
+          task.id) {
+          <app-kanban-card [data]="task" [cardType]="task.priority">
+            <mat-card-header>
+              <mat-card-title>{{ task.title }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>{{ task.description }}</p>
+            </mat-card-content>
+          </app-kanban-card>
 
- 
+          }
+        </div>
+        }
+      </div>
+    </mat-expansion-panel>
+    }
+  </mat-accordion>
 </div>

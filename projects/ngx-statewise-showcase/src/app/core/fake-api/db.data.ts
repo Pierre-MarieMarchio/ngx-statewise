@@ -198,31 +198,37 @@ export interface Project {
   id: string;
   organizationId: string;
   title: string;
+  color: string; 
 }
 export const PROJECT: Project[] = [
   {
     id: 'project-5',
     organizationId: 'org-3',
-    title: 'project-5',
+    title: 'Analytics Dashboard',
+    color: 'orange',
   },
   {
     id: 'project-4',
     organizationId: 'org-2',
-    title: 'project-4',
+    title: 'Customer Portal',
+    color: 'green',
   },
   {
     id: 'project-3',
     organizationId: 'org-2',
-    title: 'project-3',
+    title: 'Inventory Manager',
+    color: 'blue',
   },
   {
     id: 'project-2',
     organizationId: 'org-1',
-    title: 'project-2',
+    title: 'HR Platform',
+    color: 'purple',
   },
   {
     id: 'project-1',
     organizationId: 'org-1',
-    title: 'project-1',
+    title: 'Marketing Site',
+    color: 'pink',
   },
 ];

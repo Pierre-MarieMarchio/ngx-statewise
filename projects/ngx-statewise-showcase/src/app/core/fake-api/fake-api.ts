@@ -123,11 +123,14 @@ export class FakeApi {
     const userId = this.request.params.get('userId');
     const taskId = this.request.params.get('taskId');
 
-    console.log(body);
-    console.log(taskId);
-    console.log(userId);
+    if (!userId) return this.respond400Error('userId is missing');
+    const user = this.usersDB.findByUserId(userId);
 
-    return this.respondSuccess(body);
+    if (!user) return this.respond400Error('user does not exist');
+    if (!body) return this.respond400Error();
+
+    const res = this.taskDB.update(taskId!, body, user)
+    return this.respondSuccess(res);
   }
 
   private handleGetAllProject(): HttpResponse<unknown> {

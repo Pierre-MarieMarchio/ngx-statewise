@@ -36,16 +36,19 @@ export class ProjectTaskListComponent {
       columnDef: 'status',
       header: 'Status',
       cell: (element: Task) => `${element.status}`,
+      maxWidth: '200px',
     },
     {
       columnDef: 'priority',
       header: 'Priority',
       cell: (element: Task) => `${element.priority}`,
+      maxWidth: '200px',
     },
     {
       columnDef: 'organisation',
       header: 'Organisation',
       cell: (element: Task) => `${element.organizationId}`,
+      maxWidth: '200px',
       requiredRole: 'admin',
     },
   ];
