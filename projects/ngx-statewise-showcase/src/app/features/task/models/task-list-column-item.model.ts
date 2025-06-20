@@ -1,4 +1,5 @@
-import { Task } from './task.model';
+import { Task } from "@shared/app-common/models";
+
 
 export interface TaskListColumnItem {
   columnDef: string;

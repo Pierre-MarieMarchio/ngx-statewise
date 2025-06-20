@@ -3,7 +3,7 @@
 .light {
   background-color: var(--mat-sys-background);
   color: var(--mat-sys-on-background);
-
+  
   --color-secondary: #746e7c;
   --Icon-active: #0f0f11;
   @include mat.theme(

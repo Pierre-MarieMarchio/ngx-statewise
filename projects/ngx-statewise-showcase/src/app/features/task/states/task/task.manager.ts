@@ -4,7 +4,8 @@ import { TaskUpdator } from './task.updator';
 import { dispatch, dispatchAsync, registerLocalUpdator } from 'ngx-statewise';
 import { getAllTaskActions, taskReset, updateTaskActions } from './task.action';
 import { ITaskManager } from '@shared/app-common/tokens/task-manager/task-manager.interface';
-import { Task } from '../../models';
+import { Task } from '@shared/app-common/models';
+
 
 @Injectable({
   providedIn: 'root',

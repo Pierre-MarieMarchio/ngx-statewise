@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  input,
-  output,
-  signal,
-} from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import {
   CdkDragDrop,
   moveItemInArray,
@@ -15,44 +7,38 @@ import {
 } from '@angular/cdk/drag-drop';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatIconModule } from '@angular/material/icon';
+import { KanbanCardComponent } from '@shared/app-common/components';
 import { STATUSES, Task, TaskStatus } from '@shared/app-common/models';
 import { PROJECT_MANAGER, TASK_MANAGER } from '@shared/app-common/tokens';
-import { KanbanCardComponent } from '@shared/app-common/components';
 import {
   OptimisticStateUpdateService,
   StateRollbackService,
 } from '@app/core/services';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 @Component({
-  selector: 'app-task-kanban',
+  selector: 'app-dashbord-kanban',
   imports: [
-    MatGridListModule,
-    MatButtonModule,
-    MatIconModule,
-    MatCardModule,
-    MatExpansionModule,
     CdkDropList,
     KanbanCardComponent,
+    MatGridListModule,
+    MatCardModule,
+    MatExpansionModule,
   ],
-  templateUrl: './task-kanban.component.html',
-  styleUrl: './task-kanban.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './dashbord-kanban.component.html',
+  styleUrl: './dashbord-kanban.component.scss',
 })
-export class TaskKanbanComponent {
-  public tasks = input<Task[]>();
-  public taskChanged = output<Task>();
-
+export class DashbordKanbanComponent {
   private readonly taskManager = inject(TASK_MANAGER);
-  public readonly projectManager = inject(PROJECT_MANAGER);
+  private readonly projectManager = inject(PROJECT_MANAGER);
   private readonly stateRollbackService = inject(StateRollbackService);
   private readonly optimisticStateService = inject(
     OptimisticStateUpdateService
   );
 
   private readonly statuses = STATUSES;
+  public tasks = this.taskManager.tasks;
+  public tasksError = this.taskManager.isError;
   private readonly localTasks = signal<Task[]>([]);
   private readonly pendingUpdates = signal<Map<string, Task>>(new Map());
   private readonly destroyErrorRollback: () => void;
@@ -61,7 +47,7 @@ export class TaskKanbanComponent {
   constructor() {
     this.destroyErrorRollback = this.stateRollbackService.setupErrorRollback({
       isError: () => this.taskManager.isError(),
-      originalData: () => this.tasks(),
+      originalData: () => this.tasks()!,
       localData: this.localTasks,
       pendingUpdates: this.pendingUpdates,
       errorMessage: 'Error detected, rolling back kanban state',
@@ -69,7 +55,7 @@ export class TaskKanbanComponent {
 
     this.destroyOptimisticTasksState =
       this.optimisticStateService.setupOptimisticUpdates({
-        sourceData: () => this.tasks(),
+        sourceData: () => this.tasks()!,
         pendingUpdates: this.pendingUpdates,
         localData: this.localTasks,
         getEntityId: (task) => task.id,
@@ -110,7 +96,7 @@ export class TaskKanbanComponent {
 
   private handleCrossColumnMove(event: CdkDragDrop<Task[]>): void {
     const id = event.container.id;
-    const newStatus = id.slice('dropList_'.length, id.lastIndexOf('_'));
+    const newStatus = id.slice('dropList_'.length);
 
     if (!this.statuses.includes(newStatus as TaskStatus)) {
       console.warn(`invalid status detected: ${newStatus}`);
@@ -125,13 +111,12 @@ export class TaskKanbanComponent {
     );
 
     const updatedTask = this.updateTask(newStatus, event);
-
     const currentPending = this.pendingUpdates();
     const newPending = new Map(currentPending);
     newPending.set(updatedTask.id, updatedTask);
     this.pendingUpdates.set(newPending);
 
-    this.taskChanged.emit(updatedTask);
+    this.onTaskChangedhandler(updatedTask);
   }
 
   private updateTask(
@@ -148,14 +133,11 @@ export class TaskKanbanComponent {
     return updatedTask;
   }
 
-  public getProjectFilteredTasks(
-    projectId: string,
-    tasksToFilter: Task[]
-  ): Task[] {
-    return tasksToFilter?.filter((task) => task.projectId === projectId) || [];
+  private onTaskChangedhandler(updatedTask: Task): void {
+    this.taskManager.update(updatedTask);
   }
 
-  public getConnectedDropListIds(projectId: string) {
-    return this.statuses.map((status) => `dropList_${status}_${projectId}`);
+  public getConnectedDropListIds() {
+    return this.statuses.map((status) => `dropList_${status}`);
   }
 }

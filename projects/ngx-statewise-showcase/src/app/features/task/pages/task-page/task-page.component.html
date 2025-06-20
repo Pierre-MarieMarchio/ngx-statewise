@@ -1,7 +1,14 @@
 <app-side-panel #taskPanel>
-  <div class="panel-content" slot="view-content">
+  <div slot="view-content">
     <h1 class="task-page-header">TASK</h1>
     <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">view_kanban</mat-icon>
+          Kanban
+        </ng-template>
+        <app-task-kanban [tasks]="this.taskManager.tasks()!" (taskChanged)="onTaskChanged($event)"
+      /></mat-tab>
       <mat-tab>
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">view_list</mat-icon>
@@ -32,13 +39,7 @@
           [tasks]="this.taskManager.tasks()!"
         />
       </mat-tab>
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon class="tab-icon">view_kanban</mat-icon>
-          Kanban
-        </ng-template>
-        <app-task-kanban [tasks]="this.taskManager.tasks()!" (taskChanged)="onTaskChanged($event)"
-      /></mat-tab>
+      
     </mat-tab-group>
   </div>
 

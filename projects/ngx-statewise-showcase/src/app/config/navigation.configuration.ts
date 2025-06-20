@@ -16,9 +16,5 @@ export const navigationItems: NavigationItem[] = [
     label: 'Project',
     route: 'project',
   },
-  {
-    icon: 'Group',
-    label: 'Team',
-    route: 'team',
-  },
+
 ];

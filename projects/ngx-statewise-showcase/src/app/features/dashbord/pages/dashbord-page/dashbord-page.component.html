@@ -1,0 +1,11 @@
+<app-side-panel #dashbordPanel>
+  <div slot="view-content">
+    <app-dashbord-kanban></app-dashbord-kanban>
+  </div>
+
+  <app-task-details
+    slot="panel-content"
+    [selectedTask]="selectedTask()"
+    (close)="closeSideNav()"
+  />
+</app-side-panel>

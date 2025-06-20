@@ -37,7 +37,7 @@ export class AuthEffect {
         const res = await firstValueFrom(this.authRepository.login(payload));
 
         this.authToken.setAccessToken(res.body?.accessToken!);
-        this.authToken.setRefreshToken(this.tokenFactory.generateJWT());
+        this.authToken.setRefreshToken(this.tokenFactory.generateFakeJWT());
 
         return loginActions.success(res.body!);
       } catch {

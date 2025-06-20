@@ -1,7 +1,8 @@
 import { Component, computed, inject, input, output } from '@angular/core';
-import { Task, TaskListColumnItem } from '../../models';
+import { TaskListColumnItem } from '../../models';
 import { MatTableModule } from '@angular/material/table';
 import { AUTH_MANAGER } from '@shared/app-common/tokens';
+import { Task } from '@shared/app-common/models';
 
 @Component({
   selector: 'app-personal-task-list',

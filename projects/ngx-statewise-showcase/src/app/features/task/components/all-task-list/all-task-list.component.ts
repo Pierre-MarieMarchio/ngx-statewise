@@ -1,6 +1,7 @@
 import { Component, inject, input, output } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
-import { Task, TaskListColumnItem } from '@app/features/task/models';
+import { TaskListColumnItem } from '@app/features/task/models';
+import { Task } from '@shared/app-common/models';
 import { AUTH_MANAGER } from '@shared/app-common/tokens';
 
 @Component({

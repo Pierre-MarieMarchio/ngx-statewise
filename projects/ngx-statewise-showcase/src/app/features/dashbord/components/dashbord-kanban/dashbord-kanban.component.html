@@ -1,0 +1,43 @@
+<div class="dashbord-kanban-task-container">
+  
+  <div ><h2 class="dashbord-kanban-task-title">TASK KANBAN</h2></div>
+
+  <mat-grid-list
+    class="dashbord-kanban-task-header-section"
+    cols="3"
+    gutterSize="1rem"
+    rowHeight="2rem"
+  >
+    @for (col of columns(); track col.id) {
+    <mat-grid-tile class="dashbord-kanban-task-column-header">
+      <div class="dashbord-kanban-task-header">
+        <h3>{{ col.id }}</h3>
+      </div>
+    </mat-grid-tile>
+    }
+  </mat-grid-list>
+  <div class="dashbord-kanban-task-body">
+    @for (col of columns(); track col.id) {
+    <div
+      class="dashbord-kanban-task-column"
+      cdkDropList
+      [id]="'dropList_' + col.id"
+      [cdkDropListData]="col.tasks || []"
+      [cdkDropListConnectedTo]="getConnectedDropListIds()"
+      (cdkDropListDropped)="onTaskDrop($event)"
+    >
+      @for (task of col.tasks; track task.id) {
+      <app-kanban-card [data]="task" [cardType]="task.priority">
+        <mat-card-header>
+          <mat-card-title>{{ task.title }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ task.description }}</p>
+        </mat-card-content>
+      </app-kanban-card>
+
+      }
+    </div>
+    }
+  </div>
+</div>

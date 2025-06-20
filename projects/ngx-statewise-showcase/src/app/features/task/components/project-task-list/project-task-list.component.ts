@@ -6,10 +6,11 @@ import {
   output,
 } from '@angular/core';
 import { PROJECT_MANAGER } from '@shared/app-common/tokens';
-import { Task, TaskListColumnItem } from '../../models';
+import { TaskListColumnItem } from '../../models';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTableModule } from '@angular/material/table';
+import { Task } from '@shared/app-common/models';
 
 @Component({
   selector: 'app-project-task-list',

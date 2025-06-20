@@ -3,7 +3,8 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { User } from '@shared/app-common/models/auth-user.model';
-import { Task } from '../models/task.model';
+import { Task } from '@shared/app-common/models';
+
 
 @Injectable({
   providedIn: 'root',

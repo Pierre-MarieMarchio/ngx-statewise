@@ -1,14 +1,16 @@
 import { Component, inject, signal, ViewChild } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
-import { SidePanelComponent } from '@app/core/layouts/side-panel/side-panel.component';
-import { TaskDetailsComponent, AllTaskListComponent, PersonalTaskListComponent, ProjectTaskListComponent } from '../../components';
-import { Task } from '../../models';
-import { TaskKanbanComponent } from "../../components/task-kanban/task-kanban.component";
+import { Task } from '@shared/app-common/models';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
-
-
-
+import { SidePanelComponent } from '@app/core/layouts';
+import { TaskDetailsComponent } from '@shared/app-common/components';
+import {
+  TaskKanbanComponent,
+  AllTaskListComponent,
+  PersonalTaskListComponent,
+  ProjectTaskListComponent,
+} from '../../components';
 
 @Component({
   selector: 'app-task-page',
