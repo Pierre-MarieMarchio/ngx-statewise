@@ -1,0 +1,26 @@
+<mat-card class="dashbord-task-list-container">
+  <div><h2 class="dashbord-task-list-title">ALL TASK</h2></div>
+
+  <div class="dashbord-task-list-scroll">
+    <table mat-table [dataSource]="this.tasks()!">
+      @for (column of columns; track column) {
+      <ng-container [matColumnDef]="column.columnDef">
+        <th mat-header-cell *matHeaderCellDef>
+          {{ column.header }}
+        </th>
+        <td mat-cell *matCellDef="let row">
+          {{ column.cell(row) }}
+        </td>
+      </ng-container>
+      }
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr
+        mat-row
+        class="clickable-row"
+        (click)="selectTask(item)"
+        *matRowDef="let item; columns: displayedColumns"
+      ></tr>
+    </table>
+  </div>
+</mat-card>

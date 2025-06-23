@@ -1,13 +1,14 @@
 import { Component, inject, signal, ViewChild } from '@angular/core';
-import { DashbordKanbanComponent } from '../../components';
+import { DashbordKanbanComponent, DashbordTaskListComponent } from '../../components';
 import { SidePanelComponent } from '@app/core/layouts';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
 import { Task } from '@shared/app-common/models';
 import { TaskDetailsComponent } from '@shared/app-common/components';
 
+
 @Component({
   selector: 'app-dashbord-page',
-  imports: [DashbordKanbanComponent, SidePanelComponent, TaskDetailsComponent],
+  imports: [DashbordKanbanComponent, SidePanelComponent, TaskDetailsComponent, DashbordTaskListComponent],
   templateUrl: './dashbord-page.component.html',
   styleUrl: './dashbord-page.component.scss',
   host: {

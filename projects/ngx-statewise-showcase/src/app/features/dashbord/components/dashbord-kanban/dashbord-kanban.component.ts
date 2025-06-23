@@ -7,14 +7,14 @@ import {
 } from '@angular/cdk/drag-drop';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { KanbanCardComponent } from '@shared/app-common/components';
 import { STATUSES, Task, TaskStatus } from '@shared/app-common/models';
-import { PROJECT_MANAGER, TASK_MANAGER } from '@shared/app-common/tokens';
+import { TASK_MANAGER } from '@shared/app-common/tokens';
 import {
   OptimisticStateUpdateService,
   StateRollbackService,
 } from '@app/core/services';
-import { MatExpansionModule } from '@angular/material/expansion';
 
 @Component({
   selector: 'app-dashbord-kanban',
@@ -30,7 +30,6 @@ import { MatExpansionModule } from '@angular/material/expansion';
 })
 export class DashbordKanbanComponent {
   private readonly taskManager = inject(TASK_MANAGER);
-  private readonly projectManager = inject(PROJECT_MANAGER);
   private readonly stateRollbackService = inject(StateRollbackService);
   private readonly optimisticStateService = inject(
     OptimisticStateUpdateService
