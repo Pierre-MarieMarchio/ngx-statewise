@@ -8,7 +8,12 @@ import { TaskDetailsComponent } from '@shared/app-common/components';
 
 @Component({
   selector: 'app-dashbord-page',
-  imports: [DashbordKanbanComponent, SidePanelComponent, TaskDetailsComponent, DashbordTaskListComponent],
+  imports: [
+    DashbordKanbanComponent,
+    SidePanelComponent,
+    TaskDetailsComponent,
+    DashbordTaskListComponent,
+  ],
   templateUrl: './dashbord-page.component.html',
   styleUrl: './dashbord-page.component.scss',
   host: {
@@ -16,7 +21,7 @@ import { TaskDetailsComponent } from '@shared/app-common/components';
   },
 })
 export class DashbordPageComponent {
-  @ViewChild('taskPanel') dashbordPanel!: SidePanelComponent;
+  @ViewChild('dashbordPanel') dashbordPanel!: SidePanelComponent;
 
   public readonly taskManager = inject(TASK_MANAGER);
 

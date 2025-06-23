@@ -24,6 +24,7 @@
 
   --color-secondary: rgb(164, 160, 170);
   --Icon-active: #f3f3f3;
+  --mat-sys-surface: #262627 !important;
   @include mat.theme(
     (
       color: (
@@ -40,10 +41,6 @@
   );
 }
 
-.light,
-.dark {
-  transition: background-color 0.5s ease, color 0.5s ease !important;
-}
 
 .color-secondary {
   color: var(--color-secondary);
