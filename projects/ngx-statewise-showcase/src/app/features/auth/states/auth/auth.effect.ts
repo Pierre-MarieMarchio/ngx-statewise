@@ -15,19 +15,20 @@ import {
   AuthNotificationService,
 } from '../../services';
 import { TASK_MANAGER } from '@shared/app-common/tokens/task-manager/task-manager.token';
+import { PROJECT_MANAGER } from '@shared/app-common/tokens';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthEffect {
+  private readonly projectManager = inject(PROJECT_MANAGER);
+  private readonly taskManager = inject(TASK_MANAGER);
   private readonly authRepository = inject(AuthRepositoryService);
   private readonly authToken = inject(AuthTokenService);
   private readonly authTokenHelper = inject(AuthTokenHelperService);
   private readonly router = inject(Router);
   private readonly notification = inject(AuthNotificationService);
   private readonly tokenFactory = inject(TokenService);
-
-  private readonly taskManager = inject(TASK_MANAGER);
 
   public readonly loginRequestEffect = createEffect(
     loginActions.request,
@@ -36,7 +37,7 @@ export class AuthEffect {
         const res = await firstValueFrom(this.authRepository.login(payload));
 
         this.authToken.setAccessToken(res.body?.accessToken!);
-        this.authToken.setRefreshToken(this.tokenFactory.generateJWT());
+        this.authToken.setRefreshToken(this.tokenFactory.generateFakeJWT());
 
         return loginActions.success(res.body!);
       } catch {
@@ -48,8 +49,10 @@ export class AuthEffect {
   public readonly loginSuccessEffect = createEffect(
     loginActions.success,
     () => {
+      this.projectManager.getAll();
+      this.taskManager.getAll();
       this.router.navigate(['/']);
-      this.notification.loginSuccess();
+
     }
   );
 
@@ -67,36 +70,35 @@ export class AuthEffect {
       const refreshToken = this.authToken.getRefreshToken();
 
       if (!refreshToken) {
-        console.log('!ref to ');
         return authenticateActions.failure();
       }
 
-      if (!accessToken) {
-        try {
-          const res = await firstValueFrom(this.authRepository.authenticate());
-          const newToken = this.authToken.setNewAccessTokenFromResponse(res);
-          const decoded = this.authTokenHelper.decode(newToken);
-
-          return decoded
-            ? authenticateActions.success(
-                this.authTokenHelper.getPayload(decoded)
-              )
-            : authenticateActions.failure();
-        } catch (error) {
-          console.error('Authentication error:', error);
-          return authenticateActions.failure();
-        }
-      } else {
+      if (accessToken) {
         const decoded = this.authTokenHelper.decode(accessToken);
         const now = Math.floor(Date.now() / 1000);
 
-        if (!decoded || (decoded.exp && decoded.exp < now)) {
+        if (!decoded || decoded.exp < now) {
           return authenticateActions.failure();
         }
 
         return authenticateActions.success(
           this.authTokenHelper.getPayload(decoded)
         );
+      }
+
+      try {
+        const res = await firstValueFrom(this.authRepository.authenticate());
+        const newToken = this.authToken.setNewAccessTokenFromResponse(res);
+        const decoded = this.authTokenHelper.decode(newToken);
+
+        return decoded
+          ? authenticateActions.success(
+              this.authTokenHelper.getPayload(decoded)
+            )
+          : authenticateActions.failure();
+      } catch (error) {
+        console.error('Authentication error:', error);
+        return authenticateActions.failure();
       }
     }
   );
@@ -117,13 +119,24 @@ export class AuthEffect {
     }
   );
 
+  public readonly authenticateSuccessEffect = createEffect(
+    authenticateActions.success,
+    () => {
+      this.projectManager.getAll();
+      this.taskManager.getAll();
+    }
+  );
+
   public readonly logoutRequestEffect = createEffect(
     logoutActions.request,
     async () => {
       try {
+
+        await firstValueFrom(this.authRepository.logout());
+        
         await Promise.all([
           this.taskManager.reset(),
-          firstValueFrom(this.authRepository.logout()),
+          this.projectManager.reset(),
         ]);
 
         return logoutActions.success();

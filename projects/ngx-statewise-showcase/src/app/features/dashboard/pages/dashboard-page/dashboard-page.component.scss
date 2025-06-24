@@ -1,0 +1,31 @@
+.dashboard-container {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 2fr 3fr;
+}
+
+.dashboard-page-header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+
+  .dashboard-page-header {
+    font-size: 3rem;
+    margin: 0rem;
+  }
+}
+
+app-dashboard-kanban,
+app-dashboard-task-list {
+  width: auto;
+  max-height: 60vh;
+}
+
+@media (max-width: 1080px) {
+  .dashboard-container {
+    grid-template-columns: 1fr;
+  }
+}

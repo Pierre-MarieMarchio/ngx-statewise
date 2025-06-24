@@ -1,0 +1,11 @@
+.project-task-list-container {
+  box-sizing: border-box;
+  padding-top: 1rem;
+  min-height: calc(100vh - 187px);
+
+  .project-task-list-expansion-panel {
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+}

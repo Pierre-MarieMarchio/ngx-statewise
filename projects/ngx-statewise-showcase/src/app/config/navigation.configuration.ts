@@ -11,14 +11,5 @@ export const navigationItems: NavigationItem[] = [
     label: 'Task',
     route: 'task',
   },
-  {
-    icon: 'Folder_Open',
-    label: 'Project',
-    route: 'project',
-  },
-  {
-    icon: 'Group',
-    label: 'Team',
-    route: 'team',
-  },
+
 ];
