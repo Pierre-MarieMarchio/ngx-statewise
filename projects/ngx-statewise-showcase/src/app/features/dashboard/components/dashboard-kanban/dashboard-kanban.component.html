@@ -1,25 +1,24 @@
-<mat-card class="dashbord-kanban-task-container">
-  
-  <div ><h2 class="dashbord-kanban-task-title">TASK KANBAN</h2></div>
+<mat-card class="dashboard-kanban-task-container">
+  <div><h2 class="dashboard-kanban-task-title">TASK KANBAN</h2></div>
 
   <mat-grid-list
-    class="dashbord-kanban-task-header-section"
+    class="dashboard-kanban-task-header-section"
     cols="3"
     gutterSize="1rem"
     rowHeight="2rem"
   >
     @for (col of columns(); track col.id) {
-    <mat-grid-tile class="dashbord-kanban-task-column-header">
-      <div class="dashbord-kanban-task-header">
+    <mat-grid-tile class="dashboard-kanban-task-column-header">
+      <div class="dashboard-kanban-task-header">
         <h3>{{ col.id }}</h3>
       </div>
     </mat-grid-tile>
     }
   </mat-grid-list>
-  <div class="dashbord-kanban-task-body">
+  <div class="dashboard-kanban-task-body">
     @for (col of columns(); track col.id) {
     <div
-      class="dashbord-kanban-task-column"
+      class="dashboard-kanban-task-column"
       cdkDropList
       [id]="'dropList_' + col.id"
       [cdkDropListData]="col.tasks || []"
@@ -41,4 +40,3 @@
     }
   </div>
 </mat-card>
- 

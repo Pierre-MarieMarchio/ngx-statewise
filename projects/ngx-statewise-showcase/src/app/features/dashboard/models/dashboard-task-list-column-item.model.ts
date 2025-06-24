@@ -1,7 +1,6 @@
-import { Task } from "@shared/app-common/models";
+import { Task } from '@shared/app-common/models';
 
-
-export interface DashbordTaskListColumnItem {
+export interface DashboardTaskListColumnItem {
   columnDef: string;
   header: string;
   cell: (element: Task) => string;

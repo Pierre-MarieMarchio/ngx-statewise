@@ -17,7 +17,7 @@ import {
 } from '@app/core/services';
 
 @Component({
-  selector: 'app-dashbord-kanban',
+  selector: 'app-dashboard-kanban',
   imports: [
     CdkDropList,
     KanbanCardComponent,
@@ -25,10 +25,10 @@ import {
     MatCardModule,
     MatExpansionModule,
   ],
-  templateUrl: './dashbord-kanban.component.html',
-  styleUrl: './dashbord-kanban.component.scss',
+  templateUrl: './dashboard-kanban.component.html',
+  styleUrl: './dashboard-kanban.component.scss',
 })
-export class DashbordKanbanComponent {
+export class DashboardKanbanComponent {
   private readonly taskManager = inject(TASK_MANAGER);
   private readonly stateRollbackService = inject(StateRollbackService);
   private readonly optimisticStateService = inject(

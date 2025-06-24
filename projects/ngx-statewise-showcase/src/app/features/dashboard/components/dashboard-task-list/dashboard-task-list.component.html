@@ -1,7 +1,7 @@
-<mat-card class="dashbord-task-list-container">
-  <div><h2 class="dashbord-task-list-title">ALL TASK</h2></div>
+<mat-card class="dashboard-task-list-container">
+  <div><h2 class="dashboard-task-list-title">ALL TASK</h2></div>
 
-  <div class="dashbord-task-list-scroll">
+  <div class="dashboard-task-list-scroll">
     <table mat-table [dataSource]="this.tasks()!">
       @for (column of columns; track column) {
       <ng-container [matColumnDef]="column.columnDef">

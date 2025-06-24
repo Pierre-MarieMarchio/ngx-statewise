@@ -1,0 +1,16 @@
+<app-side-panel #dashboardPanel>
+  <div class="dashboard-page-header-container">
+    <h1 class="dashboard-page-header">Dashboard</h1>
+  </div>
+  <app-dashboard-user-picker />
+  <div class="dashboard-container" slot="view-content">
+    <app-dashboard-task-list (taskSelected)="selectTask($event)" />
+    <app-dashboard-kanban />
+  </div>
+
+  <app-task-details
+    slot="panel-content"
+    [selectedTask]="selectedTask()"
+    (close)="closeSideNav()"
+  />
+</app-side-panel>

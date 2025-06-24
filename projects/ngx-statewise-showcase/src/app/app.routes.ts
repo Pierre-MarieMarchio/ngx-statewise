@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { LandingPageComponent } from './features/landing-page/landing-page.component';
 import { LoginPageComponent } from './features/auth/pages/login-page.component';
-import { DashbordPageComponent } from './features/dashbord/pages';
+import { DashboardPageComponent } from './features/dashboard/pages';
 import { TaskPageComponent } from './features/task/pages';
 import { loggedInGuard, loggedOutGuard } from './features/auth/guards';
 import { ProjectsPageComponent } from './features/project/pages';
@@ -21,7 +21,7 @@ export const routes: Routes = [
   },
   {
     path: 'home',
-    component: DashbordPageComponent,
+    component: DashboardPageComponent,
     title: 'Ngx-Statewise',
     canActivate: [loggedOutGuard],
   },

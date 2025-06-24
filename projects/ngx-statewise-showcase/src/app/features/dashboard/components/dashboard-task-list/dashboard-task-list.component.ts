@@ -1,27 +1,27 @@
 import { Component, inject, output } from '@angular/core';
 import { Task } from '@shared/app-common/models';
 import { AUTH_MANAGER, TASK_MANAGER } from '@shared/app-common/tokens';
-import { DashbordTaskListColumnItem } from '../../models';
+import { DashboardTaskListColumnItem } from '../../models';
 import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 
 @Component({
-  selector: 'app-dashbord-task-list',
+  selector: 'app-dashboard-task-list',
   imports: [MatTableModule, MatCardModule],
-  templateUrl: './dashbord-task-list.component.html',
-  styleUrl: './dashbord-task-list.component.scss',
+  templateUrl: './dashboard-task-list.component.html',
+  styleUrl: './dashboard-task-list.component.scss',
 })
-export class DashbordTaskListComponent {
+export class DashboardTaskListComponent {
   public taskSelected = output<Task>();
 
   private readonly authManager = inject(AUTH_MANAGER);
   private readonly taskManager = inject(TASK_MANAGER);
 
   public tasks = this.taskManager.tasks;
-  public columns: DashbordTaskListColumnItem[] = [];
+  public columns: DashboardTaskListColumnItem[] = [];
   public displayedColumns: string[] = [];
 
-  private readonly allColumns: DashbordTaskListColumnItem[] = [
+  private readonly allColumns: DashboardTaskListColumnItem[] = [
     {
       columnDef: 'title',
       header: 'Title',

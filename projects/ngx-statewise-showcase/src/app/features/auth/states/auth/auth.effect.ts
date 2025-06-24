@@ -52,7 +52,7 @@ export class AuthEffect {
       this.projectManager.getAll();
       this.taskManager.getAll();
       this.router.navigate(['/']);
-      this.notification.loginSuccess();
+
     }
   );
 
@@ -131,10 +131,12 @@ export class AuthEffect {
     logoutActions.request,
     async () => {
       try {
+
+        await firstValueFrom(this.authRepository.logout());
+        
         await Promise.all([
           this.taskManager.reset(),
           this.projectManager.reset(),
-          firstValueFrom(this.authRepository.logout()),
         ]);
 
         return logoutActions.success();

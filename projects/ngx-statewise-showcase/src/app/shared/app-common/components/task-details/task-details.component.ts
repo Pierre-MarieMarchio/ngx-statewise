@@ -51,9 +51,9 @@ export class TaskDetailsComponent {
   getStatusColor(status: TaskStatus): string {
     switch (status) {
       case 'todo':
-        return 'primary'; 
+        return 'primary';
       case 'in-progress':
-        return 'accent'; 
+        return 'accent';
       case 'done':
         return 'warn';
       default:
@@ -64,11 +64,11 @@ export class TaskDetailsComponent {
   getPriorityColor(priority: TaskPriority): string {
     switch (priority) {
       case 'low':
-        return 'primary'; 
+        return 'primary';
       case 'medium':
         return 'accent';
       case 'high':
-        return 'warn'; 
+        return 'warn';
       default:
         return 'primary';
     }
@@ -108,8 +108,13 @@ export class TaskDetailsComponent {
     });
   }
 
-  isDueDateOverdue(dueDate?: string): boolean {
+  isDueDateOverdue(dueDate?: string, status?: TaskStatus): boolean {
     if (!dueDate) return false;
+
+    if (new Date(dueDate) < new Date() && status === 'done') {
+      return false;
+    }
+
     return new Date(dueDate) < new Date();
   }
 }
