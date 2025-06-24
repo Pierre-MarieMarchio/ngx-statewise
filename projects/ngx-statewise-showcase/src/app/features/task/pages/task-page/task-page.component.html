@@ -1,0 +1,51 @@
+<app-side-panel #taskPanel>
+  <div slot="view-content">
+    <h1 class="task-page-header">TASK</h1>
+    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">view_kanban</mat-icon>
+          Kanban
+        </ng-template>
+        <app-task-kanban [tasks]="this.taskManager.tasks()!" (taskChanged)="onTaskChanged($event)"
+      /></mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">view_list</mat-icon>
+          All Tasks
+        </ng-template>
+        <app-all-task-list
+          (taskSelected)="selectTask($event)"
+          [tasks]="this.taskManager.tasks()!"
+        />
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">person</mat-icon>
+          My Tasks
+        </ng-template>
+        <app-personal-task-list
+          (taskSelected)="selectTask($event)"
+          [allTasks]="this.taskManager.tasks()!"
+        />
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">construction</mat-icon>
+          Projects
+        </ng-template>
+        <app-project-task-list
+          (taskSelected)="selectTask($event)"
+          [tasks]="this.taskManager.tasks()!"
+        />
+      </mat-tab>
+      
+    </mat-tab-group>
+  </div>
+
+  <app-task-details
+    slot="panel-content"
+    [selectedTask]="selectedTask()"
+    (close)="closeSideNav()"
+  />
+</app-side-panel>

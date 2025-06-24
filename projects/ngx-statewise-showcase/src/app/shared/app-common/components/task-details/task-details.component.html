@@ -1,0 +1,173 @@
+@if (selectedTask()) {
+
+<div class="task-header">
+  <div class="header-content">
+    <h2 class="header-title">TASK DETAILS</h2>
+  </div>
+  <button mat-icon-button class="close-btn" (click)="onCloseClick()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<div class="task-content">
+  <div class="task-title-section">
+    <h2 class="task-title">{{ selectedTask()!.title }}</h2>
+  </div>
+
+  <div class="task-meta">
+    <mat-chip-set>
+      <mat-chip [class]="'status-' + selectedTask()!.status" selected>
+        <mat-icon matChipAvatar>{{
+          getStatusIcon(selectedTask()!.status)
+        }}</mat-icon>
+        {{ selectedTask()!.status | titlecase }}
+      </mat-chip>
+      <mat-chip [class]="'priority-' + selectedTask()!.priority" selected>
+        <mat-icon matChipAvatar>{{
+          getPriorityIcon(selectedTask()!.priority)
+        }}</mat-icon>
+        {{ selectedTask()!.priority | titlecase }}
+      </mat-chip>
+    </mat-chip-set>
+  </div>
+
+  <mat-divider class="section-divider"></mat-divider>
+
+  <mat-tab-group class="details-tabs" mat-stretch-tabs="false">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">info</mat-icon>
+        Preview
+      </ng-template>
+
+      <div class="tab-content">
+        @if (selectedTask()!.description) {
+        <div class="detail-section">
+          <div class="section-header">
+            <mat-icon>description</mat-icon>
+            <h3>Description</h3>
+          </div>
+          <div class="description-content">
+            <p>{{ selectedTask()!.description }}</p>
+          </div>
+        </div>
+        } @if (selectedTask()!.dueDate) {
+        <div class="detail-section">
+          <div class="section-header">
+            <mat-icon
+              [class.overdue]="
+                isDueDateOverdue(
+                  selectedTask()!.dueDate,
+                  selectedTask()?.status
+                )
+              "
+            >
+              schedule
+            </mat-icon>
+            <h3>Due date</h3>
+          </div>
+          @if (selectedTask()!.dueDate) {
+          <div
+            class="due-date-content"
+            [class.overdue]="
+              isDueDateOverdue(selectedTask()!.dueDate, selectedTask()?.status)
+            "
+          >
+            <span>{{ formatDate(selectedTask()!.dueDate!) }}</span>
+            @if (isDueDateOverdue(selectedTask()!.dueDate,
+            selectedTask()?.status)) {
+            <mat-icon class="warning-icon">warning</mat-icon>
+            }
+          </div>
+          }
+        </div>
+        } @if (selectedTask()!.assignedUserIds &&
+        selectedTask()!.assignedUserIds!.length > 0) {
+        <div class="detail-section">
+          <div class="section-header">
+            <mat-icon>people</mat-icon>
+            <h3>Assigned users</h3>
+          </div>
+          <div class="users-content">
+            <mat-chip-set>
+              @for (userId of selectedTask()!.assignedUserIds; track userId) {
+              <mat-chip color="primary">
+                <mat-icon matChipAvatar>person</mat-icon>
+                {{ userId }}
+              </mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        </div>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- Details Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">settings</mat-icon>
+        Détails
+      </ng-template>
+      <div class="tab-content">
+        <div class="metadata-grid">
+          <div class="metadata-item">
+            <div class="metadata-label">
+              <mat-icon>fingerprint</mat-icon>
+              <strong>ID de la tâche</strong>
+            </div>
+            <span class="metadata-value">{{ selectedTask()!.id }}</span>
+          </div>
+
+          <div class="metadata-item">
+            <div class="metadata-label">
+              <mat-icon>folder</mat-icon>
+              <strong>Projet</strong>
+            </div>
+            <span class="metadata-value">{{ selectedTask()!.projectId }}</span>
+          </div>
+
+          <div class="metadata-item">
+            <div class="metadata-label">
+              <mat-icon>business</mat-icon>
+              <strong>Organisation</strong>
+            </div>
+            <span class="metadata-value">{{
+              selectedTask()!.organizationId
+            }}</span>
+          </div>
+
+          <div class="metadata-item">
+            <div class="metadata-label">
+              <mat-icon>add_circle</mat-icon>
+              <strong>Créé le</strong>
+            </div>
+            <span class="metadata-value">{{
+              formatDate(selectedTask()!.createdAt)
+            }}</span>
+          </div>
+
+          <div class="metadata-item">
+            <div class="metadata-label">
+              <mat-icon>edit</mat-icon>
+              <strong>Modifié le</strong>
+            </div>
+            <span class="metadata-value">{{
+              formatDate(selectedTask()!.updatedAt)
+            }}</span>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+} @else {
+<div class="empty-state">
+  <div class="empty-content">
+    <mat-icon class="empty-icon">assignment</mat-icon>
+    <h3>No Task Selected</h3>
+    <p>Select a task from the list to view its details</p>
+  </div>
+</div>
+}
