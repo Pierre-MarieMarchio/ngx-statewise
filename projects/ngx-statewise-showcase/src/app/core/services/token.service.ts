@@ -14,7 +14,7 @@ export class TokenService {
     return result;
   }
 
-  generateJWT(): string {
+  generateFakeJWT(): string {
     const headerLength = 36;
     const payloadLength = 350;
     const signatureLength = 43;

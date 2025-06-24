@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
 import { LandingPageComponent } from './features/landing-page/landing-page.component';
 import { LoginPageComponent } from './features/auth/pages/login-page.component';
-import { HomeComponent } from './features/dashbord/pages/dashbord.component';
-import { ProjectsPageComponent, TaskPageComponent, TeamsPageComponent } from './features/project-management/pages';
+import { DashboardPageComponent } from './features/dashboard/pages';
+import { TaskPageComponent } from './features/task/pages';
 import { loggedInGuard, loggedOutGuard } from './features/auth/guards';
-
+import { ProjectsPageComponent } from './features/project/pages';
 
 export const routes: Routes = [
   {
@@ -21,7 +21,7 @@ export const routes: Routes = [
   },
   {
     path: 'home',
-    component: HomeComponent,
+    component: DashboardPageComponent,
     title: 'Ngx-Statewise',
     canActivate: [loggedOutGuard],
   },
@@ -34,12 +34,6 @@ export const routes: Routes = [
   {
     path: 'project',
     component: ProjectsPageComponent,
-    title: 'Ngx-Statewise',
-    canActivate: [loggedOutGuard],
-  },
-  {
-    path: 'team',
-    component: TeamsPageComponent,
     title: 'Ngx-Statewise',
     canActivate: [loggedOutGuard],
   },

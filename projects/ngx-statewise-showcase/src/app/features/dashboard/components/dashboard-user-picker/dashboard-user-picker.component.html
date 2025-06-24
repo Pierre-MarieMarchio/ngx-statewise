@@ -1,0 +1,9 @@
+<mat-button-toggle-group
+  name="UserSelection"
+  (change)="onSelectionChange($event)"
+  [value]="getCurrentUserEmail()"
+>
+  <mat-button-toggle value="admin">Admin</mat-button-toggle>
+  <mat-button-toggle value="user1">User 1</mat-button-toggle>
+  <mat-button-toggle value="user2">User 2</mat-button-toggle>
+</mat-button-toggle-group>

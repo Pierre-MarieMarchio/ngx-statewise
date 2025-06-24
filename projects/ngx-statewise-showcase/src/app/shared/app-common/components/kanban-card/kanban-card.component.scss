@@ -1,0 +1,26 @@
+.kanban-card {
+  flex-shrink: 0;
+  background-color: var(--mat-sys-background, #fff);
+  margin-bottom: 1rem;
+}
+
+.card-type-indicator {
+  border-left: 4px solid;
+  border-radius: 0.5rem;
+}
+
+.indicator-high {
+  border-left-color: #f44336;
+}
+
+.indicator-medium {
+  border-left-color: #2196f3;
+}
+
+.indicator-low {
+  border-left-color: #4caf50;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.3, 1);
+}
