@@ -1,8 +1,9 @@
 import { Component, inject, input, output } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
-import { TaskListColumnItem } from '@app/features/task/models';
 import { Task } from '@shared/app-common/models';
 import { AUTH_MANAGER } from '@shared/app-common/tokens';
+import { DynamicTableColumnsService } from '@shared/app-common/services';
+import { TASK_TABLE_COLUMNS } from '@shared/app-common/configs';
 
 @Component({
   selector: 'app-all-task-list',
@@ -11,44 +12,21 @@ import { AUTH_MANAGER } from '@shared/app-common/tokens';
   styleUrl: './all-task-list.component.scss',
 })
 export class AllTaskListComponent {
-  private readonly authManager = inject(AUTH_MANAGER);
   public tasks = input<Task[]>();
   public taskSelected = output<Task>();
 
-  public columns: TaskListColumnItem[] = [];
-  public displayedColumns: string[] = [];
+  private readonly authManager = inject(AUTH_MANAGER);
+  private readonly tableColumnsService = inject(DynamicTableColumnsService);
 
-  private readonly allColumns: TaskListColumnItem[] = [
-    {
-      columnDef: 'title',
-      header: 'Title',
-      cell: (element: Task) => `${element.title}`,
-    },
-    {
-      columnDef: 'status',
-      header: 'Status',
-      cell: (element: Task) => `${element.status}`,
-    },
-    {
-      columnDef: 'priority',
-      header: 'Priority',
-      cell: (element: Task) => `${element.priority}`,
-    },
-    {
-      columnDef: 'organisation',
-      header: 'Organisation',
-      cell: (element: Task) => `${element.organizationId}`,
-      requiredRole: 'admin',
-    },
-  ];
-
-  ngOnInit() {
-    this.columns = this.allColumns.filter(
-      (col) =>
-        !col.requiredRole || col.requiredRole === this.authManager.user()?.role
+  public readonly allColumns = TASK_TABLE_COLUMNS;
+  public readonly displayedColumns =
+    this.tableColumnsService.getDisplayedColumns(
+      this.allColumns,
+      this.authManager.user
     );
-    this.displayedColumns = this.columns.map((c) => c.columnDef);
-  }
+  public readonly columnKeys = this.tableColumnsService.getColumnKeys(
+    this.displayedColumns
+  );
 
   selectTask(task: Task) {
     this.taskSelected.emit(task);

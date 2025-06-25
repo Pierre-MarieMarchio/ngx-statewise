@@ -1,8 +1,10 @@
-import { Component, computed, inject, input, output } from '@angular/core';
-import { TaskListColumnItem } from '../../models';
+import { Component, inject, input, output } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { AUTH_MANAGER } from '@shared/app-common/tokens';
 import { Task } from '@shared/app-common/models';
+import { DynamicTableColumnsService } from '@shared/app-common/services';
+import { TASK_TABLE_COLUMNS } from '@shared/app-common/configs';
+import { TaskFilterService } from '../../services';
 
 @Component({
   selector: 'app-personal-task-list',
@@ -11,46 +13,27 @@ import { Task } from '@shared/app-common/models';
   styleUrl: './personal-task-list.component.scss',
 })
 export class PersonalTaskListComponent {
-  public allTasks = input<Task[]>();
+  public allTasks = input.required<Task[]>();
   public taskSelected = output<Task>();
+
   private readonly authManager = inject(AUTH_MANAGER);
+  private readonly tableColumnsService = inject(DynamicTableColumnsService);
+  private readonly taskFilterService = inject(TaskFilterService);
 
-  public tasks = computed(() => {
-    const tasks = this.allTasks() || [];
-    const currentUser = this.authManager.user();
-    const currentUserId = currentUser?.userId;
-
-    if (!currentUserId || !tasks.length) {
-      return [];
-    }
-
-    return tasks.filter((task) =>
-      task.assignedUserIds?.includes(currentUserId)
+  public readonly allColumns = TASK_TABLE_COLUMNS;
+  public readonly displayedColumns =
+    this.tableColumnsService.getDisplayedColumns(
+      this.allColumns,
+      this.authManager.user
     );
-  });
+  public readonly columnKeys = this.tableColumnsService.getColumnKeys(
+    this.displayedColumns
+  );
 
-  public displayedColumns: string[] = [];
-  public readonly columns: TaskListColumnItem[] = [
-    {
-      columnDef: 'title',
-      header: 'Title',
-      cell: (element: Task) => `${element.title}`,
-    },
-    {
-      columnDef: 'status',
-      header: 'Status',
-      cell: (element: Task) => `${element.status}`,
-    },
-    {
-      columnDef: 'priority',
-      header: 'Priority',
-      cell: (element: Task) => `${element.priority}`,
-    },
-  ];
-
-  ngOnInit() {
-    this.displayedColumns = this.columns.map((c) => c.columnDef);
-  }
+  public tasks = this.taskFilterService.getPersonalTasks(
+    this.allTasks,
+    this.authManager.user
+  );
 
   selectTask(task: Task) {
     this.taskSelected.emit(task);

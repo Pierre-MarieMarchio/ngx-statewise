@@ -1,6 +1,6 @@
 <div class="project-task-list-container">
   <mat-accordion displayMode="flat" multi>
-    @for (project of this.projectManager.projects(); track $index) {
+    @for (project of projects(); track $index) {
     <mat-expansion-panel
       togglePosition="before"
       class="project-task-list-expansion-panel"
@@ -12,7 +12,7 @@
       </mat-expansion-panel-header>
 
       <table mat-table [dataSource]="getFilteredTasks(project.id)">
-        @for (column of columns; track column) {
+        @for (column of displayedColumns(); track column) {
         <ng-container [matColumnDef]="column.columnDef">
           <th mat-header-cell *matHeaderCellDef [style.width]="column.maxWidth">
             {{ column.header }}
@@ -23,12 +23,12 @@
         </ng-container>
         }
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-header-row *matHeaderRowDef="columnKeys()"></tr>
         <tr
           mat-row
           class="clickable-row"
           (click)="selectTask(item)"
-          *matRowDef="let item; columns: displayedColumns"
+          *matRowDef="let item; columns: columnKeys()"
         ></tr>
       </table>
     </mat-expansion-panel>

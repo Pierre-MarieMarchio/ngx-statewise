@@ -9,12 +9,13 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { KanbanCardComponent } from '@shared/app-common/components';
-import { STATUSES, Task, TaskStatus } from '@shared/app-common/models';
+import { Task, TaskStatus } from '@shared/app-common/models';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
 import {
   OptimisticStateUpdateService,
   StateRollbackService,
 } from '@app/core/services';
+import { STATUSES } from '@shared/app-common/configs';
 
 @Component({
   selector: 'app-dashboard-kanban',

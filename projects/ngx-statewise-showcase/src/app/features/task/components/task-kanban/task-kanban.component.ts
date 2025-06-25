@@ -18,13 +18,14 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
-import { STATUSES, Task, TaskStatus } from '@shared/app-common/models';
+import { Task, TaskStatus } from '@shared/app-common/models';
 import { PROJECT_MANAGER, TASK_MANAGER } from '@shared/app-common/tokens';
 import { KanbanCardComponent } from '@shared/app-common/components';
 import {
   OptimisticStateUpdateService,
   StateRollbackService,
 } from '@app/core/services';
+import { STATUSES } from '@shared/app-common/configs';
 
 @Component({
   selector: 'app-task-kanban',

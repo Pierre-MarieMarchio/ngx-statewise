@@ -1,4 +1,4 @@
-import { Component, inject, output } from '@angular/core';
+import { Component, computed, inject, output, Signal } from '@angular/core';
 import { Task } from '@shared/app-common/models';
 import { AUTH_MANAGER, TASK_MANAGER } from '@shared/app-common/tokens';
 import { DashboardTaskListColumnItem } from '../../models';
@@ -17,9 +17,8 @@ export class DashboardTaskListComponent {
   private readonly authManager = inject(AUTH_MANAGER);
   private readonly taskManager = inject(TASK_MANAGER);
 
-  public tasks = this.taskManager.tasks;
-  public columns: DashboardTaskListColumnItem[] = [];
-  public displayedColumns: string[] = [];
+  private readonly user = this.authManager.user;
+  public readonly tasks = this.taskManager.tasks;
 
   private readonly allColumns: DashboardTaskListColumnItem[] = [
     {
@@ -45,13 +44,15 @@ export class DashboardTaskListComponent {
     },
   ];
 
-  ngOnInit() {
-    this.columns = this.allColumns.filter(
-      (col) =>
-        !col.requiredRole || col.requiredRole === this.authManager.user()?.role
-    );
-    this.displayedColumns = this.columns.map((c) => c.columnDef);
-  }
+  public readonly displayedColumns = computed(() =>
+    this.allColumns.filter(
+      (col) => !col.requiredRole || col.requiredRole === this.user()?.role
+    )
+  );
+
+  public readonly columnKeys = computed(() =>
+    this.displayedColumns().map((c) => c.columnDef)
+  );
 
   selectTask(task: Task) {
     this.taskSelected.emit(task);

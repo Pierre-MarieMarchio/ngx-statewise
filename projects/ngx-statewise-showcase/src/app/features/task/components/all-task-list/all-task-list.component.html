@@ -1,6 +1,6 @@
 <div class="all-task-list-container">
-  <table mat-table [dataSource]="this.tasks()!">
-    @for (column of columns; track column) {
+  <table mat-table [dataSource]="tasks()!">
+    @for (column of displayedColumns(); track column) {
     <ng-container [matColumnDef]="column.columnDef">
       <th mat-header-cell *matHeaderCellDef>
         {{ column.header }}
@@ -11,12 +11,12 @@
     </ng-container>
     }
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-header-row *matHeaderRowDef="columnKeys()"></tr>
     <tr
       mat-row
       class="clickable-row"
       (click)="selectTask(item)"
-      *matRowDef="let item; columns: displayedColumns"
+      *matRowDef="let item; columns: columnKeys()"
     ></tr>
   </table>
 </div>
