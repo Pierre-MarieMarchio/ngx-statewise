@@ -1,5 +1,4 @@
 import { inject, Injectable } from '@angular/core';
-import { ActionContextRegistery } from '../../../registries/action-context.registery';
 import { GlobalUpdatorsRegistry } from '../../../registries/global-updators.registery';
 import { LocalUpdatorRegistry } from '../../../registries/local-updators.registery';
 import { IUpdator } from '../../../updator';
@@ -8,30 +7,45 @@ import { IUpdator } from '../../../updator';
 export class UpdatorResolver {
   private readonly globalUpdatorsRegistry = inject(GlobalUpdatorsRegistry);
   private readonly localUpdatorsRegistry = inject(LocalUpdatorRegistry);
-  private readonly actionContext = inject(ActionContextRegistery);
 
-  resolveUpdator<S>(
+  public resolveRoot<S>(
     actionType: string,
     contextOrUpdator?: object | IUpdator<S>
   ): IUpdator<S> | undefined {
-    this.setContext(actionType, contextOrUpdator);
-
     const explicit = this.asUpdator(contextOrUpdator);
     if (explicit) {
-      this.localUpdatorsRegistry.register(explicit, explicit);
       return explicit;
     }
 
-    const local = this.asLocal(contextOrUpdator, actionType);
+    return this.resolveScoped(actionType, contextOrUpdator);
+  }
+
+  public resolveContinuation<S>(
+    actionType: string,
+    contextOrUpdator?: object | IUpdator<S>
+  ): IUpdator<S> | undefined {
+    const explicit = this.asUpdator(contextOrUpdator);
+    if (explicit?.updators[actionType]) {
+      return explicit;
+    }
+
+    return this.resolveScoped(actionType, contextOrUpdator);
+  }
+
+  private resolveScoped<S>(
+    actionType: string,
+    contextOrUpdator?: object | IUpdator<S>
+  ): IUpdator<S> | undefined {
+    const context = this.asUpdator(contextOrUpdator)
+      ? undefined
+      : contextOrUpdator;
+
+    const local = this.asLocal<S>(context, actionType);
     if (local) {
       return local;
     }
 
     return this.globalUpdatorsRegistry.getUpdator<S>(actionType);
-  }
-
-  private setContext(type: string, context?: object | IUpdator<any>) {
-    if (context) this.actionContext.set(type, context);
   }
 
   private asUpdator<S>(updator?: object | IUpdator<S>): IUpdator<S> | null {

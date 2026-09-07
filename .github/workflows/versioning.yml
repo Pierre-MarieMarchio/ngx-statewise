@@ -37,6 +37,9 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions@github.com"
 
+      - name: Validate workspace
+        run: npm run check
+
       - name: Determine changed libraries
         id: changed-libs
         run: |

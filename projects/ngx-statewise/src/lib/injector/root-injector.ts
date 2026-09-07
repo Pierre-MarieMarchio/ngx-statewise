@@ -9,7 +9,7 @@ export function setRootInjector(injector: EnvironmentInjector): void {
 export function getRootInjector(): EnvironmentInjector {
   if (!rootInjector) {
     throw new Error(
-      '[StateManager] EnvironmentInjector not initialized. Ensure that provideStateManager() is included in the providers of bootstrapApplication.'
+      '[ngx-statewise] EnvironmentInjector not initialized. Ensure that provideStatewise() is included in the providers of bootstrapApplication.'
     );
   }
   return rootInjector;

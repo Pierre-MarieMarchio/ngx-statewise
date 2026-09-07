@@ -1,16 +1,22 @@
-import { Injectable } from "@angular/core";
-import { Action } from "../action/interfaces/action-type";
+import { Injectable } from '@angular/core';
+import type { Action } from '../action/interfaces/action-type';
+import type { DispatchExecution } from '../manager/interfaces/dispatch-execution';
+
+export type RegisteredEffect = (
+  action: Action,
+  execution: DispatchExecution
+) => Promise<void>;
 
 @Injectable({ providedIn: 'root' })
 export class ActionEffectRegistry {
-  private readonly _effects = new Map<string, ((action: Action) => void)[]>();
+  private readonly _effects = new Map<string, RegisteredEffect[]>();
 
-  public register(actionType: string, effect: (action: Action) => void): void {
+  public register(actionType: string, effect: RegisteredEffect): void {
     const list = this._effects.get(actionType) || [];
     this._effects.set(actionType, [...list, effect]);
   }
 
-  public get(actionType: string): ((action: Action) => void)[] {
+  public get(actionType: string): RegisteredEffect[] {
     return this._effects.get(actionType) || [];
   }
 

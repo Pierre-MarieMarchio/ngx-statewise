@@ -2,17 +2,17 @@ import { inject, Injectable } from '@angular/core';
 import { withInjectionContext } from '../../injector/injection-utils';
 import { Action } from '../../action/interfaces/action-type';
 import { IUpdator } from '../../updator';
-import { DispatchAsyncHandler } from './handlers/dispatchAsync.handler';
+import { DispatchHandler } from './handlers/dispatch.handler';
 
 @Injectable({ providedIn: 'root' })
 export class DispatchAsyncService {
-  private readonly dispatchAsynHandler = inject(DispatchAsyncHandler);
+  private readonly dispatchHandler = inject(DispatchHandler);
 
-  public dispatchAsync<T extends Action, S>(
+  public async dispatchAsync<T extends Action, S>(
     action: T,
     contextOrUpdator?: object | IUpdator<S>
   ): Promise<void> {
-    return this.dispatchAsynHandler.handle(action, contextOrUpdator);
+    return this.dispatchHandler.start(action, contextOrUpdator);
   }
 }
 
@@ -36,7 +36,7 @@ export async function dispatchAsync<T extends Action, S>(
   action: T,
   updator: IUpdator<S>
 ): Promise<void>;
-export function dispatchAsync<T extends Action, S>(
+export async function dispatchAsync<T extends Action, S>(
   action: T,
   contextOrUpdator?: object | IUpdator<S>
 ): Promise<void> {

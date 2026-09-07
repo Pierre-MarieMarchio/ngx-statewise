@@ -12,21 +12,24 @@ export class DispatchService {
     action: T,
     contextOrUpdator?: object | IUpdator<S>
   ): void {
-    this.dispatchHandler.handle(action, contextOrUpdator);
+    void this.dispatchHandler.start(action, contextOrUpdator).catch((error) => {
+      console.error(`Dispatch for ${action.type} failed:`, error);
+    });
   }
 }
 
 /**
- * Dispatches an action with optional updator registration.
+ * Dispatches an action with an optional local context or explicit updator.
  *
  * This function provides a flexible way to dispatch actions:
- * - If only an action is provided, it will be dispatched through the ActionDispatcher
- * - If an updator is also provided, it will be registered (if needed) and used to update state
+ * - If only an action is provided, a global updator is resolved when available.
+ * - A context selects a locally registered updator.
+ * - An explicit updator is used only for this execution and its cascading actions.
  *
  * @template T - The action type.
  * @template S - The state type (inferred from updator if provided).
  * @param action - The action to dispatch.
- * @param updator - Optional updator to handle state updates for this action.
+ * @param contextOrUpdator - Optional local context or explicit updator.
  */
 export function dispatch<T extends Action>(action: T, context?: object): void;
 export function dispatch<T extends Action, S>(

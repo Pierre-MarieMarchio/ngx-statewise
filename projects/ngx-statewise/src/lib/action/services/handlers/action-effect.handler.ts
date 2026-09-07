@@ -1,15 +1,17 @@
 import { inject, Injectable } from '@angular/core';
 import { ActionEffectRegistry } from '../../../registries/global-effect.registery';
-import { Action } from '../../interfaces/action-type';
+import type { Action } from '../../interfaces/action-type';
+import type { DispatchExecution } from '../../../manager/interfaces/dispatch-execution';
 
 @Injectable({ providedIn: 'root' })
-export class ActionEffectHandlerr {
+export class ActionEffectHandler {
   private readonly registry = inject(ActionEffectRegistry);
 
-  public handle(action: Action): void {
+  public async handle(
+    action: Action,
+    execution: DispatchExecution
+  ): Promise<void> {
     const effects = this.registry.get(action.type);
-    for (const effect of effects) {
-      effect(action);
-    }
+    await Promise.all(effects.map((effect) => effect(action, execution)));
   }
 }

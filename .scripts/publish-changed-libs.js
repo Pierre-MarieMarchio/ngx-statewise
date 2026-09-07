@@ -19,5 +19,6 @@ for (const lib of changed.split(",")) {
     });
   } catch (e) {
     console.error(`Failed to publish ${lib}:`, e.message);
+    process.exitCode = 1;
   }
 }

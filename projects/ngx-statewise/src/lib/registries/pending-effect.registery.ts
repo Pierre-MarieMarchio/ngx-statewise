@@ -1,22 +1,23 @@
-import { inject, Injectable } from '@angular/core';
-import { EffectRelationRegistery } from './effect-relation.registery';
+import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class PendingEffectRegistry {
   private readonly pending: Map<string, Promise<void>[]> = new Map();
-  private readonly effectRelationRegistery = inject(EffectRelationRegistery);
 
   public register(actionType: string, promise: Promise<void>): Promise<void> {
     const list = this.pending.get(actionType) || [];
     this.pending.set(actionType, [...list, promise]);
 
-    promise.finally(() => {
+    const cleanup = () => {
       const current = this.pending.get(actionType) || [];
-      this.pending.set(
-        actionType,
-        current.filter((p) => p !== promise)
-      );
-    });
+      const remaining = current.filter((p) => p !== promise);
+      if (remaining.length) {
+        this.pending.set(actionType, remaining);
+      } else {
+        this.pending.delete(actionType);
+      }
+    };
+    promise.then(cleanup, cleanup);
 
     return promise;
   }
@@ -26,14 +27,7 @@ export class PendingEffectRegistry {
   }
 
   public async waitFor(actionType: string): Promise<void> {
-    const allRelatedTypes =
-      this.effectRelationRegistery.getAllRelated(actionType);
-    const allPromisesToWait: Promise<void>[] = [];
-    for (const type of allRelatedTypes) {
-      const promises = this.pending.get(type) || [];
-      allPromisesToWait.push(...promises);
-    }
-    await Promise.all(allPromisesToWait);
+    await Promise.all(this.get(actionType));
   }
 
   public async waitForAll(): Promise<void> {

@@ -14,7 +14,9 @@ export class EffectResultResolver {
       const awaited = await result;
 
       if (isObservable(awaited)) {
-        const resolvedObs = await firstValueFrom(awaited);
+        const resolvedObs = await firstValueFrom(awaited, {
+          defaultValue: undefined,
+        });
         return Array.isArray(resolvedObs) ? resolvedObs : [resolvedObs];
       }
 
@@ -22,7 +24,7 @@ export class EffectResultResolver {
     }
 
     if (isObservable(result)) {
-      const resolved = await firstValueFrom(result);
+      const resolved = await firstValueFrom(result, { defaultValue: undefined });
       return Array.isArray(resolved) ? resolved : [resolved];
     }
 

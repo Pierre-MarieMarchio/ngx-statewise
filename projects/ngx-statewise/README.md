@@ -34,7 +34,7 @@ The core concept of ngx-statewise revolves around a clear, predictable flow of a
 
 - **Manager Dispatches Action**: The manager dispatches this action, which triggers the appropriate updator.
 
-- **Updator Updates State**: The updator modifies the state based on the action and its payload.
+- **Updator Updates State When Registered**: If an updator handles the action, it modifies the state before effects run. Effect-only actions are also valid.
 
 - **Effect Handles Side Effects**: After the state is updated, any related effect is triggered to handle side operations (like API calls).
 
@@ -52,7 +52,7 @@ While NgRx and NGXS implement state management based on redux-style patterns wit
 
 - **Simplified Boilerplate**: The amount of code required to implement state management is significantly reduced compared to NgRx or NGXS.
 
-The unidirectional flow (Action → Updator → Effect → Potentially More Actions) in ngx-statewise makes state management highly predictable and easier to debug. The library implements a deliberate design choice where an action must be dispatched first, triggering a state update via updators before any effects are executed. This represents a fundamental difference from Redux-based libraries like NgRx, where effects often run concurrently with or even before state updates. In ngx-statewise, by ensuring state is updated first, all effects work with the latest state data, creating more predictable behavior. However, this enforced sequence may require an adjustment in thinking for developers accustomed to other state management approaches where effects can be triggered independently or in different orders.
+The unidirectional flow (Action → optional Updator → Effect → Potentially More Actions) in ngx-statewise makes state management predictable and easier to debug. When an updator handles an action, its state update is completed before effects execute. Actions without an updator are valid when they exist only to trigger effects.
 
 ### Considerations
 
@@ -366,7 +366,7 @@ Effects can return other actions to trigger Updators or even other effects, crea
 
 When creating effects, you must ensure that you don't return the input action directly as it can result in infinite loops. Instead, you should return new actions to trigger the corresponding state updates or other side effects.
 
-By default, effects return Promises. However, you can also use Observables if needed, giving you flexibility based on your use case. Promises are often simpler for scenarios involving a single asynchronous operation, while Observables can be more appropriate when you need to handle multiple asynchronous values over time (e.g., streams of data).
+Effects may return synchronous values, Promises, or Observables. Observable effects are intentionally one-shot: ngx-statewise consumes their first emission, then stops listening. Use an application-level subscription for long-lived streams.
 
 #### Defining Effects with `createEffect`
 
@@ -413,7 +413,7 @@ export class AuthEffects {
 
 #### Effects with Observables
 
-While Promises are the default return type for effects, you can also return Observables if needed. This is useful for handling scenarios where you expect multiple values over time (e.g., streams of data).
+You can return an Observable for a one-shot asynchronous operation. Only its first emission is processed. An Observable that completes without emitting, such as `EMPTY`, is treated like an effect returning `void`.
 
 Here’s an example of an effect using an Observable:
 
@@ -464,13 +464,13 @@ By registering your effects with provideEffects, Angular ensures they are instan
 
 ##### Locally
 
-comming
+Coming soon.
 
 #### Key Notes:
 
-- Promises (default): By default, effects should return Promises. This is ideal for handling single asynchronous operations.
+- Promises: Effects can return Promises for single asynchronous operations.
 
-- Observables (optional): If needed, you can also return Observables in your effects, particularly useful for handling streams or multiple values over time.
+- Observables: Observable effects are one-shot. Only the first emission is processed; completion without an emission produces no action.
 
 - Avoid Infinite Loops: Be careful not to return the input action from the effect (e.g., avoid returning the same action that triggered the effect). This can lead to infinite loops of action dispatching.
 
@@ -527,7 +527,7 @@ await dispatchAsync(action, scope);
 
 ```
 
-or asynchronous scenarios, use `dispatchAsync(...)`, which returns a `Promise<void>` that resolves after all effects and cascading effects are complete. This is useful when you need to wait for asynchronous operations (such as API calls or other side effects) to finish before proceeding with further logic, such as navigating or updating UI components. The Promise ensures that the state updates and effects are completed before the code continues execution.
+For asynchronous scenarios, use `dispatchAsync(...)`, which returns a `Promise<void>` that resolves after all directly triggered effects and all actions returned by those effects have completed recursively. Fire-and-forget dispatches started imperatively inside an effect are independent unless the effect explicitly awaits them. Unexpected updater or effect errors reject the returned Promise.
 
 #### Dispatch Updator scope
 
