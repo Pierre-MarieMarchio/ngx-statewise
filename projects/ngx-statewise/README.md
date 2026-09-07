@@ -107,7 +107,7 @@ Signals are the recommended approach as they automatically trigger component upd
 
 ```typescript
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class AuthStates {
   public user = signal<User | null>(null);
@@ -133,6 +133,7 @@ export class AuthStates {
   public hasError = false;
 }
 ```
+
 #### Key Notes
 
 - Signals are reactive and recommended for most use cases. Components will auto-update when signal values change.
@@ -163,11 +164,11 @@ import { defineActionsGroup, payload, emptyPayload } from 'ngx-statewise';
 export const loginActions = defineActionsGroup({
   source: 'LOGIN',
   events: {
-    request: payload<LoginSubmit>(),  // Becomes LOGIN_REQUEST
-    success: payload<LoginResponse>(),  // Becomes LOGIN_SUCCESS
-    failure: emptyPayload,  // Becomes LOGIN_FAILURE
-    cancel: emptyPayload,  // Becomes LOGIN_CANCEL
-    retry: payload<number>(),  // Becomes LOGIN_RETRY
+    request: payload<LoginSubmit>(), // Becomes LOGIN_REQUEST
+    success: payload<LoginResponse>(), // Becomes LOGIN_SUCCESS
+    failure: emptyPayload, // Becomes LOGIN_FAILURE
+    cancel: emptyPayload, // Becomes LOGIN_CANCEL
+    retry: payload<number>(), // Becomes LOGIN_RETRY
   },
 });
 ```
@@ -185,10 +186,10 @@ For single actions that do not require grouping, you can use defineSingleAction.
 For example, `'LOGOUT'` becomes `'LOGOUT_ACTION'`, and `'SELECT_ITEM'` becomes `'SELECT_ITEM_ACTION'`. Here's how you define them:
 
 ```typescript
-import { defineSingleAction, emptyPayload, payload } from "ngx-statewise";
+import { defineSingleAction, emptyPayload, payload } from 'ngx-statewise';
 
-export const logoutAction = defineSingleAction("LOGOUT", emptyPayload); // Becomes LOGOUT_ACTION
-export const selectItemAction = defineSingleAction("SELECT_ITEM", payload<number>()); // Becomes SELECT_ITEM_ACTION
+export const logoutAction = defineSingleAction('LOGOUT', emptyPayload); // Becomes LOGOUT_ACTION
+export const selectItemAction = defineSingleAction('SELECT_ITEM', payload<number>()); // Becomes SELECT_ITEM_ACTION
 ```
 
 In this case:
@@ -227,7 +228,6 @@ Updators are responsible for updating the state in response to actions. The acti
 
 In ngx-statewise, you can define Updators in two main ways: using action type strings directly or using ofType to tie the actions more dynamically to the respective handlers.
 
-
 #### Defining Updators
 
 ##### Interface Implementation
@@ -238,7 +238,6 @@ A class implementing Updator must adhere to the `IUpdator` interface. This inter
 - `updators`: A registry of action types (as keys) and their corresponding handler functions that update the state.
 
 Every Updator class should implement the IUpdator interface to ensure that it follows the expected structure for state updates and action handling.
-
 
 ##### Using Action Type Strings
 
@@ -259,7 +258,7 @@ export class AuthUpdator implements IUpdator<AuthStates> {
       state.asError.set(false);
     },
     LOGIN_SUCCESS: (state, payload: LoginResponses) => {...},
-    
+
   };
 }
 ```
@@ -297,9 +296,8 @@ To make an Updator available throughout the entire app (regardless of the callin
 
 Usage in `app.config.ts`:
 
-
 ```typescript
-import { provideUpdators  } from 'ngx-statewise';
+import { provideUpdators } from 'ngx-statewise';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -358,9 +356,9 @@ export class AuthManager implements IAuthManager {
 
 ### 4. Effects
 
-Effects are responsible for handling asynchronous operations such as API calls, navigation, or side effects that are not directly related to state updates. They are created using the `createEffect` utility function and are tied to specific actions. 
+Effects are responsible for handling asynchronous operations such as API calls, navigation, or side effects that are not directly related to state updates. They are created using the `createEffect` utility function and are tied to specific actions.
 
-A key architectural principle in ngx-statewise, *for now*, is that effects always run after state has been updated by an updator. This guarantees that effects operate on the most up-to-date application state. The sequence **Action → Updator → Effect** is enforced by design to ensure predictability and consistency across your application.
+A key architectural principle in ngx-statewise, _for now_, is that effects always run after state has been updated by an updator. This guarantees that effects operate on the most up-to-date application state. The sequence **Action → Updator → Effect** is enforced by design to ensure predictability and consistency across your application.
 
 Effects can return other actions to trigger Updators or even other effects, creating a chain of operations. This design promotes cascading effects, where an initial action triggers a state update, which then leads to one or more effects, each of which can dispatch further actions. Rather than encouraging isolated, standalone actions, ngx-statewise iencourage for sequences of operations, making complex workflows easier to orchestrate.
 
@@ -376,7 +374,7 @@ Here's an example of an effect that uses a Promise:
 
 ```typescript
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class AuthEffects {
   private readonly authRepository = inject(AuthRepositoryService);
@@ -397,7 +395,7 @@ export class AuthEffects {
       } catch (error) {
         return loginActions.failure(); // Failure action on error
       }
-    }
+    },
   );
 
   /**
@@ -405,7 +403,7 @@ export class AuthEffects {
    * It is an example of an effect returning an empty observable.
    */
   public readonly logoutEffect = createEffect(logoutAction.action, () => {
-    this.router.navigate(["/"]);
+    this.router.navigate(['/']);
     return EMPTY; // No additional action needed after logout
   });
 }
@@ -419,7 +417,7 @@ Here’s an example of an effect using an Observable:
 
 ```typescript
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class UserEffects {
   private readonly userService = inject(UserService);
@@ -432,9 +430,9 @@ export class UserEffects {
     (payload) => {
       return this.userService.fetchUser(payload.userId).pipe(
         map((user) => userActions.getUserSuccess(user)), // Success action
-        catchError(() => of(userActions.getUserFailure())) // Failure action on error
+        catchError(() => of(userActions.getUserFailure())), // Failure action on error
       );
-    }
+    },
   );
 }
 ```
@@ -502,7 +500,6 @@ export class AuthManager {
   public readonly isLoggedIn = computed(() => this.authStates.isLoggedIn());
   public readonly isLoading = computed(() => this.authStates.isLoading());
   public readonly asError = computed(() => this.authStates.asError());
-
 }
 ```
 
@@ -513,6 +510,7 @@ By exposing these signals, components using this manager can simply bind to the 
 You can dispatch actions in different ways depending on your use case and how the associated updator is scoped.
 
 ##### Synchronous Dispatch
+
 ```typescript
 dispatch(action);
 dispatch(action, scope);
@@ -521,10 +519,10 @@ dispatch(action, scope);
 For synchronous scenarios, use `dispatch(...)`, which triggers a state update without waiting for any asynchronous operations or effects to complete. This is ideal when you want to trigger state changes immediately and don't need to wait for any side effects (like API calls) to finish. The state update is done synchronously, and the flow continues without blocking.
 
 ##### Asynchronous Dispatch
+
 ```typescript
 await dispatchAsync(action);
 await dispatchAsync(action, scope);
-
 ```
 
 For asynchronous scenarios, use `dispatchAsync(...)`, which returns a `Promise<void>` that resolves after all directly triggered effects and all actions returned by those effects have completed recursively. Fire-and-forget dispatches started imperatively inside an effect are independent unless the effect explicitly awaits them. Unexpected updater or effect errors reject the returned Promise.
@@ -533,12 +531,11 @@ For asynchronous scenarios, use `dispatchAsync(...)`, which returns a `Promise<v
 
 When dispatching an action, it is important to resolve the appropriate `Updator` to update the state correctly. You can define the scope of the IUpdator in several ways, depending on whether you want to use globally, locally, or explicitly defined updators.
 
-| Pattern | Scope | Description |
-| --------- | -------- | -------------- |
-| `dispatch(action)`          | Global | Uses a globally registered `Updator`, available app-wide.                                                                                          |
-| `dispatch(action, this)`      | Local  | Uses a local `Updator` registered explicitly within the Manager via `registerLocalUpdator(...)`. It is scoped to the Manager.                      |
+| Pattern                       | Scope    | Description                                                                                                                                        |
+| ----------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dispatch(action)`            | Global   | Uses a globally registered `Updator`, available app-wide.                                                                                          |
+| `dispatch(action, this)`      | Local    | Uses a local `Updator` registered explicitly within the Manager via `registerLocalUpdator(...)`. It is scoped to the Manager.                      |
 | `dispatch(action, myUpdator)` | Explicit | Uses a specific `Updator` instance passed directly to the dispatch, without persisting it globally or locally. Ideal for one-off cases or testing. |
-
 
 #### Example: `AuthManager`
 
@@ -613,7 +610,6 @@ export class AuthManager {
 - **Projects Requiring Predictable State Updates**: The enforced sequence where state is always updated before effects run makes ngx-statewise particularly well-suited for applications where consistency between state and side effects is critical.
 
 - **Medium to Large Angular Applications**: The modular architecture scales well for larger applications with complex state management needs while keeping the codebase organized and maintainable.
-
 
 ## Contributing
 
