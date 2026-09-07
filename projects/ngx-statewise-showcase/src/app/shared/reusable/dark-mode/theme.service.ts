@@ -1,7 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Theme } from './theme.enum';
 
-
 @Injectable({
   providedIn: 'root',
 })
@@ -14,9 +13,7 @@ export class ThemeService {
 
   public updateTheme(): void {
     this.themeSignal.update((value) =>
-      value === Theme.DARK ? Theme.LIGHT : Theme.DARK
+      value === Theme.DARK ? Theme.LIGHT : Theme.DARK,
     );
   }
 }
-
-

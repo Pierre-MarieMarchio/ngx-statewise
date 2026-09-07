@@ -12,7 +12,7 @@ import {
 } from '@angular/common/http';
 import { routes } from './app.routes';
 import { accessTokenInterceptor } from './features/auth/interceptors';
-import { provideEffects, provideStatewise } from 'ngx-statewise';
+import { provideStatewise } from 'ngx-statewise';
 import { fakeApiInterceptor } from './core/fake-api';
 import { AuthEffect, AuthManager } from './features/auth/states';
 import { TaskEffect, TaskManager } from './features/task/states';
@@ -27,12 +27,11 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideHttpClient(
       withFetch(),
-      withInterceptors([fakeApiInterceptor, accessTokenInterceptor])
+      withInterceptors([fakeApiInterceptor, accessTokenInterceptor]),
     ),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideStatewise(),
-    provideEffects([AuthEffect, TaskEffect, ProjectEffect]),
+    provideStatewise({ effects: [AuthEffect, TaskEffect, ProjectEffect] }),
 
     { provide: AUTH_MANAGER, useExisting: AuthManager },
     { provide: TASK_MANAGER, useExisting: TaskManager },

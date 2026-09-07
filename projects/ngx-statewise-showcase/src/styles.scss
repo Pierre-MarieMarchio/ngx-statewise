@@ -1,6 +1,6 @@
-@use "./assets/fonts";
-@use "./assets/themes";
-@use "./assets/styles";
+@use './assets/fonts';
+@use './assets/themes';
+@use './assets/styles';
 
 html,
 body {
@@ -8,7 +8,7 @@ body {
 }
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 .page {

@@ -1,9 +1,4 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  signal,
-  inject,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import {
   MatButtonToggleChange,
   MatButtonToggleModule,
@@ -23,9 +18,9 @@ export class DashboardUserPickerComponent {
   public onSelectionChange(event: MatButtonToggleChange): void {
     const selectedValue = event.value;
     const userCredentials = {
-      'admin': { email: 'admin@admin', password: 'admin' },
-      'user1': { email: 'user1@user', password: 'user1' },
-      'user2': { email: 'user2@user', password: 'user2' },
+      admin: { email: 'admin@admin', password: 'admin' },
+      user1: { email: 'user1@user', password: 'user1' },
+      user2: { email: 'user2@user', password: 'user2' },
     };
 
     const credentials =
@@ -35,11 +30,9 @@ export class DashboardUserPickerComponent {
     }
   }
 
-
   public getCurrentUserEmail(): string {
-
     console.log(this.authManager.user()?.userName);
-    
+
     return this.authManager.user()?.userName ?? '';
   }
 }

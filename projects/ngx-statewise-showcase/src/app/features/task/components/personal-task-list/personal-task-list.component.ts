@@ -1,4 +1,11 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  input,
+  output,
+  OnInit,
+} from '@angular/core';
 import { TaskListColumnItem } from '../../models';
 import { MatTableModule } from '@angular/material/table';
 import { AUTH_MANAGER } from '@shared/app-common/tokens';
@@ -10,7 +17,7 @@ import { Task } from '@shared/app-common/models';
   templateUrl: './personal-task-list.component.html',
   styleUrl: './personal-task-list.component.scss',
 })
-export class PersonalTaskListComponent {
+export class PersonalTaskListComponent implements OnInit {
   public allTasks = input<Task[]>();
   public taskSelected = output<Task>();
   private readonly authManager = inject(AUTH_MANAGER);
@@ -25,7 +32,7 @@ export class PersonalTaskListComponent {
     }
 
     return tasks.filter((task) =>
-      task.assignedUserIds?.includes(currentUserId)
+      task.assignedUserIds?.includes(currentUserId),
     );
   });
 

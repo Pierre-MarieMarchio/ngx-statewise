@@ -26,12 +26,12 @@ import { Task, TaskPriority, TaskStatus } from '@shared/app-common/models';
 })
 export class TaskDetailsComponent {
   selectedTask = input<Task | null>();
-  close = output<void>();
+  closed = output<void>();
   modify = output<Task>();
   delete = output<string>();
 
   onCloseClick() {
-    this.close.emit();
+    this.closed.emit();
   }
 
   onModifyClick() {

@@ -4,7 +4,7 @@ import { Observable, catchError, delay, tap, throwError } from 'rxjs';
 import { FakeApi } from './fake-api';
 
 export function fakeApiInterceptor(
-  request: HttpRequest<unknown>
+  request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> {
   const { method, url, body } = request;
   console.log('[FakeApiInterceptor] Request ⏩');
@@ -14,15 +14,15 @@ export function fakeApiInterceptor(
     .handleRequest()
     .pipe(
       delay(200), // delay to simulate server latency
-      tap(response => {
+      tap((response) => {
         const { status, url, body } = response;
         console.log('[FakeApiInterceptor] Response success ✅');
         console.table({ status, url, body });
       }),
-      catchError(error => {
+      catchError((error) => {
         console.error('[FakeApiInterceptor] Response error ❌');
         console.error(error);
         return throwError(() => error);
-      })
+      }),
     );
 }

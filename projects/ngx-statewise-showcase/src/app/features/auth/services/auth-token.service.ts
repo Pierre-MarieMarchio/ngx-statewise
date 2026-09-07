@@ -7,7 +7,6 @@ import { LocalStorageService } from '@app/core/services';
   providedIn: 'root',
 })
 export class AuthTokenService extends LocalStorageService {
-
   public setAccessToken(value: string): void {
     this.setItem(environment.ACCESS_TOKEN_KEY, value);
   }
@@ -32,11 +31,18 @@ export class AuthTokenService extends LocalStorageService {
     this.removeItem(environment.REFRESH_TOKEN_KEY);
   }
 
-  public setNewAccessTokenFromResponse(res: HttpResponse<any>): string {
+  public setNewAccessTokenFromResponse(
+    res: HttpResponse<{ accessToken: string }>,
+  ): string {
     const newToken = res.body?.accessToken;
-    if (newToken) {
-      this.setAccessToken(newToken);
+
+    if (!newToken) {
+      // No credentials in the response: the caller's decode() rejects it.
+      return '';
     }
+
+    this.setAccessToken(newToken);
+
     return newToken;
   }
 }

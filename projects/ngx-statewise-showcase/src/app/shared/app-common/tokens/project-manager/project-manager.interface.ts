@@ -1,5 +1,5 @@
-import { Signal } from "@angular/core";
-import { Project } from "@app/features/project/models";
+import { Signal } from '@angular/core';
+import { Project } from '@app/features/project/models';
 
 export interface IProjectManager {
   projects: Signal<Project[] | null>;

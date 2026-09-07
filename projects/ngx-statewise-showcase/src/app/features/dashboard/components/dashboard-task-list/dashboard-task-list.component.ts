@@ -1,4 +1,4 @@
-import { Component, inject, output } from '@angular/core';
+import { Component, inject, output, OnInit } from '@angular/core';
 import { Task } from '@shared/app-common/models';
 import { AUTH_MANAGER, TASK_MANAGER } from '@shared/app-common/tokens';
 import { DashboardTaskListColumnItem } from '../../models';
@@ -11,7 +11,7 @@ import { MatCardModule } from '@angular/material/card';
   templateUrl: './dashboard-task-list.component.html',
   styleUrl: './dashboard-task-list.component.scss',
 })
-export class DashboardTaskListComponent {
+export class DashboardTaskListComponent implements OnInit {
   public taskSelected = output<Task>();
 
   private readonly authManager = inject(AUTH_MANAGER);
@@ -48,7 +48,7 @@ export class DashboardTaskListComponent {
   ngOnInit() {
     this.columns = this.allColumns.filter(
       (col) =>
-        !col.requiredRole || col.requiredRole === this.authManager.user()?.role
+        !col.requiredRole || col.requiredRole === this.authManager.user()?.role,
     );
     this.displayedColumns = this.columns.map((c) => c.columnDef);
   }

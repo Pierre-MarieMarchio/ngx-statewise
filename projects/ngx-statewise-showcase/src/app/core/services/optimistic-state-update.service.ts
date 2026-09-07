@@ -1,15 +1,15 @@
-import { effect, Injectable, WritableSignal } from "@angular/core";
-import { OptimisticStateUpdateConfig } from "../models";
+import { effect, Injectable, WritableSignal } from '@angular/core';
+import { OptimisticStateUpdateConfig } from '../models';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OptimisticStateUpdateService {
-
   public setupOptimisticUpdates<T>(
-    config: OptimisticStateUpdateConfig<T>
+    config: OptimisticStateUpdateConfig<T>,
   ): () => void {
-    const getEntityId = config.getEntityId || ((item: any) => item.id);
+    const getEntityId =
+      config.getEntityId ?? ((item: T) => (item as { id: string }).id);
     const isUpdateConfirmed =
       config.isUpdateConfirmed ||
       ((sourceItem: T, pendingItem: T) =>
@@ -36,7 +36,7 @@ export class OptimisticStateUpdateService {
 
         pending.forEach((pendingItem, entityId) => {
           const sourceItem = sourceData.find(
-            (item) => getEntityId(item) === entityId
+            (item) => getEntityId(item) === entityId,
           );
           if (sourceItem && isUpdateConfirmed(sourceItem, pendingItem)) {
             newPending.delete(entityId);
@@ -56,7 +56,7 @@ export class OptimisticStateUpdateService {
   public addOptimisticUpdate<T>(
     pendingUpdates: WritableSignal<Map<string, T>>,
     item: T,
-    getEntityId: (item: T) => string = (item: any) => item.id
+    getEntityId: (item: T) => string = (item) => (item as { id: string }).id,
   ): void {
     const current = pendingUpdates();
     const entityId = getEntityId(item);
@@ -66,7 +66,7 @@ export class OptimisticStateUpdateService {
 
   public removeOptimisticUpdate<T>(
     pendingUpdates: WritableSignal<Map<string, T>>,
-    entityId: string
+    entityId: string,
   ): void {
     const current = pendingUpdates();
     if (current.has(entityId)) {
@@ -76,7 +76,7 @@ export class OptimisticStateUpdateService {
   }
 
   public clearOptimisticUpdates<T>(
-    pendingUpdates: WritableSignal<Map<string, T>>
+    pendingUpdates: WritableSignal<Map<string, T>>,
   ): void {
     pendingUpdates.set(new Map());
   }

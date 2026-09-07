@@ -4,6 +4,7 @@ import {
   inject,
   input,
   output,
+  OnInit,
 } from '@angular/core';
 import { PROJECT_MANAGER } from '@shared/app-common/tokens';
 import { TaskListColumnItem } from '../../models';
@@ -20,7 +21,7 @@ import { Task } from '@shared/app-common/models';
   providers: [provideNativeDateAdapter()],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProjectTaskListComponent {
+export class ProjectTaskListComponent implements OnInit {
   public tasks = input<Task[]>();
   public taskSelected = output<Task>();
 

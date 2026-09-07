@@ -4,14 +4,14 @@
   <div class="dashboard-task-list-scroll">
     <table mat-table [dataSource]="this.tasks()!">
       @for (column of columns; track column) {
-      <ng-container [matColumnDef]="column.columnDef">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ column.header }}
-        </th>
-        <td mat-cell *matCellDef="let row">
-          {{ column.cell(row) }}
-        </td>
-      </ng-container>
+        <ng-container [matColumnDef]="column.columnDef">
+          <th mat-header-cell *matHeaderCellDef>
+            {{ column.header }}
+          </th>
+          <td mat-cell *matCellDef="let row">
+            {{ column.cell(row) }}
+          </td>
+        </ng-container>
       }
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

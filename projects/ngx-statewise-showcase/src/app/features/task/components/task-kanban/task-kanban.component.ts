@@ -6,6 +6,7 @@ import {
   input,
   output,
   signal,
+  OnDestroy,
 } from '@angular/core';
 import {
   CdkDragDrop,
@@ -41,7 +42,7 @@ import {
   styleUrl: './task-kanban.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TaskKanbanComponent {
+export class TaskKanbanComponent implements OnDestroy {
   public tasks = input<Task[]>();
   public taskChanged = output<Task>();
 
@@ -49,7 +50,7 @@ export class TaskKanbanComponent {
   public readonly projectManager = inject(PROJECT_MANAGER);
   private readonly stateRollbackService = inject(StateRollbackService);
   private readonly optimisticStateService = inject(
-    OptimisticStateUpdateService
+    OptimisticStateUpdateService,
   );
 
   private readonly statuses = STATUSES;
@@ -87,7 +88,7 @@ export class TaskKanbanComponent {
     this.statuses.map((status) => ({
       id: status,
       tasks: this.localTasks()?.filter((t) => t.status === status),
-    }))
+    })),
   );
 
   public onTaskDrop(event: CdkDragDrop<Task[]>): void {
@@ -104,7 +105,7 @@ export class TaskKanbanComponent {
     moveItemInArray(
       event.container.data,
       event.previousIndex,
-      event.currentIndex
+      event.currentIndex,
     );
   }
 
@@ -121,7 +122,7 @@ export class TaskKanbanComponent {
       event.previousContainer.data,
       event.container.data,
       event.previousIndex,
-      event.currentIndex
+      event.currentIndex,
     );
 
     const updatedTask = this.updateTask(newStatus, event);
@@ -136,7 +137,7 @@ export class TaskKanbanComponent {
 
   private updateTask(
     newStatus: string,
-    event: CdkDragDrop<Task[], Task[], any>
+    event: CdkDragDrop<Task[], Task[], Task>,
   ) {
     const movedTask = event.container.data[event.currentIndex];
     const updatedTask: Task = {
@@ -150,7 +151,7 @@ export class TaskKanbanComponent {
 
   public getProjectFilteredTasks(
     projectId: string,
-    tasksToFilter: Task[]
+    tasksToFilter: Task[],
   ): Task[] {
     return tasksToFilter?.filter((task) => task.projectId === projectId) || [];
   }

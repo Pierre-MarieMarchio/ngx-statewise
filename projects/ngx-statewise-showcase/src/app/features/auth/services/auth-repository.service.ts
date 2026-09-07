@@ -12,12 +12,12 @@ export class AuthRepositoryService {
   private readonly API_BASE_URL = environment.API_BASE_URL;
 
   public login(
-    request: LoginRequest
+    request: LoginRequest,
   ): Observable<HttpResponse<LoginResponses>> {
     const response = this.http.post<LoginResponses>(
       `${this.API_BASE_URL}/Auth/login`,
       request,
-      { observe: 'response', withCredentials: true }
+      { observe: 'response', withCredentials: true },
     );
     return response;
   }
@@ -26,7 +26,7 @@ export class AuthRepositoryService {
     const response = this.http.post<void>(
       `${this.API_BASE_URL}/Auth/logout`,
       null,
-      { observe: 'response', withCredentials: true }
+      { observe: 'response', withCredentials: true },
     );
     return response;
   }
@@ -35,16 +35,16 @@ export class AuthRepositoryService {
     const response = this.http.post<AuthenticateResponses>(
       `${this.API_BASE_URL}/Auth/Authenticate`,
       null,
-      { observe: 'response', withCredentials: true }
+      { observe: 'response', withCredentials: true },
     );
     return response;
   }
 
-  public test(): Observable<HttpResponse<{}>> {
-    const response = this.http.get<{}>(
+  public test(): Observable<HttpResponse<null>> {
+    const response = this.http.get<null>(
       `${this.API_BASE_URL}/Auth/test-cookie`,
 
-      { observe: 'response', withCredentials: true }
+      { observe: 'response', withCredentials: true },
     );
     return response;
   }

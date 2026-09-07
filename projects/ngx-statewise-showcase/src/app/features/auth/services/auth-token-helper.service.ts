@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { jwtDecode } from 'jwt-decode';
 import { AccessToken } from '../models';
 
-
 @Injectable({ providedIn: 'root' })
 export class AuthTokenHelperService {
   decode(token: string): AccessToken | null {

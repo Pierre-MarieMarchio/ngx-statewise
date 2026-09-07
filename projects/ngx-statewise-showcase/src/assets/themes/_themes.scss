@@ -1,9 +1,9 @@
-@use "@angular/material" as mat;
+@use '@angular/material' as mat;
 
 .light {
   background-color: var(--mat-sys-background);
   color: var(--mat-sys-on-background);
-  
+
   --color-secondary: #746e7c;
   --Icon-active: #0f0f11;
   @include mat.theme(
@@ -14,7 +14,7 @@
         theme-type: light,
       ),
     ),
-    $overrides: ("on-background": #333, "background": white)
+    $overrides: ('on-background': #333, 'background': white)
   );
 }
 
@@ -34,19 +34,23 @@
       ),
     ),
     $overrides: (
-      "on-background": #f3f3f3,
-      "on-surface-variant": #f3f3f3,
-      "background": #0f0f11
+      'on-background': #f3f3f3,
+      'on-surface-variant': #f3f3f3,
+      'background': #0f0f11
     )
   );
 }
-
 
 .color-secondary {
   color: var(--color-secondary);
 }
 
 mat-icon {
-  font-family: "Material Symbols Outlined";
-  font-variation-settings: "FILL" 0, "wght" 200, "GRAD" 0, "opsz" 24, "STRK" 3 !important;
+  font-family: 'Material Symbols Outlined';
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 200,
+    'GRAD' 0,
+    'opsz' 24,
+    'STRK' 3 !important;
 }

@@ -6,7 +6,6 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { NavigationComponent } from './core/layouts';
 import { navigationItems } from './config/navigation.configuration';
 
-
 @Component({
   selector: 'app-root',
   imports: [

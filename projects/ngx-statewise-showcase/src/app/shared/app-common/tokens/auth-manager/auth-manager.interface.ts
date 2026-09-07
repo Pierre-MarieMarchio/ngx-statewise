@@ -9,6 +9,5 @@ export interface IAuthManager {
 
   login(credential: LoginSubmit): Promise<void>;
   authenticate(): Promise<void>;
-  authenticateT(): void;
   logout(): void;
 }

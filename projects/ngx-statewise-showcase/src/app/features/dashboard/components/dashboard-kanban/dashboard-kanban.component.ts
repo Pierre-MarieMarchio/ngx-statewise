@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, OnDestroy } from '@angular/core';
 import {
   CdkDragDrop,
   moveItemInArray,
@@ -28,11 +28,11 @@ import {
   templateUrl: './dashboard-kanban.component.html',
   styleUrl: './dashboard-kanban.component.scss',
 })
-export class DashboardKanbanComponent {
+export class DashboardKanbanComponent implements OnDestroy {
   private readonly taskManager = inject(TASK_MANAGER);
   private readonly stateRollbackService = inject(StateRollbackService);
   private readonly optimisticStateService = inject(
-    OptimisticStateUpdateService
+    OptimisticStateUpdateService,
   );
 
   private readonly statuses = STATUSES;
@@ -72,7 +72,7 @@ export class DashboardKanbanComponent {
     this.statuses.map((status) => ({
       id: status,
       tasks: this.localTasks()?.filter((t) => t.status === status),
-    }))
+    })),
   );
 
   public onTaskDrop(event: CdkDragDrop<Task[]>): void {
@@ -89,7 +89,7 @@ export class DashboardKanbanComponent {
     moveItemInArray(
       event.container.data,
       event.previousIndex,
-      event.currentIndex
+      event.currentIndex,
     );
   }
 
@@ -106,7 +106,7 @@ export class DashboardKanbanComponent {
       event.previousContainer.data,
       event.container.data,
       event.previousIndex,
-      event.currentIndex
+      event.currentIndex,
     );
 
     const updatedTask = this.updateTask(newStatus, event);
@@ -120,7 +120,7 @@ export class DashboardKanbanComponent {
 
   private updateTask(
     newStatus: string,
-    event: CdkDragDrop<Task[], Task[], any>
+    event: CdkDragDrop<Task[], Task[], Task>,
   ) {
     const movedTask = event.container.data[event.currentIndex];
     const updatedTask: Task = {

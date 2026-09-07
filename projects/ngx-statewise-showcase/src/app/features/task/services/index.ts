@@ -1,1 +1,1 @@
-export { TaskRepositoryService } from "./task-repository.service"
+export { TaskRepositoryService } from './task-repository.service';

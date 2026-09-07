@@ -36,14 +36,18 @@ export class AuthEffect {
       try {
         const res = await firstValueFrom(this.authRepository.login(payload));
 
-        this.authToken.setAccessToken(res.body?.accessToken!);
+        if (!res.body) {
+          return loginActions.failure();
+        }
+
+        this.authToken.setAccessToken(res.body.accessToken);
         this.authToken.setRefreshToken(this.tokenFactory.generateFakeJWT());
 
-        return loginActions.success(res.body!);
+        return loginActions.success(res.body);
       } catch {
         return loginActions.failure();
       }
-    }
+    },
   );
 
   public readonly loginSuccessEffect = createEffect(
@@ -52,15 +56,14 @@ export class AuthEffect {
       this.projectManager.getAll();
       this.taskManager.getAll();
       this.router.navigate(['/']);
-
-    }
+    },
   );
 
   public readonly loginFailureEffect = createEffect(
     loginActions.failure,
     () => {
       this.notification.loginFailure();
-    }
+    },
   );
 
   public readonly authenticateRequestEffect = createEffect(
@@ -82,7 +85,7 @@ export class AuthEffect {
         }
 
         return authenticateActions.success(
-          this.authTokenHelper.getPayload(decoded)
+          this.authTokenHelper.getPayload(decoded),
         );
       }
 
@@ -93,14 +96,14 @@ export class AuthEffect {
 
         return decoded
           ? authenticateActions.success(
-              this.authTokenHelper.getPayload(decoded)
+              this.authTokenHelper.getPayload(decoded),
             )
           : authenticateActions.failure();
       } catch (error) {
         console.error('Authentication error:', error);
         return authenticateActions.failure();
       }
-    }
+    },
   );
 
   public readonly authenticateFailureEffect = createEffect(
@@ -116,7 +119,7 @@ export class AuthEffect {
       }
 
       return logoutActions.request();
-    }
+    },
   );
 
   public readonly authenticateSuccessEffect = createEffect(
@@ -124,16 +127,15 @@ export class AuthEffect {
     () => {
       this.projectManager.getAll();
       this.taskManager.getAll();
-    }
+    },
   );
 
   public readonly logoutRequestEffect = createEffect(
     logoutActions.request,
     async () => {
       try {
-
         await firstValueFrom(this.authRepository.logout());
-        
+
         await Promise.all([
           this.taskManager.reset(),
           this.projectManager.reset(),
@@ -144,7 +146,7 @@ export class AuthEffect {
         console.error('Authentication error:', error);
         return logoutActions.failure();
       }
-    }
+    },
   );
 
   public readonly logoutSuccessEffect = createEffect(
@@ -154,13 +156,13 @@ export class AuthEffect {
       this.authToken.clearRefreshToken();
 
       this.router.navigate(['/']);
-    }
+    },
   );
 
   public readonly logoutFailureEffect = createEffect(
     logoutActions.failure,
     () => {
       this.notification.logoutFailure();
-    }
+    },
   );
 }

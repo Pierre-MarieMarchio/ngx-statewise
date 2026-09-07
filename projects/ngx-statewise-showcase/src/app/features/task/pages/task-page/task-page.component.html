@@ -7,7 +7,9 @@
           <mat-icon class="tab-icon">view_kanban</mat-icon>
           Kanban
         </ng-template>
-        <app-task-kanban [tasks]="this.taskManager.tasks()!" (taskChanged)="onTaskChanged($event)"
+        <app-task-kanban
+          [tasks]="this.taskManager.tasks()!"
+          (taskChanged)="onTaskChanged($event)"
       /></mat-tab>
       <mat-tab>
         <ng-template mat-tab-label>
@@ -39,13 +41,12 @@
           [tasks]="this.taskManager.tasks()!"
         />
       </mat-tab>
-      
     </mat-tab-group>
   </div>
 
   <app-task-details
     slot="panel-content"
     [selectedTask]="selectedTask()"
-    (close)="closeSideNav()"
+    (closed)="closeSideNav()"
   />
 </app-side-panel>

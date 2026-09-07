@@ -11,6 +11,7 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "ngx-statewise": ["./dist/ngx-statewise"],
+      "ngx-statewise/testing": ["./dist/ngx-statewise/testing"],
       "@shared/*": ["./projects/ngx-statewise-showcase/src/app/shared/*"],
       "@assets/*": ["./projects/ngx-statewise-showcase/src/assets/*"],
       "@app/*": ["./projects/ngx-statewise-showcase/src/app/*"],

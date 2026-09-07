@@ -1,1 +1,1 @@
-export {accessTokenInterceptor} from "./access-token.interceptor"
+export { accessTokenInterceptor } from './access-token.interceptor';

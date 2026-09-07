@@ -19,7 +19,7 @@ export class ProjectEffect {
         const user = this.authManager.user();
         if (user) {
           const response = await firstValueFrom(
-            this.projectRepository.getAll(user)
+            this.projectRepository.getAll(user),
           );
           return getAllProjectsActions.success(response);
         }
@@ -28,6 +28,6 @@ export class ProjectEffect {
         console.error(error);
         return getAllProjectsActions.failure();
       }
-    }
+    },
   );
 }

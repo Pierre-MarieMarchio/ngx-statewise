@@ -5,7 +5,6 @@ import { environment } from '../../../../environments/environment';
 import { User } from '@shared/app-common/models/auth-user.model';
 import { Task } from '@shared/app-common/models';
 
-
 @Injectable({
   providedIn: 'root',
 })
@@ -45,7 +44,7 @@ export class TaskRepositoryService {
   delete(user: User, taskId: string): Observable<void> {
     let params = this.buildAccessParams(user);
     params = params.set('taskId', taskId);
-    return this.http.delete<void>(`${this.API_BASE_URL}`, {params} );
+    return this.http.delete<void>(`${this.API_BASE_URL}`, { params });
   }
 
   private buildAccessParams(user: User): HttpParams {

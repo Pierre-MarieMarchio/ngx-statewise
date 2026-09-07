@@ -50,7 +50,7 @@ export class FakeApi {
             statusText: response.statusText ?? 'Bad Request',
             error: response.body,
             url: this.request.url,
-          })
+          }),
       );
     }
     return throwError(() => this.respond400Error(`Cannot ${method} ${url}`));
@@ -68,7 +68,7 @@ export class FakeApi {
 
     const user = this.usersDB.findByUsernameAndPassword(
       email as string,
-      password as string
+      password as string,
     );
 
     if (!user) return this.respond400Error('Username or password is incorrect');
@@ -129,7 +129,7 @@ export class FakeApi {
     if (!user) return this.respond400Error('user does not exist');
     if (!body) return this.respond400Error();
 
-    const res = this.taskDB.update(taskId!, body, user)
+    const res = this.taskDB.update(taskId!, body, user);
     return this.respondSuccess(res);
   }
 
@@ -170,7 +170,7 @@ class UsersDB {
 
   findByUsernameAndPassword(email: string, password: string) {
     return this.users.find(
-      (user) => user.email === email && user.password === password
+      (user) => user.email === email && user.password === password,
     );
   }
 
@@ -207,7 +207,7 @@ export class TaskDB {
     return this.tasks.filter(
       (task) =>
         task.projectId === projectId &&
-        (user.role === 'admin' || task.organizationId === user.organizationId)
+        (user.role === 'admin' || task.organizationId === user.organizationId),
     );
   }
 
@@ -218,7 +218,7 @@ export class TaskDB {
   findByUserOrganization(user: User): Task[] {
     if (user.role === 'admin') return this.tasks;
     return this.tasks.filter(
-      (task) => task.organizationId === user.organizationId
+      (task) => task.organizationId === user.organizationId,
     );
   }
 
@@ -276,14 +276,14 @@ export class ProjectDB {
 
   findByOrganizationId(organizationId: string): Project[] {
     return this.project.filter(
-      (project) => project.organizationId === organizationId
+      (project) => project.organizationId === organizationId,
     );
   }
 
   findByUserOrganization(user: User): Project[] {
     if (user.role === 'admin') return this.project;
     return this.project.filter(
-      (project) => project.organizationId === user.organizationId
+      (project) => project.organizationId === user.organizationId,
     );
   }
 }

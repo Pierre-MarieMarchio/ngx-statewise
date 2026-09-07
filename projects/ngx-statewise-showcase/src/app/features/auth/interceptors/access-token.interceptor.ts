@@ -32,10 +32,10 @@ export const accessTokenInterceptor: HttpInterceptorFn = (req, next) => {
               },
             });
             return next(newReq);
-          })
+          }),
         );
       }
       return EMPTY;
-    })
+    }),
   );
 };

@@ -11,5 +11,4 @@ export const navigationItems: NavigationItem[] = [
     label: 'Task',
     route: 'task',
   },
-
 ];

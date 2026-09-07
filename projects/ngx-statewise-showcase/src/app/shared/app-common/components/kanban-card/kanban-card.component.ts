@@ -15,5 +15,4 @@ export class KanbanCardComponent<T extends KanbanCardData> {
 
 export interface KanbanCardData {
   id: string;
-  [key: string]: any;
 }

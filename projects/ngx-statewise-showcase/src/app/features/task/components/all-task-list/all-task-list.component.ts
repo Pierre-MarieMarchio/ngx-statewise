@@ -1,4 +1,4 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, input, output, OnInit } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { TaskListColumnItem } from '@app/features/task/models';
 import { Task } from '@shared/app-common/models';
@@ -10,7 +10,7 @@ import { AUTH_MANAGER } from '@shared/app-common/tokens';
   templateUrl: './all-task-list.component.html',
   styleUrl: './all-task-list.component.scss',
 })
-export class AllTaskListComponent {
+export class AllTaskListComponent implements OnInit {
   private readonly authManager = inject(AUTH_MANAGER);
   public tasks = input<Task[]>();
   public taskSelected = output<Task>();
@@ -45,7 +45,7 @@ export class AllTaskListComponent {
   ngOnInit() {
     this.columns = this.allColumns.filter(
       (col) =>
-        !col.requiredRole || col.requiredRole === this.authManager.user()?.role
+        !col.requiredRole || col.requiredRole === this.authManager.user()?.role,
     );
     this.displayedColumns = this.columns.map((c) => c.columnDef);
   }

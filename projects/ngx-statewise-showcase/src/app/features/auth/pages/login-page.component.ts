@@ -4,7 +4,6 @@ import { LoginFormComponent } from './components/login-form/login-form.component
 import { AuthManager } from '../states';
 import { LoginSubmit } from '../models';
 
-
 @Component({
   selector: 'app-login-page',
   imports: [LoginFormComponent, MatProgressBarModule],

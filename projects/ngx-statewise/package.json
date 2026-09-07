@@ -3,8 +3,8 @@
   "version": "0.6.4",
   "description": "A lightweight and intuitive state management for Angular. Simpler than NgRx, more structured than DIY.",
   "peerDependencies": {
-    "@angular/common": "^19.2.0 || ^20.0.0",
-    "@angular/core": "^19.2.0 || ^20.0.0"
+    "@angular/core": "^19.2.0 || ^20.0.0",
+    "rxjs": "^7.4.0"
   },
   "repository": {
     "type": "git",
@@ -58,5 +58,9 @@
   "dependencies": {
     "tslib": "^2.3.0"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "devDependencies": {
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.6"
+  }
 }

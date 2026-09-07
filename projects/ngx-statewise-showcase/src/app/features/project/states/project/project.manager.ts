@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { dispatch, dispatchAsync, registerLocalUpdator } from 'ngx-statewise';
+import { injectStatewise } from 'ngx-statewise';
 import { IProjectManager } from '@shared/app-common/tokens';
 import { ProjectState } from './project.state';
-import { ProjectUpdator } from './project.updator';
+import { projectUpdater } from './project.updater';
 import { getAllProjectsActions, projectReset } from './project.action';
 
 @Injectable({
@@ -10,26 +10,21 @@ import { getAllProjectsActions, projectReset } from './project.action';
 })
 export class ProjectManager implements IProjectManager {
   private readonly projectStates = inject(ProjectState);
-  private readonly projectUpdator = inject(ProjectUpdator);
-
-  constructor() {
-    registerLocalUpdator(this, this.projectUpdator);
-  }
+  private readonly statewise = injectStatewise(projectUpdater);
 
   public readonly projects = this.projectStates.projects.asReadonly();
   public readonly isError = this.projectStates.isError.asReadonly();
   public readonly isLoading = this.projectStates.isLoading.asReadonly();
 
   public getAll(): void {
-    dispatch(getAllProjectsActions.request(), this);
+    this.statewise.dispatch(getAllProjectsActions.request());
   }
 
-  public async getAllAsync(): Promise<void> {
-    await dispatchAsync(getAllProjectsActions.request(), this);
+  public getAllAsync(): Promise<void> {
+    return this.statewise.dispatchAsync(getAllProjectsActions.request());
   }
 
-  public async reset(): Promise<void> {
-    await dispatchAsync(projectReset.action(), this);
+  public reset(): Promise<void> {
+    return this.statewise.dispatchAsync(projectReset());
   }
-
 }

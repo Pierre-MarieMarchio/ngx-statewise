@@ -11,20 +11,12 @@
       </mat-card-subtitle>
     </mat-card-header>
     <mat-card-content class="login-card-content">
-      <mat-form-field
-        
-        subscriptSizing="dynamic"
-        appearance="outline"
-      >
+      <mat-form-field subscriptSizing="dynamic" appearance="outline">
         <mat-label>e-mail</mat-label>
         <input formControlName="email" matInput type="email" />
       </mat-form-field>
 
-      <mat-form-field
-       
-        subscriptSizing="dynamic"
-        appearance="outline"
-      >
+      <mat-form-field subscriptSizing="dynamic" appearance="outline">
         <mat-label>password</mat-label>
         <input
           formControlName="password"
@@ -39,7 +31,7 @@
           (click)="hidePassword($event)"
         >
           <mat-icon class="icon-outlined">{{
-            isPasswordHided() ? "visibility_off" : "visibility"
+            isPasswordHided() ? 'visibility_off' : 'visibility'
           }}</mat-icon>
         </button>
       </mat-form-field>

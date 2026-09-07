@@ -1,4 +1,4 @@
-import { WritableSignal } from "@angular/core";
+import { WritableSignal } from '@angular/core';
 
 export interface RollbackConfig<T> {
   isError: () => boolean;

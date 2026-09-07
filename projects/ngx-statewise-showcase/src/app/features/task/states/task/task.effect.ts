@@ -19,7 +19,7 @@ export class TaskEffect {
         const user = this.authManager.user();
         if (user) {
           const response = await firstValueFrom(
-            this.taskRepository.getAll(user)
+            this.taskRepository.getAll(user),
           );
           return getAllTaskActions.success(response);
         }
@@ -28,7 +28,7 @@ export class TaskEffect {
         console.error(error);
         return getAllTaskActions.failure();
       }
-    }
+    },
   );
 
   public readonly updateTaskRequestEffect = createEffect(
@@ -38,7 +38,7 @@ export class TaskEffect {
         const user = this.authManager.user();
         if (user) {
           const response = await firstValueFrom(
-            this.taskRepository.update(payload.id, payload, user)
+            this.taskRepository.update(payload.id, payload, user),
           );
           return updateTaskActions.success(response);
         }
@@ -47,6 +47,6 @@ export class TaskEffect {
         console.error(error);
         return updateTaskActions.failure();
       }
-    }
+    },
   );
 }
