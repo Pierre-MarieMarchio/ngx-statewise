@@ -351,6 +351,18 @@ public readonly loginSuccessEffect = createEffect(loginActions.success, () => {
 
 The check costs a set lookup, only runs when no updater matched, and is disabled outside dev mode. An action claimed by no updater at all stays perfectly valid — that is an effect-only action.
 
+##### What the check cannot see
+
+An action type becomes known when the module declaring its updater is loaded. In a lazily loaded feature, that happens with the chunk, so a dispatch aimed at an updater whose chunk has not been loaded yet is not reported.
+
+This is a missed detection, never a false alarm: the check never blames a dispatch that would have worked. And when the chunk is absent, neither the updater nor the effects of that feature exist, so the action does nothing at all — which is the bug you were trying to catch in the first place.
+
+If a lazily loaded feature must react to actions dispatched before it is reached, declare its updater globally instead of attaching it to a manager:
+
+```typescript
+provideStatewise({ updaters: [authUpdater] });
+```
+
 #### Key Notes
 
 - One action type can only be handled by a single updater within the same scope. A duplicate is reported at startup, not silently ignored.
