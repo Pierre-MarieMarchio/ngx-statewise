@@ -1,0 +1,7 @@
+dist
+coverage
+node_modules
+.angular
+package-lock.json
+CHANGELOG.md
+projects/*/CHANGELOG.md

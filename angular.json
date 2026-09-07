@@ -28,10 +28,8 @@
           "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/ngx-statewise/tsconfig.spec.json",
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ]
+            "karmaConfig": "projects/ngx-statewise/karma.conf.cjs",
+            "polyfills": ["zone.js", "zone.js/testing"]
           }
         }
       }
@@ -53,9 +51,7 @@
             "outputPath": "dist/ngx-statewise-showcase",
             "index": "projects/ngx-statewise-showcase/src/index.html",
             "browser": "projects/ngx-statewise-showcase/src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js"],
             "tsConfig": "projects/ngx-statewise-showcase/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -112,10 +108,7 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
+            "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "projects/ngx-statewise-showcase/tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [

@@ -1,13 +1,13 @@
-import { execSync } from "child_process";
+import { execSync } from 'child_process';
 
 const changed = process.env.changed_libraries;
 
 if (!changed) {
-  console.log("No libraries to build.");
+  console.log('No libraries to build.');
   process.exit(0);
 }
 
-for (const lib of changed.split(",")) {
+for (const lib of changed.split(',')) {
   console.log(`Building ${lib}...`);
-  execSync(`npx ng build ${lib}`, { stdio: "inherit" });
+  execSync(`npx ng build ${lib}`, { stdio: 'inherit' });
 }
