@@ -1,39 +1,53 @@
 import { Routes } from '@angular/router';
-import { LandingPageComponent } from './features/landing-page/landing-page.component';
-import { LoginPageComponent } from './features/auth/pages/login-page.component';
-import { DashboardPageComponent } from './features/dashboard/pages';
-import { TaskPageComponent } from './features/task/pages';
 import { loggedInGuard, loggedOutGuard } from './features/auth/guards';
-import { ProjectsPageComponent } from './features/project/pages';
 
+/**
+ * Every page is loaded on navigation: keeping them eager put the whole
+ * application, Angular Material included, in the initial bundle.
+ */
 export const routes: Routes = [
   {
     path: '',
-    component: LandingPageComponent,
+    loadComponent: () =>
+      import('./features/landing-page/landing-page.component').then(
+        (m) => m.LandingPageComponent,
+      ),
     title: 'Ngx-Statewise',
     canActivate: [loggedInGuard],
   },
   {
     path: 'login',
-    component: LoginPageComponent,
+    loadComponent: () =>
+      import('./features/auth/pages/login-page.component').then(
+        (m) => m.LoginPageComponent,
+      ),
     title: 'Ngx-Statewise',
     canActivate: [loggedInGuard],
   },
   {
     path: 'home',
-    component: DashboardPageComponent,
+    loadComponent: () =>
+      import('./features/dashboard/pages/dashboard-page/dashboard-page.component').then(
+        (m) => m.DashboardPageComponent,
+      ),
     title: 'Ngx-Statewise',
     canActivate: [loggedOutGuard],
   },
   {
     path: 'task',
-    component: TaskPageComponent,
+    loadComponent: () =>
+      import('./features/task/pages/task-page/task-page.component').then(
+        (m) => m.TaskPageComponent,
+      ),
     title: 'Ngx-Statewise',
     canActivate: [loggedOutGuard],
   },
   {
     path: 'project',
-    component: ProjectsPageComponent,
+    loadComponent: () =>
+      import('./features/project/pages/project-page/projects-page.component').then(
+        (m) => m.ProjectsPageComponent,
+      ),
     title: 'Ngx-Statewise',
     canActivate: [loggedOutGuard],
   },
