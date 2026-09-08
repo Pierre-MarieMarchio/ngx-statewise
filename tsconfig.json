@@ -16,6 +16,7 @@
       "@shared/*": ["./projects/ngx-statewise-showcase/src/app/shared/*"],
       "@assets/*": ["./projects/ngx-statewise-showcase/src/assets/*"],
       "@app/*": ["./projects/ngx-statewise-showcase/src/app/*"],
+      "@testing/*": ["./projects/ngx-statewise-showcase/src/testing/*"],
       "@themes/*": [
         "./projects/ngx-statewise-showcase/src/assets/styles/themes/*"
       ]

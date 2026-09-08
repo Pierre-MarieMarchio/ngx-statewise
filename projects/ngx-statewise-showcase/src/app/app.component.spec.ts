@@ -1,0 +1,52 @@
+import { provideRouter } from '@angular/router';
+import { TestBed } from '@angular/core/testing';
+import { AUTH_MANAGER } from '@shared/app-common/tokens';
+import { fakeAuthManager } from '@testing/fake-managers';
+import { AppComponent } from './app.component';
+import { ThemeService } from './shared/reusable/dark-mode/theme.service';
+import { Theme } from './shared/reusable/dark-mode/theme.enum';
+
+describe('AppComponent', () => {
+  let previousBodyClass: string;
+
+  beforeEach(() => {
+    previousBodyClass = document.body.className;
+  });
+
+  afterEach(() => {
+    document.body.className = previousBodyClass;
+  });
+
+  const mount = async () => {
+    await TestBed.configureTestingModule({
+      imports: [AppComponent],
+      providers: [
+        provideRouter([]),
+        { provide: AUTH_MANAGER, useValue: fakeAuthManager() },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    return fixture;
+  };
+
+  it('renders the navigation and a router outlet', async () => {
+    const fixture = await mount();
+    const host = fixture.nativeElement as HTMLElement;
+
+    expect(host.querySelector('app-navigation')).not.toBeNull();
+    expect(fixture.componentInstance.navigationItems.length).toBeGreaterThan(0);
+  });
+
+  it('writes the theme in use onto the document body', async () => {
+    const fixture = await mount();
+
+    expect(document.body.className).toBe('dark mat-typography');
+
+    TestBed.inject(ThemeService).setTheme(Theme.LIGHT);
+    fixture.detectChanges();
+
+    expect(document.body.className).toBe('light mat-typography');
+  });
+});
