@@ -61,7 +61,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "^2.3.0",
-    "lerna": "^8.2.2",
+    "lerna": "^10.0.1",
     "ng-packagr": "^22.1.1",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.70.0"
