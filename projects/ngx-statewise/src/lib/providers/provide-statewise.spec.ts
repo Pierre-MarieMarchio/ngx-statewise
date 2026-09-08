@@ -14,12 +14,19 @@ interface CounterState {
   count: number;
 }
 
+interface OrderedState {
+  log: string[];
+}
+
 const COUNTER_STATE = new InjectionToken<CounterState>('COUNTER_STATE');
+const ORDERED_STATE = new InjectionToken<OrderedState>('ORDERED_STATE');
 const provideActions = defineActionsGroup({
   source: 'provideProbe',
   events: {
     // Handled by counterUpdater below.
     incremented: payload<number>(),
+    // Handled by orderedUpdater below.
+    appended: payload<string>(),
     // Deliberately handled by no updater: effect-only actions stay valid.
     pinged: payload<number>(),
     ponged: emptyPayload,
@@ -29,6 +36,12 @@ const provideActions = defineActionsGroup({
 const counterUpdater = defineUpdater(COUNTER_STATE, (on) => {
   on(provideActions.incremented, (state, amount) => {
     state.count += amount;
+  });
+});
+
+const orderedUpdater = defineUpdater(ORDERED_STATE, (on) => {
+  on(provideActions.appended, (state, value) => {
+    state.log.push(value);
   });
 });
 
@@ -45,6 +58,7 @@ class CounterEffect {
 
 describe('provideStatewise', () => {
   let state: CounterState;
+  let ordered: OrderedState;
   let handledErrors: unknown[];
 
   function configure(...providers: unknown[]): void {
@@ -52,6 +66,7 @@ describe('provideStatewise', () => {
       providers: [
         ...(providers as never[]),
         { provide: COUNTER_STATE, useFactory: () => state },
+        { provide: ORDERED_STATE, useFactory: () => ordered },
         {
           provide: ErrorHandler,
           useValue: {
@@ -64,6 +79,7 @@ describe('provideStatewise', () => {
 
   beforeEach(() => {
     state = { count: 0 };
+    ordered = { log: [] };
     effectRuns = [];
     handledErrors = [];
   });
@@ -100,6 +116,25 @@ describe('provideStatewise', () => {
     );
 
     expect(state.count).toBe(5);
+  });
+
+  /*
+   * A global updater is the one case where two dispatch scopes reach the same
+   * state, so scope isolation cannot be what keeps their dispatches ordered.
+   * Only the synchronous updater does. Gate it.
+   */
+  it('applies the dispatches of two scopes to one global state in order', async () => {
+    configure(provideStatewise({ updaters: [orderedUpdater] }));
+    const engine = TestBed.inject(StatewiseEngine);
+    const firstScope: DispatchScope = { updaters: new Map() };
+    const secondScope: DispatchScope = { updaters: new Map() };
+
+    await Promise.all([
+      engine.execute(provideActions.appended('first'), firstScope),
+      engine.execute(provideActions.appended('second'), secondScope),
+    ]);
+
+    expect(ordered.log).toEqual(['first', 'second']);
   });
 
   describe('misrouted dispatch', () => {
