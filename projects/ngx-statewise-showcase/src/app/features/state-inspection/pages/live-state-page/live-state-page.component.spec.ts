@@ -21,7 +21,6 @@ import {
 // engine recognise a misrouted dispatch of one of them.
 import { taskUpdater } from '@app/features/project/states/task/task.updater';
 import { noticeUpdater } from '@app/features/state-inspection/states';
-import { TallyState } from '@app/features/state-inspection/states';
 import { LiveStatePageComponent } from './live-state-page.component';
 
 describe('LiveStatePageComponent', () => {
@@ -29,7 +28,6 @@ describe('LiveStatePageComponent', () => {
   let authManager: FakeAuthManager;
   let taskManager: FakeTaskManager;
   let projectManager: FakeProjectManager;
-  let tallyState: TallyState;
 
   const host = (): HTMLElement => fixture.nativeElement as HTMLElement;
 
@@ -61,20 +59,16 @@ describe('LiveStatePageComponent', () => {
       ],
     }).compileComponents();
 
-    tallyState = TestBed.inject(TallyState);
-    tallyState.total = 0;
-    tallyState.lastStep = 0;
-
     fixture = TestBed.createComponent(LiveStatePageComponent);
     fixture.detectChanges();
   });
 
-  it('shows one card per state it watches', () => {
+  it('shows one readout per manager it watches', () => {
     expect(
       Array.from(host().querySelectorAll('[data-card]')).map((card) =>
         card.getAttribute('data-card'),
       ),
-    ).toEqual(['auth', 'tasks', 'projects', 'notice', 'tally']);
+    ).toEqual(['auth', 'tasks', 'projects']);
   });
 
   it('reads the auth state, derived values included', () => {
@@ -137,22 +131,6 @@ describe('LiveStatePageComponent', () => {
     expect(reading('tasks', 'isLoading')).toBe('true');
   });
 
-  it('raises a notice through a handle owning no updater', () => {
-    expect(reading('notice', 'raisedCount')).toBe('0');
-
-    click('raise a notice');
-
-    expect(reading('notice', 'message')).toBe('raised from the state page');
-    expect(reading('notice', 'raisedCount')).toBe('1');
-  });
-
-  it('increments the tally held in plain properties', () => {
-    click('increment the tally');
-
-    expect(tallyState.total).toBe(1);
-    expect(reading('tally', 'total')).toBe('1');
-  });
-
   it('asks the managers to reload', () => {
     let taskReloads = 0;
     let projectReloads = 0;
@@ -187,7 +165,7 @@ describe('LiveStatePageComponent', () => {
 
     it('lets the reader clear what it collected', () => {
       click('dispatch a misrouted action');
-      click('clear');
+      click('clear failures');
 
       expect(host().textContent).toContain('Nothing has failed yet.');
     });
