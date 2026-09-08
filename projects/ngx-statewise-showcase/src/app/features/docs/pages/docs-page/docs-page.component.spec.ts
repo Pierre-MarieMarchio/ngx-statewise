@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideStatewise } from 'ngx-statewise';
-import { noticeUpdater } from '@app/features/notice/states';
+import { noticeUpdater } from '@app/features/state-inspection/states';
 import { DocsPageComponent, DOCS_SECTIONS } from './docs-page.component';
 
 describe('DocsPageComponent', () => {

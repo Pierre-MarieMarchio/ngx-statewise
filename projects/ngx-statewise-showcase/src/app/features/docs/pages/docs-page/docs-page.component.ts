@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
-import { NoticeDemoComponent } from '@app/features/notice/components/notice-demo/notice-demo.component';
-import { TallyDemoComponent } from '@app/features/tally/components/tally-demo/tally-demo.component';
+import { NoticeDemoComponent } from '@app/features/state-inspection/components/notice-demo/notice-demo.component';
+import { TallyDemoComponent } from '@app/features/state-inspection/components/tally-demo/tally-demo.component';
 
 /** One documented mechanism, with the showcase code that exercises it. */
 export interface DocsSection {
@@ -31,7 +31,7 @@ export const DOCS_SECTIONS: DocsSection[] = [
 
 export const taskReset = defineSingleAction('TASK_RESET', emptyPayload);
 // -> TASK_RESET_ACTION`,
-    seenIn: 'features/task/states/task/task.action.ts',
+    seenIn: 'features/project/states/task/task.action.ts',
   },
   {
     id: 'updaters',
@@ -49,7 +49,7 @@ private readonly statewise = injectStatewise(taskUpdater);
 
 // reachable from any handle, for the types no manager claims
 provideStatewise({ updaters: [aGlobalUpdater] });`,
-    seenIn: 'features/task/states/task/task.updater.ts',
+    seenIn: 'features/project/states/task/task.updater.ts',
   },
   {
     id: 'precedence',
@@ -62,7 +62,7 @@ scope.updaters.get(actionType) ?? this.globalUpdaters.get(actionType)
 // so this reaches the global updater, owning no updater at all
 const statewise = injectStatewise();
 statewise.dispatch(noticeActions.raised('saved'));`,
-    seenIn: 'features/notice/states/notice/notice.updater.ts',
+    seenIn: 'features/state-inspection/states/notice/notice.updater.ts',
   },
   {
     id: 'plain-state',
@@ -81,7 +81,7 @@ export const tallyUpdater = defineUpdater(TallyState, (on) => {
     state.lastStep = step;
   });
 });`,
-    seenIn: 'features/tally/states/tally/tally.state.ts',
+    seenIn: 'features/state-inspection/states/tally/tally.state.ts',
   },
   {
     id: 'manager-derived-state',
@@ -99,7 +99,7 @@ export const tallyUpdater = defineUpdater(TallyState, (on) => {
   public readonly taskCount = computed(() => this.tasks().length);
   public readonly countByStatus = computed(() => /* one per status */);
 }`,
-    seenIn: 'features/task/states/task/task.manager.ts',
+    seenIn: 'features/project/states/task/task.manager.ts',
   },
   {
     id: 'effects',
@@ -110,7 +110,7 @@ export const tallyUpdater = defineUpdater(TallyState, (on) => {
   const tasks = await firstValueFrom(this.repository.getAll(user));
   return getAllTaskActions.success(tasks);
 });`,
-    seenIn: 'features/task/states/task/task.effect.ts',
+    seenIn: 'features/project/states/task/task.effect.ts',
   },
   {
     id: 'observable-effects',
@@ -150,11 +150,12 @@ createEffect(loginActions.success, () => {
     id: 'scoping',
     title: 'An effect runs for the manager owning its action',
     summary:
-      'A dispatch reaching a scope that owns nothing of the action does not run its effects either: cascading their actions into the wrong scope would corrupt another manager. In development that misrouted dispatch throws; in production it reaches the ErrorHandler.',
+      'A dispatch reaching a scope that owns nothing of the action does not run its effects either: cascading their actions into the wrong scope would corrupt another manager. In development that misrouted dispatch throws; in production it reaches the ErrorHandler. The state page has a button for it, and shows what comes back — this application replaces the default ErrorHandler with one that keeps failures as state instead of dropping them in the console.',
     snippet: `// TASK_REQUEST is claimed by taskUpdater, which this handle does not own
 const other = injectStatewise(projectUpdater);
 other.dispatch(getAllTaskActions.request()); // misrouted: nothing runs`,
-    seenIn: 'projects/ngx-statewise/src/integration/execution-contract.spec.ts',
+    seenIn:
+      'features/state-inspection/pages/live-state-page/live-state-page.component.ts',
   },
   {
     id: 'dispatch-modes',
@@ -170,7 +171,7 @@ public getAllAsync(): Promise<void> {
   // settles once the effects, and the actions they returned, are done
   return this.statewise.dispatchAsync(getAllTaskActions.request());
 }`,
-    seenIn: 'features/task/states/task/task.manager.ts',
+    seenIn: 'features/project/states/task/task.manager.ts',
   },
   {
     id: 'concurrency',
@@ -182,7 +183,7 @@ public getAllAsync(): Promise<void> {
   async (task) => { ... },
   { concurrency: 'latest', key: (task) => task.id, cancelOn: taskReset },
 );`,
-    seenIn: 'features/task/states/task/task.effect.ts',
+    seenIn: 'features/project/states/task/task.effect.ts',
   },
   {
     id: 'error-recovery',
@@ -201,7 +202,7 @@ on(updateTaskActions.failure, (state, taskId) => {
   const replaced = state.pendingWrites().get(taskId);
   state.tasks.update(carrying(replaced));
 });`,
-    seenIn: 'features/task/states/task/task.updater.ts',
+    seenIn: 'features/project/states/task/task.updater.ts',
   },
   {
     id: 'rendered-state',
@@ -234,7 +235,7 @@ public readonly isSaving = computed(
   ),
 ]);`,
     seenIn:
-      'features/live-state/pages/live-state-page/live-state-page.component.ts',
+      'features/state-inspection/pages/live-state-page/live-state-page.component.ts',
   },
   {
     id: 'history',

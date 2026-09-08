@@ -12,12 +12,15 @@ import {
   PROJECT_MANAGER,
   TASK_MANAGER,
 } from '@shared/app-common/tokens';
-import { NoticeState, noticeActions } from '@app/features/notice/states';
+import { ReportedErrors } from '@app/core/services';
+import { getAllTaskActions } from '@app/features/project/states/task/task.action';
 import {
+  NoticeState,
+  noticeActions,
   TallyState,
   tallyActions,
   tallyUpdater,
-} from '@app/features/tally/states';
+} from '@app/features/state-inspection/states';
 
 /** One line of a readout: a label and the value read at render time. */
 export interface StateReading {
@@ -45,6 +48,7 @@ export class LiveStatePageComponent {
   private readonly taskManager = inject(TASK_MANAGER);
   private readonly projectManager = inject(PROJECT_MANAGER);
   private readonly noticeState = inject(NoticeState);
+  private readonly reportedErrors = inject(ReportedErrors);
   public readonly tallyState = inject(TallyState);
 
   private readonly bareHandle = injectStatewise();
@@ -87,6 +91,31 @@ export class LiveStatePageComponent {
     { label: 'message', value: this.noticeState.message() ?? '(none)' },
     { label: 'raisedCount', value: String(this.noticeState.raisedCount()) },
   ]);
+
+  /** What the application decided to do with a failure instead of hiding it. */
+  public readonly reported = this.reportedErrors.all;
+
+  /**
+   * Dispatches an action this handle does not own, on purpose.
+   *
+   * `TASK_REQUEST` is claimed by the task updater, which is attached to the
+   * task manager, and this handle owns no updater at all. So the engine
+   * refuses it rather than letting the dispatch skip its state update in
+   * silence — which is what used to happen before the check existed.
+   */
+  public dispatchMisrouted(): void {
+    try {
+      this.bareHandle.dispatch(getAllTaskActions.request());
+    } catch (error) {
+      // Development throws at the dispatch site; production hands the same
+      // error to the ErrorHandler. The panel shows it either way.
+      this.reportedErrors.record(error);
+    }
+  }
+
+  public clearReported(): void {
+    this.reportedErrors.clear();
+  }
 
   public raiseNotice(): void {
     this.bareHandle.dispatch(

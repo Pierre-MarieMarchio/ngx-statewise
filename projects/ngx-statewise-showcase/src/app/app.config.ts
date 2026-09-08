@@ -1,5 +1,6 @@
 import {
   ApplicationConfig,
+  ErrorHandler,
   inject,
   provideAppInitializer,
   provideZoneChangeDetection,
@@ -14,14 +15,15 @@ import { routes } from './app.routes';
 import { accessTokenInterceptor } from './features/auth/interceptors';
 import { provideStatewise } from 'ngx-statewise';
 import { fakeApiInterceptor } from './core/fake-api';
+import { ShowcaseErrorHandler } from './core/error-handling';
 import {
   AuthEffect,
   AuthManager,
   withoutCredentials,
 } from './features/auth/states';
-import { TaskEffect, TaskManager } from './features/task/states';
+import { TaskEffect, TaskManager } from './features/project/states';
 import { ProjectEffect, ProjectManager } from './features/project/states';
-import { noticeUpdater } from './features/notice/states';
+import { noticeUpdater } from './features/state-inspection/states';
 import {
   AUTH_MANAGER,
   PROJECT_MANAGER,
@@ -38,6 +40,10 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([accessTokenInterceptor, fakeApiInterceptor]),
     ),
     provideZoneChangeDetection({ eventCoalescing: true }),
+    // Everything the library reports — a misrouted dispatch, an effect that
+    // promised an action and produced none, the cause behind a failure
+    // action — becomes state the state page renders.
+    { provide: ErrorHandler, useClass: ShowcaseErrorHandler },
     provideRouter(routes),
     provideStatewise({
       effects: [AuthEffect, TaskEffect, ProjectEffect],
