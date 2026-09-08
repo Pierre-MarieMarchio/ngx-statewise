@@ -20,10 +20,14 @@
   },
   "plugins": {
     "@release-it/conventional-changelog": {
-      "preset": { "name": "angular" },
+      "preset": {
+        "name": "angular"
+      },
       "infile": "CHANGELOG.md",
       "tagName": "ngx-statewise@${version}",
-      "gitRawCommitsOpts": { "path": "projects/ngx-statewise" }
+      "gitRawCommitsOpts": {
+        "path": "."
+      }
     }
   }
 }
