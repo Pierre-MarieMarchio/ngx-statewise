@@ -1,0 +1,185 @@
+import type { CalloutKind, CalloutLabels } from '../guide/callout';
+import { DEFAULT_LOCALE, type LocaleCode } from './locale';
+
+/**
+ * Every string of the interface. The guide itself is markdown, so this covers
+ * the chrome around it: navigation, buttons, the landing page and the notices.
+ */
+export interface UiStrings {
+  readonly skipToContent: string;
+  readonly openNavigation: string;
+  readonly closeNavigation: string;
+  readonly switchToDarkTheme: string;
+  readonly switchToLightTheme: string;
+  readonly language: string;
+  readonly guideNavLabel: string;
+  readonly pagerNavLabel: string;
+  readonly currentLanguage: string;
+  readonly onThisPage: string;
+  readonly previousPage: string;
+  readonly nextPage: string;
+  readonly copyCode: string;
+  readonly codeRegion: string;
+  readonly tableRegion: string;
+  readonly codeCopied: string;
+  readonly editThisPage: string;
+  readonly breadcrumbHome: string;
+  readonly search: string;
+  readonly searchLabel: string;
+  readonly searchPlaceholder: string;
+  readonly searchPrompt: string;
+  readonly searchNoResults: string;
+  readonly calloutNote: string;
+  readonly calloutTip: string;
+  readonly calloutImportant: string;
+  readonly calloutWarning: string;
+  readonly calloutCaution: string;
+  readonly untranslatedTitle: string;
+  readonly untranslatedBody: string;
+  readonly footerLicence: string;
+  readonly footerFoundAProblem: string;
+  readonly footerOpenAnIssue: string;
+  readonly homeEyebrow: string;
+  readonly homeTagline: string;
+  readonly homeGetStarted: string;
+  readonly homeReadTheGuide: string;
+  readonly homeFlowTitle: string;
+  readonly homeFlowAction: string;
+  readonly homeFlowActionText: string;
+  readonly homeFlowUpdater: string;
+  readonly homeFlowUpdaterText: string;
+  readonly homeFlowEffect: string;
+  readonly homeFlowEffectText: string;
+  readonly homeFlowManager: string;
+  readonly homeFlowManagerText: string;
+  readonly homeContentsTitle: string;
+  readonly homeTitle: string;
+}
+
+const EN: UiStrings = {
+  skipToContent: 'Skip to content',
+  openNavigation: 'Open navigation',
+  closeNavigation: 'Close navigation',
+  switchToDarkTheme: 'Switch to the dark theme',
+  switchToLightTheme: 'Switch to the light theme',
+  language: 'Language',
+  guideNavLabel: 'Guide',
+  pagerNavLabel: 'Guide pages',
+  currentLanguage: 'Current language',
+  onThisPage: 'On this page',
+  previousPage: 'Previous',
+  nextPage: 'Next',
+  copyCode: 'Copy code',
+  codeRegion: 'Code sample',
+  tableRegion: 'Table',
+  codeCopied: 'Copied',
+  editThisPage: 'Edit this page on GitHub',
+  breadcrumbHome: 'Home',
+  search: 'Search',
+  searchLabel: 'Search the guide',
+  searchPlaceholder: 'Search the guide…',
+  searchPrompt: 'Type to search pages and sections.',
+  searchNoResults: 'Nothing matches that.',
+  calloutNote: 'Note',
+  calloutTip: 'Tip',
+  calloutImportant: 'Important',
+  calloutWarning: 'Warning',
+  calloutCaution: 'Careful',
+  untranslatedTitle: 'This page is not translated yet',
+  untranslatedBody: 'It is shown in English.',
+  footerLicence: 'ngx-statewise is released under the GPL-3.0 licence.',
+  footerFoundAProblem: 'Found something wrong on this page?',
+  footerOpenAnIssue: 'Open an issue',
+  homeEyebrow: 'Angular state management',
+  homeTagline:
+    'Signals for state, actions for intent, effects for everything else. Simpler than NgRx, more structured than doing it by hand.',
+  homeGetStarted: 'Get started',
+  homeReadTheGuide: 'Read the guide',
+  homeFlowTitle: 'The whole flow',
+  homeFlowAction: 'Action',
+  homeFlowActionText: 'carries the intent and its payload.',
+  homeFlowUpdater: 'Updater',
+  homeFlowUpdaterText: 'writes the state, synchronously.',
+  homeFlowEffect: 'Effect',
+  homeFlowEffectText: 'runs the side work, on state already up to date.',
+  homeFlowManager: 'Manager',
+  homeFlowManagerText: 'exposes the signals and dispatches, in its own scope.',
+  homeContentsTitle: 'Contents',
+  homeTitle: 'ngx-statewise — state management for Angular',
+};
+
+const FR: UiStrings = {
+  skipToContent: 'Aller au contenu',
+  openNavigation: 'Ouvrir la navigation',
+  closeNavigation: 'Fermer la navigation',
+  switchToDarkTheme: 'Passer au thème sombre',
+  switchToLightTheme: 'Passer au thème clair',
+  language: 'Langue',
+  guideNavLabel: 'Guide',
+  pagerNavLabel: 'Pages du guide',
+  currentLanguage: 'Langue actuelle',
+  onThisPage: 'Sur cette page',
+  previousPage: 'Précédent',
+  nextPage: 'Suivant',
+  copyCode: 'Copier le code',
+  codeRegion: 'Extrait de code',
+  tableRegion: 'Tableau',
+  codeCopied: 'Copié',
+  editThisPage: 'Modifier cette page sur GitHub',
+  breadcrumbHome: 'Accueil',
+  search: 'Rechercher',
+  searchLabel: 'Rechercher dans le guide',
+  searchPlaceholder: 'Rechercher dans le guide…',
+  searchPrompt: 'Tapez pour chercher une page ou une section.',
+  searchNoResults: 'Aucun résultat.',
+  calloutNote: 'Remarque',
+  calloutTip: 'Astuce',
+  calloutImportant: 'Important',
+  calloutWarning: 'Attention',
+  calloutCaution: 'Prudence',
+  untranslatedTitle: "Cette page n'est pas encore traduite",
+  untranslatedBody: 'Elle est affichée en anglais.',
+  footerLicence: 'ngx-statewise est publié sous licence GPL-3.0.',
+  footerFoundAProblem: 'Une erreur sur cette page ?',
+  footerOpenAnIssue: 'Ouvrir une issue',
+  homeEyebrow: 'Gestion d’état pour Angular',
+  homeTagline:
+    'Des signals pour l’état, des actions pour l’intention, des effects pour tout le reste. Plus simple que NgRx, plus structuré qu’à la main.',
+  homeGetStarted: 'Commencer',
+  homeReadTheGuide: 'Lire le guide',
+  homeFlowTitle: 'Tout le flux',
+  homeFlowAction: 'Action',
+  homeFlowActionText: 'porte l’intention et sa charge utile.',
+  homeFlowUpdater: 'Updater',
+  homeFlowUpdaterText: 'écrit l’état, de façon synchrone.',
+  homeFlowEffect: 'Effect',
+  homeFlowEffectText: 'exécute le travail annexe, sur un état déjà à jour.',
+  homeFlowManager: 'Manager',
+  homeFlowManagerText:
+    'expose les signals et dispatche, dans sa propre portée.',
+  homeContentsTitle: 'Sommaire',
+  homeTitle: 'ngx-statewise — gestion d’état pour Angular',
+};
+
+const BY_LOCALE: Record<LocaleCode, UiStrings> = { en: EN, fr: FR };
+
+export function uiStrings(code: LocaleCode): UiStrings {
+  return BY_LOCALE[code] ?? BY_LOCALE[DEFAULT_LOCALE.code];
+}
+
+const CALLOUT_KEYS: Record<CalloutKind, keyof UiStrings> = {
+  note: 'calloutNote',
+  tip: 'calloutTip',
+  important: 'calloutImportant',
+  warning: 'calloutWarning',
+  caution: 'calloutCaution',
+};
+
+/** The callout labels, in the shape the markdown renderer wants them. */
+export function calloutLabels(code: LocaleCode): CalloutLabels {
+  const strings = uiStrings(code);
+
+  return Object.fromEntries(
+    Object.entries(CALLOUT_KEYS).map(([kind, key]) => [kind, strings[key]]),
+  ) as CalloutLabels;
+}

@@ -1,0 +1,127 @@
+<a class="skip-link" href="#main">{{ text().skipToContent }}</a>
+
+<header class="header">
+  <button
+    class="header__icon-button header__nav-toggle"
+    type="button"
+    aria-controls="sidebar"
+    [attr.aria-expanded]="navOpen()"
+    [attr.aria-label]="
+      navOpen() ? text().closeNavigation : text().openNavigation
+    "
+    (click)="toggleNav()"
+  >
+    <docs-icon
+      class="header__nav-toggle-icon"
+      [name]="navOpen() ? 'close' : 'menu'"
+    />
+  </button>
+
+  <a class="header__brand" [routerLink]="homeLink()">
+    <span class="header__brand-mark" aria-hidden="true"></span>
+    <span class="header__brand-name">ngx-statewise</span>
+  </a>
+
+  <div class="header__actions">
+    <button
+      class="header__search"
+      type="button"
+      [attr.aria-label]="text().searchLabel"
+      (click)="openSearch()"
+    >
+      <docs-icon class="header__search-icon" name="search" />
+      <span class="header__search-text">{{ text().search }}</span>
+      <kbd class="header__search-keys">⌘K</kbd>
+    </button>
+
+    <nav class="language" [attr.aria-label]="text().language">
+      <docs-icon class="language__icon" name="translate" />
+      @for (option of localeOptions(); track option.locale.code) {
+        @if (option.isCurrent) {
+          <span
+            class="language__link language__link--current"
+            aria-current="true"
+          >
+            {{ option.locale.label }}
+          </span>
+        } @else {
+          <a
+            class="language__link"
+            [href]="option.href"
+            [attr.hreflang]="option.locale.htmlLang"
+            [attr.lang]="option.locale.htmlLang"
+          >
+            {{ option.locale.label }}
+          </a>
+        }
+      }
+    </nav>
+
+    <button
+      class="header__icon-button"
+      type="button"
+      [attr.aria-label]="
+        theme() === 'dark'
+          ? text().switchToLightTheme
+          : text().switchToDarkTheme
+      "
+      (click)="toggleTheme()"
+    >
+      <docs-icon [name]="theme() === 'dark' ? 'dark-mode' : 'light-mode'" />
+    </button>
+
+    <a class="header__link" [href]="npmUrl" target="_blank" rel="noreferrer">
+      npm
+    </a>
+    <a
+      class="header__link"
+      [href]="repositoryUrl"
+      target="_blank"
+      rel="noreferrer"
+    >
+      GitHub
+    </a>
+  </div>
+</header>
+
+<div class="layout" [class.layout--nav-open]="navOpen()">
+  <nav class="sidebar" id="sidebar" [attr.aria-label]="text().guideNavLabel">
+    <!-- The drawer animates its row height; the inner element is what keeps
+         the content from being squashed while it does. -->
+    <div class="sidebar__inner">
+      @for (section of sections; track section.title.en) {
+        <p class="sidebar__section">{{ section.title[locale.code] }}</p>
+        <ul class="sidebar__list" role="list">
+          @for (page of section.pages; track page.slug) {
+            <li>
+              <a
+                class="sidebar__link"
+                routerLinkActive="sidebar__link--active"
+                [routerLink]="pageLink(page.slug)"
+                [title]="page.summary[locale.code]"
+                (click)="closeNav()"
+              >
+                {{ page.title[locale.code] }}
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </nav>
+
+  <main class="main" id="main" tabindex="-1">
+    <router-outlet />
+  </main>
+</div>
+
+<footer class="footer text-muted">
+  <p class="footer__text">
+    {{ text().footerLicence }} {{ text().footerFoundAProblem }}
+    <a [href]="repositoryUrl + '/issues'" target="_blank" rel="noreferrer">
+      {{ text().footerOpenAnIssue }} </a
+    >.
+  </p>
+</footer>
+
+<docs-search-dialog />

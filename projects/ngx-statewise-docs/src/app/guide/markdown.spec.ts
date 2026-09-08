@@ -1,8 +1,10 @@
+import { renderOptions as options } from '../../testing/render-options';
 import { renderGuide, slugify } from './markdown';
 
 /** Stands in for `Location.prepareExternalUrl` under a subpath deployment. */
-const underSubpath = (path: string) => `/ngx-statewise${path}`;
-const atRoot = (path: string) => path;
+const underSubpath = options({
+  toExternalUrl: (path) => `/ngx-statewise/en${path}`,
+});
 
 describe('slugify', () => {
   it('drops punctuation and joins words with hyphens', () => {
@@ -21,16 +23,27 @@ describe('slugify', () => {
 
 describe('renderGuide', () => {
   it('gives every heading an id, which is what the anchors are made of', () => {
-    const { html } = renderGuide('# Effects\n\n## Registering Effects', atRoot);
+    const { html } = renderGuide(
+      '# Effects\n\n## Registering effects',
+      options(),
+    );
 
     expect(html).toContain('<h1 id="effects">');
     expect(html).toContain('<h2 id="registering-effects">');
   });
 
+  it('adds a permalink beside every heading but the title', () => {
+    const { html } = renderGuide('# Effects\n\n## Scope', options());
+
+    expect(html).toContain('<a class="heading-anchor" href="#scope"');
+    // The h1 is the page title; a permalink to the top of the page is noise.
+    expect(html).not.toContain('href="#effects"');
+  });
+
   it('lists h2 and h3 in the table of contents, and leaves h1 out of it', () => {
     const { headings } = renderGuide(
       '# Effects\n\n## Scope\n\n### Lifecycle\n\n#### Ignored',
-      atRoot,
+      options(),
     );
 
     expect(headings).toEqual([
@@ -40,7 +53,7 @@ describe('renderGuide', () => {
   });
 
   it('keeps repeated headings addressable by suffixing the duplicate', () => {
-    const { headings } = renderGuide('## Key Notes\n\n## Key Notes', atRoot);
+    const { headings } = renderGuide('## Key notes\n\n## Key notes', options());
 
     expect(headings.map((heading) => heading.id)).toEqual([
       'key-notes',
@@ -49,17 +62,17 @@ describe('renderGuide', () => {
   });
 
   it("does not carry one page's heading counter into the next", () => {
-    const first = renderGuide('## Key Notes', atRoot);
-    const second = renderGuide('## Key Notes', atRoot);
+    const first = renderGuide('## Key notes', options());
+    const second = renderGuide('## Key notes', options());
 
     expect(first.headings[0].id).toBe('key-notes');
     expect(second.headings[0].id).toBe('key-notes');
   });
 
-  it('sends a site-absolute link through the base href', () => {
+  it('sends a site-absolute link through the base href and the locale', () => {
     const { html } = renderGuide('[Scope](/guide/effects#scope)', underSubpath);
 
-    expect(html).toContain('href="/ngx-statewise/guide/effects#scope"');
+    expect(html).toContain('href="/ngx-statewise/en/guide/effects#scope"');
   });
 
   it('leaves a fragment-only link alone', () => {
@@ -77,8 +90,31 @@ describe('renderGuide', () => {
     expect(html).toContain('rel="noreferrer"');
   });
 
+  it('wraps a fenced block in a copyable code block naming its language', () => {
+    const { html } = renderGuide(
+      '```typescript\nconst a = 1;\n```',
+      options({ copyCodeLabel: 'Copier le code' }),
+    );
+
+    expect(html).toContain('class="code-block"');
+    expect(html).toContain('class="language-typescript"');
+    expect(html).toContain('data-copy-code');
+    expect(html).toContain('aria-label="Copier le code"');
+    expect(html).toContain('const a = 1;');
+  });
+
+  it('escapes code rather than letting it into the document as markup', () => {
+    const { html } = renderGuide(
+      '```html\n<img src=x onerror="alert(1)">\n```',
+      options(),
+    );
+
+    expect(html).not.toContain('<img src=x');
+    expect(html).toContain('&lt;img');
+  });
+
   it('renders GitHub-flavoured tables, which the guide is full of', () => {
-    const { html } = renderGuide('| a | b |\n| - | - |\n| 1 | 2 |', atRoot);
+    const { html } = renderGuide('| a | b |\n| - | - |\n| 1 | 2 |', options());
 
     expect(html).toContain('<table>');
     expect(html).toContain('<td>1</td>');

@@ -3,14 +3,19 @@ import { drainEffects, provideStatewiseTesting } from 'ngx-statewise/testing';
 import { DocsUiEffect } from './docs-ui.effect';
 import { DocsUiManager } from './docs-ui.manager';
 import { docsUiUpdater } from './docs-ui.updater';
-import { THEME_ATTRIBUTE, THEME_STORAGE_KEY } from './theme';
+import { THEME_CLASSES, THEME_STORAGE_KEY } from './theme';
 
 describe('DocsUiManager', () => {
   let manager: DocsUiManager;
 
+  const themeClass = () =>
+    THEME_CLASSES.find((candidate) =>
+      document.documentElement.classList.contains(candidate),
+    );
+
   beforeEach(() => {
     localStorage.clear();
-    document.documentElement.removeAttribute(THEME_ATTRIBUTE);
+    document.documentElement.classList.remove(...THEME_CLASSES);
 
     TestBed.configureTestingModule({
       providers: [
@@ -26,7 +31,7 @@ describe('DocsUiManager', () => {
 
   afterEach(() => {
     localStorage.clear();
-    document.documentElement.removeAttribute(THEME_ATTRIBUTE);
+    document.documentElement.classList.remove(...THEME_CLASSES);
   });
 
   it('starts on the dark theme, with the navigation closed', () => {
@@ -47,9 +52,20 @@ describe('DocsUiManager', () => {
     await drainEffects();
 
     expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe('light');
-    expect(document.documentElement.getAttribute(THEME_ATTRIBUTE)).toBe(
-      'light',
+    expect(themeClass()).toBe('light');
+  });
+
+  it('leaves exactly one theme class on the document', async () => {
+    manager.toggleTheme();
+    await drainEffects();
+    manager.toggleTheme();
+    await drainEffects();
+
+    const applied = THEME_CLASSES.filter((candidate) =>
+      document.documentElement.classList.contains(candidate),
     );
+
+    expect(applied).toEqual(['dark']);
   });
 
   it('adopts the theme found in storage', async () => {
@@ -59,9 +75,7 @@ describe('DocsUiManager', () => {
     await drainEffects();
 
     expect(manager.theme()).toBe('light');
-    expect(document.documentElement.getAttribute(THEME_ATTRIBUTE)).toBe(
-      'light',
-    );
+    expect(themeClass()).toBe('light');
   });
 
   it('keeps the default when storage holds nothing usable', async () => {

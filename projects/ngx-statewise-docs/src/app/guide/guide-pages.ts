@@ -1,107 +1,148 @@
-import actions from './content/actions.md';
-import effects from './content/effects.md';
-import gettingStarted from './content/getting-started.md';
-import introduction from './content/introduction.md';
-import managers from './content/managers.md';
-import migration from './content/migration.md';
-import states from './content/states.md';
-import testing from './content/testing.md';
-import updaters from './content/updaters.md';
-import why from './content/why.md';
+import { DEFAULT_LOCALE, type LocaleCode } from '../i18n';
+import actionsEn from './content/en/actions.md';
+import effectsEn from './content/en/effects.md';
+import gettingStartedEn from './content/en/getting-started.md';
+import introductionEn from './content/en/introduction.md';
+import managersEn from './content/en/managers.md';
+import migrationEn from './content/en/migration.md';
+import statesEn from './content/en/states.md';
+import testingEn from './content/en/testing.md';
+import updatersEn from './content/en/updaters.md';
+import whyEn from './content/en/why.md';
+
+/** A value the interface must have in every locale. */
+type Translated = Record<LocaleCode, string>;
 
 export interface GuidePage {
   /** Last segment of the route, and the name of the markdown file behind it. */
   readonly slug: string;
-  readonly title: string;
+  readonly title: Translated;
   /** One line, used as the page description and in the sidebar tooltip. */
-  readonly summary: string;
-  readonly markdown: string;
+  readonly summary: Translated;
+  /**
+   * The markdown, per locale. Partial on purpose: a locale with no entry falls
+   * back to the default one, and the page says so. Adding a translation is a
+   * file in `content/<locale>/` and one key here.
+   */
+  readonly content: Partial<Translated>;
 }
 
 export interface GuideSection {
-  readonly title: string;
+  readonly title: Translated;
   readonly pages: readonly GuidePage[];
 }
 
 /**
  * The guide, in reading order. This is the one place a page is declared: the
- * router, the sidebar and the previous/next footer are all derived from it, so
- * adding a page is adding an entry here and a markdown file beside it.
+ * router, the sidebar, the landing page and the previous/next footer are all
+ * derived from it.
  */
 export const GUIDE_SECTIONS: readonly GuideSection[] = [
   {
-    title: 'Overview',
+    title: { en: 'Overview', fr: 'Vue d’ensemble' },
     pages: [
       {
         slug: 'introduction',
-        title: 'Introduction',
-        summary: 'What ngx-statewise is, and the flow it is built around.',
-        markdown: introduction,
+        title: { en: 'Introduction', fr: 'Introduction' },
+        summary: {
+          en: 'What ngx-statewise is, and the flow it is built around.',
+          fr: 'Ce qu’est ngx-statewise, et le flux qui le structure.',
+        },
+        content: { en: introductionEn },
       },
       {
         slug: 'why',
-        title: 'Why ngx-statewise',
-        summary: 'What the design buys you, and when it fits.',
-        markdown: why,
+        title: { en: 'Why ngx-statewise', fr: 'Pourquoi ngx-statewise' },
+        summary: {
+          en: 'What the design buys you, and when it fits.',
+          fr: 'Ce que la conception apporte, et quand elle convient.',
+        },
+        content: { en: whyEn },
       },
       {
         slug: 'getting-started',
-        title: 'Getting started',
-        summary: 'Install the package and wire provideStatewise.',
-        markdown: gettingStarted,
+        title: { en: 'Getting started', fr: 'Démarrage' },
+        summary: {
+          en: 'Install the package and wire provideStatewise.',
+          fr: 'Installer le paquet et brancher provideStatewise.',
+        },
+        content: { en: gettingStartedEn },
       },
     ],
   },
   {
-    title: 'Key concepts',
+    title: { en: 'Key concepts', fr: 'Concepts clés' },
     pages: [
       {
         slug: 'states',
-        title: 'States',
-        summary: 'Where the data lives, with signals or plain properties.',
-        markdown: states,
+        title: { en: 'States', fr: 'States' },
+        summary: {
+          en: 'Where the data lives, with signals or plain properties.',
+          fr: 'Où vivent les données, en signals ou en propriétés simples.',
+        },
+        content: { en: statesEn },
       },
       {
         slug: 'actions',
-        title: 'Actions',
-        summary: 'Action groups, single actions, and the types they generate.',
-        markdown: actions,
+        title: { en: 'Actions', fr: 'Actions' },
+        summary: {
+          en: 'Action groups, single actions, and the types they generate.',
+          fr: 'Groupes d’actions, actions seules, et les types générés.',
+        },
+        content: { en: actionsEn },
       },
       {
         slug: 'updaters',
-        title: 'Updaters',
-        summary: 'How a state reacts to an action, and which scope owns it.',
-        markdown: updaters,
+        title: { en: 'Updaters', fr: 'Updaters' },
+        summary: {
+          en: 'How a state reacts to an action, and which scope owns it.',
+          fr: 'Comment un état réagit à une action, et quelle portée le détient.',
+        },
+        content: { en: updatersEn },
       },
       {
         slug: 'effects',
-        title: 'Effects',
-        summary: 'Asynchronous work, its scope and its lifecycle.',
-        markdown: effects,
+        title: { en: 'Effects', fr: 'Effects' },
+        summary: {
+          en: 'Asynchronous work, its scope and its lifecycle.',
+          fr: 'Le travail asynchrone, sa portée et son cycle de vie.',
+        },
+        content: { en: effectsEn },
       },
       {
         slug: 'managers',
-        title: 'Managers',
-        summary: 'The dispatch handle your components talk to.',
-        markdown: managers,
+        title: { en: 'Managers', fr: 'Managers' },
+        summary: {
+          en: 'The dispatch handle your components talk to.',
+          fr: 'La poignée de dispatch à laquelle parlent vos composants.',
+        },
+        content: { en: managersEn },
       },
     ],
   },
   {
-    title: 'Guides',
+    title: { en: 'Guides', fr: 'Guides' },
     pages: [
       {
         slug: 'testing',
-        title: 'Testing',
-        summary: 'The ngx-statewise/testing entry point in a TestBed.',
-        markdown: testing,
+        title: { en: 'Testing', fr: 'Tests' },
+        summary: {
+          en: 'The ngx-statewise/testing entry point in a TestBed.',
+          fr: 'Le point d’entrée ngx-statewise/testing dans un TestBed.',
+        },
+        content: { en: testingEn },
       },
       {
         slug: 'migration',
-        title: 'Migrating from 0.6.x',
-        summary:
-          'What the rewrite renamed, and the three behaviours it changed.',
-        markdown: migration,
+        title: {
+          en: 'Migrating from 0.6.x',
+          fr: 'Migrer depuis 0.6.x',
+        },
+        summary: {
+          en: 'What the rewrite renamed, and the four behaviours it changed.',
+          fr: 'Ce que la réécriture a renommé, et les quatre comportements changés.',
+        },
+        content: { en: migrationEn },
       },
     ],
   },
@@ -114,4 +155,34 @@ export const GUIDE_PAGES: readonly GuidePage[] = GUIDE_SECTIONS.flatMap(
 
 export function findGuidePage(slug: string): GuidePage | undefined {
   return GUIDE_PAGES.find((page) => page.slug === slug);
+}
+
+export interface GuideContent {
+  readonly markdown: string;
+  /** The locale asked for has no translation, so this is the default one. */
+  readonly isFallback: boolean;
+  /** Which locale the markdown below is actually written in. */
+  readonly locale: LocaleCode;
+}
+
+export function guideContent(page: GuidePage, code: LocaleCode): GuideContent {
+  const translated = page.content[code];
+
+  if (translated !== undefined) {
+    return { markdown: translated, isFallback: false, locale: code };
+  }
+
+  const fallback = page.content[DEFAULT_LOCALE.code];
+
+  if (fallback === undefined) {
+    throw new Error(
+      `the "${page.slug}" page has no content in "${code}" and none in the default locale either`,
+    );
+  }
+
+  return {
+    markdown: fallback,
+    isFallback: true,
+    locale: DEFAULT_LOCALE.code,
+  };
 }

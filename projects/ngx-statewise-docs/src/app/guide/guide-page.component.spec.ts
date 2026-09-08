@@ -1,8 +1,25 @@
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { Router, provideRouter } from '@angular/router';
-import { GUIDE_PAGES, findGuidePage, type GuidePage } from './guide-pages';
+import { LOCALE, findLocale, type LocaleCode } from '../i18n';
+import {
+  GUIDE_PAGES,
+  findGuidePage,
+  guideContent,
+  type GuidePage,
+} from './guide-pages';
 import { GuidePageComponent } from './guide-page.component';
+
+function configure(code: LocaleCode = 'en') {
+  TestBed.resetTestingModule();
+  TestBed.configureTestingModule({
+    imports: [GuidePageComponent],
+    providers: [
+      provideRouter([]),
+      { provide: LOCALE, useValue: findLocale(code) },
+    ],
+  });
+}
 
 function mount(page: GuidePage) {
   const fixture = TestBed.createComponent(GuidePageComponent);
@@ -10,6 +27,16 @@ function mount(page: GuidePage) {
   fixture.detectChanges();
 
   return fixture;
+}
+
+function pageOrFail(slug: string): GuidePage {
+  const page = findGuidePage(slug);
+
+  if (page === undefined) {
+    throw new Error(`the guide has no "${slug}" page`);
+  }
+
+  return page;
 }
 
 /**
@@ -25,30 +52,19 @@ function spyOnNavigation() {
   return navigate;
 }
 
-function pageOrFail(slug: string): GuidePage {
-  const page = findGuidePage(slug);
-
-  if (page === undefined) {
-    throw new Error(`the guide has no "${slug}" page`);
-  }
-
-  return page;
-}
-
 describe('GuidePageComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [GuidePageComponent],
-      providers: [provideRouter([])],
-    }).compileComponents();
+  beforeEach(() => {
+    configure();
   });
 
   it('renders the markdown of the page it is given', () => {
     const host = mount(pageOrFail('effects')).nativeElement as HTMLElement;
 
-    expect(host.querySelector('.guide__body h1')?.textContent).toBe('Effects');
+    expect(host.querySelector('.guide__body h1')?.textContent).toContain(
+      'Effects',
+    );
     expect(
-      host.querySelectorAll('.guide__body pre code').length,
+      host.querySelectorAll('.guide__body .code-block').length,
     ).toBeGreaterThan(0);
   });
 
@@ -81,6 +97,21 @@ describe('GuidePageComponent', () => {
     expect(entries.length).toBe(headings.length);
   });
 
+  it('shows the section the page belongs to, as a breadcrumb', () => {
+    const host = mount(pageOrFail('effects')).nativeElement as HTMLElement;
+
+    expect(host.querySelector('.breadcrumb')?.textContent).toContain(
+      'Key concepts',
+    );
+  });
+
+  it('links to the markdown behind the page, in the locale it served', () => {
+    const host = mount(pageOrFail('effects')).nativeElement as HTMLElement;
+    const href = host.querySelector('.edit-link')?.getAttribute('href');
+
+    expect(href).toContain('/guide/content/en/effects.md');
+  });
+
   it('titles the document after the page', () => {
     mount(pageOrFail('effects'));
 
@@ -90,14 +121,14 @@ describe('GuidePageComponent', () => {
   it('offers no previous link on the first page, and no next on the last', () => {
     const first = mount(GUIDE_PAGES[0]).nativeElement as HTMLElement;
 
-    expect(first.querySelector('.guide__pager-link--previous')).toBeNull();
-    expect(first.querySelector('.guide__pager-link--next')).not.toBeNull();
+    expect(first.querySelector('.pager__link--previous')).toBeNull();
+    expect(first.querySelector('.pager__link--next')).not.toBeNull();
 
     const last = mount(GUIDE_PAGES[GUIDE_PAGES.length - 1])
       .nativeElement as HTMLElement;
 
-    expect(last.querySelector('.guide__pager-link--previous')).not.toBeNull();
-    expect(last.querySelector('.guide__pager-link--next')).toBeNull();
+    expect(last.querySelector('.pager__link--previous')).not.toBeNull();
+    expect(last.querySelector('.pager__link--next')).toBeNull();
   });
 
   it('hands a cross-page link from the markdown to the router', () => {
@@ -106,14 +137,14 @@ describe('GuidePageComponent', () => {
 
     const host = fixture.nativeElement as HTMLElement;
     const link = host.querySelector<HTMLAnchorElement>(
-      '.guide__body a[href^="/guide/"]',
+      '.guide__body a[href^="/en/guide/"]',
     );
 
     expect(link).not.toBeNull();
     link?.click();
 
     expect(navigate).toHaveBeenCalledWith(
-      '/guide/updaters#dispatching-through-the-right-manager',
+      '/en/guide/updaters#dispatching-through-the-right-manager',
     );
   });
 
@@ -129,5 +160,54 @@ describe('GuidePageComponent', () => {
     external.click();
 
     expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('copies a code block to the clipboard, and confirms it', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } });
+
+    const fixture = mount(pageOrFail('effects'));
+    const host = fixture.nativeElement as HTMLElement;
+    const button = host.querySelector<HTMLButtonElement>('[data-copy-code]');
+    const code = host.querySelector('.code-block code')?.textContent;
+
+    button?.click();
+    await Promise.resolve();
+
+    expect(writeText).toHaveBeenCalledWith(code);
+    expect(button?.classList.contains('code-block__copy--copied')).toBe(true);
+
+    vi.unstubAllGlobals();
+  });
+
+  describe('in a locale with no translation', () => {
+    beforeEach(() => {
+      configure('fr');
+    });
+
+    it('says so, and serves the default locale instead', () => {
+      const page = pageOrFail('effects');
+      const host = mount(page).nativeElement as HTMLElement;
+
+      expect(guideContent(page, 'fr').isFallback).toBe(true);
+      expect(host.querySelector('.notice')?.textContent).toContain(
+        "n'est pas encore traduite",
+      );
+      // The article says which language it is actually in, whatever the page is.
+      expect(host.querySelector('.guide__body')?.getAttribute('lang')).toBe(
+        'en',
+      );
+    });
+
+    it('still localises the interface around it', () => {
+      const host = mount(pageOrFail('effects')).nativeElement as HTMLElement;
+
+      expect(host.querySelector('.toc__title')?.textContent).toContain(
+        'Sur cette page',
+      );
+      expect(host.querySelector('.pager__label')?.textContent).toContain(
+        'Précédent',
+      );
+    });
   });
 });

@@ -1,0 +1,109 @@
+@use '@angular/material' as mat;
+
+/* ---------------------------------------------------------------------------
+   The palettes, the theme classes and the token overrides are the showcase's,
+   so the two applications of this repository look like one product. Copied
+   rather than imported across projects: the showcase is a private demo, and
+   the documentation site must not break if it moves or goes away.
+
+   On top of them, a NEUTRAL surface and text ramp. Material's generated
+   surfaces are tinted by the primary palette — in the dark theme they resolve
+   to #161215, #231e22, #2d292c, all faintly pink — which reads warm and busy
+   under long-form prose. The showcase already fights this by forcing
+   `--mat-sys-surface: #262627`; this takes the same decision consistently.
+
+   The split is: neutrals carry the page, magenta and violet carry the accents.
+   Same hues as the showcase, applied where they earn their keep.
+   --------------------------------------------------------------------------- */
+
+.light {
+  background-color: var(--mat-sys-background);
+  color: var(--mat-sys-on-background);
+
+  /* Neutral ramp */
+  --surface-page: #ffffff;
+  --surface-subtle: #f7f7f8;
+  --surface-raised: #ffffff;
+  --surface-sunken: #f2f2f4;
+  --surface-hover: rgb(0 0 0 / 4%);
+  --surface-code: #f7f7f8;
+
+  /* Hairlines. Two weights: one that separates, one that merely suggests. */
+  --border: #e6e5e9;
+  --border-strong: #d6d4da;
+
+  --text-strong: #1c1b1f;
+  --text: #333;
+  /* 5.42:1 — the old #746e7c passed at 4.92:1 with no margin to spare. */
+  --text-muted: #6b6572;
+  /* 4.61:1. The tier below cannot be lighter and still pass AA, so faint and
+     muted are separated by size and weight, not by more grey. */
+  --text-faint: #78737f;
+
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 6%), 0 4px 12px rgb(0 0 0 / 4%);
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$magenta-palette,
+        tertiary: mat.$violet-palette,
+        theme-type: light,
+      ),
+      typography: Roboto,
+    ),
+    $overrides: ('on-background': #333, 'background': white)
+  );
+}
+
+.dark {
+  background-color: var(--mat-sys-background);
+  color: var(--mat-sys-on-background);
+
+  --mat-sys-surface: #262627 !important;
+
+  /* Neutral ramp, lifted off pure black. #f3f3f3 on #0f0f11 is 17:1 — pure
+     white on near-black, which halates under long-form prose. This keeps the
+     showcase's hues and trades a little contrast for readability. */
+  --surface-page: #17171a;
+  --surface-subtle: #1c1c20;
+  --surface-raised: #232327;
+  --surface-sunken: #111113;
+  --surface-hover: rgb(255 255 255 / 6%);
+  --surface-code: #131316;
+
+  /* #232125 is the border the showcase draws its side navigation with, lifted
+     with the rest of the ramp. A hairline is decoration, not a control, so
+     WCAG 1.4.11's 3:1 does not apply to it. */
+  --border: #2a282e;
+  --border-strong: #3a373f;
+
+  --text-strong: #f5f5f7;
+  --text: #d8d6da;
+  --text-muted: rgb(158 154 164);
+  --text-faint: rgb(135 131 142); /* 4.83:1 */
+
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 40%), 0 6px 18px rgb(0 0 0 / 28%);
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$magenta-palette,
+        tertiary: mat.$violet-palette,
+        theme-type: dark,
+      ),
+      typography: Roboto,
+    ),
+    $overrides: (
+      'on-background': #f3f3f3,
+      /* Overridden to the body colour by the showcase, which makes it useless
+         as a muted tone — use --text-muted instead. Kept for parity. */
+        'on-surface-variant': #f3f3f3,
+      'background': #0f0f11
+    )
+  );
+}
+
+/* Utility for the muted tier, so a template need not know the token name. */
+.text-muted {
+  color: var(--text-muted);
+}

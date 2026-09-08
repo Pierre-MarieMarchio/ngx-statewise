@@ -1,58 +1,72 @@
 <section class="hero">
-  <p class="hero__eyebrow">Angular state management</p>
+  <p class="hero__eyebrow">{{ text().homeEyebrow }}</p>
   <h1 class="hero__title">ngx-statewise</h1>
-  <p class="hero__tagline">
-    Signals for state, actions for intent, effects for everything else. Simpler
-    than NgRx, more structured than doing it by hand.
-  </p>
+  <p class="hero__tagline text-muted">{{ text().homeTagline }}</p>
 
   <div class="hero__actions">
-    <a class="button button--primary" routerLink="/guide/getting-started">
-      Get started
+    <a
+      class="button button--primary"
+      [routerLink]="pageLink('getting-started')"
+    >
+      {{ text().homeGetStarted }}
     </a>
-    <a class="button" routerLink="/guide/introduction">Read the guide</a>
+    <a class="button" [routerLink]="pageLink('introduction')">
+      {{ text().homeReadTheGuide }}
+    </a>
   </div>
 
   <pre class="hero__install"><code>npm install ngx-statewise</code></pre>
 </section>
 
 <section class="flow" aria-labelledby="flow-title">
-  <h2 class="flow__title" id="flow-title">The whole flow</h2>
-  <ol class="flow__steps">
+  <h2 class="flow__title" id="flow-title">{{ text().homeFlowTitle }}</h2>
+  <ol class="flow__steps" role="list">
     <li class="flow__step">
-      <span class="flow__step-name">Action</span>
-      <span class="flow__step-text">carries the intent and its payload.</span>
-    </li>
-    <li class="flow__step">
-      <span class="flow__step-name">Updater</span>
-      <span class="flow__step-text">writes the state, synchronously.</span>
-    </li>
-    <li class="flow__step">
-      <span class="flow__step-name">Effect</span>
-      <span class="flow__step-text">
-        runs the side work, on state already up to date.
+      <span class="flow__step-name">{{ text().homeFlowAction }}</span>
+      <span class="flow__step-text text-muted">
+        {{ text().homeFlowActionText }}
       </span>
     </li>
     <li class="flow__step">
-      <span class="flow__step-name">Manager</span>
-      <span class="flow__step-text">
-        exposes the signals and dispatches, in its own scope.
+      <span class="flow__step-name">{{ text().homeFlowUpdater }}</span>
+      <span class="flow__step-text text-muted">
+        {{ text().homeFlowUpdaterText }}
+      </span>
+    </li>
+    <li class="flow__step">
+      <span class="flow__step-name">{{ text().homeFlowEffect }}</span>
+      <span class="flow__step-text text-muted">
+        {{ text().homeFlowEffectText }}
+      </span>
+    </li>
+    <li class="flow__step">
+      <span class="flow__step-name">{{ text().homeFlowManager }}</span>
+      <span class="flow__step-text text-muted">
+        {{ text().homeFlowManagerText }}
       </span>
     </li>
   </ol>
 </section>
 
 <section class="contents" aria-labelledby="contents-title">
-  <h2 class="contents__title" id="contents-title">Contents</h2>
-  @for (section of sections; track section.title) {
+  <h2 class="contents__title" id="contents-title">
+    {{ text().homeContentsTitle }}
+  </h2>
+  @for (section of sections; track section.title.en) {
     <div class="contents__section">
-      <h3 class="contents__section-title">{{ section.title }}</h3>
-      <ul class="contents__list">
+      <h3 class="contents__section-title text-muted">
+        {{ section.title[locale.code] }}
+      </h3>
+      <ul class="contents__list" role="list">
         @for (page of section.pages; track page.slug) {
-          <li class="contents__item">
-            <a class="contents__link" [routerLink]="['/guide', page.slug]">
-              <span class="contents__link-title">{{ page.title }}</span>
-              <span class="contents__link-summary">{{ page.summary }}</span>
+          <li>
+            <a class="contents__link" [routerLink]="pageLink(page.slug)">
+              <span class="contents__link-title">
+                {{ page.title[locale.code] }}
+              </span>
+              <span class="contents__link-summary text-muted">
+                {{ page.summary[locale.code] }}
+              </span>
             </a>
           </li>
         }

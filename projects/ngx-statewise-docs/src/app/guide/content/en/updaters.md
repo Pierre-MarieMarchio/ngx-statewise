@@ -138,7 +138,7 @@ If a lazily loaded feature must react to actions dispatched before it is reached
 provideStatewise({ updaters: [authUpdater] });
 ```
 
-## Key Notes
+## Key notes
 
 - One action type can only be handled by a single updater within the same scope. A duplicate is reported at startup, not silently ignored.
 - Handlers mutate the state in place, typically through signals. They return nothing.

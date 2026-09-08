@@ -1,6 +1,12 @@
 # Managers
 
-In ngx-statewise, a manager is the bridge between your UI and your state logic. It exposes state as reactive signals and offers a declarative API to trigger actions. This keeps components simple, state interactions predictable, and everything testable.
+A manager is the only part of a feature your components should know about. It
+exposes the state as read-only signals and offers named methods instead of
+dispatches, so a component asks for `login(credentials)` rather than assembling
+an action.
+
+It is also the unit of scope: a manager applies the updaters it declared, and
+observes only the effects it started.
 
 A manager gets its dispatch handle from `injectStatewise`, passing the updaters it owns.
 
@@ -16,7 +22,7 @@ export class AuthManager {
 
 `injectStatewise` must be called in an injection context, like `inject`. It resolves each updater's state through the injector of the caller, once and for all.
 
-## State Exposure
+## Exposing state
 
 Managers expose state reactively to the components depending on it, so those components bind to signals rather than handling state logic themselves.
 
@@ -33,7 +39,7 @@ export class AuthManager {
 }
 ```
 
-## Dispatching Actions
+## Dispatching actions
 
 The handle returned by `injectStatewise` exposes the whole dispatch API:
 
@@ -52,7 +58,7 @@ await this.statewise.waitForEffect(loginActions.request);
 
 Observation is scoped like dispatch: two managers awaiting the same action type never wait for each other. The action history is not on the handle at all: it is application-wide, so it is injected instead — `inject(ActionHistory).snapshot()`.
 
-### Synchronous Dispatch
+### Synchronous dispatch
 
 ```typescript
 this.statewise.dispatch(logoutAction());
@@ -60,7 +66,7 @@ this.statewise.dispatch(logoutAction());
 
 `dispatch` applies the updater immediately, then starts the effects without waiting for them. Use it when you don't need to know when the side effects are done.
 
-### Asynchronous Dispatch
+### Asynchronous dispatch
 
 ```typescript
 await this.statewise.dispatchAsync(loginActions.request(credentials));
@@ -105,13 +111,3 @@ export class AuthManager {
   }
 }
 ```
-
-## Key Notes
-
-- Managers are the coordination layer between your components and your logic. They expose state as signals and dispatch actions, giving a consistent, typed and testable API.
-
-- Updaters describe how state reacts. They are attached to a manager through `injectStatewise`, or made global through `provideStatewise`. A manager only ever sees the updaters it declared, plus the global ones.
-
-- Effects handle asynchronous or side-effecting operations. They are registered globally, from the effect classes listed in `provideStatewise`.
-
-- Each part — Managers, Updaters, Effects — has one focused responsibility, which keeps the state flow predictable and easy to reason about as the application grows.

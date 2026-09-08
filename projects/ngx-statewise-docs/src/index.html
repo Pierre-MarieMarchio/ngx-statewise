@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" class="dark">
   <head>
     <meta charset="utf-8" />
     <title>ngx-statewise</title>
@@ -10,18 +10,40 @@
       content="Documentation for ngx-statewise, a lightweight signals-first state management library for Angular."
     />
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <meta
+      name="theme-color"
+      content="#17171a"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta
+      name="theme-color"
+      content="#ffffff"
+      media="(prefers-color-scheme: light)"
+    />
     <script>
-      // Applies the stored theme before the first paint. Without it every page
-      // load would show the default theme until Angular boots and corrects it.
-      // The key is mirrored from src/app/ui-state/theme.ts.
+      // Applies the theme before the first paint. Without it every page load
+      // would show the default until Angular boots and corrected it. A stored
+      // choice wins; failing that the system is asked, so a first visit on a
+      // light desktop is not answered with a dark page.
+      // The key and the class names mirror src/app/ui-state/theme.ts.
       (function () {
+        var theme = null;
         try {
           var stored = localStorage.getItem('ngx-statewise-docs-theme');
           if (stored === 'dark' || stored === 'light') {
-            document.documentElement.setAttribute('data-theme', stored);
+            theme = stored;
           }
         } catch (error) {
-          // Storage blocked: the default in the markup above stands.
+          // Storage blocked: fall through to the system preference.
+        }
+        if (theme === null && typeof matchMedia === 'function') {
+          theme = matchMedia('(prefers-color-scheme: light)').matches
+            ? 'light'
+            : 'dark';
+        }
+        if (theme !== null) {
+          document.documentElement.classList.remove('dark', 'light');
+          document.documentElement.classList.add(theme);
         }
       })();
     </script>

@@ -2,20 +2,35 @@ import {
   ChangeDetectionStrategy,
   Component,
   DOCUMENT,
+  type ElementRef,
+  afterRenderEffect,
   computed,
   effect,
   inject,
   input,
+  signal,
+  viewChild,
 } from '@angular/core';
 import { Location } from '@angular/common';
 import { DomSanitizer, Meta, Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
-import { GUIDE_PAGES, type GuidePage } from './guide-pages';
+import { CurrentPagePath, LOCALE, calloutLabels, uiStrings } from '../i18n';
+import { REPOSITORY_URL } from '../site';
+import {
+  GUIDE_PAGES,
+  GUIDE_SECTIONS,
+  guideContent,
+  type GuidePage,
+} from './guide-pages';
+import { IconComponent } from '../shell/icon.component';
 import { renderGuide } from './markdown';
+
+/** How long the copy button stays in its confirmed state. */
+const COPIED_FEEDBACK_MS = 1600;
 
 @Component({
   selector: 'docs-guide-page',
-  imports: [RouterLink],
+  imports: [IconComponent, RouterLink],
   templateUrl: './guide-page.component.html',
   styleUrl: './guide-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,18 +39,36 @@ export class GuidePageComponent {
   /** Bound from the route's `data` by `withComponentInputBinding()`. */
   public readonly page = input.required<GuidePage>();
 
+  protected readonly locale = inject(LOCALE);
+  protected readonly text = computed(() => uiStrings(this.locale.code));
+
   private readonly sanitizer = inject(DomSanitizer);
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly document = inject(DOCUMENT);
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
+  private readonly currentPage = inject(CurrentPagePath);
 
-  private readonly rendered = computed(() =>
-    renderGuide(this.page().markdown, (path) =>
-      this.location.prepareExternalUrl(path),
-    ),
+  private readonly body = viewChild.required<ElementRef<HTMLElement>>('body');
+
+  protected readonly content = computed(() =>
+    guideContent(this.page(), this.locale.code),
   );
+
+  private readonly rendered = computed(() => {
+    const text = this.text();
+
+    return renderGuide(this.content().markdown, {
+      toExternalUrl: (path) =>
+        this.location.prepareExternalUrl(`/${this.locale.code}${path}`),
+      copyCodeLabel: text.copyCode,
+      headingLinkLabel: text.onThisPage,
+      calloutLabels: calloutLabels(this.locale.code),
+      codeRegionLabel: text.codeRegion,
+      tableRegionLabel: text.tableRegion,
+    });
+  });
 
   protected readonly headings = computed(() => this.rendered().headings);
 
@@ -49,6 +82,18 @@ export class GuidePageComponent {
     this.sanitizer.bypassSecurityTrustHtml(this.rendered().html),
   );
 
+  /** The heading currently under the top of the viewport, if any. */
+  protected readonly activeHeading = signal<string | null>(null);
+
+  /** Read out by the live region: the confirmation the pop does not carry. */
+  protected readonly announcement = signal('');
+
+  protected readonly section = computed(() =>
+    GUIDE_SECTIONS.find((section) =>
+      section.pages.some((page) => page.slug === this.page().slug),
+    ),
+  );
+
   private readonly index = computed(() =>
     GUIDE_PAGES.findIndex((page) => page.slug === this.page().slug),
   );
@@ -56,27 +101,106 @@ export class GuidePageComponent {
   protected readonly previous = computed(() => pageAt(this.index() - 1));
   protected readonly next = computed(() => pageAt(this.index() + 1));
 
+  /** Where the markdown behind this page lives, in the locale being shown. */
+  protected readonly editUrl = computed(
+    () =>
+      `${REPOSITORY_URL}/blob/dev/projects/ngx-statewise-docs/src/app/guide/content/${this.content().locale}/${this.page().slug}.md`,
+  );
+
   public constructor() {
+    // Tells the shell which page it is wrapping, so the language switcher
+    // can point at this page in the other locale.
+    effect(() => {
+      this.currentPage.path.set(`guide/${this.page().slug}`);
+    });
+
     effect(() => {
       const page = this.page();
+      const code = this.locale.code;
+      const title = page.title[code];
 
       // "Why ngx-statewise" already names the library; suffixing it would
       // repeat it in the tab.
       this.title.setTitle(
-        page.title.includes('ngx-statewise')
-          ? page.title
-          : `${page.title} — ngx-statewise`,
+        title.includes('ngx-statewise') ? title : `${title} — ngx-statewise`,
       );
-      this.meta.updateTag({ name: 'description', content: page.summary });
+      this.meta.updateTag({
+        name: 'description',
+        content: page.summary[code],
+      });
+    });
+
+    // After-render hooks do not run while prerendering, so the observer is
+    // browser-only without asking the platform.
+    afterRenderEffect((onCleanup) => {
+      this.rendered();
+
+      const root = this.body().nativeElement;
+      const headings = [
+        ...root.querySelectorAll<HTMLElement>('h2[id], h3[id]'),
+      ];
+
+      if (headings.length === 0) {
+        this.activeHeading.set(null);
+        return;
+      }
+
+      // Clear of the line an anchor jump lands on: sitting exactly on it makes
+      // sub-pixel scrolling flip the marker in and out.
+      const top = headerHeight(root) + 16;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          // IntersectionObserver does not promise document order, so several
+          // headings crossing in one callback could otherwise elect the wrong
+          // one. The lowest heading still above the band is the current
+          // section.
+          const visible = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort(
+              (a, b) => a.boundingClientRect.top - b.boundingClientRect.top,
+            );
+
+          if (visible.length > 0) {
+            this.activeHeading.set(visible[visible.length - 1].target.id);
+            return;
+          }
+
+          // Above the first heading there is no current section; leaving the
+          // marker where it was would point at one already left behind.
+          if (headings[0].getBoundingClientRect().top > top) {
+            this.activeHeading.set(null);
+          }
+        },
+        { rootMargin: `-${String(top)}px 0px -70% 0px`, threshold: 0 },
+      );
+
+      headings.forEach((heading) => observer.observe(heading));
+      onCleanup(() => observer.disconnect());
     });
   }
 
+  protected pageLink(slug: string): string[] {
+    return ['/', this.locale.code, 'guide', slug];
+  }
+
+  protected homeLink(): string[] {
+    return ['/', this.locale.code];
+  }
+
   /**
-   * The guide's cross-page links come out of markdown as plain anchors, so
-   * they would reload the whole document. Anything inside the site is handed
-   * to the router instead; everything else is left to the browser.
+   * The guide's links and copy buttons come out of markdown as plain markup,
+   * so there is no component to bind to. The page listens once, here.
    */
   protected onContentClick(event: MouseEvent): void {
+    const target = event.target as Element | null;
+    const copy = target?.closest('[data-copy-code]');
+
+    if (copy !== null && copy !== undefined) {
+      void this.copyCode(copy);
+      return;
+    }
+
     if (
       event.button !== 0 ||
       event.ctrlKey ||
@@ -87,7 +211,7 @@ export class GuidePageComponent {
       return;
     }
 
-    const anchor = (event.target as Element | null)?.closest('a');
+    const anchor = target?.closest('a');
 
     if (!anchor || anchor.origin !== this.document.location.origin) {
       return;
@@ -100,6 +224,52 @@ export class GuidePageComponent {
       this.location.normalize(anchor.pathname + anchor.hash),
     );
   }
+
+  /**
+   * The button lives in injected markup, so its confirmed state is a class on
+   * the element rather than a binding.
+   */
+  private async copyCode(button: Element): Promise<void> {
+    const code = button
+      .closest('.code-block')
+      ?.querySelector('code')?.textContent;
+
+    if (code === null || code === undefined) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(code);
+    } catch {
+      // Denied permission, or an insecure origin. Nothing to confirm.
+      return;
+    }
+
+    const text = this.text();
+
+    button.classList.add('code-block__copy--copied');
+    button.setAttribute('title', text.codeCopied);
+    button.setAttribute('aria-label', text.codeCopied);
+    this.announcement.set(text.codeCopied);
+
+    setTimeout(() => {
+      button.classList.remove('code-block__copy--copied');
+      button.setAttribute('title', text.copyCode);
+      button.setAttribute('aria-label', text.copyCode);
+      this.announcement.set('');
+    }, COPIED_FEEDBACK_MS);
+  }
+}
+
+/**
+ * The sticky header's height, read from the token rather than duplicated as a
+ * literal — the scroll-spy band and `scroll-margin-top` have to agree.
+ */
+function headerHeight(element: Element): number {
+  const value = getComputedStyle(element).getPropertyValue('--header-height');
+  const rem = Number.parseFloat(value);
+
+  return Number.isFinite(rem) ? rem * 16 : 48;
 }
 
 /** `GUIDE_PAGES.at()` would wrap a negative index round to the last page. */

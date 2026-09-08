@@ -1,16 +1,24 @@
 # Effects
 
-Effects are responsible for handling asynchronous operations such as API calls, navigation, or side effects that are not directly related to state updates. They are created using the `createEffect` utility function and are tied to specific actions.
+An effect is the asynchronous half of a feature: API calls, navigation,
+storage, logging — everything that is not a state change. You declare one with
+`createEffect`, bound to a single action.
 
-A key architectural principle in ngx-statewise, _for now_, is that effects always run after state has been updated by an updater. This guarantees that effects operate on the most up-to-date application state. The sequence **Action → Updater → Effect** is enforced by design to ensure predictability and consistency across your application.
+Effects always run **after** the updater, so they never read stale state. The
+sequence **action → updater → effect** is not a convention here, it is enforced.
 
-Effects can return other actions to trigger Updaters or even other effects, creating a chain of operations. This design promotes cascading effects, where an initial action triggers a state update, which then leads to one or more effects, each of which can dispatch further actions. Rather than encouraging isolated, standalone actions, ngx-statewise encourages sequences of operations, making complex workflows easier to orchestrate.
+An effect may return another action, and that action goes through the same
+cycle: its updater, then its own effects. This is how a flow like "log in, load
+the workspace, then navigate" is expressed — as a chain, not as a callback tree.
+Never return the action that triggered the effect: that is an infinite cascade,
+and nothing will stop it for you.
 
-When creating effects, you must ensure that you don't return the input action directly as it can result in infinite loops. Instead, you should return new actions to trigger the corresponding state updates or other side effects.
+A handler may return an action, a promise, an observable, or nothing.
+Observables are read once — ngx-statewise takes the first emission and stops
+listening — so a long-lived stream belongs in an application-level
+subscription, not in an effect.
 
-Effects may return synchronous values, Promises, or Observables. Observable effects are intentionally one-shot: ngx-statewise consumes their first emission, then stops listening. Use an application-level subscription for long-lived streams.
-
-## Defining Effects with `createEffect`
+## Defining an effect
 
 The `createEffect` utility allows you to create an effect linked to a particular action. By default, it expects a Promise, but you can also return Observables within the effect.
 
@@ -53,7 +61,7 @@ export class AuthEffects {
 }
 ```
 
-## Effects with Observables
+## Returning an observable
 
 You can return an Observable for a one-shot asynchronous operation. Only its first emission is processed. An Observable that completes without emitting, such as `EMPTY`, is treated like an effect returning `void`.
 
@@ -83,7 +91,7 @@ export class UserEffects {
 
 In the example above, the effect listens for the GET_USER_REQUEST action and uses an Observable to handle the asynchronous operation of fetching user data.
 
-## Registering Effects
+## Registering effects
 
 Effect classes must be declared in `provideStatewise` so Angular instantiates them at startup. `createEffect` registers itself in the injection context of the class that declares it, which is why the class must be instantiated for its effects to exist. Without this declaration, nothing happens when the action is dispatched.
 
@@ -133,18 +141,15 @@ export class AuthEffects {
 
 Ignoring the returned handle is perfectly fine: destruction of the owning injector already unregisters the effect.
 
-## Key Notes
+## Key notes
 
-- Promises: Effects can return Promises for single asynchronous operations.
-
-- Observables: Observable effects are one-shot. Only the first emission is processed; completion without an emission produces no action.
-
-- Avoid Infinite Loops: Be careful not to return the input action from the effect (e.g., avoid returning the same action that triggered the effect). This can lead to infinite loops of action dispatching.
-
-- Side Effects: Effects are designed for side effects like API calls, routing, or other asynchronous operations. They should not directly modify the state. That’s the role of Updaters.
-
-- Scope: An effect only runs for the manager owning the updater of its action. Dispatching that action through another manager runs neither the updater nor the effect.
-
-- Effect Registration: don't forget to declare your effect classes in `provideStatewise({ effects: [...] })` so they are instantiated and ready to handle actions.
-
-- Lifecycle: an effect is unregistered with the injector that created it, so component-scoped or route-scoped effect classes never accumulate duplicates.
+- Return a promise, an observable, an action, or nothing at all. An observable
+  is read once: its first emission becomes the action, and completing without
+  emitting produces none.
+- Never return the action that triggered the effect. That is an infinite
+  cascade, and nothing stops it for you.
+- Effects do not touch state. That is the updater's job, and it has already run.
+- Declare every effect class in `provideStatewise({ effects: [...] })`, or it is
+  never instantiated and its effects never exist.
+- An effect belongs to the scope owning its action's updater, and is
+  unregistered with the injector that created it.

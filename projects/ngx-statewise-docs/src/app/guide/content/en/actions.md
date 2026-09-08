@@ -1,10 +1,14 @@
 # Actions
 
-Actions are events that trigger state changes. In ngx-statewise, actions can be defined individually or grouped together for specific event flows. Each action typically includes a type (an event identifier) and optionally a payload.
+An action is a statement of intent: something happened, and here is what came
+with it. It carries a type — a string identifying the event — and optionally a
+payload.
 
-In ngx-statewise, actions are defined in a flexible and organized way, using both single actions and action groups. Action groups provide a powerful mechanism for managing related actions, while single actions are useful for standalone operations. Both are automatically typed and can include payloads when necessary. By organizing actions this way, we ensure that the state management process remains clear and predictable.
+You never write that string by hand. Declare actions in a group when they
+belong to one flow, or on their own when they stand alone, and the types are
+generated for you, consistently and typed.
 
-## Action Group
+## Action groups
 
 When using defineActionsGroup, action types are automatically created by combining the source (a base name) and event name. This is useful when dealing with a set of related actions, such as loading states or error handling, allowing you to organize actions under a common source.
 
@@ -33,7 +37,7 @@ In the above example:
 - The `LOGIN_SUCCESS` action will be triggered when the login operation succeeds, with a payload of type `LoginResponse`.
 - The `LOGIN_FAILURE`, `LOGIN_CANCEL`, actions don't require payloads, so they are defined with emptyPayload.
 
-## Single Action
+## Single actions
 
 For single actions that do not require grouping, you can use defineSingleAction. These actions will automatically be suffixed with `_ACTION` to ensure their uniqueness.
 
@@ -45,6 +49,13 @@ import { defineSingleAction, emptyPayload, payload } from 'ngx-statewise';
 export const logoutAction = defineSingleAction('LOGOUT', emptyPayload); // Becomes LOGOUT_ACTION
 export const selectItemAction = defineSingleAction('SELECT_ITEM', payload<number>()); // Becomes SELECT_ITEM_ACTION
 ```
+
+> [!WARNING]
+> `defineActionsGroup` upper-cases its source; `defineSingleAction` does not.
+> `defineActionsGroup({ source: 'login', … })` gives you `LOGIN_REQUEST`, but
+> `defineSingleAction('logout', emptyPayload)` gives you `logout_ACTION`, not
+> `LOGOUT_ACTION`. Pass the source already upper-cased to a single action, as
+> the examples above do, or the two conventions will not match.
 
 In this case:
 
@@ -61,7 +72,7 @@ on(logoutAction, (state) => { ... });
 createEffect(selectItemAction, (id) => { ... });
 ```
 
-## Action Types
+## Action types
 
 Each action (whether part of an action group or a single action) will have its own distinct type. These types are automatically generated based on the action's name and whether it's part of a group or standalone. This allows for clear and consistent action names throughout the application.
 
@@ -70,18 +81,12 @@ For example:
 - The `loginActions.request` action will have the type `LOGIN_REQUEST`.
 - The `logoutAction` will have the type `LOGOUT_ACTION`.
 
-## Key Notes
+## Key notes
 
-- Actions can be defined individually using `defineSingleAction` or as a group using `defineActionsGroup`, depending on the use case.
-
-- Action types are automatically generated in a consistent and predictable way:
-
-  - For grouped actions, a source like `LOGIN` combined with an event like request produces `LOGIN_REQUEST`.
-
-  - For single actions, a name like `LOGOUT` becomes `LOGOUT_ACTION`.
-
-- Action types are used as keys in updaters and effects, and they must match exactly.
-
-- The `ofType(action)` helper ensures correct and type-safe usage when wiring actions into updaters or effects.
-
-- Grouping related actions improves clarity and structure, especially for common flows like `request / success / failure`.
+- `defineActionsGroup` for a flow, `defineSingleAction` for a standalone
+  operation. Both produce creators used the same way.
+- The generated string is the key updaters and effects match on, so it has to
+  agree exactly. `ofType(creator)` returns it, typed, instead of you writing it
+  out.
+- Grouping `request / success / failure` under one source keeps a flow readable
+  at a glance, and keeps its types from colliding with another feature's.

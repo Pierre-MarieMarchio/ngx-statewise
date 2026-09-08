@@ -1,0 +1,9 @@
+// Roboto is served from the repository rather than fetched from
+// fonts.googleapis.com: the production build inlines a remote stylesheet at
+// build time, which would make `npm run check` depend on reaching Google.
+//
+// The showcase also self-hosts Material Symbols, a 3.8 MB variable font
+// carrying every icon, because it names icons by ligature at runtime. This
+// site uses a fixed handful, drawn as inline SVG in src/app/shell/icon, so it
+// pays nothing for them.
+@use './roboto/roboto-font.scss';

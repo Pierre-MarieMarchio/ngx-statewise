@@ -6,7 +6,7 @@ export { docsUiUpdater } from './docs-ui.updater';
 export { ThemeEnvironment } from './theme-environment.service';
 export {
   DEFAULT_THEME,
-  THEME_ATTRIBUTE,
+  THEME_CLASSES,
   THEME_STORAGE_KEY,
   isTheme,
   type Theme,

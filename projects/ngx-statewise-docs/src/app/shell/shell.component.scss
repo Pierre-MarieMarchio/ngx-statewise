@@ -1,0 +1,371 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* --- Header --------------------------------------------------------------
+   Thin and quiet. On a reading tool the chrome should be findable and
+   otherwise forgettable. */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: var(--header-height);
+  padding: 0 var(--gutter);
+  border-bottom: 1px solid var(--border);
+  background-color: color-mix(in srgb, var(--surface-page) 90%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+/* Without the blur, a translucent header is just prose showing through it. */
+@supports not (backdrop-filter: blur(1px)) {
+  .header {
+    background-color: var(--surface-page);
+  }
+}
+
+/* At the top of the page there is nothing to separate the header from, so it
+   earns its edge only once the content starts passing under it. */
+@supports (animation-timeline: scroll()) {
+  .header {
+    border-bottom-color: transparent;
+    animation: header-settle linear both;
+    animation-timeline: scroll();
+    animation-range: 0 4rem;
+  }
+
+  @keyframes header-settle {
+    to {
+      border-bottom-color: var(--border);
+      box-shadow: var(--shadow-raised);
+    }
+  }
+}
+
+.header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-strong);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.header__brand-mark {
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--radius-sm);
+  /* magenta primary into violet tertiary — the showcase's two palettes. */
+  background-image: linear-gradient(
+    135deg,
+    var(--mat-sys-primary),
+    var(--mat-sys-tertiary)
+  );
+}
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+/* One shape for every clickable thing in the header: a 28px target that fills
+   with a wash on hover. No lift — a docs header should not bounce. */
+.header__icon-button,
+.header__link,
+.language__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.75rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--text-base);
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition-hover);
+
+  &:hover {
+    background-color: var(--surface-hover);
+    color: var(--text-strong);
+  }
+}
+
+.header__icon-button {
+  width: 1.75rem;
+  padding: 0;
+}
+
+.header__link,
+.language__link {
+  padding: 0 var(--space-2);
+}
+
+.header__nav-toggle {
+  display: none;
+}
+
+/* The search affordance is a field, not an icon: on a docs site it is the
+   primary way in, and it should look like somewhere you can type. */
+.header__search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 1.75rem;
+  margin-right: var(--space-2);
+  padding: 0 var(--space-2) 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--surface-subtle);
+  color: var(--text-faint);
+  font: inherit;
+  font-size: var(--text-base);
+  cursor: pointer;
+  transition: var(--transition-hover);
+
+  &:hover {
+    border-color: var(--border-strong);
+    color: var(--text-muted);
+  }
+}
+
+.header__search-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.header__search-text {
+  min-width: 7rem;
+  text-align: left;
+}
+
+.header__search-keys {
+  padding: 0.05rem 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+}
+
+@media (max-width: 48rem) {
+  .header__search-text,
+  .header__search-keys {
+    display: none;
+  }
+
+  .header__search {
+    padding: 0;
+    width: 1.75rem;
+    justify-content: center;
+    border-color: transparent;
+    background: none;
+  }
+}
+
+.language {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-right: var(--space-1);
+  padding-right: var(--space-2);
+  border-right: 1px solid var(--border);
+}
+
+.language__link--current {
+  color: var(--text-strong);
+  cursor: default;
+}
+
+.language__icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--text-faint);
+}
+
+/* --- Layout ------------------------------------------------------------- */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  gap: var(--space-8);
+  width: 100%;
+  max-width: 84rem;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  flex: 1;
+}
+
+.sidebar {
+  position: sticky;
+  top: var(--header-height);
+  align-self: start;
+  max-height: calc(100vh - var(--header-height));
+  padding: var(--space-6) var(--space-2) var(--space-6) 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sidebar__section {
+  margin: var(--space-5) 0 var(--space-2);
+  padding-left: var(--space-3);
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-normal);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.sidebar__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The active marker is the showcase's — a rule grown from a ::before — kept,
+   but paired with a filled row rather than a nudge, so nothing moves. */
+.sidebar__link {
+  position: relative;
+  display: block;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--text-base);
+  text-decoration: none;
+  transition: var(--transition-hover);
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 0;
+    width: 2px;
+    border-radius: 1px;
+    background-color: var(--mat-sys-primary);
+    transform: translateY(-50%);
+    transition:
+      height var(--duration-fast) var(--ease-emphasised),
+      opacity var(--duration-fast) var(--ease-out);
+    opacity: 0;
+  }
+
+  &:hover {
+    background-color: var(--surface-hover);
+    color: var(--text-strong);
+  }
+}
+
+.sidebar__link--active {
+  background-color: var(--surface-hover);
+  color: var(--text-strong);
+  font-weight: var(--weight-normal);
+
+  &::before {
+    height: 1.05rem;
+    opacity: 1;
+  }
+}
+
+.main {
+  min-width: 0;
+  padding: var(--space-7) 0 var(--space-9);
+}
+
+/* The band where the sidebar is shown but the table of contents is not: the
+   column would otherwise sit against the sidebar with all the slack on the
+   right. */
+@media (min-width: 60rem) and (max-width: 78rem) {
+  .main {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+/* --- Footer ------------------------------------------------------------- */
+.footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding: var(--space-5) var(--gutter);
+  color: var(--text-muted);
+  font-size: var(--text-base);
+  text-align: center;
+}
+
+.footer__text {
+  margin: 0;
+}
+
+/* --- Narrow ------------------------------------------------------------- */
+@media (max-width: 60rem) {
+  .header__nav-toggle {
+    display: inline-flex;
+  }
+
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  /* The drawer slides rather than appearing: on a small screen the change of
+     context is worth the 200ms. `grid-template-rows` animates cleanly here
+     because the row is the only thing moving. */
+  .sidebar {
+    display: grid;
+    position: static;
+    max-height: none;
+    grid-template-rows: 0fr;
+    padding: 0;
+    border-bottom: 1px solid transparent;
+    overflow: hidden;
+    transition:
+      grid-template-rows var(--duration-normal) var(--ease-emphasised),
+      border-color var(--duration-normal) var(--ease-out);
+  }
+
+  .sidebar__inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .layout--nav-open .sidebar {
+    grid-template-rows: 1fr;
+    border-bottom-color: var(--border);
+  }
+
+  .layout--nav-open .sidebar__inner {
+    padding: var(--space-4) 0;
+  }
+}
+
+/* Nothing of the chrome belongs on paper. */
+@media print {
+  .header,
+  .sidebar,
+  .footer,
+  .skip-link {
+    display: none;
+  }
+
+  .layout {
+    display: block;
+    max-width: none;
+    padding: 0;
+  }
+
+  .main {
+    padding: 0;
+  }
+}

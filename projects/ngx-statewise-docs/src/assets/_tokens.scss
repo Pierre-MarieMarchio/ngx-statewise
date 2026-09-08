@@ -1,0 +1,106 @@
+/* ---------------------------------------------------------------------------
+   Scale, rhythm and motion. Colour lives in themes/_themes.scss, which wraps
+   the showcase's Material palettes; everything here is theme-independent.
+
+   The reference for the feel is a reading tool rather than an application:
+   a calm neutral page, hairline separations, generous measure, and motion you
+   register without watching. Hover feedback is deliberately near-instant —
+   a 300ms lift reads as a toy, an 80ms wash reads as responsive.
+   --------------------------------------------------------------------------- */
+:root {
+  /* --- Type ------------------------------------------------------------- */
+  --font-sans:
+    Roboto, 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  /* Roboto Mono is not shipped — the build stays offline, and the repository
+     only carries Roboto. This is the stack the platform actually has.
+     Deliberately no 'JetBrains Mono': it is installed on many developer
+     machines and on almost no reader's, so listing it would show the author a
+     different code font from the audience. */
+  --font-mono:
+    ui-monospace, 'SF Mono', SFMono-Regular, 'Cascadia Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md: 1rem;
+  --text-lg: 1.1875rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: 2.5rem;
+
+  --leading-tight: 1.25;
+  --leading-snug: 1.45;
+  --leading-normal: 1.7;
+
+  /* --- Space: a 4px base, so everything lands on the same grid ---------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 2.5rem;
+  --space-8: 3.5rem;
+  --space-9: 5rem;
+
+  /* --- Shape ------------------------------------------------------------ */
+  --radius-sm: 3px;
+  --radius: 6px;
+  --radius-lg: 10px;
+
+  /* --- Layout ----------------------------------------------------------- */
+  --header-height: 3rem;
+  --sidebar-width: 15.5rem;
+  --toc-width: 15rem;
+  /* 704px — about 88 characters of Roboto at the body size. The wide end of
+     the comfortable range, chosen so the tables the guide is full of still
+     have somewhere to go. */
+  --measure: 44rem;
+
+  /* Only 400 and 700 exist: the repository ships Roboto-Regular and
+     Roboto-Bold, and the build may not fetch a font. A requested 500 silently
+     resolves to 400 and a 600 to 700, so asking for either is a lie — these
+     two are the whole scale, and emphasis below 700 is carried by colour and
+     size instead. */
+  --weight-normal: 400;
+  --weight-bold: 700;
+  --gutter: var(--space-5);
+
+  /* --- Motion ----------------------------------------------------------- */
+  /* Feedback the pointer should not have to wait for. */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  /* Enters and exits that carry a small distance. */
+  --ease-emphasised: cubic-bezier(0.2, 0, 0, 1);
+
+  --duration-instant: 80ms;
+  --duration-fast: 130ms;
+  --duration-normal: 200ms;
+  --duration-slow: 280ms;
+
+  --transition-hover:
+    background-color var(--duration-instant) var(--ease-out),
+    color var(--duration-instant) var(--ease-out),
+    border-color var(--duration-instant) var(--ease-out);
+}
+
+/* Someone who asked the system for less movement gets none of it. Kept to a
+   single rule so no component can forget it. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 1ms;
+    --duration-fast: 1ms;
+    --duration-normal: 1ms;
+    --duration-slow: 1ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
