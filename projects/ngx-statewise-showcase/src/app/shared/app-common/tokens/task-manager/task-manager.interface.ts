@@ -15,6 +15,8 @@ export interface ITaskManager {
   countByStatus: Signal<Record<TaskStatus, number>>;
 
   getAll(): void;
+  /** Settles once the reload this manager started is over. */
+  reloaded(): Promise<void>;
   getAllAsync(): Promise<void>;
   update(task: Task): void;
   reset(): Promise<void>;

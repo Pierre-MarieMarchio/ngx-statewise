@@ -14,13 +14,8 @@ import {
 } from '@shared/app-common/tokens';
 import { ReportedErrors } from '@app/core/services';
 import { getAllTaskActions } from '@app/features/project/states/task/task.action';
-import {
-  NoticeState,
-  noticeActions,
-  TallyState,
-  tallyActions,
-  tallyUpdater,
-} from '@app/features/state-inspection/states';
+import { NoticeDemoComponent, TallyDemoComponent } from '../../components';
+import { NoticeState } from '../../states';
 
 /** One line of a readout: a label and the value read at render time. */
 export interface StateReading {
@@ -35,7 +30,12 @@ export interface StateReading {
  */
 @Component({
   selector: 'app-live-state-page',
-  imports: [MatButtonModule, MatCardModule],
+  imports: [
+    MatButtonModule,
+    MatCardModule,
+    NoticeDemoComponent,
+    TallyDemoComponent,
+  ],
   templateUrl: './live-state-page.component.html',
   styleUrl: './live-state-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,10 +49,13 @@ export class LiveStatePageComponent {
   private readonly projectManager = inject(PROJECT_MANAGER);
   private readonly noticeState = inject(NoticeState);
   private readonly reportedErrors = inject(ReportedErrors);
-  public readonly tallyState = inject(TallyState);
 
+  /**
+   * Owns no updater at all, which is what makes it useful here: it reaches the
+   * globally registered notice updater, and it is refused for an action a
+   * manager owns.
+   */
   private readonly bareHandle = injectStatewise();
-  private readonly tallyHandle = injectStatewise(tallyUpdater);
 
   public readonly authReadings = computed<StateReading[]>(() => [
     { label: 'user', value: this.authManager.user()?.userName ?? '(none)' },
@@ -115,16 +118,6 @@ export class LiveStatePageComponent {
 
   public clearReported(): void {
     this.reportedErrors.clear();
-  }
-
-  public raiseNotice(): void {
-    this.bareHandle.dispatch(
-      noticeActions.raised('raised from the state page'),
-    );
-  }
-
-  public incrementTally(): void {
-    this.tallyHandle.dispatch(tallyActions.incremented(1));
   }
 
   public reloadTasks(): void {

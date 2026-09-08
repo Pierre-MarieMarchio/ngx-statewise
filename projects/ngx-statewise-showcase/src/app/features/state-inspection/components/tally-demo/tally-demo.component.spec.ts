@@ -78,14 +78,18 @@ describe('TallyDemoComponent', () => {
   });
 
   it('dispatches the deferred increment once its timer fires', async () => {
-    click('+ 1 deferred, outside Angular');
+    vi.useFakeTimers();
 
-    expect(tallyState.total).toBe(0);
+    try {
+      click('+ 1 deferred, outside Angular');
 
-    await new Promise((settle) =>
-      setTimeout(settle, DEFERRED_DISPATCH_DELAY_MS + 200),
-    );
+      expect(tallyState.total).toBe(0);
 
-    expect(tallyState.total).toBe(1);
+      await vi.advanceTimersByTimeAsync(DEFERRED_DISPATCH_DELAY_MS);
+
+      expect(tallyState.total).toBe(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

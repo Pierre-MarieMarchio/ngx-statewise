@@ -11,18 +11,34 @@
         <img class="side-nav-logo-img" src="icon-logo.png" alt="" />
       </a>
       @if (logedInDisplay()) {
-        @for (item of navigationitems(); track $index) {
-          <a
-            mat-item
-            class="nav-groupe-icon color-secondary"
-            [routerLink]="item.route"
-            routerLinkActive="active-link"
-          >
-            <mat-icon class="nav-icon icon-outlined" matListItemIcon>
-              {{ item.icon }}
-            </mat-icon>
-            <span>{{ item.label }}</span>
-          </a>
+        @for (item of navigationitems(); track item.label) {
+          @if (item.href) {
+            <!-- Leaves the application, so a plain link and a new tab. -->
+            <a
+              mat-item
+              class="nav-groupe-icon color-secondary"
+              [href]="item.href"
+              target="_blank"
+              rel="noopener"
+            >
+              <mat-icon class="nav-icon icon-outlined" matListItemIcon>
+                {{ item.icon }}
+              </mat-icon>
+              <span>{{ item.label }}</span>
+            </a>
+          } @else {
+            <a
+              mat-item
+              class="nav-groupe-icon color-secondary"
+              [routerLink]="item.route"
+              routerLinkActive="active-link"
+            >
+              <mat-icon class="nav-icon icon-outlined" matListItemIcon>
+                {{ item.icon }}
+              </mat-icon>
+              <span>{{ item.label }}</span>
+            </a>
+          }
         }
       }
     </mat-nav-list>

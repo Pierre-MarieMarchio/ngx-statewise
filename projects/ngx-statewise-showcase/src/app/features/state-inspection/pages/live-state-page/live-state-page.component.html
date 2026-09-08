@@ -13,12 +13,6 @@
     <button class="primary-btn" mat-stroked-button (click)="reloadProjects()">
       reload the projects
     </button>
-    <button class="primary-btn" mat-stroked-button (click)="raiseNotice()">
-      raise a notice
-    </button>
-    <button mat-stroked-button (click)="incrementTally()">
-      increment the tally
-    </button>
     <button
       class="primary-btn"
       mat-stroked-button
@@ -62,14 +56,18 @@
     <mat-card class="live-state-card" appearance="outlined">
       <h2 class="live-state-card-title">Notice</h2>
       <p class="live-state-card-note">
-        Registered globally, owned by no manager.
+        Registered globally, owned by no manager, so any handle reaches it.
       </p>
-      <dl class="live-state-readout" data-card="notice">
-        @for (reading of noticeReadings(); track reading.label) {
-          <dt>{{ reading.label }}</dt>
-          <dd [attr.data-reading]="reading.label">{{ reading.value }}</dd>
-        }
-      </dl>
+      <app-notice-demo />
+    </mat-card>
+
+    <mat-card class="live-state-card" appearance="outlined">
+      <h2 class="live-state-card-title">Tally</h2>
+      <p class="live-state-card-note">
+        Plain properties, not signals: these numbers only look live because
+        clicking redraws the page.
+      </p>
+      <app-tally-demo />
     </mat-card>
 
     <mat-card class="live-state-card" appearance="outlined">
@@ -90,22 +88,10 @@
             <dd>{{ failure.message }}</dd>
           }
         </dl>
-        <button mat-stroked-button (click)="clearReported()">clear</button>
+        <button mat-stroked-button (click)="clearReported()">
+          clear failures
+        </button>
       }
-    </mat-card>
-
-    <mat-card class="live-state-card" appearance="outlined">
-      <h2 class="live-state-card-title">Tally</h2>
-      <p class="live-state-card-note">
-        Plain properties, not signals: these two only look live because clicking
-        redraws the page.
-      </p>
-      <dl class="live-state-readout" data-card="tally">
-        <dt>total</dt>
-        <dd data-reading="total">{{ tallyState.total }}</dd>
-        <dt>lastStep</dt>
-        <dd data-reading="lastStep">{{ tallyState.lastStep }}</dd>
-      </dl>
     </mat-card>
   </div>
 </div>

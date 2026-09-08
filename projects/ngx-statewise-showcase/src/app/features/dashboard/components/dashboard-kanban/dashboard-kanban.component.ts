@@ -1,41 +1,33 @@
 import {
-  CdkDragDrop,
-  CdkDropList,
-  moveItemInArray,
-  transferArrayItem,
-} from '@angular/cdk/drag-drop';
-import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  ErrorHandler,
   inject,
 } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatGridListModule } from '@angular/material/grid-list';
-import { KanbanCardComponent } from '@shared/app-common/components';
-import { STATUSES, Task, TaskStatus } from '@shared/app-common/models';
+import {
+  TaskBoardService,
+  TaskSelectionService,
+} from '@app/features/project/services';
+import { Task } from '@shared/app-common/models';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
+import {
+  KanbanComponent,
+  type KanbanColumn,
+  type KanbanMove,
+} from '@shared/reusable/kanban';
 
 @Component({
   selector: 'app-dashboard-kanban',
-  imports: [
-    CdkDropList,
-    KanbanCardComponent,
-    MatGridListModule,
-    MatCardModule,
-    MatExpansionModule,
-  ],
+  imports: [KanbanComponent, MatCardModule],
   templateUrl: './dashboard-kanban.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './dashboard-kanban.component.scss',
 })
 export class DashboardKanbanComponent {
   private readonly taskManager = inject(TASK_MANAGER);
-  private readonly errorHandler = inject(ErrorHandler);
-
-  private readonly statuses = STATUSES;
+  private readonly board = inject(TaskBoardService);
+  private readonly selection = inject(TaskSelectionService);
 
   /**
    * Read straight from the manager: the board shows the state, and the state
@@ -44,95 +36,27 @@ export class DashboardKanbanComponent {
    */
   public tasks = this.taskManager.tasks;
 
-  /** Nothing to lay out on a board, so the board says so instead. */
+  /** Nothing to lay out on a board, so the card says so instead. */
   public readonly isEmpty = computed(() => (this.tasks() ?? []).length === 0);
 
-  public readonly columns = computed(() =>
-    this.statuses.map((status) => ({
+  public readonly columns = computed<readonly KanbanColumn<Task>[]>(() =>
+    this.board.columns.map((status) => ({
       id: status,
-      tasks: (this.tasks() ?? []).filter((task) => task.status === status),
+      label: status,
+      items: this.selection.inStatus(this.tasks(), status),
     })),
   );
 
-  /**
-   * The keyboard path the CDK does not provide. Dragging is the only way a
-   * mouse has, and it was the only way at all: a card was a `cdkDrag` with no
-   * tabindex and no key handler, which made the showcase's main interaction
-   * unusable without a pointer.
-   */
-  public moveTask(task: Task, offset: number): void {
-    const from = this.statuses.indexOf(task.status);
-    const to = from + offset;
+  public readonly cardTypeFor = (task: Task): string => task.priority;
 
-    if (to < 0 || to >= this.statuses.length) {
-      return;
+  public readonly labelFor = (task: Task): string =>
+    `${task.title}, ${task.status}. Use the left and right arrow keys to move it between columns.`;
+
+  public onTaskMoved({ item, to }: KanbanMove<Task>): void {
+    const status = this.board.asColumn(to);
+
+    if (status) {
+      this.taskManager.update(this.board.inColumn(item, status));
     }
-
-    this.applyMove({ ...task, status: this.statuses[to] });
-  }
-
-  /** What a screen reader reads on a card, and how to move it. */
-  public cardLabel(task: Task): string {
-    return `${task.title}, ${task.status}. Use the left and right arrow keys to move it between columns.`;
-  }
-  private applyMove(task: Task): void {
-    this.taskManager.update(task);
-  }
-
-  public onTaskDrop(event: CdkDragDrop<Task[]>): void {
-    const isSameContainer = event.previousContainer === event.container;
-
-    if (isSameContainer) {
-      this.handleSameColumnMove(event);
-    } else {
-      this.handleCrossColumnMove(event);
-    }
-  }
-
-  private handleSameColumnMove(event: CdkDragDrop<Task[]>): void {
-    moveItemInArray(
-      event.container.data,
-      event.previousIndex,
-      event.currentIndex,
-    );
-  }
-
-  private handleCrossColumnMove(event: CdkDragDrop<Task[]>): void {
-    const id = event.container.id;
-    const newStatus = id.slice('dropList_'.length);
-
-    if (!this.statuses.includes(newStatus as TaskStatus)) {
-      this.errorHandler.handleError(
-        new Error(`invalid status detected: ${newStatus}`),
-      );
-      return;
-    }
-
-    transferArrayItem(
-      event.previousContainer.data,
-      event.container.data,
-      event.previousIndex,
-      event.currentIndex,
-    );
-
-    this.applyMove(this.updateTask(newStatus, event));
-  }
-
-  private updateTask(
-    newStatus: string,
-    event: CdkDragDrop<Task[], Task[], Task>,
-  ) {
-    const movedTask = event.container.data[event.currentIndex];
-    const updatedTask: Task = {
-      ...movedTask,
-      status: newStatus as TaskStatus,
-    };
-
-    event.container.data[event.currentIndex] = updatedTask;
-    return updatedTask;
-  }
-
-  public getConnectedDropListIds() {
-    return this.statuses.map((status) => `dropList_${status}`);
   }
 }

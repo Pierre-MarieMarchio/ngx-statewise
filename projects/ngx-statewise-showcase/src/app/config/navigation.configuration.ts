@@ -22,8 +22,14 @@ export const navigationItems: NavigationItem[] = [
     route: 'history',
   },
   {
+    /*
+     * The guide lives with the library rather than in here. This showcase is
+     * what exercises it; explaining it is the documentation's job, and keeping
+     * a copy of that explanation in a TypeScript literal only made two things
+     * to keep in step.
+     */
     icon: 'Menu_Book',
     label: 'Docs',
-    route: 'docs',
+    href: 'https://github.com/Pierre-MarieMarchio/ngx-statewise#readme',
   },
 ];

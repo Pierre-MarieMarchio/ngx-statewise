@@ -43,6 +43,18 @@ export class TaskManager implements ITaskManager {
     );
   });
 
+  /**
+   * Resolves once the reload this manager started has settled.
+   *
+   * A cascade from another feature — a login reloading the tasks — dispatches
+   * through this manager's own handle, and observation is scoped exactly like
+   * dispatch. So awaiting the action that started the cascade does not cover
+   * it, and this is what does.
+   */
+  public reloaded(): Promise<void> {
+    return this.statewise.waitForEffect(getAllTaskActions.request);
+  }
+
   public getAll(): void {
     this.statewise.dispatch(getAllTaskActions.request());
   }

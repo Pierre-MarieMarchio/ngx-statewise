@@ -1,2 +1,5 @@
+export { AssignedTasksService } from './assigned-tasks.service';
 export { ProjectRepositoryService } from './project-repository.service';
+export { TaskBoardService } from './task-board.service';
 export { TaskRepositoryService } from './task-repository.service';
+export { TaskSelectionService } from './task-selection.service';

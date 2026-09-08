@@ -4,52 +4,20 @@
   @if (isEmpty()) {
     <p class="empty-state">No task to show.</p>
   } @else {
-    <mat-grid-list
-      class="dashboard-kanban-task-header-section"
-      cols="3"
-      gutterSize="1rem"
-      rowHeight="2rem"
+    <app-kanban
+      [columns]="columns()"
+      [cardTypeFor]="cardTypeFor"
+      [labelFor]="labelFor"
+      (itemMoved)="onTaskMoved($event)"
     >
-      @for (col of columns(); track col.id) {
-        <mat-grid-tile class="dashboard-kanban-task-column-header">
-          <div class="dashboard-kanban-task-header">
-            <h3>{{ col.id }}</h3>
-          </div>
-        </mat-grid-tile>
-      }
-    </mat-grid-list>
-    <div class="dashboard-kanban-task-body">
-      @for (col of columns(); track col.id) {
-        <div
-          class="dashboard-kanban-task-column"
-          cdkDropList
-          role="list"
-          [attr.aria-label]="col.id + ' tasks'"
-          [id]="'dropList_' + col.id"
-          [cdkDropListData]="col.tasks || []"
-          [cdkDropListConnectedTo]="getConnectedDropListIds()"
-          (cdkDropListDropped)="onTaskDrop($event)"
-        >
-          @for (task of col.tasks; track task.id) {
-            <app-kanban-card
-              [data]="task"
-              [cardType]="task.priority"
-              role="listitem"
-              tabindex="0"
-              [attr.aria-label]="cardLabel(task)"
-              (keydown.arrowleft)="moveTask(task, -1)"
-              (keydown.arrowright)="moveTask(task, 1)"
-            >
-              <mat-card-header>
-                <mat-card-title>{{ task.title }}</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                <p>{{ task.description }}</p>
-              </mat-card-content>
-            </app-kanban-card>
-          }
-        </div>
-      }
-    </div>
+      <ng-template #kanbanCard let-task>
+        <mat-card-header>
+          <mat-card-title>{{ task.title }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ task.description }}</p>
+        </mat-card-content>
+      </ng-template>
+    </app-kanban>
   }
 </mat-card>

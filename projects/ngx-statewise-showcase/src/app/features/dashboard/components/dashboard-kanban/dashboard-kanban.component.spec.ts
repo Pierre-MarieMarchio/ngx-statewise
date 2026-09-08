@@ -14,6 +14,11 @@ const TASKS = [
   sampleTask({ id: 'd', status: 'todo' }),
 ];
 
+/**
+ * The board itself is covered by `KanbanComponent`'s own specs. What is left
+ * here is the adapting: which columns the tasks fall into, and what a move
+ * means for the manager.
+ */
 describe('DashboardKanbanComponent', () => {
   let taskManager: FakeTaskManager;
 
@@ -27,28 +32,17 @@ describe('DashboardKanbanComponent', () => {
 
     const fixture = TestBed.createComponent(DashboardKanbanComponent);
     fixture.detectChanges();
+
     return fixture;
   };
 
-  it('renders one drop list per status', async () => {
-    const fixture = await mount();
-
-    expect(
-      Array.from(
-        (fixture.nativeElement as HTMLElement).querySelectorAll(
-          '.dashboard-kanban-task-column',
-        ),
-      ).map((column) => column.id),
-    ).toEqual(['dropList_todo', 'dropList_in-progress', 'dropList_done']);
-  });
-
-  it('groups the tasks of the manager by status', async () => {
+  it('builds one column per status, in order', async () => {
     const fixture = await mount();
 
     expect(
       fixture.componentInstance
         .columns()
-        .map((column) => [column.id, column.tasks?.length]),
+        .map((column) => [column.id, column.items.length]),
     ).toEqual([
       ['todo', 2],
       ['in-progress', 1],
@@ -56,79 +50,59 @@ describe('DashboardKanbanComponent', () => {
     ]);
   });
 
-  it('connects every drop list to all the others', async () => {
+  it('names each column for whoever cannot see it', async () => {
     const fixture = await mount();
 
-    expect(fixture.componentInstance.getConnectedDropListIds()).toEqual([
-      'dropList_todo',
-      'dropList_in-progress',
-      'dropList_done',
-    ]);
+    expect(
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          '[role="list"]',
+        ),
+      ).map((column) => column.getAttribute('aria-label')),
+    ).toEqual(['todo items', 'in-progress items', 'done items']);
   });
 
-  it('empties itself when the manager reports no task', async () => {
+  it('says so when the manager reports no task', async () => {
     const fixture = await mount();
     taskManager.tasks.set([]);
     fixture.detectChanges();
 
-    expect(
-      fixture.componentInstance
-        .columns()
-        .every((column) => column.tasks?.length === 0),
-    ).toBe(true);
+    expect(fixture.componentInstance.isEmpty()).toBe(true);
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'No task to show.',
+    );
   });
-  describe('without a pointer', () => {
-    /** The CDK offers no keyboard path, and this board is the main demo. */
-    it('makes every card a tab stop with a name', async () => {
-      const fixture = await mount();
-      const cards = (fixture.nativeElement as HTMLElement).querySelectorAll(
-        'app-kanban-card',
-      );
 
-      expect(cards.length).toBe(TASKS.length);
-      for (const card of Array.from(cards)) {
-        expect(card.getAttribute('tabindex')).toBe('0');
-        expect(card.getAttribute('aria-label')).toContain('arrow keys');
-      }
+  it('updates the task through the manager when it moves', async () => {
+    const fixture = await mount();
+
+    fixture.componentInstance.onTaskMoved({
+      item: TASKS[0],
+      from: 'todo',
+      to: 'done',
     });
 
-    it('moves a card to the next column on the right arrow', async () => {
-      const fixture = await mount();
+    expect(taskManager.updates).toEqual([{ ...TASKS[0], status: 'done' }]);
+  });
 
-      fixture.componentInstance.moveTask(TASKS[0], 1);
+  /** A column id the board does not recognise is not a status to write. */
+  it('writes nothing for a column it cannot read as a status', async () => {
+    const fixture = await mount();
 
-      expect(taskManager.updates).toEqual([
-        { ...TASKS[0], status: 'in-progress' },
-      ]);
+    fixture.componentInstance.onTaskMoved({
+      item: TASKS[0],
+      from: 'todo',
+      to: 'nowhere',
     });
 
-    it('moves it back on the left arrow', async () => {
-      const fixture = await mount();
+    expect(taskManager.updates).toEqual([]);
+  });
 
-      fixture.componentInstance.moveTask(TASKS[1], -1);
+  it('colours a card by its priority', async () => {
+    const fixture = await mount();
 
-      expect(taskManager.updates).toEqual([{ ...TASKS[1], status: 'todo' }]);
-    });
-
-    it('stops at the ends rather than wrapping around', async () => {
-      const fixture = await mount();
-
-      fixture.componentInstance.moveTask(TASKS[0], -1);
-      fixture.componentInstance.moveTask(TASKS[2], 1);
-
-      expect(taskManager.updates).toEqual([]);
-    });
-
-    it('names each column for whoever cannot see it', async () => {
-      const fixture = await mount();
-
-      expect(
-        Array.from(
-          (fixture.nativeElement as HTMLElement).querySelectorAll(
-            '[role="list"]',
-          ),
-        ).map((column) => column.getAttribute('aria-label')),
-      ).toEqual(['todo tasks', 'in-progress tasks', 'done tasks']);
-    });
+    expect(
+      fixture.componentInstance.cardTypeFor(sampleTask({ priority: 'high' })),
+    ).toBe('high');
   });
 });

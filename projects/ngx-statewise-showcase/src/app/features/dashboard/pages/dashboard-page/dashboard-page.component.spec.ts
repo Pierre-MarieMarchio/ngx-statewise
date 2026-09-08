@@ -1,7 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { AUTH_MANAGER, TASK_MANAGER } from '@shared/app-common/tokens';
+import {
+  AUTH_MANAGER,
+  PROJECT_MANAGER,
+  TASK_MANAGER,
+} from '@shared/app-common/tokens';
 import {
   fakeAuthManager,
+  fakeProjectManager,
   fakeTaskManager,
   sampleTask,
 } from '@testing/fake-managers';
@@ -14,6 +19,7 @@ describe('DashboardPageComponent', () => {
       providers: [
         { provide: AUTH_MANAGER, useValue: fakeAuthManager() },
         { provide: TASK_MANAGER, useValue: fakeTaskManager([sampleTask()]) },
+        { provide: PROJECT_MANAGER, useValue: fakeProjectManager() },
       ],
     }).compileComponents();
 

@@ -117,6 +117,7 @@ export const fakeTaskManager = (
     updates,
     getAll: () => undefined,
     getAllAsync: () => Promise.resolve(),
+    reloaded: () => Promise.resolve(),
     update: (task: Task) => {
       updates.push(task);
     },
@@ -142,6 +143,7 @@ export const fakeProjectManager = (
     projectCount: computed(() => projectsSignal()?.length ?? 0),
     getAll: () => undefined,
     getAllAsync: () => Promise.resolve(),
+    settled: () => Promise.resolve(),
     reset: () => Promise.resolve(),
   };
 };
