@@ -11,4 +11,14 @@ export const navigationItems: NavigationItem[] = [
     label: 'Task',
     route: 'task',
   },
+  {
+    icon: 'History',
+    label: 'History',
+    route: 'history',
+  },
+  {
+    icon: 'Menu_Book',
+    label: 'Docs',
+    route: 'docs',
+  },
 ];

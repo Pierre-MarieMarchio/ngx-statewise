@@ -1,0 +1,28 @@
+<div class="tally-demo">
+  <div class="tally-demo-actions">
+    <button class="primary-btn" mat-stroked-button (click)="increment(1)">
+      + 1
+    </button>
+    <button class="primary-btn" mat-stroked-button (click)="increment(5)">
+      + 5
+    </button>
+    <button mat-stroked-button (click)="incrementLater(1)">
+      + 1 deferred, outside Angular
+    </button>
+    <button mat-button (click)="redraw()">redraw</button>
+    <button mat-button (click)="reset()">reset</button>
+  </div>
+
+  <dl class="tally-demo-readout">
+    <dt>total</dt>
+    <dd data-readout="total">{{ tallyState.total }}</dd>
+    <dt>last step</dt>
+    <dd data-readout="last-step">{{ tallyState.lastStep }}</dd>
+  </dl>
+
+  <p class="tally-demo-hint">
+    The deferred button raises the total a moment later, from outside Angular.
+    Nothing redraws on its own, so the numbers stay behind until you press
+    redraw.
+  </p>
+</div>

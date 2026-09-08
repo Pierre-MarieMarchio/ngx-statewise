@@ -17,6 +17,7 @@ import { fakeApiInterceptor } from './core/fake-api';
 import { AuthEffect, AuthManager } from './features/auth/states';
 import { TaskEffect, TaskManager } from './features/task/states';
 import { ProjectEffect, ProjectManager } from './features/project/states';
+import { noticeUpdater } from './features/notice/states';
 import {
   AUTH_MANAGER,
   PROJECT_MANAGER,
@@ -31,7 +32,11 @@ export const appConfig: ApplicationConfig = {
     ),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideStatewise({ effects: [AuthEffect, TaskEffect, ProjectEffect] }),
+    provideStatewise({
+      effects: [AuthEffect, TaskEffect, ProjectEffect],
+      updaters: [noticeUpdater],
+      history: { limit: 50 },
+    }),
 
     { provide: AUTH_MANAGER, useExisting: AuthManager },
     { provide: TASK_MANAGER, useExisting: TaskManager },
