@@ -205,6 +205,44 @@ on(updateTaskActions.failure, (state, taskId) => {
     seenIn: 'features/project/states/task/task.updater.ts',
   },
   {
+    id: 'awaiting-effects',
+    title: 'Waiting for effects another handle started',
+    summary:
+      'Observation is scoped exactly like dispatch, which has a consequence worth knowing: awaiting the action that starts a cascade does not cover what the cascade dispatches through other handles. A login reloads the tasks and the projects by calling their managers, so await login() settles while both reloads are still running. waitForEffect waits on one action type of one handle, waitForAllEffects on everything that handle started, and the managers expose them so a caller can wait for data rather than just for a session.',
+    snippet: `// in the manager, over its own handle
+public reloaded(): Promise<void> {
+  return this.statewise.waitForEffect(getAllTaskActions.request);
+}
+
+// switching user is more than signing in
+await this.authManager.login(credentials);
+await Promise.all([
+  this.taskManager.reloaded(),
+  this.projectManager.settled(),
+]);`,
+    seenIn: 'features/auth/services/user-switch.service.ts',
+  },
+  {
+    id: 'scoped-effects',
+    title: 'An effect that lives and dies with a component',
+    summary:
+      'createEffect registers in the injection context it is called from, so an effect class provided by a component is unregistered when that component is destroyed — nothing has to remember to clean it up. The handle it returns is for the rarer case of stopping earlier than that: the notice card counts what it hears and can stop listening on demand, while the effects of the application itself stay registered for good.',
+    snippet: `@Injectable()
+export class NoticeListenerService {
+  private readonly listening = createEffect(noticeActions.raised, () => {
+    this.heard.update((count) => count + 1);
+  });
+
+  public stopListening(): void {
+    this.listening.destroy();
+  }
+}
+
+@Component({ providers: [NoticeListenerService] })`,
+    seenIn:
+      'features/state-inspection/components/notice-demo/notice-listener.service.ts',
+  },
+  {
     id: 'rendered-state',
     title: 'Showing what the state says',
     summary:
