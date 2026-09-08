@@ -68,6 +68,10 @@ const scopedActions = defineActionsGroup({
     applied: payload<string>(),
   },
 });
+const orderedActions = defineActionsGroup({
+  source: 'Ordered',
+  events: { appended: payload<string>() },
+});
 
 let effectOnlyStarted: Deferred;
 let effectOnlyGate: Deferred;
@@ -153,6 +157,12 @@ const scopedUpdater = defineUpdater(FIRST_STATE, (on) => {
 const failingUpdater = defineUpdater(FIRST_STATE, (on) => {
   on(failingUpdaterAction, () => {
     throw new Error('unexpected updater failure');
+  });
+});
+
+const orderedUpdater = defineUpdater(FIRST_STATE, (on) => {
+  on(orderedActions.appended, (state, value) => {
+    state.completed.push(value);
   });
 });
 
@@ -302,6 +312,69 @@ describe('public execution contract', () => {
       await expectAsync(
         statewise.dispatchAsync(emptyObservableAction()),
       ).toBeResolved();
+    });
+  });
+
+  /*
+   * What these defend: an updater is applied synchronously, inside `dispatch`,
+   * before anything is awaited. Nothing else in the suite asserts it, so any
+   * change putting an awaited step in front of the updater would pass
+   * unnoticed.
+   *
+   * The first and the last are real gates — verified by inserting one awaited
+   * step before `applyUpdater`, which turns both red. The two ordering specs
+   * are weaker: they hold trivially while the code is synchronous, and a
+   * uniform delay in front of every updater keeps them green. Only a delay
+   * that varies per dispatch reverses the order, and nothing can produce one
+   * today. They record the intended property; strengthen them the day an
+   * asynchronous step makes it breakable.
+   */
+  describe('synchronous state, ordered dispatches', () => {
+    it('has applied the updater before dispatch returns', () => {
+      const ordered = manager(orderedUpdater);
+
+      ordered.dispatch(orderedActions.appended('now'));
+
+      // No await: the state a component reads in the same tick is already up
+      // to date.
+      expect(firstState.completed).toEqual(['now']);
+    });
+
+    it('applies two dispatches of one action type in dispatch order', () => {
+      const ordered = manager(orderedUpdater);
+
+      ordered.dispatch(orderedActions.appended('first'));
+      ordered.dispatch(orderedActions.appended('second'));
+
+      expect(firstState.completed).toEqual(['first', 'second']);
+    });
+
+    it('keeps that order when neither dispatch is awaited in turn', async () => {
+      const ordered = manager(orderedUpdater);
+
+      const first = ordered.dispatchAsync(orderedActions.appended('first'));
+      const second = ordered.dispatchAsync(orderedActions.appended('second'));
+      await Promise.all([first, second]);
+
+      expect(firstState.completed).toEqual(['first', 'second']);
+    });
+
+    it('tracks a fire-and-forget dispatch before it returns', async () => {
+      let waited = false;
+
+      statewise.dispatch(effectOnlyAction(1));
+      // Called synchronously after dispatch: the effect must already be
+      // observable, or an awaiting caller would proceed too early.
+      const waiting = statewise.waitForAllEffects().then(() => {
+        waited = true;
+      });
+
+      await effectOnlyStarted.promise;
+      expect(waited).toBeFalse();
+
+      effectOnlyGate.resolve();
+      await waiting;
+      expect(waited).toBeTrue();
     });
   });
 
