@@ -1,0 +1,50 @@
+name: Angular compatibility
+
+# The published peer range promises three Angular majors; this workspace holds
+# one. This is where the other two stop being an assumption: the packed library
+# is installed into a throwaway application and built and tested against each
+# major in turn. See tools/angular-compat/README.md for what that does and does
+# not prove.
+#
+# Not on pull requests, on purpose: no diff here changes what npm resolves for
+# Angular 20. What changes is the registry, which is a clock rather than an
+# event — so this runs weekly, and on demand before a release.
+on:
+  schedule:
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: angular-compat-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  compat:
+    name: Angular ${{ matrix.angular }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Each major answers on its own. A break on 20 must not hide the result
+      # on 21, or the report says less than the run measured.
+      fail-fast: false
+      matrix:
+        angular: ['20', '21', '22']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build, pack and exercise against Angular ${{ matrix.angular }}
+        run: npm run verify:angular -- ${{ matrix.angular }}
