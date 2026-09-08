@@ -65,5 +65,10 @@
     "ng-packagr": "^22.1.1",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.70.0"
+  },
+  "// --- SECURITY OVERRIDES ---": "lerna pins versions with open advisories; both fixes are patch-level",
+  "overrides": {
+    "js-yaml": "^4.3.2",
+    "pacote": "^21.5.1"
   }
 }
