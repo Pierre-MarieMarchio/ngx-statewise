@@ -63,6 +63,31 @@ export class TaskKanbanComponent {
     })),
   );
 
+  /**
+   * The keyboard path the CDK does not provide. Dragging is the only way a
+   * mouse has, and it was the only way at all: a card was a `cdkDrag` with no
+   * tabindex and no key handler, which made the showcase's main interaction
+   * unusable without a pointer.
+   */
+  public moveTask(task: Task, offset: number): void {
+    const from = this.statuses.indexOf(task.status);
+    const to = from + offset;
+
+    if (to < 0 || to >= this.statuses.length) {
+      return;
+    }
+
+    this.applyMove({ ...task, status: this.statuses[to] });
+  }
+
+  /** What a screen reader reads on a card, and how to move it. */
+  public cardLabel(task: Task): string {
+    return `${task.title}, ${task.status}. Use the left and right arrow keys to move it between columns.`;
+  }
+  private applyMove(task: Task): void {
+    this.taskChanged.emit(task);
+  }
+
   public onTaskDrop(event: CdkDragDrop<Task[]>): void {
     const isSameContainer = event.previousContainer === event.container;
 
@@ -114,7 +139,7 @@ export class TaskKanbanComponent {
       event.currentIndex,
     );
 
-    this.taskChanged.emit(this.updateTask(newStatus, event));
+    this.applyMove(this.updateTask(newStatus, event));
   }
 
   private updateTask(

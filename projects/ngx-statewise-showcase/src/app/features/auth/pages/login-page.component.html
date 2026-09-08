@@ -5,4 +5,8 @@
   errorMessage="Those credentials were refused. Check them and try again."
 />
 
-<app-login-form class="d-flex center" (formSubmit)="onFormSubmit($event)" />
+<app-login-form
+  class="d-flex center"
+  [pending]="authManager.isLoading()"
+  (formSubmit)="onFormSubmit($event)"
+/>

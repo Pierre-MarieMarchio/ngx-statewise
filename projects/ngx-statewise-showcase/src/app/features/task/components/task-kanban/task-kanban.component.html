@@ -32,6 +32,8 @@
               <div
                 class="kanban-task-column"
                 cdkDropList
+                role="list"
+                [attr.aria-label]="project.title + ', ' + col.id + ' tasks'"
                 [id]="'dropList_' + col.id + '_' + project.id"
                 [cdkDropListData]="
                   getProjectFilteredTasks(project.id, col.tasks) || []
@@ -43,7 +45,15 @@
                   task of getProjectFilteredTasks(project.id, col.tasks);
                   track task.id
                 ) {
-                  <app-kanban-card [data]="task" [cardType]="task.priority">
+                  <app-kanban-card
+                    [data]="task"
+                    [cardType]="task.priority"
+                    role="listitem"
+                    tabindex="0"
+                    [attr.aria-label]="cardLabel(task)"
+                    (keydown.arrowleft)="moveTask(task, -1)"
+                    (keydown.arrowright)="moveTask(task, 1)"
+                  >
                     <mat-card-header>
                       <mat-card-title>{{ task.title }}</mat-card-title>
                     </mat-card-header>

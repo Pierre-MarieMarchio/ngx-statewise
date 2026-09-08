@@ -1,7 +1,13 @@
 <div class="side-nav-container">
   <div class="side-nav-content">
     <mat-nav-list>
-      <a class="side-nav-logo" mat-item [routerLink]="''">
+      <!-- The name goes on the link; the image is decorative beside it. -->
+      <a
+        class="side-nav-logo"
+        mat-item
+        [routerLink]="''"
+        aria-label="Ngx-Statewise, back to home"
+      >
         <img class="side-nav-logo-img" src="icon-logo.png" alt="" />
       </a>
       @if (logedInDisplay()) {
@@ -29,6 +35,7 @@
           disableRipple="true"
           class=".no-hover-button"
           mat-icon-button
+          aria-label="Log out"
         >
           <mat-icon class="footer-icon color-secondary icon-outlined">
             logout
