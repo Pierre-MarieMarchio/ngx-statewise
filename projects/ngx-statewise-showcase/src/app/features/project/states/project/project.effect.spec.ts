@@ -67,8 +67,8 @@ describe('ProjectEffect', () => {
     await statewise.dispatchAsync(getAllProjectsActions.request());
 
     expect(projectState.projects()).toEqual(PROJECTS);
-    expect(projectState.isLoading()).toBeFalse();
-    expect(projectState.isError()).toBeFalse();
+    expect(projectState.isLoading()).toBe(false);
+    expect(projectState.isError()).toBe(false);
   });
 
   /**
@@ -95,7 +95,7 @@ describe('ProjectEffect', () => {
 
     await statewise.dispatchAsync(getAllProjectsActions.request());
 
-    expect(projectState.isError()).toBeTrue();
+    expect(projectState.isError()).toBe(true);
     expect(projectState.projects()).toBeNull();
   });
 
@@ -110,8 +110,8 @@ describe('ProjectEffect', () => {
     await statewise.dispatchAsync(getAllProjectsActions.request());
 
     expect(projectState.projects()).toBeNull();
-    expect(projectState.isError()).toBeFalse();
-    expect(projectState.isLoading()).toBeTrue();
+    expect(projectState.isError()).toBe(false);
+    expect(projectState.isLoading()).toBe(true);
   });
 
   it('fails the request without calling the repository while no user is known', async () => {
@@ -122,7 +122,7 @@ describe('ProjectEffect', () => {
     await statewise.dispatchAsync(getAllProjectsActions.request());
 
     expect(subscriptions).toBe(0);
-    expect(projectState.isError()).toBeTrue();
+    expect(projectState.isError()).toBe(true);
   });
 
   it('subscribes the repository exactly once for one request', async () => {

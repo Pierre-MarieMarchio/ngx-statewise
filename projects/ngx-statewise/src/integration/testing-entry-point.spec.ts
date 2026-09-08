@@ -103,17 +103,17 @@ describe('ngx-statewise/testing', () => {
     it('keeps the misrouted-dispatch check on by default', async () => {
       configure();
 
-      await expectAsync(
+      await expect(
         scope().dispatchAsync(testingActions.owned(1)),
-      ).toBeRejectedWithError(/No updater in scope/);
+      ).rejects.toThrow(/No updater in scope/);
     });
 
     it('turns the misrouted-dispatch check off on demand', async () => {
       configure({ strict: false });
 
-      await expectAsync(
+      await expect(
         scope().dispatchAsync(testingActions.owned(1)),
-      ).toBeResolved();
+      ).resolves.not.toThrow();
       expect(box.value).toBe(0);
     });
 
@@ -130,7 +130,7 @@ describe('ngx-statewise/testing', () => {
     it('resolves immediately when nothing is running', async () => {
       configure();
 
-      await expectAsync(drainEffects()).toBeResolved();
+      await expect(drainEffects()).resolves.not.toThrow();
     });
 
     it('waits for an effect started by a fire-and-forget dispatch', async () => {
@@ -143,11 +143,11 @@ describe('ngx-statewise/testing', () => {
       });
 
       await Promise.resolve();
-      expect(drained).toBeFalse();
+      expect(drained).toBe(false);
 
       releaseSlow();
       await draining;
-      expect(drained).toBeTrue();
+      expect(drained).toBe(true);
     });
   });
 
@@ -163,7 +163,7 @@ describe('ngx-statewise/testing', () => {
 
       expect(() => {
         scope().dispatch(transient());
-      }).toThrowError(/No updater in scope/);
+      }).toThrow(/No updater in scope/);
 
       restore();
 
@@ -180,7 +180,7 @@ describe('ngx-statewise/testing', () => {
 
       expect(() => {
         scope().dispatch(testingActions.owned(1));
-      }).toThrowError(/No updater in scope/);
+      }).toThrow(/No updater in scope/);
     });
   });
 });

@@ -24,15 +24,15 @@ describe('SidePanelComponent', () => {
     const fixture = await mount();
     const component = fixture.componentInstance;
 
-    expect(component.sidenav.opened).toBeFalse();
+    expect(component.sidenav.opened).toBe(false);
 
     component.open();
-    expect(component.sidenav.opened).toBeTrue();
+    expect(component.sidenav.opened).toBe(true);
 
     component.close();
-    expect(component.sidenav.opened).toBeFalse();
+    expect(component.sidenav.opened).toBe(false);
 
     component.toggle();
-    expect(component.sidenav.opened).toBeTrue();
+    expect(component.sidenav.opened).toBe(true);
   });
 });

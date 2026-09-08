@@ -41,11 +41,11 @@ describe('DashboardPageComponent', () => {
     fixture.detectChanges();
 
     expect(component.selectedTask()?.id).toBe('picked');
-    expect(component.dashboardPanel.sidenav.opened).toBeTrue();
+    expect(component.dashboardPanel.sidenav.opened).toBe(true);
 
     component.closeSideNav();
     fixture.detectChanges();
 
-    expect(component.dashboardPanel.sidenav.opened).toBeFalse();
+    expect(component.dashboardPanel.sidenav.opened).toBe(false);
   });
 });

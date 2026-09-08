@@ -182,7 +182,7 @@ describe('HistoryPageComponent', () => {
     const payload = rows()[0][2];
 
     expect(payload.length).toBe(MAX_PAYLOAD_LENGTH + 1);
-    expect(payload.endsWith('…')).toBeTrue();
+    expect(payload.endsWith('…')).toBe(true);
   });
 
   it('leaves a short payload whole', () => {

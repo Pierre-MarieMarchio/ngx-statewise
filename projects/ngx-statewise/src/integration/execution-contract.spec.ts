@@ -219,18 +219,18 @@ describe('public execution contract', () => {
     });
 
     await effectOnlyStarted.promise;
-    expect(settled).toBeFalse();
+    expect(settled).toBe(false);
 
     effectOnlyGate.resolve();
     await execution;
 
-    expect(settled).toBeTrue();
+    expect(settled).toBe(true);
   });
 
   it('treats an empty one-shot Observable as a result without action', async () => {
-    await expectAsync(
+    await expect(
       statewise.dispatchAsync(emptyObservableAction()),
-    ).toBeResolved();
+    ).resolves.not.toThrow();
   });
 
   it('waits for every effect attached to a cascaded action', async () => {
@@ -248,20 +248,20 @@ describe('public execution contract', () => {
 
     cascadeFirstGate.resolve();
     await cascadeFirstFinished.promise;
-    expect(settled).toBeFalse();
+    expect(settled).toBe(false);
 
     cascadeSecondGate.resolve();
     await execution;
 
-    expect(settled).toBeTrue();
+    expect(settled).toBe(true);
   });
 
   it('rejects dispatchAsync when an effect fails unexpectedly', async () => {
-    await expectAsync(
+    await expect(
       statewise.dispatchAsync(failingEffectAction()),
-    ).toBeRejectedWithError('unexpected effect failure');
+    ).rejects.toThrow('unexpected effect failure');
 
-    await expectAsync(statewise.waitForAllEffects()).toBeResolved();
+    await expect(statewise.waitForAllEffects()).resolves.not.toThrow();
     expect(handledErrors).toEqual([]);
   });
 
@@ -280,9 +280,9 @@ describe('public execution contract', () => {
   it('rejects dispatchAsync when an updater fails unexpectedly', async () => {
     const failing = manager(failingUpdater);
 
-    await expectAsync(
-      failing.dispatchAsync(failingUpdaterAction()),
-    ).toBeRejectedWithError('unexpected updater failure');
+    await expect(failing.dispatchAsync(failingUpdaterAction())).rejects.toThrow(
+      'unexpected updater failure',
+    );
   });
 
   describe('effects belong to the manager owning the action', () => {
@@ -298,9 +298,9 @@ describe('public execution contract', () => {
     it('runs none of them for a manager that owns nothing of it', async () => {
       const stranger = manager(completionUpdater(SECOND_STATE));
 
-      await expectAsync(
+      await expect(
         stranger.dispatchAsync(scopedActions.requested('leaked')),
-      ).toBeRejectedWithError(/No updater in scope for "SCOPED_REQUESTED"/);
+      ).rejects.toThrow(/No updater in scope for "SCOPED_REQUESTED"/);
 
       // The effect never ran, so nothing cascaded into the wrong scope.
       expect(scopedEffectRuns).toEqual([]);
@@ -309,9 +309,9 @@ describe('public execution contract', () => {
     });
 
     it('keeps running them for an action no updater claims', async () => {
-      await expectAsync(
+      await expect(
         statewise.dispatchAsync(emptyObservableAction()),
-      ).toBeResolved();
+      ).resolves.not.toThrow();
     });
   });
 
@@ -370,11 +370,11 @@ describe('public execution contract', () => {
       });
 
       await effectOnlyStarted.promise;
-      expect(waited).toBeFalse();
+      expect(waited).toBe(false);
 
       effectOnlyGate.resolve();
       await waiting;
-      expect(waited).toBeTrue();
+      expect(waited).toBe(true);
     });
   });
 

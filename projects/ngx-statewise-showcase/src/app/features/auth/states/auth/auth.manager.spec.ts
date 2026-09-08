@@ -20,25 +20,25 @@ describe('AuthManager', () => {
 
   it('exposes the state read-only', () => {
     expect(manager.user()).toBeNull();
-    expect(manager.isLoggedIn()).toBeFalse();
-    expect(manager.isLoading()).toBeFalse();
+    expect(manager.isLoggedIn()).toBe(false);
+    expect(manager.isLoading()).toBe(false);
   });
 
   it('derives isAdmin from the role of the user', () => {
-    expect(manager.isAdmin()).toBeFalse();
+    expect(manager.isAdmin()).toBe(false);
 
     state.user.set(sampleUser({ role: 'admin' }));
-    expect(manager.isAdmin()).toBeTrue();
+    expect(manager.isAdmin()).toBe(true);
 
     state.user.set(sampleUser({ role: 'contributor' }));
-    expect(manager.isAdmin()).toBeFalse();
+    expect(manager.isAdmin()).toBe(false);
   });
 
   it('reports no admin once the user is gone', () => {
     state.user.set(sampleUser({ role: 'admin' }));
-    expect(manager.isAdmin()).toBeTrue();
+    expect(manager.isAdmin()).toBe(true);
 
     state.user.set(null);
-    expect(manager.isAdmin()).toBeFalse();
+    expect(manager.isAdmin()).toBe(false);
   });
 });

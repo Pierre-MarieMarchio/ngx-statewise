@@ -89,9 +89,9 @@ describe('ScopedStatewiseRef', () => {
     it('resolves once the cascade is over', async () => {
       effects.register('SOURCE', () => Promise.resolve({ type: 'CHILD' }));
 
-      await expectAsync(
+      await expect(
         plainRef().dispatchAsync({ type: 'SOURCE' }),
-      ).toBeResolved();
+      ).resolves.not.toThrow();
       expect(engine.recordedActions()).toEqual([
         { type: 'SOURCE' },
         { type: 'CHILD' },
@@ -103,9 +103,9 @@ describe('ScopedStatewiseRef', () => {
         updaters: new Map([['FAILING_UPDATE', failingHandler]]),
       });
 
-      await expectAsync(
+      await expect(
         ref.dispatchAsync({ type: 'FAILING_UPDATE' }),
-      ).toBeRejectedWith(failure);
+      ).rejects.toEqual(failure);
       expect(handled).toEqual([]);
     });
 
@@ -113,9 +113,9 @@ describe('ScopedStatewiseRef', () => {
       const effectFailure = new Error('effect failure');
       effects.register('SOURCE', () => Promise.reject(effectFailure));
 
-      await expectAsync(
+      await expect(
         plainRef().dispatchAsync({ type: 'SOURCE' }),
-      ).toBeRejectedWith(effectFailure);
+      ).rejects.toEqual(effectFailure);
       expect(handled).toEqual([]);
     });
   });
@@ -124,8 +124,10 @@ describe('ScopedStatewiseRef', () => {
     it('accepts a creator as well as an action', async () => {
       const ref = plainRef();
 
-      await expectAsync(ref.waitForEffect({ type: 'SOURCE' })).toBeResolved();
-      await expectAsync(ref.waitForAllEffects()).toBeResolved();
+      await expect(
+        ref.waitForEffect({ type: 'SOURCE' }),
+      ).resolves.not.toThrow();
+      await expect(ref.waitForAllEffects()).resolves.not.toThrow();
     });
 
     it('observes only the effects it started itself', async () => {
@@ -142,10 +144,10 @@ describe('ScopedStatewiseRef', () => {
 
       const execution = dispatcher.dispatchAsync({ type: 'SOURCE' });
 
-      await expectAsync(
+      await expect(
         observer.waitForEffect({ type: 'SOURCE' }),
-      ).toBeResolved();
-      await expectAsync(observer.waitForAllEffects()).toBeResolved();
+      ).resolves.not.toThrow();
+      await expect(observer.waitForAllEffects()).resolves.not.toThrow();
 
       release();
       await execution;
