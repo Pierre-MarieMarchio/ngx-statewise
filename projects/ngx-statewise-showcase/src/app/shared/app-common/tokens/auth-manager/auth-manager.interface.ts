@@ -6,6 +6,7 @@ export interface IAuthManager {
   user: Signal<User | null>;
   isLoggedIn: Signal<boolean>;
   isLoading: Signal<boolean>;
+  isError: Signal<boolean>;
 
   /** Derived from the user, so a role check never reads the state twice. */
   isAdmin: Signal<boolean>;

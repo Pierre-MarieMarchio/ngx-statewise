@@ -17,6 +17,14 @@ export class TaskManager implements ITaskManager {
   public readonly isError = this.taskStates.isError.asReadonly();
   public readonly isLoading = this.taskStates.isLoading.asReadonly();
 
+  /**
+   * Derived from the writes in flight rather than stored, so it stays true
+   * until the last of them has answered.
+   */
+  public readonly isSaving = computed(
+    () => this.taskStates.pendingWrites().size > 0,
+  );
+
   public readonly taskCount = computed(() => this.tasks().length);
 
   /**

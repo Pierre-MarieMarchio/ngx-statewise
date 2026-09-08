@@ -204,6 +204,25 @@ on(updateTaskActions.failure, (state, taskId) => {
     seenIn: 'features/task/states/task/task.updater.ts',
   },
   {
+    id: 'rendered-state',
+    title: 'Showing what the state says',
+    summary:
+      'A manager exposing isLoading and isError is only half of it: the views have to read them. One shared component renders both for a read — a labelled progress bar while it runs, and a live region when it fails, with a retry that dispatches again — and every list says so when it has nothing to show. The task manager also tells two states apart: isLoading is reading the list, while isSaving is derived from the writes still in flight, so the spinner does not stop on the first of several answers.',
+    snippet: `<app-data-state
+  label="tasks"
+  [loading]="taskManager.isLoading() || taskManager.isSaving()"
+  [error]="taskManager.isError()"
+  [retryable]="true"
+  (retried)="taskManager.getAll()"
+/>
+
+// derived, so it stays true until the last write has answered
+public readonly isSaving = computed(
+  () => this.taskStates.pendingWrites().size > 0,
+);`,
+    seenIn: 'shared/app-common/components/data-state/data-state.component.ts',
+  },
+  {
     id: 'live-state',
     title: 'Watching the state as it moves',
     summary:

@@ -42,6 +42,9 @@ export class DashboardKanbanComponent {
    */
   public tasks = this.taskManager.tasks;
 
+  /** Nothing to lay out on a board, so the board says so instead. */
+  public readonly isEmpty = computed(() => (this.tasks() ?? []).length === 0);
+
   public readonly columns = computed(() =>
     this.statuses.map((status) => ({
       id: status,

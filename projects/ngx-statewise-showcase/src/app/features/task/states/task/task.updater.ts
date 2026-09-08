@@ -3,6 +3,13 @@ import { defineUpdater } from 'ngx-statewise';
 import { getAllTaskActions, taskReset, updateTaskActions } from './task.action';
 import { TaskState } from './task.state';
 
+/*
+ * `isLoading` belongs to reading the list, and nothing else touches it. A write
+ * in flight shows through `pendingWrites`, which the manager derives `isSaving`
+ * from — a single flag would be cleared by the first answer of N writes, and
+ * the spinner would stop while the rest were still going.
+ */
+
 /** Puts one task back in a list, leaving the others in place and in order. */
 const carrying =
   (updated: Task) =>
@@ -52,7 +59,6 @@ export const taskUpdater = defineUpdater(TaskState, (on) => {
    * should restore.
    */
   on(updateTaskActions.request, (state, task) => {
-    state.isLoading.set(true);
     state.isError.set(false);
 
     const replaced = state.tasks().find((existing) => existing.id === task.id);
@@ -67,13 +73,11 @@ export const taskUpdater = defineUpdater(TaskState, (on) => {
   });
 
   on(updateTaskActions.success, (state, updatedTask) => {
-    state.isLoading.set(false);
     state.pendingWrites.update(without(updatedTask.id));
     state.tasks.update(carrying(updatedTask));
   });
 
   on(updateTaskActions.failure, (state, taskId) => {
-    state.isLoading.set(false);
     state.isError.set(true);
 
     const replaced = state.pendingWrites().get(taskId);

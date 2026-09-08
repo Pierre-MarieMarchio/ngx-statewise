@@ -56,6 +56,7 @@ export class LiveStatePageComponent {
     { label: 'isLoggedIn', value: String(this.authManager.isLoggedIn()) },
     { label: 'isAdmin', value: String(this.authManager.isAdmin()) },
     { label: 'isLoading', value: String(this.authManager.isLoading()) },
+    { label: 'isError', value: String(this.authManager.isError()) },
   ]);
 
   public readonly taskReadings = computed<StateReading[]>(() => {
@@ -68,6 +69,7 @@ export class LiveStatePageComponent {
         value: String(count),
       })),
       { label: 'isLoading', value: String(this.taskManager.isLoading()) },
+      { label: 'isSaving', value: String(this.taskManager.isSaving()) },
       { label: 'isError', value: String(this.taskManager.isError()) },
     ];
   });
