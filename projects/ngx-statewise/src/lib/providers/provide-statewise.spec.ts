@@ -150,7 +150,7 @@ describe('provideStatewise', () => {
     it('throws in dev mode, which is the default reaction', async () => {
       configure(provideStatewise());
 
-      await expectAsync(misroute()).toBeRejectedWithError(
+      await expect(misroute()).rejects.toThrow(
         /No updater in scope for "PROVIDEPROBE_INCREMENTED"/,
       );
     });
@@ -158,7 +158,7 @@ describe('provideStatewise', () => {
     it('reports to the ErrorHandler when asked to', async () => {
       configure(provideStatewise({ misroutedDispatch: 'report' }));
 
-      await expectAsync(misroute()).toBeResolved();
+      await expect(misroute()).resolves.not.toThrow();
 
       expect(handledErrors.length).toBe(1);
       expect((handledErrors[0] as Error).message).toMatch(
@@ -169,7 +169,7 @@ describe('provideStatewise', () => {
     it('says nothing at all when asked to ignore it', async () => {
       configure(provideStatewise({ misroutedDispatch: 'ignore' }));
 
-      await expectAsync(misroute()).toBeResolved();
+      await expect(misroute()).resolves.not.toThrow();
 
       expect(handledErrors).toEqual([]);
       expect(state.count).toBe(0);
@@ -200,18 +200,18 @@ describe('provideStatewise', () => {
       const message =
         '[ngx-statewise] history.limit must be a positive integer.';
 
-      expect(() => provideStatewise({ history: { limit: 0 } })).toThrowError(
+      expect(() => provideStatewise({ history: { limit: 0 } })).toThrow(
         message,
       );
-      expect(() => provideStatewise({ history: { limit: -1 } })).toThrowError(
+      expect(() => provideStatewise({ history: { limit: -1 } })).toThrow(
         message,
       );
-      expect(() => provideStatewise({ history: { limit: 1.5 } })).toThrowError(
+      expect(() => provideStatewise({ history: { limit: 1.5 } })).toThrow(
         message,
       );
       expect(() =>
         provideStatewise({ history: { limit: Number.NaN } }),
-      ).toThrowError(message);
+      ).toThrow(message);
     });
 
     it('accepts a valid limit', () => {

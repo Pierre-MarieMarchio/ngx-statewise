@@ -75,6 +75,6 @@ describe('DashboardKanbanComponent', () => {
       fixture.componentInstance
         .columns()
         .every((column) => column.tasks?.length === 0),
-    ).toBeTrue();
+    ).toBe(true);
   });
 });

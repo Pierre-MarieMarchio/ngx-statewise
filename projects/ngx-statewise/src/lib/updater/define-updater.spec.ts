@@ -70,7 +70,7 @@ describe('defineUpdater', () => {
         on(counterActions.reset, () => undefined);
         on(counterActions.reset, () => undefined);
       }),
-    ).toThrowError(
+    ).toThrow(
       /Duplicate handler for action type "DEFINEPROBE_RESET" in a single updater/,
     );
   });

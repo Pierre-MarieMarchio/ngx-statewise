@@ -58,12 +58,12 @@ describe('TaskPageComponent', () => {
     fixture.detectChanges();
 
     expect(component.selectedTask()?.id).toBe('picked');
-    expect(component.taskPanel.sidenav.opened).toBeTrue();
+    expect(component.taskPanel.sidenav.opened).toBe(true);
 
     component.closeSideNav();
     fixture.detectChanges();
 
-    expect(component.taskPanel.sidenav.opened).toBeFalse();
+    expect(component.taskPanel.sidenav.opened).toBe(false);
   });
 
   it('forwards a changed task to the manager', async () => {

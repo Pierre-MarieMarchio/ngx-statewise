@@ -46,8 +46,8 @@ describe('TaskDetailsComponent', () => {
     const fixture = await mount();
     const component = fixture.componentInstance;
 
-    expect(component.isDueDateOverdue('2020-01-01', 'todo')).toBeTrue();
-    expect(component.isDueDateOverdue('2020-01-01', 'done')).toBeFalse();
-    expect(component.isDueDateOverdue(undefined, 'todo')).toBeFalse();
+    expect(component.isDueDateOverdue('2020-01-01', 'todo')).toBe(true);
+    expect(component.isDueDateOverdue('2020-01-01', 'done')).toBe(false);
+    expect(component.isDueDateOverdue(undefined, 'todo')).toBe(false);
   });
 });

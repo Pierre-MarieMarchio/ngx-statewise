@@ -64,7 +64,7 @@ describe('injectStatewise', () => {
   });
 
   it('refuses to run outside an injection context', () => {
-    expect(() => injectStatewise()).toThrowError(/injection context/i);
+    expect(() => injectStatewise()).toThrow(/injection context/i);
   });
 
   it('returns a usable handle even without updater', () => {
@@ -108,7 +108,7 @@ describe('injectStatewise', () => {
           on(sharedAction, () => undefined);
         }),
       ),
-    ).toThrowError(
+    ).toThrow(
       /Two updaters attached to the same scope both handle "INJECT_SHARED_ACTION"/,
     );
   });

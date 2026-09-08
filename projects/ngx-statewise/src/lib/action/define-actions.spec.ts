@@ -7,7 +7,9 @@ describe('defineActionsGroup', () => {
     const actions = defineActionsGroup({
       source: 'user',
       events: {
-        loadRequest: payload<{ id: number }>(),
+        loadRequest: payload<{
+          id: number;
+        }>(),
         loadSuccess: emptyPayload,
       },
     });
@@ -22,7 +24,12 @@ describe('defineActionsGroup', () => {
 
     type _RequestType = Expect<Equal<typeof request.type, 'USER_LOAD_REQUEST'>>;
     type _RequestPayload = Expect<
-      Equal<typeof request.payload, { id: number }>
+      Equal<
+        typeof request.payload,
+        {
+          id: number;
+        }
+      >
     >;
     type _SuccessType = Expect<Equal<typeof success.type, 'USER_LOAD_SUCCESS'>>;
   });
@@ -85,9 +92,12 @@ describe('defineSingleAction', () => {
       'IGNORED',
       (_value: string) => undefined,
     );
-    const action: { type: string; payload?: unknown } = ignored('dropped');
+    const action: {
+      type: string;
+      payload?: unknown;
+    } = ignored('dropped');
 
     expect(action).toEqual({ type: 'IGNORED_ACTION' });
-    expect('payload' in action).toBeFalse();
+    expect('payload' in action).toBe(false);
   });
 });

@@ -34,15 +34,13 @@ describe('DocsPageComponent', () => {
 
   it('gives every section a summary, a snippet and a source to look at', () => {
     for (const section of DOCS_SECTIONS) {
-      expect(section.summary.length)
-        .withContext(`${section.id} summary`)
-        .toBeGreaterThan(0);
-      expect(section.snippet.length)
-        .withContext(`${section.id} snippet`)
-        .toBeGreaterThan(0);
-      expect(section.seenIn)
-        .withContext(`${section.id} seenIn`)
-        .toMatch(/\.ts$/);
+      expect(section.summary.length, `${section.id} summary`).toBeGreaterThan(
+        0,
+      );
+      expect(section.snippet.length, `${section.id} snippet`).toBeGreaterThan(
+        0,
+      );
+      expect(section.seenIn, `${section.id} seenIn`).toMatch(/\.ts$/);
     }
   });
 
