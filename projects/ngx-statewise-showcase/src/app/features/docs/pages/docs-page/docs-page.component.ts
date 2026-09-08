@@ -116,12 +116,15 @@ export const tallyUpdater = defineUpdater(TallyState, (on) => {
     id: 'observable-effects',
     title: 'An effect may hand back an Observable',
     summary:
-      'The engine reads a one-shot source itself, so a repository call needs no unwrapping in the effect. Only the first emission counts, and a source completing without emitting is a result without action — which is not the same as firstValueFrom, whose EmptyError would turn that into a failure.',
-    snippet: `createEffect(getAllProjectsActions.request, () =>
-  this.projectRepository.getAll(user).pipe(
-    map((projects) => getAllProjectsActions.success(projects)),
-    catchError(() => of(getAllProjectsActions.failure())),
-  ),
+      'The engine reads a one-shot source itself, so a repository call needs no unwrapping in the effect. Only the first emission counts, and a source completing without emitting is a result without action — which is not the same as firstValueFrom, whose EmptyError would turn that into a failure. That silence is the trap: nothing would answer the request, and isLoading would stay set with nothing to clear it. Every branch of this pipeline produces an action, so the effect says so with mustAnswer and a source running dry is reported instead.',
+    snippet: `createEffect(
+  getAllProjectsActions.request,
+  () =>
+    this.projectRepository.getAll(user).pipe(
+      map((projects) => getAllProjectsActions.success(projects)),
+      catchError(() => of(getAllProjectsActions.failure())),
+    ),
+  { mustAnswer: true },
 );`,
     seenIn: 'features/project/states/project/project.effect.ts',
   },
@@ -170,28 +173,35 @@ public getAllAsync(): Promise<void> {
     seenIn: 'features/task/states/task/task.manager.ts',
   },
   {
+    id: 'concurrency',
+    title: 'Two dispatches racing each other',
+    summary:
+      'By default every dispatch runs its own effect, and a slow answer landing after a fast one overwrites it. The board declares latest with one key per task instead: dragging the same card twice abandons its own earlier write, while dragging a second card abandons nothing. An abandoned run fires the abortSignal its handler received, unsubscribes the request and drops its answer, so a stale response never reaches an updater. cancelOn ties the same mechanism to the reset that empties the list.',
+    snippet: `createEffect(
+  updateTaskActions.request,
+  async (task) => { ... },
+  { concurrency: 'latest', key: (task) => task.id, cancelOn: taskReset },
+);`,
+    seenIn: 'features/task/states/task/task.effect.ts',
+  },
+  {
     id: 'error-recovery',
     title: 'Failing, and recovering from it',
     summary:
-      'A failure is an action like any other: the effect catches what went wrong and returns the failure event, whose updater puts the state back in a consistent shape. On top of that, the kanban applies its moves optimistically and rolls them back when the manager reports an error, so a rejected update never leaves a card where the server refused to put it.',
-    snippet: `createEffect(updateTaskActions.request, async (task) => {
-  try {
-    const updated = await firstValueFrom(this.repository.update(task));
-
-    return updateTaskActions.success(updated);
-  } catch {
-    return updateTaskActions.failure();
-  }
+      'A failure is an action like any other: the effect catches what went wrong and returns the failure event, whose updater puts the state back in a consistent shape. The board moves its cards before the server answers, so the failure carries the id of the card it concerns and the updater restores that one. Keeping the point of return per write is what a single error flag could not do: reverting on it took down every card in flight, including those the server had never refused.',
+    snippet: `on(updateTaskActions.request, (state, task) => {
+  // optimistic: the card moves now, and the version it replaced is kept
+  const replaced = state.tasks().find((known) => known.id === task.id);
+  state.pendingWrites.update((writes) => new Map(writes).set(task.id, replaced));
+  state.tasks.update(carrying(task));
 });
 
-// and the board undoes what the server refused
-this.stateRollbackService.setupErrorRollback({
-  isError: () => this.taskManager.isError(),
-  originalData: () => this.tasks(),
-  localData: this.localTasks,
-  pendingUpdates: this.pendingUpdates,
+on(updateTaskActions.failure, (state, taskId) => {
+  // one entry per write, so this puts back its own card and no other
+  const replaced = state.pendingWrites().get(taskId);
+  state.tasks.update(carrying(replaced));
 });`,
-    seenIn: 'core/services/state-rollback.service.ts',
+    seenIn: 'features/task/states/task/task.updater.ts',
   },
   {
     id: 'live-state',
@@ -211,15 +221,21 @@ this.stateRollbackService.setupErrorRollback({
     id: 'history',
     title: 'Action history',
     summary:
-      'The history is off until a limit is configured. It keeps the last dispatched actions, oldest first, application-wide — whichever handle executed them. It is injected rather than read off a dispatch handle, because no scope owns it. snapshot() hands back a plain array rather than a signal, so a view over it refreshes when asked, not on its own. ofType reads a type name off a creator, which is how the dashboard filters without repeating strings. Recorded actions keep their payload verbatim, so whatever an action carries — a password, a token — is kept with it.',
-    snippet: `provideStatewise({ history: { limit: 50 } });
+      'The history is off until a limit is configured. It keeps the last dispatched actions, oldest first, application-wide — whichever handle executed them. It is injected rather than read off a dispatch handle, because no scope owns it. snapshot() hands back a plain array rather than a signal, so a view over it refreshes when asked, not on its own. Each entry is a frozen envelope of the history own, though the payload keeps its identity. And since an entry would otherwise hold whatever the action carried, redact replaces it before it is recorded: this showcase strips the login password that way.',
+    snippet: `provideStatewise({
+  history: { limit: 50, redact: withoutCredentials },
+});
 
 // a plain array, read at the moment of the call
 const actions = inject(ActionHistory).snapshot();
 
-// the name the creator already owns
-ofType(getAllTaskActions.success); // 'TASK_SUCCESS'`,
-    seenIn: 'features/history/pages/history-page/history-page.component.ts',
+// the dispatched action is untouched; only the entry differs
+export function withoutCredentials(action: Action): Action {
+  return action.type === ofType(loginActions.request)
+    ? { type: action.type, payload: { email, password: '[redacted]' } }
+    : action;
+}`,
+    seenIn: 'features/auth/states/auth/auth.redaction.ts',
   },
 ];
 

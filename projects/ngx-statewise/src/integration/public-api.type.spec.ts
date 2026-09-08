@@ -1,6 +1,7 @@
 import { InjectionToken } from '@angular/core';
 
 import {
+  createEffect,
   defineActionsGroup,
   defineSingleAction,
   defineUpdater,
@@ -48,6 +49,61 @@ function rejectedDispatchShapes(ref: Statewise): void {
   typedActions.cleared(1);
 }
 
+/**
+ * Never called either: `createEffect` needs an injection context, and what is
+ * under test here is what the compiler accepts, not what runs.
+ */
+function rejectedEffectShapes(): void {
+  createEffect(typedActions.assigned, (value, { abortSignal }) => {
+    const target: number = value;
+
+    return abortSignal.aborted
+      ? typedActions.cleared()
+      : typedActions.assigned(target);
+  });
+
+  createEffect(typedActions.cleared, (_none, { abortSignal }) =>
+    abortSignal.aborted ? undefined : typedActions.cleared(),
+  );
+
+  createEffect(typedActions.assigned, () => undefined, {
+    concurrency: 'latest',
+    key: (value) => String(value),
+    cancelOn: [typedActions.cleared],
+    mustAnswer: true,
+  });
+
+  // An action with no payload takes every option but the key.
+  createEffect(typedActions.cleared, () => undefined, {
+    concurrency: 'first',
+    cancelOn: typedActions.assigned,
+    mustAnswer: true,
+  });
+
+  createEffect(typedActions.assigned, () => undefined, {
+    // @ts-expect-error the promise to answer is a flag, not a predicate
+    mustAnswer: () => true,
+  });
+
+  createEffect(typedActions.assigned, () => undefined, {
+    // @ts-expect-error only the three declared policies exist
+    concurrency: 'switchMap',
+  });
+
+  createEffect(typedActions.assigned, () => undefined, {
+    // @ts-expect-error a concurrency key is a string
+    key: (value) => value,
+  });
+
+  createEffect(typedActions.cleared, () => undefined, {
+    // @ts-expect-error an action with no payload has nothing to key runs by
+    key: () => 'only',
+  });
+
+  // @ts-expect-error a handler cannot require a payload its action never carries
+  createEffect(typedActions.cleared, (_value: number) => undefined);
+}
+
 describe('public API types', () => {
   it('preserves action payload and updater handler types', () => {
     const updater = defineUpdater(TYPED_STATE, (on) => {
@@ -71,5 +127,9 @@ describe('public API types', () => {
 
   it('rejects malformed actions at the Statewise boundary', () => {
     expect(rejectedDispatchShapes).toBeInstanceOf(Function);
+  });
+
+  it('rejects malformed effect declarations', () => {
+    expect(rejectedEffectShapes).toBeInstanceOf(Function);
   });
 });

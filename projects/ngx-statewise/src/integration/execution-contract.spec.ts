@@ -1,6 +1,6 @@
 import { ErrorHandler, Injectable, InjectionToken } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { EMPTY } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
 
 import {
   createEffect,
@@ -43,6 +43,10 @@ const emptyObservableAction = defineSingleAction(
   emptyPayload,
 );
 const failingEffectAction = defineSingleAction('FAILING_EFFECT', emptyPayload);
+const unansweredAction = defineSingleAction('UNANSWERED', emptyPayload);
+const answeringAction = defineSingleAction('ANSWERING', emptyPayload);
+/** Claimed by no updater and reacted to by no effect: it does nothing at all. */
+const inertAction = defineSingleAction('INERT', emptyPayload);
 const failingUpdaterAction = defineSingleAction(
   'FAILING_UPDATER',
   emptyPayload,
@@ -99,6 +103,16 @@ class ContractEffects {
   private readonly failing = createEffect(failingEffectAction, () => {
     throw new Error('unexpected effect failure');
   });
+
+  private readonly unanswered = createEffect(unansweredAction, () => EMPTY, {
+    mustAnswer: true,
+  });
+
+  private readonly answering = createEffect(
+    answeringAction,
+    () => of(inertAction()),
+    { mustAnswer: true },
+  );
 
   private readonly cascadeParent = createEffect(
     cascadeActions.started,
@@ -275,6 +289,40 @@ describe('public execution contract', () => {
     expect((handledErrors[0] as Error).message).toBe(
       'unexpected effect failure',
     );
+  });
+
+  describe('an effect that promises an action', () => {
+    it('fails the dispatch when its source answers nothing', async () => {
+      await expect(statewise.dispatchAsync(unansweredAction())).rejects.toThrow(
+        /declares mustAnswer and produced no action/,
+      );
+    });
+
+    it('reports that failure to the ErrorHandler for a bare dispatch', async () => {
+      statewise.dispatch(unansweredAction());
+
+      await statewise.waitForAllEffects();
+      await Promise.resolve();
+
+      expect(handledErrors.length).toBe(1);
+    });
+
+    it('says nothing when the source does answer', async () => {
+      await expect(
+        statewise.dispatchAsync(answeringAction()),
+      ).resolves.not.toThrow();
+    });
+
+    /**
+     * The default is unchanged: answering nothing stays a valid result, which
+     * is what an effect performing only a side effect produces.
+     */
+    it('leaves an effect promising nothing free to answer nothing', async () => {
+      await expect(
+        statewise.dispatchAsync(emptyObservableAction()),
+      ).resolves.not.toThrow();
+      expect(handledErrors).toEqual([]);
+    });
   });
 
   it('rejects dispatchAsync when an updater fails unexpectedly', async () => {

@@ -13,6 +13,7 @@ A lightweight and intuitive state management library for Angular.
   - [3. Updaters](#3-updaters)
   - [4. Effects](#4-effects)
   - [5. Managers](#5-managers)
+  - [6. Action history](#6-action-history)
 - [Testing](#testing)
 - [Migrating from 0.6.x](#migrating-from-06x)
 - [Benefits](#benefits)
@@ -101,12 +102,12 @@ export const appConfig: ApplicationConfig = {
 
 `provideStatewise` accepts four optional options:
 
-| Option              | Type                              | Description                                                                                                          |
-| ------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `effects`           | `Type<unknown>[]`                 | Effect classes, instantiated eagerly so their effects are registered at startup.                                     |
-| `updaters`          | `Updater<unknown>[]`              | Updaters available application-wide, whichever manager dispatches.                                                   |
-| `history`           | `{ limit: number }`               | Records the last `limit` actions. Disabled by default; `limit` must be a positive integer.                           |
-| `misroutedDispatch` | `'throw' \| 'report' \| 'ignore'` | What a dispatch reaching the wrong manager does. Throws in development, reports to the `ErrorHandler` in production. |
+| Option              | Type                              | Description                                                                                                                                   |
+| ------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `effects`           | `Type<unknown>[]`                 | Effect classes, instantiated eagerly so their effects are registered at startup.                                                              |
+| `updaters`          | `Updater<unknown>[]`              | Updaters available application-wide, whichever manager dispatches.                                                                            |
+| `history`           | `{ limit, redact? }`              | Records the last `limit` actions. Disabled by default; `limit` must be a positive integer. `redact` replaces an action before it is recorded. |
+| `misroutedDispatch` | `'throw' \| 'report' \| 'ignore'` | What a dispatch reaching the wrong manager does. Throws in development, reports to the `ErrorHandler` in production.                          |
 
 ## Key Concepts
 
@@ -191,6 +192,7 @@ In the above example:
 - The `LOGIN_REQUEST` action will be triggered when a login request is made, with a payload of type `LoginSubmit`.
 - The `LOGIN_SUCCESS` action will be triggered when the login operation succeeds, with a payload of type `LoginResponse`.
 - The `LOGIN_FAILURE`, `LOGIN_CANCEL`, actions don't require payloads, so they are defined with emptyPayload.
+- `LOGIN_CANCEL` only cancels something if an effect declares it through `cancelOn` — see [Concurrency](#concurrency). Declared on its own, it is an ordinary action like any other.
 
 #### Single Action
 
@@ -351,6 +353,41 @@ public readonly loginSuccessEffect = createEffect(loginActions.success, () => {
   // return getAllProjectsActions.request();
 });
 ```
+
+##### Reaching that manager without a module cycle
+
+The instruction above is easy to give and, past the first feature, not obvious to follow. Importing `TaskManager` from the task feature usually means importing its barrel, and that barrel exports the task effect too — which imports the auth manager, which is where you started. The cycle is not in your code, it is in the shape of the imports.
+
+Break it with an interface and a token, in a module neither feature owns:
+
+```typescript
+// shared/tokens/task-manager.interface.ts — what the caller needs, nothing more
+export interface ITaskManager {
+  readonly tasks: Signal<Task[]>;
+  getAll(): void;
+}
+
+// shared/tokens/task-manager.token.ts — no import of the feature at all
+export const TASK_MANAGER = new InjectionToken<ITaskManager>('TASK_MANAGER');
+```
+
+The application config is the one place that knows both sides, and `useExisting` keeps it the same instance rather than a second one:
+
+```typescript
+providers: [provideStatewise({ effects: [AuthEffect, TaskEffect] }), { provide: TASK_MANAGER, useExisting: TaskManager }];
+```
+
+The effect then injects the token:
+
+```typescript
+export class AuthEffect {
+  private readonly taskManager = inject(TASK_MANAGER);
+}
+```
+
+Two things fall out of this beyond the cycle. The interface states what one feature actually needs of another, which is a much smaller surface than the manager's own. And a test double is now an object of that shape, so a component or an effect can be mounted without pulling in the real feature.
+
+Within one feature, inject the class directly — there is no cycle to break, and a token would only add indirection.
 
 The check costs a set lookup and only runs when no updater matched. An action claimed by no updater at all stays perfectly valid — that is an effect-only action.
 
@@ -526,6 +563,112 @@ export class AuthEffects {
 
 Ignoring the returned handle is perfectly fine: destruction of the owning injector already unregisters the effect.
 
+#### Concurrency
+
+By default, every dispatch starts its own run of the effect, and each answers when it answers. That is what you want most of the time, and it is what the engine has always done. It is not what you want when two runs write the same thing: the slow one answering last overwrites the fast one, and the state ends up holding the older intent.
+
+A third parameter declares the policy governing the runs of an effect:
+
+```typescript
+public readonly updateTaskEffect = createEffect(
+  updateTaskActions.request,
+  async (task) => {
+    const updated = await firstValueFrom(this.taskRepository.update(task));
+
+    return updateTaskActions.success(updated);
+  },
+  { concurrency: 'latest', key: (task) => task.id },
+);
+```
+
+| Policy       | While a run is in flight, a new dispatch…  |
+| ------------ | ------------------------------------------ |
+| `'parallel'` | starts its own run beside it. The default. |
+| `'latest'`   | abandons that run and replaces it.         |
+| `'first'`    | starts no run at all.                      |
+
+##### What competes with what
+
+Two runs compete only when they share all three of: the same effect, the same dispatch scope, and the same concurrency key. Two managers dispatching the same action never supersede one another, and neither do two effects registered on it.
+
+The key is what makes `'latest'` usable on a list. Without one, every run of the effect competes, so moving a second card would abandon the write of the first. `key` derives it from the payload, one group per returned value:
+
+```typescript
+{ concurrency: 'latest', key: (task) => task.id }
+```
+
+##### What an abandoned run does
+
+- Its `abortSignal` fires.
+- A subscribed Observable is unsubscribed — which is what actually aborts an `HttpClient` request.
+- The actions it was about to return are dropped. They never reach an updater.
+- Its own failure is swallowed: nothing awaits the answer of a run that has been replaced.
+- The `dispatchAsync` that started it resolves, without error. Its cascade is over; it simply produced nothing.
+
+A promise cannot be cancelled, so the work behind one goes on regardless. What the policy guarantees is that its answer is dropped — and that the handler is told, so it can stop the work itself:
+
+```typescript
+public readonly searchEffect = createEffect(
+  searchActions.request,
+  async (term, { abortSignal }) => {
+    const response = await fetch(`/api/search?q=${term}`, { signal: abortSignal });
+
+    return searchActions.success(await response.json());
+  },
+  { concurrency: 'latest' },
+);
+```
+
+The context comes after the payload. An action carrying no payload still has that first parameter — it is `undefined` — so its handler reads `(_, { abortSignal })`. One call shape covers every effect, which is why a handler written before the context existed still compiles untouched.
+
+##### Cancelling explicitly
+
+`cancelOn` names the actions that abandon the runs of an effect:
+
+```typescript
+public readonly loginEffect = createEffect(
+  loginActions.request,
+  async (credentials, { abortSignal }) => { ... },
+  { cancelOn: loginActions.cancel },
+);
+```
+
+Dispatching `loginActions.cancel()` then abandons the login in flight, with the same consequences as a supersession. Pass an array to name several cancelling actions.
+
+Cancellation is scoped like dispatch: a manager abandons the runs it started, never another manager's. And it abandons every concurrency key of that effect at once — there is no per-key cancellation.
+
+##### The state is not concerned
+
+The policy governs effects, never state: the sequence **Action → Updater → Effect** is untouched. A dispatch that `'first'` holds back still goes through its updater, and so does the one superseding a run under `'latest'`.
+
+So an `isLoading` raised by a request whose effect never ran is cleared by the answer of the run already in flight — under `'first'` there is exactly one answer coming, and under `'latest'` it is the newest run that answers.
+
+#### Promising an answer
+
+An effect returning no action is a valid result: that is what an effect doing nothing but a side effect produces. A one-shot source completing without emitting reaches the engine the same way, as a deliberate absence of action — and the engine cannot tell the two apart.
+
+The difference matters, because the second one leaves a request unanswered. Whatever its updater set on the way in, an `isLoading` typically, is never cleared, and nothing says so. It is the one place where the engine leaves the state inconsistent without a trace.
+
+So the effect says which one it is:
+
+```typescript
+public readonly getAllProjectsEffect = createEffect(
+  getAllProjectsActions.request,
+  () =>
+    this.projectRepository.getAll().pipe(
+      map((projects) => getAllProjectsActions.success(projects)),
+      catchError(() => of(getAllProjectsActions.failure())),
+    ),
+  { mustAnswer: true },
+);
+```
+
+With `mustAnswer`, a run producing no action fails, and that failure travels like any other: `dispatchAsync` rejects, a bare `dispatch` reports to the `ErrorHandler`. Without it, nothing changes — answering nothing stays valid, which is what it has always been.
+
+Declare it on any effect whose pipeline is supposed to always produce something, which in practice is every `request`. Leave it off for an effect that navigates, notifies, or writes to storage and returns nothing.
+
+An abandoned run is never held to the promise. A run superseded under `'latest'`, or dropped through `cancelOn`, answers nothing by design, and blaming it would report a failure the application never caused.
+
 #### Key Notes:
 
 - Promises: Effects can return Promises for single asynchronous operations.
@@ -541,6 +684,10 @@ Ignoring the returned handle is perfectly fine: destruction of the owning inject
 - Effect Registration: don't forget to declare your effect classes in `provideStatewise({ effects: [...] })` so they are instantiated and ready to handle actions.
 
 - Lifecycle: an effect is unregistered with the injector that created it, so component-scoped or route-scoped effect classes never accumulate duplicates.
+
+- Promising an answer: `mustAnswer` turns a run producing no action into a failure. Off by default, so an effect that only performs a side effect stays valid; an abandoned run is never held to it.
+
+- Concurrency: every run goes on in parallel unless the effect declares otherwise. `'latest'` supersedes the run in flight, `'first'` holds a new dispatch back, and `cancelOn` abandons a run on demand. Abandoning drops the answer and unsubscribes the source; it never touches the updater.
 
 ### 5. Managers
 
@@ -659,6 +806,40 @@ export class AuthManager {
 - Effects handle asynchronous or side-effecting operations. They are registered globally, from the effect classes listed in `provideStatewise`.
 
 - Each part — Managers, Updaters, Effects — has one focused responsibility, which keeps the state flow predictable and easy to reason about as the application grows.
+
+### 6. Action history
+
+The history is off until a limit is configured. It keeps the last dispatched actions, oldest first, application-wide — whichever handle executed them.
+
+```typescript
+provideStatewise({ history: { limit: 50 } });
+
+// A plain array, read at the moment of the call. `ActionHistory` is injected
+// rather than read off a dispatch handle, because no scope owns it.
+const actions = inject(ActionHistory).snapshot();
+```
+
+`snapshot()` hands back a plain array rather than a signal, so a view over it refreshes when asked, not on its own. Each entry is an envelope of the history's own, and frozen: reading the history cannot rewrite what it says of the past.
+
+#### What the history keeps
+
+The payload is kept **by reference**, not copied. Copying it would require knowing how, and a `Date`, a `Map` or a class instance does not survive a naive clone. Two consequences worth knowing:
+
+- A payload the application mutates afterwards changes what the history shows of the past. Do not mutate a payload — which is the rule anyway once an updater has put it in the state.
+- Whatever an action carries is kept with it, verbatim. A password on a login request, a token on a refresh: it is all in the snapshot, and in whatever renders it.
+
+`redact` is where to deal with the second one. It replaces an action before it is recorded, so the history holds what you allow it to hold:
+
+```typescript
+provideStatewise({
+  history: {
+    limit: 50,
+    redact: (action) => (action.type === ofType(loginActions.request) ? { type: action.type, payload: '[redacted]' } : action),
+  },
+});
+```
+
+The action itself is untouched — the updater and the effects still receive what was dispatched. Only the entry differs. A redaction that throws takes the dispatch down with it, like any other programming error in a synchronous step.
 
 ## Testing
 
