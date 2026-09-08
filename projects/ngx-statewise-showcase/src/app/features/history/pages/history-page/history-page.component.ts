@@ -8,7 +8,12 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTableModule } from '@angular/material/table';
-import { injectStatewise, ofType, type Action } from 'ngx-statewise';
+import {
+  ActionHistory,
+  injectStatewise,
+  ofType,
+  type Action,
+} from 'ngx-statewise';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
 import { noticeActions } from '@app/features/notice/states';
 import { tallyActions, tallyUpdater } from '@app/features/tally/states';
@@ -48,9 +53,11 @@ export const TRACKED_ACTION_TYPES: TrackedActionType[] = [
 })
 export class HistoryPageComponent {
   /**
-   * Three dispatch origins, one history: the recorded actions are
-   * application-wide, whichever handle executed them.
+   * Three dispatch origins, one history. The history is injected rather than
+   * read off a handle, precisely because it is application-wide: no scope owns
+   * it, so no scope should hand it out.
    */
+  private readonly history = inject(ActionHistory);
   private readonly bareHandle = injectStatewise();
   private readonly tallyHandle = injectStatewise(tallyUpdater);
   private readonly taskManager = inject(TASK_MANAGER);
@@ -59,8 +66,8 @@ export class HistoryPageComponent {
   public readonly displayedColumns = ['position', 'type', 'payload'];
 
   /**
-   * `recordedActions()` hands back a snapshot rather than a signal, so the
-   * table holds what the last read saw and refreshes when asked.
+   * `snapshot()` hands back a plain array rather than a signal, so the table
+   * holds what the last read saw and refreshes when asked.
    */
   private readonly recorded = signal<readonly Action[]>([]);
   public readonly selectedType = signal<string | null>(null);
@@ -90,7 +97,7 @@ export class HistoryPageComponent {
   });
 
   public refresh(): void {
-    this.recorded.set(this.bareHandle.recordedActions());
+    this.recorded.set(this.history.snapshot());
   }
 
   public raiseNotice(): void {

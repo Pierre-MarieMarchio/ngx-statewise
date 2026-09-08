@@ -20,6 +20,7 @@ const failingHandler: StateBoundHandler = {
 describe('ScopedStatewiseRef', () => {
   let effects: EffectRegistry;
   let engine: StatewiseEngine;
+  let history: ActionHistory;
   let handled: unknown[];
   let errorHandler: ErrorHandler;
 
@@ -39,11 +40,12 @@ describe('ScopedStatewiseRef', () => {
         handled.push(error);
       },
     };
+    history = new ActionHistory(10);
     engine = new StatewiseEngine(
       effects,
       new GlobalUpdaterRegistry(),
       new PendingEffects(),
-      new ActionHistory(10),
+      history,
       errorHandler,
       'ignore',
     );
@@ -92,7 +94,7 @@ describe('ScopedStatewiseRef', () => {
       await expect(
         plainRef().dispatchAsync({ type: 'SOURCE' }),
       ).resolves.not.toThrow();
-      expect(engine.recordedActions()).toEqual([
+      expect(history.snapshot()).toEqual([
         { type: 'SOURCE' },
         { type: 'CHILD' },
       ]);
@@ -151,14 +153,6 @@ describe('ScopedStatewiseRef', () => {
 
       release();
       await execution;
-    });
-
-    it('exposes the history recorded by the engine', () => {
-      const ref = plainRef();
-
-      ref.dispatch({ type: 'SOURCE' });
-
-      expect(ref.recordedActions()).toEqual([{ type: 'SOURCE' }]);
     });
   });
 });

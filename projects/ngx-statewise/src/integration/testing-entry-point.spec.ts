@@ -1,6 +1,7 @@
 import { ErrorHandler, InjectionToken } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
+  ActionHistory,
   createEffect,
   defineActionsGroup,
   defineSingleAction,
@@ -87,7 +88,9 @@ describe('ngx-statewise/testing', () => {
 
       await scope(ownedUpdater).dispatchAsync(testingActions.owned(1));
 
-      expect(scope().recordedActions()).toEqual([testingActions.owned(1)]);
+      expect(TestBed.inject(ActionHistory).snapshot()).toEqual([
+        testingActions.owned(1),
+      ]);
     });
 
     it('lets the history options be overridden', async () => {
@@ -97,7 +100,9 @@ describe('ngx-statewise/testing', () => {
       await statewise.dispatchAsync(testingActions.owned(1));
       await statewise.dispatchAsync(testingActions.owned(2));
 
-      expect(statewise.recordedActions()).toEqual([testingActions.owned(2)]);
+      expect(TestBed.inject(ActionHistory).snapshot()).toEqual([
+        testingActions.owned(2),
+      ]);
     });
 
     it('keeps the misrouted-dispatch check on by default', async () => {

@@ -95,7 +95,7 @@ describe('HistoryPageComponent', () => {
   });
 
   /**
-   * `recordedActions()` is a snapshot: an action dispatched after the last
+   * `snapshot()` is a plain array: an action dispatched after the last
    * read stays invisible until the next one.
    */
   it('keeps showing the last snapshot until it is read again', () => {

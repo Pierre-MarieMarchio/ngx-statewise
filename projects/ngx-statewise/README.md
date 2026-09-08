@@ -581,13 +581,12 @@ export class AuthManager {
 
 The handle returned by `injectStatewise` exposes the whole dispatch API:
 
-| Member                  | Returns             | Description                                                                   |
-| ----------------------- | ------------------- | ----------------------------------------------------------------------------- |
-| `dispatch(action)`      | `void`              | Starts the action without waiting for it.                                     |
-| `dispatchAsync(action)` | `Promise<void>`     | Resolves once the whole cascade started by the action is over.                |
-| `waitForEffect(action)` | `Promise<void>`     | Waits for the effects **this manager** started for that action type.          |
-| `waitForAllEffects()`   | `Promise<void>`     | Waits for every effect **this manager** started.                              |
-| `recordedActions()`     | `readonly Action[]` | The recorded actions, application-wide, empty unless `history` is configured. |
+| Member                  | Returns         | Description                                                          |
+| ----------------------- | --------------- | -------------------------------------------------------------------- |
+| `dispatch(action)`      | `void`          | Starts the action without waiting for it.                            |
+| `dispatchAsync(action)` | `Promise<void>` | Resolves once the whole cascade started by the action is over.       |
+| `waitForEffect(action)` | `Promise<void>` | Waits for the effects **this manager** started for that action type. |
+| `waitForAllEffects()`   | `Promise<void>` | Waits for every effect **this manager** started.                     |
 
 `waitForEffect` takes an action creator or an action, never a raw string, so a typo in an action type is a compile error:
 
@@ -595,7 +594,7 @@ The handle returned by `injectStatewise` exposes the whole dispatch API:
 await this.statewise.waitForEffect(loginActions.request);
 ```
 
-Observation is scoped like dispatch: two managers awaiting the same action type never wait for each other. `recordedActions()` is the exception and is deliberately application-wide.
+Observation is scoped like dispatch: two managers awaiting the same action type never wait for each other. The action history is not on the handle at all: it is application-wide, so it is injected instead — `inject(ActionHistory).snapshot()`.
 
 ##### Synchronous Dispatch
 
@@ -730,6 +729,7 @@ The execution core was rewritten. The public API is smaller and the concepts hav
 | type `StatewiseRef`                           | type `Statewise`                                                                                |
 | type `UpdaterDefinition<State>`               | type `Updater<State>`                                                                           |
 | type `SWEffects`                              | type `EffectOutcome`                                                                            |
+| `statewise.recordedActions()`                 | `inject(ActionHistory).snapshot()`                                                              |
 
 Action creators (`defineActionsGroup`, `defineSingleAction`, `payload`, `emptyPayload`, `ofType`) are unchanged, and the generated action strings are identical. `createEffect` keeps its signature and now returns an `EffectRef`, which you can ignore.
 
@@ -738,6 +738,7 @@ Three behaviours changed beyond the renames:
 - **Dispatching an action owned by another manager now throws in dev mode** instead of doing nothing, and reports to the `ErrorHandler` in production. If an effect used to return another feature's action, call that feature's manager instead. See [Dispatching through the right manager](#dispatching-through-the-right-manager).
 - **An effect runs only for the manager owning its action's updater.** Registration is still application-wide; visibility is not. A misrouted dispatch runs nothing at all — neither the updater nor the effects. Actions no updater claims keep running their effects everywhere. See [Scope](#scope).
 - **`waitForEffect` and `waitForAllEffects` are scoped to the manager** that owns them, and `waitForEffect` no longer accepts a raw action-type string.
+- **The action history left the dispatch handle.** `recordedActions()` is gone from `Statewise`; inject `ActionHistory` and call `snapshot()`. The history was always application-wide, so a handle that scopes everything else was the wrong place to read it from — and reading it forced an `injectStatewise()` with no updater at all, purely to get at a global. `snapshot()` returns the same plain array as before.
 
 An updater class becomes a declaration:
 

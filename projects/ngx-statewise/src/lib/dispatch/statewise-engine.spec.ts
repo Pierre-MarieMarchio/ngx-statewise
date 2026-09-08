@@ -176,7 +176,7 @@ describe('StatewiseEngine', () => {
         emptyScope,
       );
 
-      expect(reporting.recordedActions()).toEqual([]);
+      expect(history.snapshot()).toEqual([]);
     });
 
     it('accepts an action no updater ever declared', () => {
@@ -435,7 +435,7 @@ describe('StatewiseEngine', () => {
 
       await engine.execute({ type: 'SOURCE' }, emptyScope);
 
-      expect(engine.recordedActions()).toEqual([
+      expect(history.snapshot()).toEqual([
         { type: 'SOURCE' },
         { type: 'CHILD' },
       ]);

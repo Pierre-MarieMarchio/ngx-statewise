@@ -211,11 +211,11 @@ this.stateRollbackService.setupErrorRollback({
     id: 'history',
     title: 'Action history',
     summary:
-      'The history is off until a limit is configured. It keeps the last dispatched actions, oldest first, application-wide — whichever handle executed them. recordedActions() hands back a snapshot rather than a signal, so a view over it refreshes when asked, not on its own. ofType reads a type name off a creator, which is how the dashboard filters without repeating strings. Recorded actions keep their payload verbatim, so whatever an action carries — a password, a token — is kept with it.',
+      'The history is off until a limit is configured. It keeps the last dispatched actions, oldest first, application-wide — whichever handle executed them. It is injected rather than read off a dispatch handle, because no scope owns it. snapshot() hands back a plain array rather than a signal, so a view over it refreshes when asked, not on its own. ofType reads a type name off a creator, which is how the dashboard filters without repeating strings. Recorded actions keep their payload verbatim, so whatever an action carries — a password, a token — is kept with it.',
     snippet: `provideStatewise({ history: { limit: 50 } });
 
 // a plain array, read at the moment of the call
-const actions = this.statewise.recordedActions();
+const actions = inject(ActionHistory).snapshot();
 
 // the name the creator already owns
 ofType(getAllTaskActions.success); // 'TASK_SUCCESS'`,
