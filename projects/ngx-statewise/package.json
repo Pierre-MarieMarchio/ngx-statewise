@@ -6,9 +6,15 @@
     "@angular/core": "^20.0.0 || ^21.0.0 || ^22.0.0",
     "rxjs": "^7.4.0"
   },
+  "author": "Pierre-Marie Marchio (https://github.com/Pierre-MarieMarchio)",
+  "homepage": "https://github.com/Pierre-MarieMarchio/ngx-statewise#readme",
+  "bugs": {
+    "url": "https://github.com/Pierre-MarieMarchio/ngx-statewise/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Pierre-MarieMarchio/ngx-statewise"
+    "url": "git+https://github.com/Pierre-MarieMarchio/ngx-statewise.git",
+    "directory": "projects/ngx-statewise"
   },
   "keywords": [
     "angular",
