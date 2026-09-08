@@ -8,6 +8,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ErrorHandler,
   inject,
   input,
   linkedSignal,
@@ -42,6 +43,7 @@ export class TaskKanbanComponent {
   public taskChanged = output<Task>();
 
   public readonly projectManager = inject(PROJECT_MANAGER);
+  private readonly errorHandler = inject(ErrorHandler);
 
   private readonly statuses = STATUSES;
 
@@ -99,7 +101,9 @@ export class TaskKanbanComponent {
     const newStatus = id.slice('dropList_'.length, id.lastIndexOf('_'));
 
     if (!this.statuses.includes(newStatus as TaskStatus)) {
-      console.warn(`invalid status detected: ${newStatus}`);
+      this.errorHandler.handleError(
+        new Error(`invalid status detected: ${newStatus}`),
+      );
       return;
     }
 

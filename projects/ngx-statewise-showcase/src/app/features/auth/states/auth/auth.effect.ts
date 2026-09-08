@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import {
   authenticateActions,
@@ -29,6 +29,7 @@ export class AuthEffect {
   private readonly router = inject(Router);
   private readonly notification = inject(AuthNotificationService);
   private readonly tokenFactory = inject(TokenService);
+  private readonly errorHandler = inject(ErrorHandler);
 
   /**
    * One session at a time, and it is the newest attempt that wins.
@@ -111,7 +112,7 @@ export class AuthEffect {
             )
           : authenticateActions.failure();
       } catch (error) {
-        console.error('Authentication error:', error);
+        this.errorHandler.handleError(error);
         return authenticateActions.failure();
       }
     },
@@ -155,7 +156,7 @@ export class AuthEffect {
 
         return logoutActions.success();
       } catch (error) {
-        console.error('Authentication error:', error);
+        this.errorHandler.handleError(error);
         return logoutActions.failure();
       }
     },

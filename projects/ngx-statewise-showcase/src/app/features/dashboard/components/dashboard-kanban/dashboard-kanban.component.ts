@@ -8,6 +8,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ErrorHandler,
   inject,
 } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
@@ -32,6 +33,7 @@ import { TASK_MANAGER } from '@shared/app-common/tokens';
 })
 export class DashboardKanbanComponent {
   private readonly taskManager = inject(TASK_MANAGER);
+  private readonly errorHandler = inject(ErrorHandler);
 
   private readonly statuses = STATUSES;
 
@@ -75,7 +77,9 @@ export class DashboardKanbanComponent {
     const newStatus = id.slice('dropList_'.length);
 
     if (!this.statuses.includes(newStatus as TaskStatus)) {
-      console.warn(`invalid status detected: ${newStatus}`);
+      this.errorHandler.handleError(
+        new Error(`invalid status detected: ${newStatus}`),
+      );
       return;
     }
 
