@@ -3,7 +3,7 @@
   "version": "0.6.4",
   "description": "A lightweight and intuitive state management for Angular. Simpler than NgRx, more structured than DIY.",
   "peerDependencies": {
-    "@angular/core": "^19.2.0 || ^20.0.0",
+    "@angular/core": "^20.0.0 || ^21.0.0",
     "rxjs": "^7.4.0"
   },
   "repository": {
