@@ -75,6 +75,19 @@ statewise.dispatch(noticeActions.raised('saved'));`,
     seenIn: 'features/task/states/task/task.effect.ts',
   },
   {
+    id: 'observable-effects',
+    title: 'An effect may hand back an Observable',
+    summary:
+      'The engine reads a one-shot source itself, so a repository call needs no unwrapping in the effect. Only the first emission counts, and a source completing without emitting is a result without action — which is not the same as firstValueFrom, whose EmptyError would turn that into a failure.',
+    snippet: `createEffect(getAllProjectsActions.request, () =>
+  this.projectRepository.getAll(user).pipe(
+    map((projects) => getAllProjectsActions.success(projects)),
+    catchError(() => of(getAllProjectsActions.failure())),
+  ),
+);`,
+    seenIn: 'features/project/states/project/project.effect.ts',
+  },
+  {
     id: 'scoping',
     title: 'An effect runs for the manager owning its action',
     summary:

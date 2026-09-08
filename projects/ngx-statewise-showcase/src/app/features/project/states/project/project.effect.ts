@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { AUTH_MANAGER } from '@shared/app-common/tokens';
 import { createEffect } from 'ngx-statewise';
-import { firstValueFrom } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
 import { getAllProjectsActions } from './project.action';
 import { ProjectRepositoryService } from '../../services';
 
@@ -12,22 +12,29 @@ export class ProjectEffect {
   private readonly projectRepository = inject(ProjectRepositoryService);
   private readonly authManager = inject(AUTH_MANAGER);
 
-  public readonly getAllTaskRequestEffect = createEffect(
+  /**
+   * Handed over as an Observable rather than awaited through
+   * `firstValueFrom`: the engine reads a one-shot source itself, so the
+   * repository call needs no unwrapping here. Only the first emission counts,
+   * and a source completing without emitting is a result without action.
+   */
+  public readonly getAllProjectsRequestEffect = createEffect(
     getAllProjectsActions.request,
-    async () => {
-      try {
-        const user = this.authManager.user();
-        if (user) {
-          const response = await firstValueFrom(
-            this.projectRepository.getAll(user),
-          );
-          return getAllProjectsActions.success(response);
-        }
-        return getAllProjectsActions.failure();
-      } catch (error) {
-        console.error(error);
+    () => {
+      const user = this.authManager.user();
+
+      if (!user) {
         return getAllProjectsActions.failure();
       }
+
+      return this.projectRepository.getAll(user).pipe(
+        map((projects) => getAllProjectsActions.success(projects)),
+        catchError((error: unknown) => {
+          console.error(error);
+
+          return of(getAllProjectsActions.failure());
+        }),
+      );
     },
   );
 }
