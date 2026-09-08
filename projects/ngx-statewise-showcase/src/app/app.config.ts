@@ -14,7 +14,11 @@ import { routes } from './app.routes';
 import { accessTokenInterceptor } from './features/auth/interceptors';
 import { provideStatewise } from 'ngx-statewise';
 import { fakeApiInterceptor } from './core/fake-api';
-import { AuthEffect, AuthManager } from './features/auth/states';
+import {
+  AuthEffect,
+  AuthManager,
+  withoutCredentials,
+} from './features/auth/states';
 import { TaskEffect, TaskManager } from './features/task/states';
 import { ProjectEffect, ProjectManager } from './features/project/states';
 import { noticeUpdater } from './features/notice/states';
@@ -35,7 +39,7 @@ export const appConfig: ApplicationConfig = {
     provideStatewise({
       effects: [AuthEffect, TaskEffect, ProjectEffect],
       updaters: [noticeUpdater],
-      history: { limit: 50 },
+      history: { limit: 50, redact: withoutCredentials },
     }),
 
     { provide: AUTH_MANAGER, useExisting: AuthManager },

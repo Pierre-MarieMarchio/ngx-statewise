@@ -218,15 +218,21 @@ on(updateTaskActions.failure, (state, taskId) => {
     id: 'history',
     title: 'Action history',
     summary:
-      'The history is off until a limit is configured. It keeps the last dispatched actions, oldest first, application-wide — whichever handle executed them. It is injected rather than read off a dispatch handle, because no scope owns it. snapshot() hands back a plain array rather than a signal, so a view over it refreshes when asked, not on its own. ofType reads a type name off a creator, which is how the dashboard filters without repeating strings. Recorded actions keep their payload verbatim, so whatever an action carries — a password, a token — is kept with it.',
-    snippet: `provideStatewise({ history: { limit: 50 } });
+      'The history is off until a limit is configured. It keeps the last dispatched actions, oldest first, application-wide — whichever handle executed them. It is injected rather than read off a dispatch handle, because no scope owns it. snapshot() hands back a plain array rather than a signal, so a view over it refreshes when asked, not on its own. Each entry is a frozen envelope of the history own, though the payload keeps its identity. And since an entry would otherwise hold whatever the action carried, redact replaces it before it is recorded: this showcase strips the login password that way.',
+    snippet: `provideStatewise({
+  history: { limit: 50, redact: withoutCredentials },
+});
 
 // a plain array, read at the moment of the call
 const actions = inject(ActionHistory).snapshot();
 
-// the name the creator already owns
-ofType(getAllTaskActions.success); // 'TASK_SUCCESS'`,
-    seenIn: 'features/history/pages/history-page/history-page.component.ts',
+// the dispatched action is untouched; only the entry differs
+export function withoutCredentials(action: Action): Action {
+  return action.type === ofType(loginActions.request)
+    ? { type: action.type, payload: { email, password: '[redacted]' } }
+    : action;
+}`,
+    seenIn: 'features/auth/states/auth/auth.redaction.ts',
   },
 ];
 
