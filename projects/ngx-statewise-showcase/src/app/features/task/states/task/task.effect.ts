@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { AUTH_MANAGER } from '@shared/app-common/tokens';
 import { createEffect } from 'ngx-statewise';
 import { firstValueFrom } from 'rxjs';
@@ -11,6 +11,12 @@ import { getAllTaskActions, taskReset, updateTaskActions } from './task.action';
 export class TaskEffect {
   private readonly taskRepository = inject(TaskRepositoryService);
   private readonly authManager = inject(AUTH_MANAGER);
+  /**
+   * The failure action tells the state what happened; this tells whatever the
+   * application plugged into `ErrorHandler` why. A `console.error` told only
+   * whoever had the console open.
+   */
+  private readonly errorHandler = inject(ErrorHandler);
 
   /**
    * Two reloads racing each other have one useful answer between them, so the
@@ -30,7 +36,7 @@ export class TaskEffect {
         }
         return getAllTaskActions.failure();
       } catch (error) {
-        console.error(error);
+        this.errorHandler.handleError(error);
         return getAllTaskActions.failure();
       }
     },
@@ -56,7 +62,7 @@ export class TaskEffect {
         }
         return updateTaskActions.failure(task.id);
       } catch (error) {
-        console.error(error);
+        this.errorHandler.handleError(error);
         return updateTaskActions.failure(task.id);
       }
     },

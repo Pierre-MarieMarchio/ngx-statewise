@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Task } from '@app/core/fake-api/db.data';
+import { Task } from '@shared/app-common/models';
 import { sampleTask } from '@testing/fake-managers';
 import { injectStatewise, type Statewise } from 'ngx-statewise';
 import { provideStatewiseTesting } from 'ngx-statewise/testing';
@@ -97,5 +97,35 @@ describe('taskUpdater', () => {
 
     // The reset dropped the point of return, so the refusal restores nothing.
     expect(statusOf('a')).toBe('todo');
+  });
+  describe('what the views read', () => {
+    it('leaves isLoading to reading the list', () => {
+      statewise.dispatch(updateTaskActions.request(moved(TODO, 'done')));
+
+      expect(state.isLoading()).toBe(false);
+    });
+
+    it('keeps a write visible until it answers', () => {
+      statewise.dispatch(updateTaskActions.request(moved(TODO, 'done')));
+
+      expect(state.pendingWrites().size).toBe(1);
+
+      statewise.dispatch(updateTaskActions.success(moved(TODO, 'done')));
+
+      expect(state.pendingWrites().size).toBe(0);
+    });
+
+    /**
+     * The first answer used to clear a single flag, so the spinner stopped
+     * while the writes beside it were still going.
+     */
+    it('stays saving while one of two writes is still in flight', () => {
+      statewise.dispatch(updateTaskActions.request(moved(TODO, 'done')));
+      statewise.dispatch(updateTaskActions.request(moved(OTHER, 'done')));
+
+      statewise.dispatch(updateTaskActions.success(moved(TODO, 'done')));
+
+      expect(state.pendingWrites().size).toBe(1);
+    });
   });
 });

@@ -13,7 +13,11 @@
     <mat-card-content class="login-card-content">
       <mat-form-field subscriptSizing="dynamic" appearance="outline">
         <mat-label>e-mail</mat-label>
-        <input formControlName="email" matInput type="email" />
+        <input formControlName="email" matInput type="email" required />
+        <!-- Material wires mat-error to the input through aria-describedby. -->
+        @if (loginForm.controls.email.hasError('required')) {
+          <mat-error>An e-mail is required.</mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field subscriptSizing="dynamic" appearance="outline">
@@ -22,25 +26,35 @@
           formControlName="password"
           [type]="isPasswordHided() ? 'password' : 'text'"
           matInput
+          required
         />
         <button
           class="mr-2"
           type="button"
           mat-icon-button
           matSuffix
+          [attr.aria-label]="
+            isPasswordHided() ? 'Show the password' : 'Hide the password'
+          "
+          [attr.aria-pressed]="!isPasswordHided()"
           (click)="hidePassword($event)"
         >
           <mat-icon class="icon-outlined">{{
             isPasswordHided() ? 'visibility_off' : 'visibility'
           }}</mat-icon>
         </button>
+        @if (loginForm.controls.password.hasError('required')) {
+          <mat-error>A password is required.</mat-error>
+        }
       </mat-form-field>
     </mat-card-content>
     <mat-card-actions class="login-card-footer">
       <a [routerLink]="['/']">
         <button mat-button>Back to home</button>
       </a>
-      <button type="submit" mat-stroked-button>Sign In</button>
+      <button type="submit" mat-stroked-button [disabled]="pending()">
+        Sign In
+      </button>
     </mat-card-actions>
   </mat-card>
 </form>

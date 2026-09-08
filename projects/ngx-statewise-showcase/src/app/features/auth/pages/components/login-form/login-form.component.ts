@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  input,
   output,
   signal,
 } from '@angular/core';
@@ -34,6 +35,9 @@ import { LoginSubmit } from '@app/features/auth/models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginFormComponent {
+  /** Whether a sign-in is already running, so a second submit is refused. */
+  public pending = input(false);
+
   public formSubmit = output<LoginSubmit>();
   public isPasswordHided = signal<boolean>(true);
 
@@ -54,10 +58,14 @@ export class LoginFormComponent {
   });
 
   handleSubmit() {
-    const signupForm = this.loginForm.getRawValue();
-    const isValid = this.loginForm.valid;
-    if (signupForm && isValid) {
-      this.formSubmit.emit(signupForm);
+    if (this.loginForm.invalid) {
+      // Without this, submitting an untouched form shows no error at all:
+      // Angular Material only renders one once the control has been touched.
+      this.loginForm.markAllAsTouched();
+
+      return;
     }
+
+    this.formSubmit.emit(this.loginForm.getRawValue());
   }
 }

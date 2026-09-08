@@ -158,4 +158,30 @@ describe('TaskKanbanComponent', () => {
         .map((task) => task.id),
     ).toEqual(['c']);
   });
+  describe('without a pointer', () => {
+    it('reports a keyboard move to its page, like a drop', async () => {
+      const fixture = await mount();
+      const changed: Task[] = [];
+      fixture.componentInstance.taskChanged.subscribe((task) =>
+        changed.push(task),
+      );
+
+      fixture.componentInstance.moveTask(TASKS[0], 1);
+
+      expect(changed).toEqual([{ ...TASKS[0], status: 'in-progress' }]);
+    });
+
+    it('makes every card a tab stop with a name', async () => {
+      const fixture = await mount();
+      const cards = (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'app-kanban-card',
+      );
+
+      expect(cards.length).toBeGreaterThan(0);
+      for (const card of Array.from(cards)) {
+        expect(card.getAttribute('tabindex')).toBe('0');
+        expect(card.getAttribute('aria-label')).toContain('arrow keys');
+      }
+    });
+  });
 });

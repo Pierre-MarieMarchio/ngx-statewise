@@ -10,7 +10,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { Task } from '@shared/app-common/models';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
 import { SidePanelComponent } from '@app/core/layouts';
-import { TaskDetailsComponent } from '@shared/app-common/components';
+import {
+  DataStateComponent,
+  TaskDetailsComponent,
+} from '@shared/app-common/components';
 import {
   TaskKanbanComponent,
   AllTaskListComponent,
@@ -23,6 +26,7 @@ import {
   imports: [
     SidePanelComponent,
     AllTaskListComponent,
+    DataStateComponent,
     TaskDetailsComponent,
     MatIconModule,
     MatTabsModule,

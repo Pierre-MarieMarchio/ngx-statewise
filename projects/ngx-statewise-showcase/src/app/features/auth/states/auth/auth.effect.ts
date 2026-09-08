@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import {
   authenticateActions,
@@ -7,7 +7,6 @@ import {
 } from './auth.action';
 import { Router } from '@angular/router';
 import { createEffect } from 'ngx-statewise';
-import { TokenService } from '@app/core/services/token.service';
 import {
   AuthRepositoryService,
   AuthTokenService,
@@ -28,7 +27,7 @@ export class AuthEffect {
   private readonly authTokenHelper = inject(AuthTokenHelperService);
   private readonly router = inject(Router);
   private readonly notification = inject(AuthNotificationService);
-  private readonly tokenFactory = inject(TokenService);
+  private readonly errorHandler = inject(ErrorHandler);
 
   /**
    * One session at a time, and it is the newest attempt that wins.
@@ -51,7 +50,6 @@ export class AuthEffect {
         }
 
         this.authToken.setAccessToken(res.body.accessToken);
-        this.authToken.setRefreshToken(this.tokenFactory.generateFakeJWT());
 
         return loginActions.success(res.body);
       } catch {
@@ -81,11 +79,6 @@ export class AuthEffect {
     authenticateActions.request,
     async () => {
       const accessToken = this.authToken.getAccessToken();
-      const refreshToken = this.authToken.getRefreshToken();
-
-      if (!refreshToken) {
-        return authenticateActions.failure();
-      }
 
       if (accessToken) {
         const decoded = this.authTokenHelper.decode(accessToken);
@@ -111,11 +104,16 @@ export class AuthEffect {
             )
           : authenticateActions.failure();
       } catch (error) {
-        console.error('Authentication error:', error);
+        this.errorHandler.handleError(error);
         return authenticateActions.failure();
       }
     },
-    { mustAnswer: true },
+    /**
+     * One renewal at a time. Now that the access-token interceptor is reached,
+     * several requests failing with 401 together would each ask for a refresh,
+     * and each successful one reloads the tasks and the projects.
+     */
+    { concurrency: 'first', mustAnswer: true },
   );
 
   public readonly authenticateFailureEffect = createEffect(
@@ -125,8 +123,10 @@ export class AuthEffect {
         this.notification.AuthenticateFailure();
       }
 
-      const refreshToken = this.authToken.getRefreshToken();
-      if (!refreshToken) {
+      // An access token we could not renew is a session that is over, so it
+      // is cleared properly. Without one this is a visitor who never had a
+      // session, and there is nothing to undo.
+      if (!this.authToken.getAccessToken()) {
         return;
       }
 
@@ -155,7 +155,7 @@ export class AuthEffect {
 
         return logoutActions.success();
       } catch (error) {
-        console.error('Authentication error:', error);
+        this.errorHandler.handleError(error);
         return logoutActions.failure();
       }
     },
@@ -166,7 +166,6 @@ export class AuthEffect {
     logoutActions.success,
     () => {
       this.authToken.clearAccessToken();
-      this.authToken.clearRefreshToken();
 
       this.router.navigate(['/']);
     },

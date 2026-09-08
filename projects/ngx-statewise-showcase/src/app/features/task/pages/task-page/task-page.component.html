@@ -1,6 +1,14 @@
 <app-side-panel #taskPanel>
   <div slot="view-content">
     <h1 class="task-page-header">TASK</h1>
+
+    <app-data-state
+      label="tasks"
+      [loading]="taskManager.isLoading() || taskManager.isSaving()"
+      [error]="taskManager.isError()"
+      [retryable]="true"
+      (retried)="taskManager.getAll()"
+    />
     <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
       <mat-tab>
         <ng-template mat-tab-label>
@@ -8,7 +16,7 @@
           Kanban
         </ng-template>
         <app-task-kanban
-          [tasks]="this.taskManager.tasks()!"
+          [tasks]="taskManager.tasks() ?? []"
           (taskChanged)="onTaskChanged($event)"
       /></mat-tab>
       <mat-tab>
@@ -18,7 +26,7 @@
         </ng-template>
         <app-all-task-list
           (taskSelected)="selectTask($event)"
-          [tasks]="this.taskManager.tasks()!"
+          [tasks]="taskManager.tasks() ?? []"
         />
       </mat-tab>
       <mat-tab>
@@ -28,7 +36,7 @@
         </ng-template>
         <app-personal-task-list
           (taskSelected)="selectTask($event)"
-          [allTasks]="this.taskManager.tasks()!"
+          [allTasks]="taskManager.tasks() ?? []"
         />
       </mat-tab>
       <mat-tab>
@@ -38,7 +46,7 @@
         </ng-template>
         <app-project-task-list
           (taskSelected)="selectTask($event)"
-          [tasks]="this.taskManager.tasks()!"
+          [tasks]="taskManager.tasks() ?? []"
         />
       </mat-tab>
     </mat-tab-group>

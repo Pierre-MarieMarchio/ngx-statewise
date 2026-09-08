@@ -72,4 +72,66 @@ describe('LoginFormComponent', () => {
 
     expect(submits).toEqual([{ email: 'admin@admin', password: 'admin' }]);
   });
+  /**
+   * Angular Material renders a `mat-error` only once its control has been
+   * touched, so a submit on an untouched form used to say nothing at all.
+   */
+  it('names the fields it is missing when submitted empty', async () => {
+    const fixture = await mount();
+    const host = fixture.nativeElement as HTMLElement;
+
+    expect(host.querySelectorAll('mat-error').length).toBe(0);
+
+    fixture.componentInstance.handleSubmit();
+    fixture.detectChanges();
+
+    expect(
+      Array.from(host.querySelectorAll('mat-error')).map((error) =>
+        error.textContent?.trim(),
+      ),
+    ).toEqual(['An e-mail is required.', 'A password is required.']);
+  });
+
+  it('ties each error to the field it concerns', async () => {
+    const fixture = await mount();
+    const host = fixture.nativeElement as HTMLElement;
+    fixture.componentInstance.handleSubmit();
+    fixture.detectChanges();
+
+    const email = host.querySelector<HTMLInputElement>(
+      'input[formcontrolname="email"]',
+    );
+    const describedBy = email?.getAttribute('aria-describedby');
+
+    expect(describedBy).toBeTruthy();
+    expect(host.querySelector(`#${describedBy}`)?.textContent).toContain(
+      'An e-mail is required.',
+    );
+  });
+
+  it('refuses a second submit while the first is running', async () => {
+    const fixture = await mount();
+    fixture.componentRef.setInput('pending', true);
+    fixture.detectChanges();
+
+    const submit = (
+      fixture.nativeElement as HTMLElement
+    ).querySelector<HTMLButtonElement>('button[type="submit"]');
+
+    expect(submit?.disabled).toBe(true);
+  });
+
+  it('names the reveal button rather than leaving its icon to speak', async () => {
+    const fixture = await mount();
+    const host = fixture.nativeElement as HTMLElement;
+    const reveal = () =>
+      host.querySelector<HTMLButtonElement>('button[matSuffix]');
+
+    expect(reveal()?.getAttribute('aria-label')).toBe('Show the password');
+
+    reveal()?.click();
+    fixture.detectChanges();
+
+    expect(reveal()?.getAttribute('aria-label')).toBe('Hide the password');
+  });
 });

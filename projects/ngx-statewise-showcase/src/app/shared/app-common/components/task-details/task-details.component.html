@@ -3,7 +3,12 @@
     <div class="header-content">
       <h2 class="header-title">TASK DETAILS</h2>
     </div>
-    <button mat-icon-button class="close-btn" (click)="onCloseClick()">
+    <button
+      mat-icon-button
+      class="close-btn"
+      aria-label="Close the task details"
+      (click)="onCloseClick()"
+    >
       <mat-icon>close</mat-icon>
     </button>
   </div>
@@ -58,7 +63,7 @@
                   [class.overdue]="
                     isDueDateOverdue(
                       selectedTask()!.dueDate,
-                      $safeNavigationMigration(selectedTask()?.status)
+                      selectedTask()?.status
                     )
                   "
                 >
@@ -72,7 +77,7 @@
                   [class.overdue]="
                     isDueDateOverdue(
                       selectedTask()!.dueDate,
-                      $safeNavigationMigration(selectedTask()?.status)
+                      selectedTask()?.status
                     )
                   "
                 >
@@ -80,7 +85,7 @@
                   @if (
                     isDueDateOverdue(
                       selectedTask()!.dueDate,
-                      $safeNavigationMigration(selectedTask()?.status)
+                      selectedTask()?.status
                     )
                   ) {
                     <mat-icon class="warning-icon">warning</mat-icon>

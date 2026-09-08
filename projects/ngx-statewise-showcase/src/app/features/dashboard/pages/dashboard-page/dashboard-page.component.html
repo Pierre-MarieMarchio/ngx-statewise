@@ -3,6 +3,14 @@
     <h1 class="dashboard-page-header">Dashboard</h1>
   </div>
   <app-dashboard-user-picker />
+
+  <app-data-state
+    label="tasks"
+    [loading]="taskManager.isLoading() || taskManager.isSaving()"
+    [error]="taskManager.isError()"
+    [retryable]="true"
+    (retried)="taskManager.getAll()"
+  />
   <div class="dashboard-container" slot="view-content">
     <app-dashboard-task-list (taskSelected)="selectTask($event)" />
     <app-dashboard-kanban />

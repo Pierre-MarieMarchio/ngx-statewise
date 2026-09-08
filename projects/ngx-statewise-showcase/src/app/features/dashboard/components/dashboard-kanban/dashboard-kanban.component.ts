@@ -8,6 +8,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ErrorHandler,
   inject,
 } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
@@ -32,6 +33,7 @@ import { TASK_MANAGER } from '@shared/app-common/tokens';
 })
 export class DashboardKanbanComponent {
   private readonly taskManager = inject(TASK_MANAGER);
+  private readonly errorHandler = inject(ErrorHandler);
 
   private readonly statuses = STATUSES;
 
@@ -42,12 +44,40 @@ export class DashboardKanbanComponent {
    */
   public tasks = this.taskManager.tasks;
 
+  /** Nothing to lay out on a board, so the board says so instead. */
+  public readonly isEmpty = computed(() => (this.tasks() ?? []).length === 0);
+
   public readonly columns = computed(() =>
     this.statuses.map((status) => ({
       id: status,
       tasks: (this.tasks() ?? []).filter((task) => task.status === status),
     })),
   );
+
+  /**
+   * The keyboard path the CDK does not provide. Dragging is the only way a
+   * mouse has, and it was the only way at all: a card was a `cdkDrag` with no
+   * tabindex and no key handler, which made the showcase's main interaction
+   * unusable without a pointer.
+   */
+  public moveTask(task: Task, offset: number): void {
+    const from = this.statuses.indexOf(task.status);
+    const to = from + offset;
+
+    if (to < 0 || to >= this.statuses.length) {
+      return;
+    }
+
+    this.applyMove({ ...task, status: this.statuses[to] });
+  }
+
+  /** What a screen reader reads on a card, and how to move it. */
+  public cardLabel(task: Task): string {
+    return `${task.title}, ${task.status}. Use the left and right arrow keys to move it between columns.`;
+  }
+  private applyMove(task: Task): void {
+    this.taskManager.update(task);
+  }
 
   public onTaskDrop(event: CdkDragDrop<Task[]>): void {
     const isSameContainer = event.previousContainer === event.container;
@@ -72,7 +102,9 @@ export class DashboardKanbanComponent {
     const newStatus = id.slice('dropList_'.length);
 
     if (!this.statuses.includes(newStatus as TaskStatus)) {
-      console.warn(`invalid status detected: ${newStatus}`);
+      this.errorHandler.handleError(
+        new Error(`invalid status detected: ${newStatus}`),
+      );
       return;
     }
 
@@ -83,7 +115,7 @@ export class DashboardKanbanComponent {
       event.currentIndex,
     );
 
-    this.taskManager.update(this.updateTask(newStatus, event));
+    this.applyMove(this.updateTask(newStatus, event));
   }
 
   private updateTask(

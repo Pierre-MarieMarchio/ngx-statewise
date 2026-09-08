@@ -20,6 +20,7 @@ export class AuthManager implements IAuthManager {
   public readonly user = this.authStates.user.asReadonly();
   public readonly isLoggedIn = this.authStates.isLoggedIn.asReadonly();
   public readonly isLoading = this.authStates.isLoading.asReadonly();
+  public readonly isError = this.authStates.isError.asReadonly();
 
   /** Derived rather than stored: the role lives in the user, nowhere else. */
   public readonly isAdmin = computed(() => this.user()?.role === 'admin');

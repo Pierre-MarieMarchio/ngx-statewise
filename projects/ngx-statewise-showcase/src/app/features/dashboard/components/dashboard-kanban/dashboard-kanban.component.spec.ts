@@ -77,4 +77,58 @@ describe('DashboardKanbanComponent', () => {
         .every((column) => column.tasks?.length === 0),
     ).toBe(true);
   });
+  describe('without a pointer', () => {
+    /** The CDK offers no keyboard path, and this board is the main demo. */
+    it('makes every card a tab stop with a name', async () => {
+      const fixture = await mount();
+      const cards = (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'app-kanban-card',
+      );
+
+      expect(cards.length).toBe(TASKS.length);
+      for (const card of Array.from(cards)) {
+        expect(card.getAttribute('tabindex')).toBe('0');
+        expect(card.getAttribute('aria-label')).toContain('arrow keys');
+      }
+    });
+
+    it('moves a card to the next column on the right arrow', async () => {
+      const fixture = await mount();
+
+      fixture.componentInstance.moveTask(TASKS[0], 1);
+
+      expect(taskManager.updates).toEqual([
+        { ...TASKS[0], status: 'in-progress' },
+      ]);
+    });
+
+    it('moves it back on the left arrow', async () => {
+      const fixture = await mount();
+
+      fixture.componentInstance.moveTask(TASKS[1], -1);
+
+      expect(taskManager.updates).toEqual([{ ...TASKS[1], status: 'todo' }]);
+    });
+
+    it('stops at the ends rather than wrapping around', async () => {
+      const fixture = await mount();
+
+      fixture.componentInstance.moveTask(TASKS[0], -1);
+      fixture.componentInstance.moveTask(TASKS[2], 1);
+
+      expect(taskManager.updates).toEqual([]);
+    });
+
+    it('names each column for whoever cannot see it', async () => {
+      const fixture = await mount();
+
+      expect(
+        Array.from(
+          (fixture.nativeElement as HTMLElement).querySelectorAll(
+            '[role="list"]',
+          ),
+        ).map((column) => column.getAttribute('aria-label')),
+      ).toEqual(['todo tasks', 'in-progress tasks', 'done tasks']);
+    });
+  });
 });
