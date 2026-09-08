@@ -6,7 +6,7 @@ import { PendingEffects } from '../effect/pending-effects';
 import type { RegisteredEffect } from '../effect/registered-effect';
 import { RunningEffects } from '../effect/running-effects';
 import type { StateBoundHandler } from '../updater/updater-definition';
-import { ActionHistory } from './action-history';
+import { ActionHistory, keepAction } from './action-history';
 import type { DispatchScope } from './dispatch-scope';
 import { GlobalUpdaterRegistry } from './global-updater-registry';
 import { StatewiseEngine } from './statewise-engine';
@@ -48,7 +48,7 @@ describe('ScopedStatewiseRef', () => {
         handled.push(error);
       },
     };
-    history = new ActionHistory(10);
+    history = new ActionHistory(10, keepAction);
     engine = new StatewiseEngine(
       effects,
       new RunningEffects(),

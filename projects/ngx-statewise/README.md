@@ -13,6 +13,7 @@ A lightweight and intuitive state management library for Angular.
   - [3. Updaters](#3-updaters)
   - [4. Effects](#4-effects)
   - [5. Managers](#5-managers)
+  - [6. Action history](#6-action-history)
 - [Testing](#testing)
 - [Migrating from 0.6.x](#migrating-from-06x)
 - [Benefits](#benefits)
@@ -101,12 +102,12 @@ export const appConfig: ApplicationConfig = {
 
 `provideStatewise` accepts four optional options:
 
-| Option              | Type                              | Description                                                                                                          |
-| ------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `effects`           | `Type<unknown>[]`                 | Effect classes, instantiated eagerly so their effects are registered at startup.                                     |
-| `updaters`          | `Updater<unknown>[]`              | Updaters available application-wide, whichever manager dispatches.                                                   |
-| `history`           | `{ limit: number }`               | Records the last `limit` actions. Disabled by default; `limit` must be a positive integer.                           |
-| `misroutedDispatch` | `'throw' \| 'report' \| 'ignore'` | What a dispatch reaching the wrong manager does. Throws in development, reports to the `ErrorHandler` in production. |
+| Option              | Type                              | Description                                                                                                                                   |
+| ------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `effects`           | `Type<unknown>[]`                 | Effect classes, instantiated eagerly so their effects are registered at startup.                                                              |
+| `updaters`          | `Updater<unknown>[]`              | Updaters available application-wide, whichever manager dispatches.                                                                            |
+| `history`           | `{ limit, redact? }`              | Records the last `limit` actions. Disabled by default; `limit` must be a positive integer. `redact` replaces an action before it is recorded. |
+| `misroutedDispatch` | `'throw' \| 'report' \| 'ignore'` | What a dispatch reaching the wrong manager does. Throws in development, reports to the `ErrorHandler` in production.                          |
 
 ## Key Concepts
 
@@ -742,6 +743,40 @@ export class AuthManager {
 - Effects handle asynchronous or side-effecting operations. They are registered globally, from the effect classes listed in `provideStatewise`.
 
 - Each part — Managers, Updaters, Effects — has one focused responsibility, which keeps the state flow predictable and easy to reason about as the application grows.
+
+### 6. Action history
+
+The history is off until a limit is configured. It keeps the last dispatched actions, oldest first, application-wide — whichever handle executed them.
+
+```typescript
+provideStatewise({ history: { limit: 50 } });
+
+// A plain array, read at the moment of the call. `ActionHistory` is injected
+// rather than read off a dispatch handle, because no scope owns it.
+const actions = inject(ActionHistory).snapshot();
+```
+
+`snapshot()` hands back a plain array rather than a signal, so a view over it refreshes when asked, not on its own. Each entry is an envelope of the history's own, and frozen: reading the history cannot rewrite what it says of the past.
+
+#### What the history keeps
+
+The payload is kept **by reference**, not copied. Copying it would require knowing how, and a `Date`, a `Map` or a class instance does not survive a naive clone. Two consequences worth knowing:
+
+- A payload the application mutates afterwards changes what the history shows of the past. Do not mutate a payload — which is the rule anyway once an updater has put it in the state.
+- Whatever an action carries is kept with it, verbatim. A password on a login request, a token on a refresh: it is all in the snapshot, and in whatever renders it.
+
+`redact` is where to deal with the second one. It replaces an action before it is recorded, so the history holds what you allow it to hold:
+
+```typescript
+provideStatewise({
+  history: {
+    limit: 50,
+    redact: (action) => (action.type === ofType(loginActions.request) ? { type: action.type, payload: '[redacted]' } : action),
+  },
+});
+```
+
+The action itself is untouched — the updater and the effects still receive what was dispatched. Only the entry differs. A redaction that throws takes the dispatch down with it, like any other programming error in a synchronous step.
 
 ## Testing
 

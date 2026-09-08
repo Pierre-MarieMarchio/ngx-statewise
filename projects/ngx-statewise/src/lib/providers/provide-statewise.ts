@@ -10,7 +10,10 @@ import {
 
 import {
   ACTION_HISTORY_LIMIT,
+  ACTION_HISTORY_REDACTION,
   ActionHistory,
+  keepAction,
+  type ActionRedaction,
 } from '../dispatch/action-history';
 import { GlobalUpdaterRegistry } from '../dispatch/global-updater-registry';
 import { StatewiseEngine } from '../dispatch/statewise-engine';
@@ -25,9 +28,17 @@ import { RunningEffects } from '../effect/running-effects';
 import { indexUpdaters, resolveUpdaters } from '../updater/resolve-updaters';
 import type { Updater } from '../updater/updater-definition';
 
-/** How many of the last dispatched actions are kept. */
+/** How many of the last dispatched actions are kept, and in what shape. */
 export interface StatewiseHistoryOptions {
   readonly limit: number;
+  /**
+   * Replaces an action before it is recorded, so what the history keeps need
+   * not be what was dispatched. Return the action untouched to keep it.
+   *
+   * The history is verbatim by design, so whatever an action carries — a
+   * password, a token — is kept with it. This is where to strip that.
+   */
+  readonly redact?: ActionRedaction;
 }
 
 export interface StatewiseConfig {
@@ -65,6 +76,10 @@ export function provideStatewise(
     ActionHistory,
     StatewiseEngine,
     { provide: ACTION_HISTORY_LIMIT, useValue: historyLimit },
+    {
+      provide: ACTION_HISTORY_REDACTION,
+      useValue: config.history?.redact ?? keepAction,
+    },
     {
       provide: MISROUTED_DISPATCH_REACTION,
       useFactory: (): MisroutedDispatchReaction =>

@@ -8,7 +8,7 @@ import type { RegisteredEffect } from '../effect/registered-effect';
 import { RunningEffects } from '../effect/running-effects';
 import { declareUpdaterActionTypes } from '../updater/declared-action-types';
 import type { StateBoundHandler } from '../updater/updater-definition';
-import { ActionHistory } from './action-history';
+import { ActionHistory, keepAction } from './action-history';
 import type { DispatchScope } from './dispatch-scope';
 import { GlobalUpdaterRegistry } from './global-updater-registry';
 import type { MisroutedDispatchReaction } from './misrouted-dispatch';
@@ -75,7 +75,7 @@ describe('StatewiseEngine', () => {
     runningEffects = new RunningEffects();
     globalUpdaters = new GlobalUpdaterRegistry();
     pendingEffects = new PendingEffects();
-    history = new ActionHistory(10);
+    history = new ActionHistory(10, keepAction);
     handledErrors = [];
     errorHandler = {
       handleError: (error: unknown): void => {
