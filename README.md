@@ -86,10 +86,11 @@ npm start          # serve the showcase
 npm run check      # format, lint, tests with coverage, build everything
 ```
 
-`npm run check` is what a commit is expected to pass, and running it locally is
-the only thing that enforces it: no workflow runs on a pull request or on `dev`.
-[`.github/workflows/versioning.yml`](.github/workflows/versioning.yml) runs it
-on a push to `main` or `next` only, as the first step of the release.
+`npm run check` is what a commit is expected to pass.
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs it on every pull
+request and again on `dev`, and
+[`.github/workflows/release.yml`](.github/workflows/release.yml) runs it once
+more before anything is tagged or published.
 
 The library is held to full statement, line and function coverage and to 95%
 branch coverage, currently met at 100%. The gate is the `coverageThresholds` of
@@ -100,7 +101,14 @@ Coming from 0.6.x? See
 
 ## Contributing
 
-Contributions are welcome. Feel free to open issues or submit pull requests.
+Contributions are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) is the whole
+workflow — the `dev` → `next` → `main` promotion, the commit convention, and the
+two rules that break a release if they are ignored. Read the first section even
+if you read nothing else.
+
+Bugs and features go through the [issue templates](.github/ISSUE_TEMPLATE);
+a vulnerability goes through [SECURITY.md](SECURITY.md), never a public issue.
+By taking part you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License
 

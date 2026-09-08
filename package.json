@@ -14,11 +14,10 @@
     "test:showcase": "ng test ngx-statewise-showcase --watch=false",
     "// --- VERIFICATION ---": "the showcase resolves ngx-statewise to dist, so its tests run once the library is built",
     "check": "npm run format:check && npm run lint && npm run test:coverage && npm run build:library && npm run test:showcase && npm run build:showcase",
+    "// --- RELEASE ---": "run from the library folder, where .release-it.json lives",
+    "release:beta": "cd projects/ngx-statewise && release-it --preRelease=beta --npm.tag=beta",
+    "release:stable": "cd projects/ngx-statewise && release-it --npm.tag=latest",
     "prepare": "husky",
-    "// --- RELEASE MANAGEMENT ---": "version bumping and prerelease commands",
-    "version:beta-graduate": "lerna version --conventional-commits --conventional-graduate --no-push --no-git-tag-version --yes && git add . && git commit -m \"chore(release): prepare next beta version release\"",
-    "version:beta-release": "npx lerna version --conventional-commits --conventional-prerelease --preid beta --message \"chore(release): publish beta version\" --yes",
-    "version:stable-release": "npx lerna version --conventional-commits --conventional-graduate --message \"chore(realease): publish stable version\" --yes",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -53,20 +52,16 @@
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
     "@eslint/js": "^10.0.1",
+    "@release-it/conventional-changelog": "^12.0.0",
     "@vitest/coverage-v8": "^4.1.11",
     "angular-eslint": "^22.5.0",
     "eslint": "^10.10.0",
     "husky": "^9.1.7",
     "jsdom": "^30.0.1",
-    "lerna": "^10.0.1",
     "ng-packagr": "^22.1.1",
+    "release-it": "^21.0.2",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.70.0",
     "vitest": "^4.0.8"
-  },
-  "// --- SECURITY OVERRIDES ---": "lerna pins versions with open advisories; both fixes are patch-level",
-  "overrides": {
-    "js-yaml": "^4.3.2",
-    "pacote": "^21.5.1"
   }
 }
