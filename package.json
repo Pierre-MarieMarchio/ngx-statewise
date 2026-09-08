@@ -14,6 +14,8 @@
     "test:showcase": "ng test ngx-statewise-showcase --watch=false",
     "// --- VERIFICATION ---": "the showcase resolves ngx-statewise to dist, so its tests run once the library is built",
     "check": "npm run format:check && npm run lint && npm run test:coverage && npm run build:library && npm run test:showcase && npm run build:showcase",
+    "// --- COMPATIBILITY ---": "kept out of `check`: each run installs a different Angular major from the registry",
+    "verify:angular": "node tools/angular-compat/verify.mjs",
     "// --- RELEASE ---": "run from the library folder, where .release-it.json lives",
     "release:beta": "cd projects/ngx-statewise && release-it --preRelease=beta --npm.tag=beta",
     "release:stable": "cd projects/ngx-statewise && release-it --npm.tag=latest",
