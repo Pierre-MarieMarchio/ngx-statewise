@@ -84,6 +84,24 @@ export const tallyUpdater = defineUpdater(TallyState, (on) => {
     seenIn: 'features/tally/states/tally/tally.state.ts',
   },
   {
+    id: 'manager-derived-state',
+    title: 'Managers hand out read-only and derived state',
+    summary:
+      'A manager owns the dispatch handle and exposes the state around it: the raw signals read-only, so nothing outside writes them, and computed signals for what can be derived. A role, a count, a tally per status — none of that is stored twice, and a view reading them never has to recompute.',
+    snippet: `export class TaskManager implements ITaskManager {
+  private readonly taskStates = inject(TaskState);
+  private readonly statewise = injectStatewise(taskUpdater);
+
+  // read-only, never written from outside
+  public readonly tasks = this.taskStates.tasks.asReadonly();
+
+  // derived, never stored
+  public readonly taskCount = computed(() => this.tasks().length);
+  public readonly countByStatus = computed(() => /* one per status */);
+}`,
+    seenIn: 'features/task/states/task/task.manager.ts',
+  },
+  {
     id: 'effects',
     title: 'Effects',
     summary:

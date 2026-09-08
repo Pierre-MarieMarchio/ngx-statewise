@@ -1,4 +1,4 @@
-import { signal, WritableSignal } from '@angular/core';
+import { computed, signal, WritableSignal } from '@angular/core';
 import { LoginSubmit } from '@app/features/auth/models';
 import { Project } from '@app/features/project/models';
 import {
@@ -6,7 +6,7 @@ import {
   IProjectManager,
   ITaskManager,
 } from '@shared/app-common/tokens';
-import { Task, User } from '@shared/app-common/models';
+import { STATUSES, Task, TaskStatus, User } from '@shared/app-common/models';
 
 /**
  * The showcase reads every manager through an injection token, so a component
@@ -60,10 +60,13 @@ export const fakeAuthManager = (
   const logins: LoginSubmit[] = [];
   const logouts: string[] = [];
 
+  const userSignal = signal(user);
+
   return {
-    user: signal(user),
+    user: userSignal,
     isLoggedIn: signal(user !== null),
     isLoading: signal(false),
+    isAdmin: computed(() => userSignal()?.role === 'admin'),
     logins,
     logouts,
     login: (credential: LoginSubmit) => {
@@ -89,10 +92,24 @@ export const fakeTaskManager = (
 ): FakeTaskManager => {
   const updates: Task[] = [];
 
+  const tasksSignal = signal(tasks);
+
   return {
-    tasks: signal(tasks),
+    tasks: tasksSignal,
     isError: signal(false),
     isLoading: signal(false),
+    taskCount: computed(() => tasksSignal()?.length ?? 0),
+    countByStatus: computed(() =>
+      STATUSES.reduce(
+        (counts, status) => ({
+          ...counts,
+          [status]: (tasksSignal() ?? []).filter(
+            (task) => task.status === status,
+          ).length,
+        }),
+        {} as Record<TaskStatus, number>,
+      ),
+    ),
     updates,
     getAll: () => undefined,
     getAllAsync: () => Promise.resolve(),
@@ -111,11 +128,16 @@ export interface FakeProjectManager extends IProjectManager {
 
 export const fakeProjectManager = (
   projects: Project[] | null = [sampleProject()],
-): FakeProjectManager => ({
-  projects: signal(projects),
-  isError: signal(false),
-  isLoading: signal(false),
-  getAll: () => undefined,
-  getAllAsync: () => Promise.resolve(),
-  reset: () => Promise.resolve(),
-});
+): FakeProjectManager => {
+  const projectsSignal = signal(projects);
+
+  return {
+    projects: projectsSignal,
+    isError: signal(false),
+    isLoading: signal(false),
+    projectCount: computed(() => projectsSignal()?.length ?? 0),
+    getAll: () => undefined,
+    getAllAsync: () => Promise.resolve(),
+    reset: () => Promise.resolve(),
+  };
+};

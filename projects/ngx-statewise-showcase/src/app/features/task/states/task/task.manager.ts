@@ -1,10 +1,10 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { injectStatewise } from 'ngx-statewise';
 import { TaskState } from './task.state';
 import { taskUpdater } from './task.updater';
 import { getAllTaskActions, taskReset, updateTaskActions } from './task.action';
 import { ITaskManager } from '@shared/app-common/tokens/task-manager/task-manager.interface';
-import { Task } from '@shared/app-common/models';
+import { STATUSES, Task, TaskStatus } from '@shared/app-common/models';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +16,24 @@ export class TaskManager implements ITaskManager {
   public readonly tasks = this.taskStates.tasks.asReadonly();
   public readonly isError = this.taskStates.isError.asReadonly();
   public readonly isLoading = this.taskStates.isLoading.asReadonly();
+
+  public readonly taskCount = computed(() => this.tasks().length);
+
+  /**
+   * Every status is present even at zero, so a view over it never has to
+   * guess which keys exist.
+   */
+  public readonly countByStatus = computed(() => {
+    const tasks = this.tasks();
+
+    return STATUSES.reduce(
+      (counts, status) => ({
+        ...counts,
+        [status]: tasks.filter((task) => task.status === status).length,
+      }),
+      {} as Record<TaskStatus, number>,
+    );
+  });
 
   public getAll(): void {
     this.statewise.dispatch(getAllTaskActions.request());

@@ -6,6 +6,9 @@ export interface IProjectManager {
   isError: Signal<boolean>;
   isLoading: Signal<boolean>;
 
+  /** Derived from the projects. */
+  projectCount: Signal<number>;
+
   getAll(): void;
   getAllAsync(): Promise<void>;
   reset(): Promise<void>;

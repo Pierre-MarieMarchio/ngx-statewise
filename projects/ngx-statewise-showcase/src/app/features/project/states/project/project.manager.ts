@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { injectStatewise } from 'ngx-statewise';
 import { IProjectManager } from '@shared/app-common/tokens';
 import { ProjectState } from './project.state';
@@ -15,6 +15,8 @@ export class ProjectManager implements IProjectManager {
   public readonly projects = this.projectStates.projects.asReadonly();
   public readonly isError = this.projectStates.isError.asReadonly();
   public readonly isLoading = this.projectStates.isLoading.asReadonly();
+
+  public readonly projectCount = computed(() => this.projects()?.length ?? 0);
 
   public getAll(): void {
     this.statewise.dispatch(getAllProjectsActions.request());
