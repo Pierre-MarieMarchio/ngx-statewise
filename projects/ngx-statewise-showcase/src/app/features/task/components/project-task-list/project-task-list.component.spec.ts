@@ -1,8 +1,13 @@
-import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Project } from '@app/features/project/models';
-import { Task, User } from '@shared/app-common/models';
+import { Task } from '@shared/app-common/models';
 import { AUTH_MANAGER, PROJECT_MANAGER } from '@shared/app-common/tokens';
+import {
+  fakeAuthManager,
+  FakeAuthManager,
+  fakeProjectManager,
+  sampleUser,
+} from '@testing/fake-managers';
 import { ProjectTaskListComponent } from './project-task-list.component';
 
 const PROJECTS: Project[] = [
@@ -32,17 +37,9 @@ const TASKS: Task[] = [
   },
 ];
 
-const userWithRole = (role: string): User => ({
-  userId: 'u-1',
-  userName: 'tester',
-  email: 'tester@tester',
-  role,
-  organizationId: 'org-1',
-});
-
 describe('ProjectTaskListComponent', () => {
   let fixture: ComponentFixture<ProjectTaskListComponent>;
-  let user: ReturnType<typeof signal<User | null>>;
+  let authManager: FakeAuthManager;
 
   const host = (): HTMLElement => fixture.nativeElement as HTMLElement;
 
@@ -52,33 +49,13 @@ describe('ProjectTaskListComponent', () => {
     );
 
   beforeEach(async () => {
-    user = signal<User | null>(userWithRole('admin'));
+    authManager = fakeAuthManager(sampleUser({ role: 'admin' }));
 
     await TestBed.configureTestingModule({
       imports: [ProjectTaskListComponent],
       providers: [
-        {
-          provide: PROJECT_MANAGER,
-          useValue: {
-            projects: signal(PROJECTS),
-            isError: signal(false),
-            isLoading: signal(false),
-            getAll: () => undefined,
-            getAllAsync: () => Promise.resolve(),
-            reset: () => Promise.resolve(),
-          },
-        },
-        {
-          provide: AUTH_MANAGER,
-          useValue: {
-            user,
-            isLoggedIn: signal(true),
-            isLoading: signal(false),
-            login: () => Promise.resolve(),
-            authenticate: () => Promise.resolve(),
-            logout: () => undefined,
-          },
-        },
+        { provide: PROJECT_MANAGER, useValue: fakeProjectManager(PROJECTS) },
+        { provide: AUTH_MANAGER, useValue: authManager },
       ],
     }).compileComponents();
 
@@ -106,14 +83,14 @@ describe('ProjectTaskListComponent', () => {
   });
 
   it('hides the organisation column from a contributor', () => {
-    user.set(userWithRole('contributor'));
+    authManager.user.set(sampleUser({ role: 'contributor' }));
     fixture.detectChanges();
 
     expect(headers()).toEqual(['Title', 'Status', 'Priority']);
   });
 
   it('hides the organisation column while no user is known', () => {
-    user.set(null);
+    authManager.user.set(null);
     fixture.detectChanges();
 
     expect(headers()).toEqual(['Title', 'Status', 'Priority']);

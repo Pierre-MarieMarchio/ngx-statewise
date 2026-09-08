@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { injectStatewise } from 'ngx-statewise';
 import { AuthState } from './auth.state';
 import {
@@ -20,6 +20,9 @@ export class AuthManager implements IAuthManager {
   public readonly user = this.authStates.user.asReadonly();
   public readonly isLoggedIn = this.authStates.isLoggedIn.asReadonly();
   public readonly isLoading = this.authStates.isLoading.asReadonly();
+
+  /** Derived rather than stored: the role lives in the user, nowhere else. */
+  public readonly isAdmin = computed(() => this.user()?.role === 'admin');
 
   public login(credential: LoginSubmit): Promise<void> {
     return this.statewise.dispatchAsync(loginActions.request(credential));
