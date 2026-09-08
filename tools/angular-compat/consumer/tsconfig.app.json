@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": [],
+    /* The point of this fixture: the shipped .d.ts files are checked against
+       this major's @angular/core typings, not waved through. `types: []`
+       keeps the scope to Angular and ngx-statewise, so a failure here is
+       about the package and not about a test runner's own declarations. */
+    "skipLibCheck": false
+  },
+  "files": ["src/main.ts"],
+  "include": ["src/**/*.d.ts"]
+}
