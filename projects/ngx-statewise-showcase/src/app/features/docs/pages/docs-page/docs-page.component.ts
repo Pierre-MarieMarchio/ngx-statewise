@@ -108,6 +108,24 @@ export const tallyUpdater = defineUpdater(TallyState, (on) => {
     seenIn: 'features/project/states/project/project.effect.ts',
   },
   {
+    id: 'cascades',
+    title: 'Effects cascade into chains of actions',
+    summary:
+      'The actions an effect returns are executed in the same dispatch, and their own effects run in turn. Signing in walks that chain across three managers, which is what the history page shows on arrival: LOGIN_REQUEST, LOGIN_SUCCESS, then PROJECT_REQUEST and TASK_REQUEST, then their two successes.',
+    snippet: `createEffect(loginActions.request, async (credential) => {
+  const res = await firstValueFrom(this.authRepository.login(credential));
+
+  return loginActions.success(res.body);
+});
+
+createEffect(loginActions.success, () => {
+  this.projectManager.getAll(); // dispatches PROJECT_REQUEST
+  this.taskManager.getAll();    // dispatches TASK_REQUEST
+  this.router.navigate(['/']);
+});`,
+    seenIn: 'features/auth/states/auth/auth.effect.ts',
+  },
+  {
     id: 'scoping',
     title: 'An effect runs for the manager owning its action',
     summary:
@@ -116,6 +134,46 @@ export const tallyUpdater = defineUpdater(TallyState, (on) => {
 const other = injectStatewise(projectUpdater);
 other.dispatch(getAllTaskActions.request()); // misrouted: nothing runs`,
     seenIn: 'projects/ngx-statewise/src/integration/execution-contract.spec.ts',
+  },
+  {
+    id: 'dispatch-modes',
+    title: 'Dispatching synchronously or awaiting the cascade',
+    summary:
+      'dispatch applies the updater before it returns and leaves the effects running, reporting a failure to the ErrorHandler. dispatchAsync hands back a promise that settles once the whole cascade started by the action is over, failure included. Same action, two ways of waiting for it.',
+    snippet: `public getAll(): void {
+  // the updater has run by the time this returns; the effects keep going
+  this.statewise.dispatch(getAllTaskActions.request());
+}
+
+public getAllAsync(): Promise<void> {
+  // settles once the effects, and the actions they returned, are done
+  return this.statewise.dispatchAsync(getAllTaskActions.request());
+}`,
+    seenIn: 'features/task/states/task/task.manager.ts',
+  },
+  {
+    id: 'error-recovery',
+    title: 'Failing, and recovering from it',
+    summary:
+      'A failure is an action like any other: the effect catches what went wrong and returns the failure event, whose updater puts the state back in a consistent shape. On top of that, the kanban applies its moves optimistically and rolls them back when the manager reports an error, so a rejected update never leaves a card where the server refused to put it.',
+    snippet: `createEffect(updateTaskActions.request, async (task) => {
+  try {
+    const updated = await firstValueFrom(this.repository.update(task));
+
+    return updateTaskActions.success(updated);
+  } catch {
+    return updateTaskActions.failure();
+  }
+});
+
+// and the board undoes what the server refused
+this.stateRollbackService.setupErrorRollback({
+  isError: () => this.taskManager.isError(),
+  originalData: () => this.tasks(),
+  localData: this.localTasks,
+  pendingUpdates: this.pendingUpdates,
+});`,
+    seenIn: 'core/services/state-rollback.service.ts',
   },
   {
     id: 'history',
