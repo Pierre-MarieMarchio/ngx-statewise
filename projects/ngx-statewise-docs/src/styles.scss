@@ -20,26 +20,36 @@ body {
   padding: 0;
 }
 
+/* The sans is the site's default: it sets everything the reader navigates by.
+   The serif is switched on for the reading column alone, in .guide__body. */
 body {
   background-color: var(--surface-page);
   color: var(--text);
   font-family: var(--font-sans);
   font-size: var(--text-md);
+  font-weight: var(--weight-regular);
   line-height: var(--leading-normal);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 a {
-  color: var(--accent);
+  color: var(--link);
   text-underline-offset: 0.15em;
   text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, currentcolor 40%, transparent);
+  transition: text-decoration-color var(--duration-instant) var(--ease-out);
+
+  &:hover {
+    color: var(--link-hover);
+    text-decoration-color: currentcolor;
+  }
 }
 
-/* One focus ring for the whole site. Keyboard users get it; a pointer click
-   does not, which is what :focus-visible is for. */
+/* One focus ring for the whole site, in the colour that means "here". Keyboard
+   users get it; a pointer click does not, which is what :focus-visible is for. */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--mark);
   outline-offset: 2px;
 }
 
@@ -49,7 +59,7 @@ main:focus {
 }
 
 ::selection {
-  background-color: color-mix(in srgb, var(--accent) 26%, transparent);
+  background-color: color-mix(in srgb, var(--link) 24%, transparent);
 }
 
 /* Thin, neutral scrollbars: the sidebar and the table of contents both scroll,
@@ -90,10 +100,11 @@ main:focus {
   z-index: 100;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius);
-  background-color: var(--accent);
-  color: var(--on-accent);
+  background-color: var(--mark);
+  color: var(--on-mark);
   font-size: var(--text-base);
-  font-weight: var(--weight-normal);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
 
   &:focus {
     left: var(--space-2);
@@ -105,41 +116,70 @@ main:focus {
    The guide is injected with innerHTML, so it never carries the emulated
    encapsulation attribute of the component holding it. Its typography, code
    blocks and callouts have to be global to reach it at all.
+
+   The column holds two kinds of thing and gives them two widths. Prose stops
+   at --measure, about 72 characters. Code, tables, callouts and disclosures
+   run to the full --column the guide component sets, because a wrapped type
+   signature and a table that scrolls sideways both cost the reader more than
+   an uneven right edge does.
    --------------------------------------------------------------------------- */
 .guide__body {
   color: var(--text);
+  font-family: var(--font-serif);
+  font-size: var(--text-body);
+  line-height: var(--leading-prose);
 
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  ul,
+  ol,
+  blockquote {
+    max-width: var(--measure);
+  }
+
+  /* Headings are the sans, against the serif of the prose. That contrast is
+     what marks a new section here; there is no rule above them and no label. */
   h1,
   h2,
   h3,
   h4 {
     color: var(--text-strong);
-    font-weight: var(--weight-bold);
+    font-family: var(--font-sans);
     line-height: var(--leading-tight);
-    letter-spacing: -0.011em;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
     /* Clears the sticky header when an anchor is jumped to. */
     scroll-margin-top: calc(var(--header-height) + var(--space-5));
   }
 
   h1 {
-    margin: 0 0 var(--space-4);
-    font-size: var(--text-3xl);
-    letter-spacing: -0.022em;
+    margin: 0 0 var(--space-5);
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.028em;
   }
 
   h2 {
     margin: var(--space-8) 0 var(--space-4);
     font-size: var(--text-xl);
+    font-weight: var(--weight-semibold);
+    letter-spacing: -0.02em;
   }
 
   h3 {
     margin: var(--space-6) 0 var(--space-3);
     font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
   }
 
   h4 {
     margin: var(--space-5) 0 var(--space-2);
     font-size: var(--text-md);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0;
   }
 
   /* The first heading after the title needs no extra air above it. */
@@ -166,12 +206,17 @@ main:focus {
     margin: var(--space-2) 0 0;
   }
 
+  li::marker {
+    color: var(--text-faint);
+  }
+
   strong {
     color: var(--text-strong);
-    font-weight: var(--weight-bold);
+    font-weight: var(--weight-semibold);
   }
 
   hr {
+    max-width: var(--column);
     margin: var(--space-7) 0;
     border: 0;
     border-top: 1px solid var(--border);
@@ -182,7 +227,7 @@ main:focus {
   .heading-anchor {
     margin-left: var(--space-2);
     color: var(--text-faint);
-    font-weight: var(--weight-normal);
+    font-weight: var(--weight-regular);
     text-decoration: none;
     opacity: 0;
     transition: opacity var(--duration-fast) var(--ease-out);
@@ -194,23 +239,32 @@ main:focus {
     opacity: 1;
   }
 
+  /* An identifier inside serif prose. Not a chip: the padded box breaks the
+     line rhythm every few words, and the guide runs three or four to the
+     paragraph. A tint and the mono face are enough to say "this is code". */
   :not(pre) > code {
-    padding: 0.1em 0.34em;
+    padding: 0.05em 0.28em;
     border-radius: var(--radius-sm);
-    background-color: var(--surface-sunken);
+    background-color: var(--surface-subtle);
     color: var(--text-strong);
     font-family: var(--font-mono);
-    font-size: 0.855em;
+    font-size: 0.82em;
+    font-weight: var(--weight-medium);
     /* Long identifiers must be allowed to break, or a narrow screen scrolls. */
     overflow-wrap: break-word;
   }
 
   a > code {
     color: inherit;
+    background-color: var(--link-soft);
   }
 
-  /* --- Tables ---------------------------------------------------------- */
+  /* --- Tables ----------------------------------------------------------
+     Reference furniture, so it leaves the serif and the measure behind: the
+     sans is denser at small sizes, and a comparison table wants every column
+     it can get. */
   .table-scroll {
+    max-width: var(--column);
     margin: 0 0 var(--space-5);
     overflow-x: auto;
   }
@@ -218,7 +272,9 @@ main:focus {
   table {
     width: 100%;
     border-collapse: collapse;
+    font-family: var(--font-sans);
     font-size: var(--text-base);
+    line-height: var(--leading-snug);
   }
 
   th,
@@ -231,11 +287,8 @@ main:focus {
 
   th {
     border-bottom: 1px solid var(--border-strong);
-    color: var(--text-muted);
-    font-size: var(--text-xs);
-    font-weight: var(--weight-normal);
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
+    color: var(--text-strong);
+    font-weight: var(--weight-semibold);
     white-space: nowrap;
   }
 
@@ -268,6 +321,7 @@ main:focus {
 
   /* --- Disclosure: an edge case a reader can leave folded --------------- */
   details {
+    max-width: var(--column);
     margin: 0 0 var(--space-5);
     padding: var(--space-3) var(--space-4);
     border: 1px solid var(--border);
@@ -277,8 +331,9 @@ main:focus {
 
   summary {
     color: var(--text-strong);
+    font-family: var(--font-sans);
     font-size: var(--text-base);
-    font-weight: var(--weight-bold);
+    font-weight: var(--weight-semibold);
     cursor: pointer;
     list-style: none;
 
@@ -316,8 +371,12 @@ main:focus {
 /* --- Code blocks ---------------------------------------------------------
    Neutral, on purpose. A page carries five of these; an accent rule on each
    one turns the column into a barcode. The accent is spent on callouts, which
-   are rarer and want to be noticed. */
+   are rarer and want to be noticed.
+
+   Wider than the prose, like the tables: a `provideStatewise` call with four
+   options is 78 columns before it wraps. */
 .code-block {
+  max-width: var(--column);
   margin: 0 0 var(--space-5);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -338,21 +397,21 @@ main:focus {
 .code-block__language,
 .code-block__title {
   overflow: hidden;
-  color: var(--text-muted);
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* The language is the word the fence was written with — `typescript`, `bash` —
+   so it is set as the token it is rather than shouted as a label. */
 .code-block__language {
   font-size: var(--text-xs);
-  font-weight: var(--weight-normal);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
 }
 
 .code-block__title {
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
+  color: var(--text-muted);
 }
 
 /* An empty bar — no language, no title — is chrome for nothing. */
@@ -386,7 +445,7 @@ main:focus {
 }
 
 .code-block__copy--copied {
-  color: var(--accent);
+  color: var(--mark);
 
   svg {
     /* A short, small pop. Enough to notice, not enough to watch. */
@@ -399,20 +458,25 @@ main:focus {
   padding: var(--space-4);
   overflow-x: auto;
   font-size: var(--text-sm);
-  line-height: 1.6;
+  line-height: 1.65;
 
   code {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     /* Code is the one place a line must not be broken to fit. */
     white-space: pre;
     tab-size: 2;
   }
 }
 
-/* --- Callouts ----------------------------------------------------------- */
+/* --- Callouts ------------------------------------------------------------
+   The one place on a guide page where colour is louder than the text. Each
+   kind keeps its own hue; none of them borrows the two brand colours, which
+   mean position and destination everywhere else. */
 .callout {
   --callout-accent: var(--text-muted);
 
+  max-width: var(--column);
   margin: 0 0 var(--space-5);
   padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
   border-left: 3px solid var(--callout-accent);
@@ -421,19 +485,19 @@ main:focus {
 }
 
 .callout--note {
-  --callout-accent: var(--accent-2);
+  --callout-accent: var(--link);
 }
 
 .callout--tip {
-  --callout-accent: #3ea37a;
+  --callout-accent: var(--success);
 }
 
 .callout--important {
-  --callout-accent: var(--accent);
+  --callout-accent: var(--mark);
 }
 
 .callout--warning {
-  --callout-accent: #d08a20;
+  --callout-accent: var(--caution);
 }
 
 .callout--caution {
@@ -446,9 +510,15 @@ main:focus {
   gap: var(--space-2);
   margin: 0 0 var(--space-2);
   color: var(--callout-accent);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-bold);
-  letter-spacing: 0.01em;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+}
+
+/* Inside a callout the prose keeps the serif but drops back to the width of
+   the box it is in, rather than the measure the rest of the column uses. */
+.callout__body > * {
+  max-width: none;
 }
 
 .callout__body > :last-child {
@@ -457,6 +527,44 @@ main:focus {
 
 .callout__body > :first-child {
   margin-top: 0;
+}
+
+/* --- Forced colours ------------------------------------------------------
+   Windows high contrast replaces every colour the site chose, including the
+   ones it uses to mean something. A rule drawn as a background disappears
+   entirely, and the flow diagram is nothing but rules, so each is restated in
+   a system colour. Global rather than per-component: an unencapsulated
+   selector still matches a component's own elements. */
+@media (forced-colors: active) {
+  .cycle__station::before,
+  .sidebar__link--active::before,
+  .toc__link--active::before {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+
+  .cycle__station--crossing::before,
+  .cycle__station--last::before {
+    background: CanvasText;
+  }
+
+  .cycle__station--crossing::after,
+  .cycle__station--last::after,
+  .cycle__return::before,
+  .cycle__return::after {
+    border-color: CanvasText;
+  }
+
+  /* The tint that marks the current page goes with the rest of the palette;
+     the underline is what survives to say which one it is. */
+  .sidebar__link--active,
+  .toc__link--active {
+    text-decoration: underline;
+  }
+
+  .callout {
+    border: 1px solid CanvasText;
+  }
 }
 
 @media print {

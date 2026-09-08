@@ -40,11 +40,23 @@ describe('HomeComponent', () => {
   it('is localised', () => {
     const host = mount('fr').nativeElement as HTMLElement;
 
-    expect(host.querySelector('.hero__eyebrow')?.textContent).toContain(
+    expect(host.querySelector('.hero__subtitle')?.textContent).toContain(
       'Gestion d’état',
     );
     expect(host.querySelector('.button--primary')?.textContent).toContain(
       'Commencer',
+    );
+  });
+
+  it('names every station of the cycle, and the way back', () => {
+    const host = mount().nativeElement as HTMLElement;
+    const stations = [...host.querySelectorAll('.cycle__station-name')].map(
+      (station) => station.textContent?.trim(),
+    );
+
+    expect(stations).toEqual(['Action', 'Updater', 'Effect']);
+    expect(host.querySelector('.cycle__return-text')?.textContent).toContain(
+      'may return an action',
     );
   });
 });

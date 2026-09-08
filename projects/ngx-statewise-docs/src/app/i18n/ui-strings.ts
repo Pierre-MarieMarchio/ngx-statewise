@@ -39,7 +39,8 @@ export interface UiStrings {
   readonly untranslatedTitle: string;
   readonly untranslatedBody: string;
   readonly footerLicence: string;
-  readonly homeEyebrow: string;
+  readonly homeSubtitle: string;
+  readonly homeThesis: string;
   readonly homeTagline: string;
   readonly homeGetStarted: string;
   readonly homeReadTheGuide: string;
@@ -52,6 +53,7 @@ export interface UiStrings {
   readonly homeFlowEffectText: string;
   readonly homeFlowManager: string;
   readonly homeFlowManagerText: string;
+  readonly homeFlowReturn: string;
   readonly homeContentsTitle: string;
   readonly homeTitle: string;
 }
@@ -90,7 +92,8 @@ const EN: UiStrings = {
   untranslatedTitle: 'This page is not translated yet',
   untranslatedBody: 'It is shown in English.',
   footerLicence: 'ngx-statewise is released under the GPL-3.0 licence.',
-  homeEyebrow: 'Angular state management',
+  homeSubtitle: 'Angular state management',
+  homeThesis: 'The state is already written when your effects run.',
   homeTagline:
     'Signals for state, actions for intent, effects for everything else. Simpler than NgRx, more structured than doing it by hand.',
   homeGetStarted: 'Get started',
@@ -104,6 +107,7 @@ const EN: UiStrings = {
   homeFlowEffectText: 'runs the side work, on state already up to date.',
   homeFlowManager: 'Manager',
   homeFlowManagerText: 'exposes the signals and dispatches, in its own scope.',
+  homeFlowReturn: 'may return an action',
   homeContentsTitle: 'Contents',
   homeTitle: 'ngx-statewise — state management for Angular',
 };
@@ -142,7 +146,8 @@ const FR: UiStrings = {
   untranslatedTitle: "Cette page n'est pas encore traduite",
   untranslatedBody: 'Elle est affichée en anglais.',
   footerLicence: 'ngx-statewise est publié sous licence GPL-3.0.',
-  homeEyebrow: 'Gestion d’état pour Angular',
+  homeSubtitle: 'Gestion d’état pour Angular',
+  homeThesis: 'L’état est déjà écrit quand vos effects démarrent.',
   homeTagline:
     'Des signals pour l’état, des actions pour l’intention, des effects pour tout le reste. Plus simple que NgRx, plus structuré qu’à la main.',
   homeGetStarted: 'Commencer',
@@ -157,6 +162,7 @@ const FR: UiStrings = {
   homeFlowManager: 'Manager',
   homeFlowManagerText:
     'expose les signals et dispatche, dans sa propre portée.',
+  homeFlowReturn: 'peut renvoyer une action',
   homeContentsTitle: 'Sommaire',
   homeTitle: 'ngx-statewise — gestion d’état pour Angular',
 };

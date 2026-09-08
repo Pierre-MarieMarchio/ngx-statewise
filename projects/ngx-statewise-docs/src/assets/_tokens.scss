@@ -1,38 +1,56 @@
 /* ---------------------------------------------------------------------------
-   Scale, rhythm and motion. Colour lives in themes/_themes.scss, which wraps
-   the showcase's Material palettes; everything here is theme-independent.
+   Scale, rhythm and motion. Colour lives in themes/_themes.scss.
 
-   The reference for the feel is a reading tool rather than an application:
-   a calm neutral page, hairline separations, generous measure, and motion you
-   register without watching. Hover feedback is deliberately near-instant —
-   a 300ms lift reads as a toy, an 80ms wash reads as responsive.
+   Two families, each with a job. Space Grotesk sets everything the reader
+   navigates by — headings, chrome, table headers, the flow diagram — because
+   its flat curves and squared terminals stay legible at 12px and give the site
+   a face. Newsreader sets the prose, because ten pages (soon closer to forty)
+   of technical argument are read, not scanned, and a serif is what a long read
+   wants. JetBrains Mono sets the code, which is a third of the visual field.
+
+   All three ship as variable woff2 through Fontsource, so `npm ci` is the
+   whole install and the build never reaches the network.
    --------------------------------------------------------------------------- */
 :root {
   /* --- Type ------------------------------------------------------------- */
   --font-sans:
-    Roboto, 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    sans-serif;
-  /* Roboto Mono is not shipped — the build stays offline, and the repository
-     only carries Roboto. This is the stack the platform actually has.
-     Deliberately no 'JetBrains Mono': it is installed on many developer
-     machines and on almost no reader's, so listing it would show the author a
-     different code font from the audience. */
+    'Space Grotesk Variable', 'Helvetica Neue', -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
   --font-mono:
-    ui-monospace, 'SF Mono', SFMono-Regular, 'Cascadia Mono', Menlo, Consolas,
-    'Liberation Mono', monospace;
+    'JetBrains Mono Variable', ui-monospace, 'SF Mono', SFMono-Regular, Menlo,
+    Consolas, 'Liberation Mono', monospace;
 
+  /* A variable axis, so these are real steps rather than the two faces a pair
+     of static files could offer. 300–700 for the sans, 200–800 for the serif;
+     nothing here asks for a weight outside those ranges. */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Chrome and furniture, in the sans. */
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;
-  --text-base: 0.9375rem;
-  --text-md: 1rem;
+  --text-base: 0.875rem;
+  --text-md: 0.9375rem;
+
+  /* Prose, in the serif. Larger than the chrome on purpose: the serif carries
+     a smaller apparent size at the same em, and the reading column is the one
+     place the reader stays. */
+  --text-body: 1.0625rem;
+
+  /* Headings and display. */
   --text-lg: 1.1875rem;
   --text-xl: 1.5rem;
   --text-2xl: 2rem;
-  --text-3xl: 2.5rem;
+  --text-3xl: 2.625rem;
 
-  --leading-tight: 1.25;
-  --leading-snug: 1.45;
-  --leading-normal: 1.7;
+  --leading-tight: 1.15;
+  --leading-snug: 1.4;
+  --leading-normal: 1.55;
+  /* Serif prose wants more room between lines than the sans does. */
+  --leading-prose: 1.65;
 
   /* --- Space: a 4px base, so everything lands on the same grid ---------- */
   --space-1: 0.25rem;
@@ -51,21 +69,18 @@
   --radius-lg: 10px;
 
   /* --- Layout ----------------------------------------------------------- */
-  --header-height: 3rem;
-  --sidebar-width: 15.5rem;
+  --header-height: 3.25rem;
+  --sidebar-width: 16rem;
   --toc-width: 15rem;
-  /* 704px — about 88 characters of Roboto at the body size. The wide end of
-     the comfortable range, chosen so the tables the guide is full of still
-     have somewhere to go. */
-  --measure: 44rem;
 
-  /* Only 400 and 700 exist: the repository ships Roboto-Regular and
-     Roboto-Bold, and the build may not fetch a font. A requested 500 silently
-     resolves to 400 and a 600 to 700, so asking for either is a lie — these
-     two are the whole scale, and emphasis below 700 is carried by colour and
-     size instead. */
-  --weight-normal: 400;
-  --weight-bold: 700;
+  /* Two widths, because the column holds two kinds of thing. Prose stops at
+     --measure: 36rem of Newsreader at the body size is about 72 characters.
+     Code, tables and callouts run to --column, eight rems wider, because a
+     wrapped signature and a scrolling table both cost more than the ragged
+     right edge does. */
+  --measure: 36rem;
+  --column: 44rem;
+
   --gutter: var(--space-5);
 
   /* --- Motion ----------------------------------------------------------- */

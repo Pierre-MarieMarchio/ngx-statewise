@@ -12,13 +12,39 @@
     <link rel="icon" href="icon-logo.png" type="image/png" />
     <meta
       name="theme-color"
-      content="#17171a"
+      content="#131218"
       media="(prefers-color-scheme: dark)"
     />
     <meta
       name="theme-color"
-      content="#ffffff"
+      content="#fbfafc"
       media="(prefers-color-scheme: light)"
+    />
+
+    <!--
+      The two faces that render before the reader has scrolled anything: the
+      serif sets the prose, the sans sets the header, the sidebar and every
+      heading. Both are found by the stylesheet a moment later, which is a
+      round trip too late on a cold load.
+
+      The hrefs are relative, so the `base` above resolves them under the
+      /ngx-statewise/ base href the production build sets. They are also
+      stable, which is why the docs build hashes bundles but not media: a
+      preload cannot name a file whose hash it does not know.
+    -->
+    <link
+      rel="preload"
+      href="media/newsreader-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="media/space-grotesk-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
     <script>
       // Resolves the theme before the first paint. Without it, every load

@@ -124,14 +124,14 @@
   background-color: var(--surface-hover);
 
   .palette__result-title {
-    color: var(--accent);
+    color: var(--mark);
   }
 }
 
 .palette__result-title {
   color: var(--text-strong);
   font-size: var(--text-base);
-  font-weight: var(--weight-normal);
+  font-weight: var(--weight-medium);
 }
 
 .palette__result-context {

@@ -3,81 +3,303 @@
   max-width: 52rem;
 }
 
-/* --- Hero --------------------------------------------------------------- */
-.hero__eyebrow {
-  margin: 0;
-  color: var(--text-faint);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-normal);
-  text-transform: uppercase;
-  letter-spacing: 0.11em;
-}
-
+/* --- Hero ----------------------------------------------------------------
+   The mark identifies the page; the display line is the argument. The logo is
+   deliberately not the hero — it says who, and the sentence under it says why
+   anyone should care, which is the harder of the two. */
 .hero__title {
-  margin: var(--space-4) 0 0;
+  margin: 0;
   line-height: 0;
 }
 
-/* The logo of the project, not a reproduction of it in CSS. Its own gradient
-   is the brand; nothing here recolours it. */
 .hero__logo {
-  width: clamp(13rem, 34vw, 17rem);
+  width: clamp(8rem, 22vw, 10.5rem);
   height: auto;
 }
 
-.hero__tagline {
-  max-width: 34rem;
+.hero__subtitle {
   margin: var(--space-4) 0 0;
   color: var(--text-muted);
-  font-size: var(--text-lg);
-  line-height: var(--leading-snug);
+  font-size: var(--text-md);
 }
 
-.hero__actions {
+.hero__thesis {
+  max-width: 22ch;
+  margin: var(--space-5) 0 0;
+  color: var(--text-strong);
+  font-size: clamp(1.875rem, 6vw, var(--text-3xl));
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.032em;
+  line-height: 1.06;
+  text-wrap: balance;
+}
+
+/* --- The cycle -----------------------------------------------------------
+   Red is the synchronous half, violet the asynchronous one, and the gradient
+   between them sits on the single arrow where the library crosses from one to
+   the other. That arrow is the whole point of the library, so it is the only
+   gradient on the site. */
+.cycle {
+  --cycle-gap: var(--space-6);
+
+  margin-top: var(--space-8);
+}
+
+.cycle__title {
+  margin: 0 0 var(--space-4);
+  color: var(--text-strong);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.02em;
+}
+
+/* The box is the manager: a manager is a scope, and the cycle runs inside one. */
+.cycle__scope {
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.cycle__owner {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: 0 var(--space-2);
+  margin: 0;
+  font-size: var(--text-base);
+}
+
+.cycle__owner-name {
+  color: var(--text-strong);
+  font-weight: var(--weight-semibold);
+}
+
+.cycle__owner-text {
+  color: var(--text-muted);
+}
+
+.cycle__track {
+  position: relative;
   margin-top: var(--space-6);
 }
 
-.button {
+.cycle__stations {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--cycle-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Each station carries the piece of the track that leaves it, so the rule runs
+   across the gap into the next one and the three read as one line. */
+.cycle__station {
+  position: relative;
+  padding-top: var(--space-3);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 2px;
+    width: calc(100% + var(--cycle-gap));
+    border-radius: 1px;
+    background-color: var(--mark);
+  }
+}
+
+.cycle__station--crossing::before {
+  background: linear-gradient(90deg, var(--mark) 0 72%, var(--link) 100%);
+}
+
+.cycle__station--last::before {
+  width: 100%;
+  background-color: var(--link);
+}
+
+/* The arrowhead belongs to the station being entered, at the head of the rule
+   that arrives there. */
+.cycle__station--crossing::after,
+.cycle__station--last::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-top: 2px solid var(--mark);
+  border-right: 2px solid var(--mark);
+  transform: translate(-100%, -50%) rotate(45deg);
+}
+
+.cycle__station--last::after {
+  border-color: var(--link);
+}
+
+.cycle__station-name {
+  display: block;
+  color: var(--mark);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
+}
+
+.cycle__station--last .cycle__station-name {
+  color: var(--link);
+}
+
+.cycle__station-text {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--text-muted);
+  font-size: var(--text-base);
+  line-height: var(--leading-snug);
+  text-wrap: pretty;
+}
+
+/* The way back: an effect can answer with an action, which starts the cycle
+   again. Violet where it leaves the effect, red at the head, because what
+   arrives is an action.
+
+   The legs land on the two ends of the track above — where the red rule starts
+   at Action, and where the violet one stops after Effect — so the track and
+   the way back close into one rectangle. The rectangle is the cycle. */
+.cycle__return {
+  position: relative;
+  height: 3rem;
+  margin: var(--space-4) 0 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--link);
+    border-top: 0;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 1px;
+    width: 6px;
+    height: 6px;
+    border-top: 2px solid var(--mark);
+    border-left: 2px solid var(--mark);
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+}
+
+.cycle__return-text {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 50%);
+  padding: 0 var(--space-3);
+  background-color: var(--surface-page);
+  color: var(--text-muted);
+  font-size: var(--text-base);
+  white-space: nowrap;
+}
+
+/* One orchestrated moment on the whole site: the track draws itself, station
+   by station, in the direction the library runs. Declared only where movement
+   is welcome, so a reader who asked for less gets the finished diagram rather
+   than a delayed one. */
+@media (prefers-reduced-motion: no-preference) {
+  .cycle__station::before {
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: cycle-draw 320ms var(--ease-emphasised) forwards;
+  }
+
+  .cycle__station--crossing::before {
+    animation-delay: 300ms;
+  }
+
+  .cycle__station--last::before {
+    animation-delay: 600ms;
+  }
+
+  .cycle__station--crossing::after,
+  .cycle__station--last::after {
+    opacity: 0;
+    animation: cycle-appear 160ms var(--ease-out) 300ms forwards;
+  }
+
+  .cycle__station--last::after {
+    animation-delay: 600ms;
+  }
+
+  .cycle__return::before {
+    clip-path: inset(0 0 0 100%);
+    animation: cycle-return 420ms var(--ease-emphasised) 880ms forwards;
+  }
+
+  .cycle__return::after {
+    opacity: 0;
+    animation: cycle-appear 160ms var(--ease-out) 1300ms forwards;
+  }
+
+  .cycle__return-text {
+    opacity: 0;
+    animation: cycle-appear 200ms var(--ease-out) 1150ms forwards;
+  }
+}
+
+@keyframes cycle-draw {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes cycle-draw-down {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes cycle-return {
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes cycle-appear {
+  to {
+    opacity: 1;
+  }
+}
+
+/* --- Starting out ------------------------------------------------------- */
+.start {
+  margin-top: var(--space-7);
+}
+
+.start__tagline {
+  max-width: 36rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-family: var(--font-serif);
+  font-size: var(--text-body);
+  line-height: var(--leading-prose);
+}
+
+.start__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.start__install {
   display: inline-flex;
   align-items: center;
   height: 2.25rem;
   padding: 0 var(--space-4);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text-strong);
-  font-size: var(--text-base);
-  font-weight: var(--weight-normal);
-  text-decoration: none;
-  transition:
-    background-color var(--duration-instant) var(--ease-out),
-    border-color var(--duration-instant) var(--ease-out),
-    filter var(--duration-instant) var(--ease-out);
-
-  &:hover {
-    border-color: var(--border-strong);
-    background-color: var(--surface-hover);
-  }
-}
-
-.button--primary {
-  border-color: transparent;
-  background-color: var(--accent);
-  color: var(--on-accent);
-
-  &:hover {
-    border-color: transparent;
-    background-color: color-mix(in srgb, var(--accent) 88%, var(--text-strong));
-  }
-}
-
-.hero__install {
-  display: inline-flex;
-  align-items: center;
-  margin: var(--space-6) 0 0;
-  padding: var(--space-2) var(--space-4);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background-color: var(--surface-code);
@@ -86,70 +308,51 @@
   font-size: var(--text-sm);
 }
 
-/* --- Sections ----------------------------------------------------------- */
-.flow,
-.contents {
-  margin-top: var(--space-9);
+.button {
+  display: inline-flex;
+  align-items: center;
+  height: 2.25rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--text-strong);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  transition: var(--transition-hover);
+
+  &:hover {
+    border-color: var(--text-faint);
+    background-color: var(--surface-hover);
+    color: var(--text-strong);
+  }
 }
 
-.flow__title,
+.button--primary {
+  border-color: transparent;
+  background-color: var(--mark);
+  color: var(--on-mark);
+
+  &:hover {
+    border-color: transparent;
+    background-color: var(--mark-hover);
+    color: var(--on-mark);
+  }
+}
+
+/* --- Contents ------------------------------------------------------------
+   A table of contents, not a grid of cards: a title, a summary, one row each.
+   It has to hold ten entries today and about forty after the guide is split. */
+.contents {
+  margin-top: var(--space-8);
+}
+
 .contents__title {
   margin: 0 0 var(--space-5);
   color: var(--text-strong);
   font-size: var(--text-xl);
-  font-weight: var(--weight-bold);
-  letter-spacing: -0.015em;
-}
-
-.flow__steps {
-  display: grid;
-  gap: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  counter-reset: step;
-}
-
-/* One bordered group rather than four floating cards: the steps are a
-   sequence, and a list reads as one. */
-.flow__step {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  counter-increment: step;
-  transition: background-color var(--duration-instant) var(--ease-out);
-
-  &::before {
-    content: counter(step);
-    width: 1.25rem;
-    flex: none;
-    color: var(--text-faint);
-    font-size: var(--text-sm);
-    font-variant-numeric: tabular-nums;
-  }
-
-  & + & {
-    border-top: 1px solid var(--border);
-  }
-
-  &:hover {
-    background-color: var(--surface-hover);
-  }
-}
-
-.flow__step-name {
-  min-width: 4.5rem;
-  color: var(--text-strong);
-  font-weight: var(--weight-bold);
-}
-
-.flow__step-text {
-  color: var(--text-muted);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.02em;
 }
 
 .contents__section + .contents__section {
@@ -157,55 +360,107 @@
 }
 
 .contents__section-title {
-  margin: 0 0 var(--space-3);
-  padding-left: var(--space-1);
-  color: var(--text-faint);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-normal);
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
+  margin: 0 0 var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-strong);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
 }
 
 .contents__list {
-  display: grid;
-  gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .contents__link {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  gap: 0 var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  margin-left: calc(var(--space-3) * -1);
   border-radius: var(--radius);
   text-decoration: none;
-  transition:
-    background-color var(--duration-instant) var(--ease-out),
-    border-color var(--duration-instant) var(--ease-out);
+  transition: background-color var(--duration-instant) var(--ease-out);
 
   &:hover {
-    border-color: var(--border-strong);
     background-color: var(--surface-hover);
+  }
+
+  &:hover .contents__link-title {
+    color: var(--link);
   }
 }
 
 .contents__link-title {
   color: var(--text-strong);
-  font-size: var(--text-base);
-  font-weight: var(--weight-normal);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  transition: color var(--duration-instant) var(--ease-out);
 }
 
 .contents__link-summary {
   color: var(--text-muted);
-  font-size: var(--text-base);
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
   line-height: var(--leading-snug);
 }
 
-@media (min-width: 48rem) {
-  .contents__list {
-    grid-template-columns: 1fr 1fr;
+/* --- Narrow --------------------------------------------------------------
+   The track turns on its side: the rule that ran across the top of the row
+   runs down the left of the column, and the gradient with it. */
+@media (max-width: 44rem) {
+  .cycle__stations {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+
+  .cycle__station {
+    padding: 0 0 0 var(--space-4);
+
+    &::before {
+      top: 0;
+      bottom: calc(var(--space-5) * -1);
+      left: 0;
+      width: 2px;
+      height: auto;
+    }
+  }
+
+  .cycle__station--crossing::before {
+    background: linear-gradient(180deg, var(--mark) 0 72%, var(--link) 100%);
+  }
+
+  .cycle__station--last::before {
+    bottom: 0;
+  }
+
+  .cycle__station--crossing::after,
+  .cycle__station--last::after {
+    top: 0;
+    left: 1px;
+    transform: translate(-50%, -50%) rotate(135deg);
+  }
+
+  /* Clear of the rail above it, so the arrowhead cannot be read as the end of
+     the effect's own line. */
+  .cycle__return {
+    height: 2.25rem;
+    margin-top: var(--space-6);
+  }
+
+  /* Same sequence, turned through ninety degrees. */
+  @media (prefers-reduced-motion: no-preference) {
+    .cycle__station::before {
+      transform: scaleY(0);
+      transform-origin: top;
+      animation-name: cycle-draw-down;
+    }
+  }
+
+  .contents__link {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.1rem;
   }
 }
