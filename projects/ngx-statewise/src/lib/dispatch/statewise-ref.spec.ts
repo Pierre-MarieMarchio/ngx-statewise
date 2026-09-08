@@ -33,19 +33,20 @@ describe('ScopedStatewiseRef', () => {
 
   beforeEach(() => {
     effects = new EffectRegistry();
-    engine = new StatewiseEngine(
-      effects,
-      new GlobalUpdaterRegistry(),
-      new PendingEffects(),
-      new ActionHistory(10),
-      false,
-    );
     handled = [];
     errorHandler = {
       handleError: (error: unknown): void => {
         handled.push(error);
       },
     };
+    engine = new StatewiseEngine(
+      effects,
+      new GlobalUpdaterRegistry(),
+      new PendingEffects(),
+      new ActionHistory(10),
+      errorHandler,
+      'ignore',
+    );
   });
 
   describe('dispatch', () => {

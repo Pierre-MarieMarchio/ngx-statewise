@@ -9,7 +9,7 @@ export * from './updater';
  * The `ɵ` prefix marks it as unstable and out of the public contract.
  */
 export { PendingEffects as ɵPendingEffects } from './effect/pending-effects';
-export { STRICT_DISPATCH as ɵSTRICT_DISPATCH } from './dispatch/strict-dispatch';
+export { MISROUTED_DISPATCH_REACTION as ɵMISROUTED_DISPATCH_REACTION } from './dispatch/misrouted-dispatch';
 export {
   restoreUpdaterActionTypes as ɵrestoreUpdaterActionTypes,
   snapshotUpdaterActionTypes as ɵsnapshotUpdaterActionTypes,

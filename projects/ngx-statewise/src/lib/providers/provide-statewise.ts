@@ -14,7 +14,11 @@ import {
 } from '../dispatch/action-history';
 import { GlobalUpdaterRegistry } from '../dispatch/global-updater-registry';
 import { StatewiseEngine } from '../dispatch/statewise-engine';
-import { STRICT_DISPATCH } from '../dispatch/strict-dispatch';
+import {
+  defaultMisroutedDispatchReaction,
+  MISROUTED_DISPATCH_REACTION,
+  type MisroutedDispatchReaction,
+} from '../dispatch/misrouted-dispatch';
 import { EffectRegistry } from '../effect/effect-registry';
 import { PendingEffects } from '../effect/pending-effects';
 import { indexUpdaters, resolveUpdaters } from '../updater/resolve-updaters';
@@ -32,6 +36,11 @@ export interface StatewiseConfig {
   readonly updaters?: readonly Updater<unknown>[];
   /** Action history, disabled unless configured. */
   readonly history?: StatewiseHistoryOptions;
+  /**
+   * What a dispatch reaching the wrong manager does. Throws in development,
+   * reports to the `ErrorHandler` in production.
+   */
+  readonly misroutedDispatch?: MisroutedDispatchReaction;
 }
 
 /** Wires the execution engine, the effects and the global updaters. */
@@ -49,7 +58,12 @@ export function provideStatewise(
     ActionHistory,
     StatewiseEngine,
     { provide: ACTION_HISTORY_LIMIT, useValue: historyLimit },
-    { provide: STRICT_DISPATCH, useFactory: (): boolean => isDevMode() },
+    {
+      provide: MISROUTED_DISPATCH_REACTION,
+      useFactory: (): MisroutedDispatchReaction =>
+        config.misroutedDispatch ??
+        defaultMisroutedDispatchReaction(isDevMode()),
+    },
     ...effects,
     provideEnvironmentInitializer(() => {
       const injector = inject(Injector);

@@ -1,4 +1,4 @@
-import { Injectable, InjectionToken } from '@angular/core';
+import { ErrorHandler, Injectable, InjectionToken } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { defineActionsGroup, emptyPayload, payload } from '../action';
@@ -45,12 +45,19 @@ class CounterEffect {
 
 describe('provideStatewise', () => {
   let state: CounterState;
+  let handledErrors: unknown[];
 
   function configure(...providers: unknown[]): void {
     TestBed.configureTestingModule({
       providers: [
         ...(providers as never[]),
         { provide: COUNTER_STATE, useFactory: () => state },
+        {
+          provide: ErrorHandler,
+          useValue: {
+            handleError: (error: unknown) => handledErrors.push(error),
+          },
+        },
       ],
     });
   }
@@ -58,6 +65,7 @@ describe('provideStatewise', () => {
   beforeEach(() => {
     state = { count: 0 };
     effectRuns = [];
+    handledErrors = [];
   });
 
   afterEach(() => {
@@ -94,19 +102,43 @@ describe('provideStatewise', () => {
     expect(state.count).toBe(5);
   });
 
-  it('turns the misrouted-dispatch check on in dev mode', async () => {
-    configure(provideStatewise());
-
-    await expectAsync(
-      Promise.resolve().then(() =>
+  describe('misrouted dispatch', () => {
+    function misroute(): Promise<void> {
+      return Promise.resolve().then(() =>
         TestBed.inject(StatewiseEngine).execute(
           provideActions.incremented(1),
           NO_SCOPE,
         ),
-      ),
-    ).toBeRejectedWithError(
-      /No updater in scope for "PROVIDEPROBE_INCREMENTED"/,
-    );
+      );
+    }
+
+    it('throws in dev mode, which is the default reaction', async () => {
+      configure(provideStatewise());
+
+      await expectAsync(misroute()).toBeRejectedWithError(
+        /No updater in scope for "PROVIDEPROBE_INCREMENTED"/,
+      );
+    });
+
+    it('reports to the ErrorHandler when asked to', async () => {
+      configure(provideStatewise({ misroutedDispatch: 'report' }));
+
+      await expectAsync(misroute()).toBeResolved();
+
+      expect(handledErrors.length).toBe(1);
+      expect((handledErrors[0] as Error).message).toMatch(
+        /No updater in scope for "PROVIDEPROBE_INCREMENTED"/,
+      );
+    });
+
+    it('says nothing at all when asked to ignore it', async () => {
+      configure(provideStatewise({ misroutedDispatch: 'ignore' }));
+
+      await expectAsync(misroute()).toBeResolved();
+
+      expect(handledErrors).toEqual([]);
+      expect(state.count).toBe(0);
+    });
   });
 
   describe('history', () => {

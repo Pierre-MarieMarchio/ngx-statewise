@@ -1,3 +1,5 @@
+import type { ErrorHandler } from '@angular/core';
+
 import type { Action } from '../action';
 import { EffectRegistry } from '../effect/effect-registry';
 import { PendingEffects } from '../effect/pending-effects';
@@ -6,6 +8,7 @@ import type { StateBoundHandler } from '../updater/updater-definition';
 import { ActionHistory } from './action-history';
 import type { DispatchScope } from './dispatch-scope';
 import { GlobalUpdaterRegistry } from './global-updater-registry';
+import type { MisroutedDispatchReaction } from './misrouted-dispatch';
 import { StatewiseEngine } from './statewise-engine';
 
 interface Recorder {
@@ -39,16 +42,21 @@ describe('StatewiseEngine', () => {
   let globalUpdaters: GlobalUpdaterRegistry;
   let pendingEffects: PendingEffects;
   let history: ActionHistory;
+  let handledErrors: unknown[];
+  let errorHandler: ErrorHandler;
   let engine: StatewiseEngine;
   let emptyScope: DispatchScope;
 
-  function build(strictDispatch: boolean): StatewiseEngine {
+  function build(
+    misroutedDispatch: MisroutedDispatchReaction,
+  ): StatewiseEngine {
     return new StatewiseEngine(
       effects,
       globalUpdaters,
       pendingEffects,
       history,
-      strictDispatch,
+      errorHandler,
+      misroutedDispatch,
     );
   }
 
@@ -57,7 +65,13 @@ describe('StatewiseEngine', () => {
     globalUpdaters = new GlobalUpdaterRegistry();
     pendingEffects = new PendingEffects();
     history = new ActionHistory(10);
-    engine = build(false);
+    handledErrors = [];
+    errorHandler = {
+      handleError: (error: unknown): void => {
+        handledErrors.push(error);
+      },
+    };
+    engine = build('ignore');
     emptyScope = scopeOf();
   });
 
@@ -111,30 +125,73 @@ describe('StatewiseEngine', () => {
   });
 
   describe('misrouted dispatch', () => {
-    it('rejects an action claimed by an updater absent from the scope', () => {
+    it('throws for an action claimed by an updater absent from the scope', () => {
       declareUpdaterActionTypes(['ENGINE_OWNED_ELSEWHERE']);
-      const strict = build(true);
+      const throwing = build('throw');
 
       expect(() =>
-        strict.execute({ type: 'ENGINE_OWNED_ELSEWHERE' }, emptyScope),
+        throwing.execute({ type: 'ENGINE_OWNED_ELSEWHERE' }, emptyScope),
       ).toThrowError(/No updater in scope for "ENGINE_OWNED_ELSEWHERE"/);
     });
 
+    it('reports the same action instead of throwing', async () => {
+      declareUpdaterActionTypes(['ENGINE_REPORTED']);
+      const reporting = build('report');
+
+      await expectAsync(
+        reporting.execute({ type: 'ENGINE_REPORTED' }, emptyScope),
+      ).toBeResolved();
+
+      expect(handledErrors.length).toBe(1);
+      expect((handledErrors[0] as Error).message).toMatch(
+        /No updater in scope for "ENGINE_REPORTED"/,
+      );
+    });
+
+    it('runs the effects of a reported action, so the cascade survives', async () => {
+      declareUpdaterActionTypes(['ENGINE_REPORTED_WITH_EFFECT']);
+      const reporting = build('report');
+      const calls: string[] = [];
+      effects.register('ENGINE_REPORTED_WITH_EFFECT', () => {
+        calls.push('ran');
+      });
+
+      await reporting.execute(
+        { type: 'ENGINE_REPORTED_WITH_EFFECT' },
+        emptyScope,
+      );
+
+      expect(calls).toEqual(['ran']);
+      expect(handledErrors.length).toBe(1);
+    });
+
     it('accepts an action no updater ever declared', () => {
-      const strict = build(true);
+      const throwing = build('throw');
 
       expect(() =>
-        strict.execute({ type: 'ENGINE_EFFECT_ONLY' }, emptyScope),
+        throwing.execute({ type: 'ENGINE_EFFECT_ONLY' }, emptyScope),
       ).not.toThrow();
+      expect(handledErrors).toEqual([]);
+    });
+
+    it('reports nothing for an action no updater ever declared', async () => {
+      const reporting = build('report');
+
+      await reporting.execute(
+        { type: 'ENGINE_REPORTED_EFFECT_ONLY' },
+        emptyScope,
+      );
+
+      expect(handledErrors).toEqual([]);
     });
 
     it('accepts a declared action once its handler is in scope', () => {
       declareUpdaterActionTypes(['ENGINE_IN_SCOPE']);
       const recorder: Recorder = { applied: [] };
-      const strict = build(true);
+      const throwing = build('throw');
 
       expect(() =>
-        strict.execute(
+        throwing.execute(
           { type: 'ENGINE_IN_SCOPE', payload: 1 },
           scopeOf(['ENGINE_IN_SCOPE', recordingHandler(recorder)]),
         ),
@@ -148,19 +205,21 @@ describe('StatewiseEngine', () => {
       globalUpdaters.set(
         new Map([['ENGINE_GLOBALLY_OWNED', recordingHandler(recorder)]]),
       );
-      const strict = build(true);
+      const throwing = build('throw');
 
       expect(() =>
-        strict.execute({ type: 'ENGINE_GLOBALLY_OWNED' }, emptyScope),
+        throwing.execute({ type: 'ENGINE_GLOBALLY_OWNED' }, emptyScope),
       ).not.toThrow();
     });
 
-    it('stays silent when the check is off', () => {
+    it('stays silent when the reaction is to ignore', async () => {
       declareUpdaterActionTypes(['ENGINE_OWNED_ELSEWHERE']);
 
-      expect(() =>
+      await expectAsync(
         engine.execute({ type: 'ENGINE_OWNED_ELSEWHERE' }, emptyScope),
-      ).not.toThrow();
+      ).toBeResolved();
+
+      expect(handledErrors).toEqual([]);
     });
   });
 
