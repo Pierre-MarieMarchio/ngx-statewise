@@ -74,12 +74,16 @@
   --toc-width: 15rem;
 
   /* Two widths, because the column holds two kinds of thing. Prose stops at
-     --measure: 36rem of Newsreader at the body size is about 72 characters.
-     Code, tables and callouts run to --column, eight rems wider, because a
-     wrapped signature and a scrolling table both cost more than the ragged
-     right edge does. */
-  --measure: 36rem;
-  --column: 44rem;
+     --measure; code, tables and callouts run to --column, because a wrapped
+     type signature and a table that scrolls sideways both cost the reader more
+     than an uneven right edge does.
+
+     36rem was set by arithmetic and measured afterwards at 74–82 characters on
+     the longest line, which is past the comfortable range. 32rem measures at
+     66–72, which is the range. Do not change it without measuring again: the
+     count depends on the face, not only on the width. */
+  --measure: 32rem;
+  --column: 42rem;
 
   --gutter: var(--space-5);
 

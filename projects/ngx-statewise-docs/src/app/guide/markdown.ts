@@ -51,6 +51,13 @@ export function renderGuide(
   const headings: GuideHeading[] = [];
   const used = new Map<string, number>();
 
+  // Every sideways-scrolling block is a landmark, and two landmarks that share
+  // a name cannot be told apart: a page with five code blocks announced five
+  // regions all called "Code sample". They are numbered in reading order, and
+  // a fenced block that names its file keeps that name instead.
+  let codeRegions = 0;
+  let tableRegions = 0;
+
   const renderer: MarkedExtension['renderer'] = {
     heading(token: Tokens.Heading) {
       const base = slugify(token.text);
@@ -76,6 +83,8 @@ export function renderGuide(
 
     code(token: Tokens.Code) {
       const { language, title } = parseFenceInfo(token.lang ?? '');
+
+      codeRegions += 1;
       const body = token.escaped ? token.text : escapeHtml(token.text);
       const languageClass = language
         ? ` class="language-${escapeAttribute(language)}"`
@@ -102,12 +111,14 @@ export function renderGuide(
         '</div>',
         // tabindex and a role: the block scrolls sideways, and a scroll
         // container no keyboard can reach fails WCAG 2.1.1.
-        `<pre class="code-block__pre" tabindex="0" role="region" aria-label="${escapeAttribute(title ?? options.codeRegionLabel)}"><code${languageClass}>${body}</code></pre>`,
+        `<pre class="code-block__pre" tabindex="0" role="region" aria-label="${escapeAttribute(title ?? `${options.codeRegionLabel} ${String(codeRegions)}`)}"><code${languageClass}>${body}</code></pre>`,
         '</div>',
       ].join('');
     },
 
     table(token: Tokens.Table) {
+      tableRegions += 1;
+
       // `display: block` on a <table> is what used to give it a scrollbar, and
       // it costs the table its semantics in the accessibility tree. A wrapper
       // scrolls instead, and it is focusable so a keyboard can drive it.
@@ -125,7 +136,7 @@ export function renderGuide(
         .join('');
 
       return [
-        `<div class="table-scroll" tabindex="0" role="region" aria-label="${escapeAttribute(options.tableRegionLabel)}">`,
+        `<div class="table-scroll" tabindex="0" role="region" aria-label="${escapeAttribute(`${options.tableRegionLabel} ${String(tableRegions)}`)}">`,
         `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`,
         '</div>',
       ].join('');

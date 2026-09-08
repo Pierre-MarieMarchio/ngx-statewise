@@ -54,6 +54,10 @@ export interface UiStrings {
   readonly homeFlowManager: string;
   readonly homeFlowManagerText: string;
   readonly homeFlowReturn: string;
+  readonly homeFlowSynchronous: string;
+  readonly homeFlowAsynchronous: string;
+  readonly homeShapeTitle: string;
+  readonly homeShapeNote: string;
   readonly homeContentsTitle: string;
   readonly homeTitle: string;
 }
@@ -108,6 +112,11 @@ const EN: UiStrings = {
   homeFlowManager: 'Manager',
   homeFlowManagerText: 'exposes the signals and dispatches, in its own scope.',
   homeFlowReturn: 'may return an action',
+  homeFlowSynchronous: 'synchronous',
+  homeFlowAsynchronous: 'asynchronous',
+  homeShapeTitle: 'What you write',
+  homeShapeNote:
+    'That is the whole surface for one feature. The rest of the guide is what happens when a flow gets harder than a login.',
   homeContentsTitle: 'Contents',
   homeTitle: 'ngx-statewise — state management for Angular',
 };
@@ -163,6 +172,11 @@ const FR: UiStrings = {
   homeFlowManagerText:
     'expose les signals et dispatche, dans sa propre portée.',
   homeFlowReturn: 'peut renvoyer une action',
+  homeFlowSynchronous: 'synchrone',
+  homeFlowAsynchronous: 'asynchrone',
+  homeShapeTitle: 'Ce que vous écrivez',
+  homeShapeNote:
+    'C’est toute la surface pour une fonctionnalité. Le reste du guide traite des flux plus retors qu’un login.',
   homeContentsTitle: 'Sommaire',
   homeTitle: 'ngx-statewise — gestion d’état pour Angular',
 };

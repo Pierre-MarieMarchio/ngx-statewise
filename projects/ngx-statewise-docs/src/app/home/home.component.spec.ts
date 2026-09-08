@@ -59,4 +59,34 @@ describe('HomeComponent', () => {
       'may return an action',
     );
   });
+
+  it('shows the code for each station, in the order the diagram draws them', () => {
+    const host = mount().nativeElement as HTMLElement;
+    const steps = [...host.querySelectorAll('.shape__step')];
+
+    expect(
+      steps.map((step) =>
+        step.querySelector('.shape__step-name')?.textContent?.trim(),
+      ),
+    ).toEqual(['Action', 'Updater', 'Effect']);
+
+    // The sample has to be the real API, or the landing page teaches something
+    // the guide then contradicts.
+    const code = steps
+      .map((step) => step.querySelector('code')?.textContent ?? '')
+      .join('\n');
+
+    expect(code).toContain('defineActionsGroup');
+    expect(code).toContain('defineUpdater');
+    expect(code).toContain('createEffect');
+  });
+
+  it('spells out what the two colours of the diagram mean', () => {
+    const host = mount().nativeElement as HTMLElement;
+    const phases = [...host.querySelectorAll('.cycle__phase')].map((phase) =>
+      phase.textContent?.trim(),
+    );
+
+    expect(phases).toEqual(['synchronous', 'asynchronous']);
+  });
 });

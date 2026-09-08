@@ -1,12 +1,16 @@
+/* The landing page runs without the guide sidebar, so it is centred in the
+   width the shell gives it rather than pinned to the left of a column that has
+   nothing in it. */
 :host {
   display: block;
-  max-width: 52rem;
+  max-width: 56rem;
+  margin-inline: auto;
 }
 
 /* --- Hero ----------------------------------------------------------------
-   The mark identifies the page; the display line is the argument. The logo is
-   deliberately not the hero — it says who, and the sentence under it says why
-   anyone should care, which is the harder of the two. */
+   Identity, argument, and the way in, in that order and all above the fold on
+   a laptop. With the diagram between the argument and the buttons, "Get
+   started" fell below 768px and the pitch read as a caption for the drawing. */
 .hero__title {
   margin: 0;
   line-height: 0;
@@ -34,15 +38,80 @@
   text-wrap: balance;
 }
 
+.hero__tagline {
+  max-width: 34rem;
+  margin: var(--space-5) 0 0;
+  color: var(--text-muted);
+  font-family: var(--font-serif);
+  font-size: var(--text-body);
+  line-height: var(--leading-prose);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.hero__install {
+  display: inline-flex;
+  align-items: center;
+  height: 2.25rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--surface-code);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  height: 2.25rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--text-strong);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  transition: var(--transition-hover);
+
+  &:hover {
+    border-color: var(--text-faint);
+    background-color: var(--surface-hover);
+    color: var(--text-strong);
+  }
+}
+
+/* Violet, not red. Red means "you are here" everywhere else on the site — on
+   the current page in the sidebar, on the current heading, on the focus ring —
+   and a primary button means the opposite of that. Violet is the colour of
+   everything that takes you somewhere. */
+.button--primary {
+  border-color: transparent;
+  background-color: var(--link);
+  color: var(--on-link);
+
+  &:hover {
+    border-color: transparent;
+    background-color: var(--link-hover);
+    color: var(--on-link);
+  }
+}
+
 /* --- The cycle -----------------------------------------------------------
    Red is the synchronous half, violet the asynchronous one, and the gradient
-   between them sits on the single arrow where the library crosses from one to
-   the other. That arrow is the whole point of the library, so it is the only
-   gradient on the site. */
+   between them sits on the one arrow where the library crosses from the first
+   to the second. See themes/_themes.scss for the rest of the convention. */
 .cycle {
   --cycle-gap: var(--space-6);
 
-  margin-top: var(--space-8);
+  margin-top: var(--space-9);
 }
 
 .cycle__title {
@@ -79,7 +148,34 @@
 
 .cycle__track {
   position: relative;
-  margin-top: var(--space-6);
+  margin-top: var(--space-5);
+}
+
+/* Two words that say what the two colours mean. Without them the reader sees
+   two red stations and one violet one and has no way of knowing why. They sit
+   on the same three-column grid as the stations, so "synchronous" ends exactly
+   where the red ends. */
+.cycle__phases {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--cycle-gap);
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.cycle__phase {
+  position: relative;
+  padding-bottom: var(--space-1);
+}
+
+.cycle__phase--sync {
+  grid-column: span 2;
+  color: var(--mark);
+}
+
+.cycle__phase--async {
+  grid-column: span 1;
+  color: var(--link);
 }
 
 .cycle__stations {
@@ -118,8 +214,21 @@
   background-color: var(--link);
 }
 
-/* The arrowhead belongs to the station being entered, at the head of the rule
-   that arrives there. */
+/* A mark per station: a dot where the track starts, an arrowhead at each of
+   the two places it arrives. Without them the eye reads one line with two
+   arrows on it rather than three stops. */
+.cycle__station--first::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--mark);
+  transform: translate(0, -50%);
+}
+
 .cycle__station--crossing::after,
 .cycle__station--last::after {
   content: '';
@@ -158,17 +267,14 @@
   text-wrap: pretty;
 }
 
-/* The way back: an effect can answer with an action, which starts the cycle
-   again. Violet where it leaves the effect, red at the head, because what
-   arrives is an action.
-
-   The legs land on the two ends of the track above — where the red rule starts
-   at Action, and where the violet one stops after Effect — so the track and
-   the way back close into one rectangle. The rectangle is the cycle. */
+/* The way back: an effect can answer with an action. Violet where it leaves
+   the effect, red at the head, because what arrives is an action. Its legs
+   land on the two ends of the track above, so the two close into one
+   rectangle, and the rectangle is the cycle. */
 .cycle__return {
   position: relative;
   height: 3rem;
-  margin: var(--space-4) 0 0;
+  margin: var(--space-3) 0 0;
 
   &::before {
     content: '';
@@ -192,11 +298,14 @@
   }
 }
 
+/* Sits under Effect, which is where the path leaves from — centred in the box
+   it read as belonging to Updater, which is the one station it has nothing to
+   do with. */
 .cycle__return-text {
   position: absolute;
-  left: 50%;
+  right: calc((100% - 2 * var(--cycle-gap)) / 6);
   bottom: 0;
-  transform: translate(-50%, 50%);
+  transform: translate(50%, 50%);
   padding: 0 var(--space-3);
   background-color: var(--surface-page);
   color: var(--text-muted);
@@ -206,8 +315,7 @@
 
 /* One orchestrated moment on the whole site: the track draws itself, station
    by station, in the direction the library runs. Declared only where movement
-   is welcome, so a reader who asked for less gets the finished diagram rather
-   than a delayed one. */
+   is welcome, so a reader who asked for less gets it finished, not delayed. */
 @media (prefers-reduced-motion: no-preference) {
   .cycle__station::before {
     transform: scaleX(0);
@@ -223,10 +331,15 @@
     animation-delay: 600ms;
   }
 
+  .cycle__station--first::after,
   .cycle__station--crossing::after,
   .cycle__station--last::after {
     opacity: 0;
     animation: cycle-appear 160ms var(--ease-out) 300ms forwards;
+  }
+
+  .cycle__station--first::after {
+    animation-delay: 120ms;
   }
 
   .cycle__station--last::after {
@@ -273,78 +386,73 @@
   }
 }
 
-/* --- Starting out ------------------------------------------------------- */
-.start {
-  margin-top: var(--space-7);
+/* --- The shape of the code -----------------------------------------------
+   The same three stations, same order, same colours, as code. A state library
+   is chosen on what it costs to use, and the page had none on it. */
+.shape {
+  margin-top: var(--space-8);
 }
 
-.start__tagline {
-  max-width: 36rem;
+.shape__title {
+  margin: 0 0 var(--space-5);
+  color: var(--text-strong);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.02em;
+}
+
+/* `minmax(0, 1fr)` and `min-width: 0`, both of them: a grid item's automatic
+   minimum size is its content's, and the content here is a `pre` whose longest
+   line does not wrap. Without these the column cannot shrink below the widest
+   line of code and the whole page scrolls sideways on a phone. */
+.shape__steps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
   margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shape__step {
+  min-width: 0;
+}
+
+.shape__step-name {
+  margin: 0 0 var(--space-2);
+  color: var(--mark);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
+}
+
+.shape__step--async .shape__step-name {
+  color: var(--link);
+}
+
+/* The one edge that ties a block back to its station on the track above. */
+.shape__step .code-block {
+  max-width: none;
+  border-left: 2px solid var(--mark);
+}
+
+.shape__step--async .code-block {
+  border-left-color: var(--link);
+}
+
+.shape__note {
+  margin: var(--space-5) 0 0;
   color: var(--text-muted);
   font-family: var(--font-serif);
   font-size: var(--text-body);
   line-height: var(--leading-prose);
 }
 
-.start__actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
-  margin-top: var(--space-5);
-}
-
-.start__install {
-  display: inline-flex;
-  align-items: center;
-  height: 2.25rem;
-  padding: 0 var(--space-4);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background-color: var(--surface-code);
-  color: var(--text);
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-}
-
-.button {
-  display: inline-flex;
-  align-items: center;
-  height: 2.25rem;
-  padding: 0 var(--space-4);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  color: var(--text-strong);
-  font-size: var(--text-base);
-  font-weight: var(--weight-medium);
-  text-decoration: none;
-  transition: var(--transition-hover);
-
-  &:hover {
-    border-color: var(--text-faint);
-    background-color: var(--surface-hover);
-    color: var(--text-strong);
-  }
-}
-
-.button--primary {
-  border-color: transparent;
-  background-color: var(--mark);
-  color: var(--on-mark);
-
-  &:hover {
-    border-color: transparent;
-    background-color: var(--mark-hover);
-    color: var(--on-mark);
-  }
-}
-
 /* --- Contents ------------------------------------------------------------
    A table of contents, not a grid of cards: a title, a summary, one row each.
    It has to hold ten entries today and about forty after the guide is split. */
 .contents {
-  margin-top: var(--space-8);
+  margin-top: var(--space-9);
 }
 
 .contents__title {
@@ -374,6 +482,11 @@
   list-style: none;
 }
 
+/* A fixed title column, not one sized to its content: each row is its own
+   grid, so `max-content` gives every row a different split and the summaries
+   come out on a ragged left edge. 11rem clears the longest title in either
+   language — "Migrating from 0.6.x" measures 150px — and one straight edge
+   down the middle is what makes a table of contents scannable. */
 .contents__link {
   display: grid;
   grid-template-columns: 11rem minmax(0, 1fr);
@@ -411,6 +524,12 @@
    The track turns on its side: the rule that ran across the top of the row
    runs down the left of the column, and the gradient with it. */
 @media (max-width: 44rem) {
+  /* Two labels over a single stacked column would name nothing. The rail's own
+     change of colour, and the station texts, carry it from here. */
+  .cycle__phases {
+    display: none;
+  }
+
   .cycle__stations {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-5);
@@ -436,6 +555,12 @@
     bottom: 0;
   }
 
+  .cycle__station--first::after {
+    top: 0;
+    left: 1px;
+    transform: translate(-50%, -50%);
+  }
+
   .cycle__station--crossing::after,
   .cycle__station--last::after {
     top: 0;
@@ -448,6 +573,12 @@
   .cycle__return {
     height: 2.25rem;
     margin-top: var(--space-6);
+  }
+
+  .cycle__return-text {
+    right: auto;
+    left: 50%;
+    transform: translate(-50%, 50%);
   }
 
   /* Same sequence, turned through ninety degrees. */

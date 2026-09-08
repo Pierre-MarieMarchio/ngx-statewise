@@ -2,6 +2,30 @@
 @use './assets/themes';
 @use './assets/tokens';
 
+/* A pair of shadows at the edges of anything that scrolls sideways, each one
+   hidden by a patch of the surface colour until there is something in that
+   direction to reach. The patches are attached to the content and the shadows
+   to the box, which is what makes them appear and disappear on their own —
+   no scroll listener, and nothing to run on a prerendered page.
+
+   Without this a table that runs off the edge of a phone looks like a table
+   that ends there. */
+@mixin scroll-shadows($surface) {
+  background:
+    linear-gradient(to right, #{$surface} 40%, transparent) 0 0 / 2.5rem 100%
+      no-repeat local,
+    linear-gradient(to left, #{$surface} 40%, transparent) 100% 0 / 2.5rem 100%
+      no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / 14%), rgb(0 0 0 / 0%)) 0
+      0 / 0.75rem 100% no-repeat scroll,
+    radial-gradient(
+        farthest-side at 100% 50%,
+        rgb(0 0 0 / 14%),
+        rgb(0 0 0 / 0%)
+      )
+      100% 0 / 0.75rem 100% no-repeat scroll;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -162,8 +186,11 @@ main:focus {
     letter-spacing: -0.028em;
   }
 
+  /* Enough to open a section, not enough to detach it: at --space-8 the gap
+     above an h2 came to four times the line height, and every section read as
+     its own page. */
   h2 {
-    margin: var(--space-8) 0 var(--space-4);
+    margin: var(--space-7) 0 var(--space-4);
     font-size: var(--text-xl);
     font-weight: var(--weight-semibold);
     letter-spacing: -0.02em;
@@ -241,15 +268,18 @@ main:focus {
 
   /* An identifier inside serif prose. Not a chip: the padded box breaks the
      line rhythm every few words, and the guide runs three or four to the
-     paragraph. A tint and the mono face are enough to say "this is code". */
+     paragraph. A tint and the mono face are enough to say "this is code".
+
+     Deliberately the same colour and weight as the prose around it. Darker or
+     heavier and every paragraph reads as speckled — worst on the migration
+     page, where most table cells are an identifier. */
   :not(pre) > code {
     padding: 0.05em 0.28em;
     border-radius: var(--radius-sm);
     background-color: var(--surface-subtle);
-    color: var(--text-strong);
+    color: inherit;
     font-family: var(--font-mono);
     font-size: 0.82em;
-    font-weight: var(--weight-medium);
     /* Long identifiers must be allowed to break, or a narrow screen scrolls. */
     overflow-wrap: break-word;
   }
@@ -267,6 +297,7 @@ main:focus {
     max-width: var(--column);
     margin: 0 0 var(--space-5);
     overflow-x: auto;
+    @include scroll-shadows(var(--surface-page));
   }
 
   table {
@@ -459,6 +490,7 @@ main:focus {
   overflow-x: auto;
   font-size: var(--text-sm);
   line-height: 1.65;
+  @include scroll-shadows(var(--surface-code));
 
   code {
     font-family: var(--font-mono);

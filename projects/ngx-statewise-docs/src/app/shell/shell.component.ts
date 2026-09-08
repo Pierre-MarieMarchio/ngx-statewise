@@ -66,6 +66,17 @@ export class ShellComponent {
   protected readonly theme = this.ui.theme;
   protected readonly navOpen = this.ui.navOpen;
 
+  /**
+   * The guide sidebar, and the button that opens it on a narrow screen. The
+   * landing page already lists every page of the guide, so showing the sidebar
+   * there would be the same links twice on one screen; every other page is a
+   * guide page and wants it. The landing page is the one that reports an empty
+   * path.
+   */
+  protected readonly showsGuideNav = computed(
+    () => this.currentPage.path().length > 0,
+  );
+
   /** The icon on the closed menu reflects what is painted, not what was picked:
       on `system` it shows the theme the system is currently asking for. */
   protected readonly themeIcon = computed(() =>

@@ -25,18 +25,6 @@
    pair in this file clears 4.5:1.
    --------------------------------------------------------------------------- */
 
-/* The gradient of the mark. Decorative, so it is the logo's exact values in
-   both themes; only text and interactive accents are re-cut for contrast. */
-:root {
-  --brand-red: #dd0031;
-  --brand-violet: #582bc3;
-  --brand-gradient: linear-gradient(
-    100deg,
-    var(--brand-red),
-    var(--brand-violet)
-  );
-}
-
 .light {
   color-scheme: light;
 
@@ -65,10 +53,12 @@
   --on-mark: #ffffff; /*  5.1:1 on --mark */
   --mark-soft: #fdeef1;
 
-  /* Links, and the asynchronous half of the flow. */
+  /* Links, and the asynchronous half of the flow. Also the primary button:
+     it takes you somewhere, which is the opposite of what red means here. */
   --link: #582bc3; /*  7.9:1 */
   --link-hover: #44209b;
   --link-soft: #f0ecfb;
+  --on-link: #ffffff; /*  8.2:1 on --link */
 
   /* Callout accents. Re-cut from the GitHub set to clear AA on the paper. */
   --danger: #b3261e; /*  6.3:1 */
@@ -110,6 +100,7 @@
   --link: #b49bff; /*  8.1:1 */
   --link-hover: #c9b7ff;
   --link-soft: #201c2e;
+  --on-link: #1b1030; /*  7.8:1 on --link */
 
   --danger: #ffb4ab; /* 11.0:1 */
   --success: #5cc79a; /*  9.0:1 */

@@ -27,7 +27,14 @@ function configure(code: LocaleCode = 'en') {
   });
 }
 
-function mount() {
+/**
+ * The shell wraps a guide page unless told otherwise. The landing page is the
+ * one that reports an empty path, and it is the one that has no sidebar, so
+ * every other test mounts as though a guide page were open.
+ */
+function mount(path = 'guide/introduction') {
+  TestBed.inject(CurrentPagePath).path.set(path);
+
   const fixture = TestBed.createComponent(ShellComponent);
   fixture.detectChanges();
 
@@ -114,10 +121,18 @@ describe('ShellComponent', () => {
     expect(host.querySelector('.layout--nav-open')).not.toBeNull();
   });
 
-  it('offers every locale, and says which one is being read', () => {
-    TestBed.inject(CurrentPagePath).path.set('guide/effects');
+  it('leaves the guide sidebar out of the landing page', () => {
+    // The landing page lists every guide page itself, so the sidebar beside it
+    // would be the same links twice on one screen.
+    const host = mount('').nativeElement as HTMLElement;
 
-    const host = mount().nativeElement as HTMLElement;
+    expect(host.querySelector('.sidebar')).toBeNull();
+    expect(host.querySelector('.header__nav-toggle')).toBeNull();
+    expect(host.querySelector('.layout--no-nav')).not.toBeNull();
+  });
+
+  it('offers every locale, and says which one is being read', () => {
+    const host = mount('guide/effects').nativeElement as HTMLElement;
     const options = host.querySelectorAll('#language-menu .menu__item');
 
     // Every locale, not only the alternates: hiding the current one leaves
@@ -136,8 +151,7 @@ describe('ShellComponent', () => {
   });
 
   it('declares a canonical URL and one alternate per locale, plus x-default', () => {
-    TestBed.inject(CurrentPagePath).path.set('guide/effects');
-    mount();
+    mount('guide/effects');
 
     const owned = document.head.querySelectorAll('link[data-docs-alternate]');
     const alternates = document.head.querySelectorAll(
@@ -159,8 +173,7 @@ describe('ShellComponent', () => {
   });
 
   it('replaces its own head links rather than piling them up', () => {
-    TestBed.inject(CurrentPagePath).path.set('guide/effects');
-    const fixture = mount();
+    const fixture = mount('guide/effects');
 
     TestBed.inject(CurrentPagePath).path.set('guide/managers');
     fixture.detectChanges();

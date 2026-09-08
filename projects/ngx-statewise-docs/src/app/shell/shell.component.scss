@@ -173,9 +173,14 @@
    registry link is the one thing here the footer does not repeat, so it is
    GitHub that goes. */
 @media (max-width: 30rem) {
+  /* The gutter narrows for the whole page, not only the header: with the two
+     out of step the wordmark and the page title sat on different left edges. */
+  :host {
+    --gutter: var(--space-4);
+  }
+
   .header {
     gap: var(--space-2);
-    padding: 0 var(--space-4);
   }
 
   .header__link:last-child {
@@ -202,13 +207,43 @@
   box-shadow: var(--shadow-raised);
   color: var(--text);
 
-  /* Anchored under the button where the browser supports it, and pinned to the
-     top right where it does not. */
+  /* The fallback: pinned under the right end of the header. */
   top: calc(var(--header-height) - var(--space-1));
   right: var(--gutter);
 
   &:popover-open {
     animation: menu-in var(--duration-fast) var(--ease-out) both;
+  }
+}
+
+/* A popover lives in the top layer, so it cannot be positioned by an ancestor
+   the way an ordinary absolute box can. Without an anchor both panels land in
+   the same place — under the last item in the header — and clicking the theme
+   button opens something three hundred pixels away from it. Each trigger names
+   itself and its panel points at that name. */
+.menu__trigger--theme {
+  anchor-name: --theme-trigger;
+}
+
+.menu__trigger--language {
+  anchor-name: --language-trigger;
+}
+
+@supports (anchor-name: --a) {
+  #theme-menu {
+    position-anchor: --theme-trigger;
+  }
+
+  #language-menu {
+    position-anchor: --language-trigger;
+  }
+
+  .menu__panel {
+    top: calc(anchor(bottom) + var(--space-2));
+    right: anchor(right);
+    left: auto;
+    /* Never off the left edge of a narrow screen. */
+    margin-left: var(--space-2);
   }
 }
 
@@ -284,6 +319,11 @@
   flex: 1;
 }
 
+.layout--no-nav {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 68rem;
+}
+
 .sidebar {
   position: sticky;
   top: var(--header-height);
@@ -301,9 +341,9 @@
   margin: var(--space-6) 0 var(--space-2);
   padding-left: var(--space-3);
   color: var(--text-strong);
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   font-weight: var(--weight-semibold);
-  letter-spacing: -0.005em;
+  letter-spacing: -0.012em;
 
   &:first-child {
     margin-top: 0;
@@ -350,10 +390,11 @@
   }
 }
 
+/* The rail and the colour, and nothing else. With a tinted row and a heavier
+   weight on top of them the current entry was louder than the heading of the
+   page it pointed at. */
 .sidebar__link--active {
-  background-color: var(--mark-soft);
   color: var(--mark);
-  font-weight: var(--weight-medium);
 
   &::before {
     height: 100%;
@@ -366,10 +407,11 @@
   padding: var(--space-7) 0 var(--space-9);
 }
 
-/* The band where the sidebar is shown but the table of contents is not: the
-   column would otherwise sit against the sidebar with all the slack on the
-   right. */
-@media (min-width: 60rem) and (max-width: 72rem) {
+/* Below 72rem the table of contents is gone, so nothing fills the right-hand
+   side and the column would sit against the left edge with all the slack on
+   the other side. It applies below 60rem too, where the sidebar has become a
+   drawer and the slack is wider still. */
+@media (max-width: 72rem) {
   .main {
     display: flex;
     justify-content: center;
