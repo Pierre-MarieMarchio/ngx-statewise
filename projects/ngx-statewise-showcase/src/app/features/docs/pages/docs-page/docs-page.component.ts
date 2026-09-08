@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { NoticeDemoComponent } from '@app/features/notice/components/notice-demo/notice-demo.component';
+import { TallyDemoComponent } from '@app/features/tally/components/tally-demo/tally-demo.component';
 
 /** One documented mechanism, with the showcase code that exercises it. */
 export interface DocsSection {
@@ -64,6 +65,25 @@ statewise.dispatch(noticeActions.raised('saved'));`,
     seenIn: 'features/notice/states/notice/notice.updater.ts',
   },
   {
+    id: 'plain-state',
+    title: 'A state needs no signals',
+    summary:
+      'An updater reads its state from the injector and mutates it; nothing in the library requires that state to be reactive. Plain properties work, and what a signal buys back is the view refreshing on its own. Below, the deferred button dispatches from a timer started outside Angular, and the numbers stay behind until something redraws.',
+    snippet: `@Injectable({ providedIn: 'root' })
+export class TallyState {
+  public total = 0;
+  public lastStep = 0;
+}
+
+export const tallyUpdater = defineUpdater(TallyState, (on) => {
+  on(tallyActions.incremented, (state, step) => {
+    state.total += step;
+    state.lastStep = step;
+  });
+});`,
+    seenIn: 'features/tally/states/tally/tally.state.ts',
+  },
+  {
     id: 'effects',
     title: 'Effects',
     summary:
@@ -101,7 +121,12 @@ other.dispatch(getAllTaskActions.request()); // misrouted: nothing runs`,
 
 @Component({
   selector: 'app-docs-page',
-  imports: [MatExpansionModule, MatIconModule, NoticeDemoComponent],
+  imports: [
+    MatExpansionModule,
+    MatIconModule,
+    NoticeDemoComponent,
+    TallyDemoComponent,
+  ],
   templateUrl: './docs-page.component.html',
   styleUrl: './docs-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -24,6 +24,10 @@
         @if (section.id === 'precedence') {
           <app-notice-demo />
         }
+
+        @if (section.id === 'plain-state') {
+          <app-tally-demo />
+        }
         <p class="docs-seen-in">
           <mat-icon class="docs-seen-in-icon icon-outlined">code</mat-icon>
           <span>{{ section.seenIn }}</span>
