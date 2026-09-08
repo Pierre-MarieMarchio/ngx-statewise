@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Task } from '@app/core/fake-api/db.data';
+import { Task } from '@shared/app-common/models';
 import { sampleTask } from '@testing/fake-managers';
 import { injectStatewise, type Statewise } from 'ngx-statewise';
 import { provideStatewiseTesting } from 'ngx-statewise/testing';

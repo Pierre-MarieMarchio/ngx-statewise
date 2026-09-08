@@ -1,4 +1,4 @@
-import { Task } from '@app/core/fake-api/db.data';
+import { Task } from '@shared/app-common/models';
 import {
   defineActionsGroup,
   defineSingleAction,

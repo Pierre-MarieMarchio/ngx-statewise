@@ -1,5 +1,5 @@
 import { Signal } from '@angular/core';
-import { Task } from '@app/core/fake-api/db.data';
+import { Task } from '@shared/app-common/models';
 import { TaskStatus } from '@shared/app-common/models';
 
 export interface ITaskManager {

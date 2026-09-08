@@ -1,4 +1,4 @@
-import { Task } from '@app/core/fake-api/db.data';
+import { Task } from '@shared/app-common/models';
 import { defineUpdater } from 'ngx-statewise';
 import { getAllTaskActions, taskReset, updateTaskActions } from './task.action';
 import { TaskState } from './task.state';
