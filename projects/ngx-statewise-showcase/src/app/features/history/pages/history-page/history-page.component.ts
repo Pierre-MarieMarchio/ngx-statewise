@@ -17,7 +17,7 @@ import {
 import { TASK_MANAGER } from '@shared/app-common/tokens';
 import { noticeActions } from '@app/features/notice/states';
 import { tallyActions, tallyUpdater } from '@app/features/tally/states';
-import { getAllTaskActions } from '@app/features/task/states/task/task.action';
+import { getAllTaskActions } from '@app/features/project/states/task/task.action';
 import { getAllProjectsActions } from '@app/features/project/states/project/project.action';
 
 /** Beyond this, a payload is cut short: some of them carry whole collections. */

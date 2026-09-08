@@ -2,7 +2,7 @@ import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { AUTH_MANAGER } from '@shared/app-common/tokens';
 import { createEffect } from 'ngx-statewise';
 import { firstValueFrom } from 'rxjs';
-import { TaskRepositoryService } from '../../../task/services';
+import { TaskRepositoryService } from '../../services';
 import { getAllTaskActions, taskReset, updateTaskActions } from './task.action';
 
 @Injectable({

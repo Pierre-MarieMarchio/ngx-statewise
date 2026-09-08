@@ -19,7 +19,7 @@ import {
   AuthManager,
   withoutCredentials,
 } from './features/auth/states';
-import { TaskEffect, TaskManager } from './features/task/states';
+import { TaskEffect, TaskManager } from './features/project/states';
 import { ProjectEffect, ProjectManager } from './features/project/states';
 import { noticeUpdater } from './features/notice/states';
 import {

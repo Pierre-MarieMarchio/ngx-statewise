@@ -36,7 +36,7 @@ export const routes: Routes = [
   {
     path: 'task',
     loadComponent: () =>
-      import('./features/task/pages/task-page/task-page.component').then(
+      import('./features/project/pages/task-page/task-page.component').then(
         (m) => m.TaskPageComponent,
       ),
     title: 'Ngx-Statewise',

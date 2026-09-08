@@ -31,7 +31,7 @@ export const DOCS_SECTIONS: DocsSection[] = [
 
 export const taskReset = defineSingleAction('TASK_RESET', emptyPayload);
 // -> TASK_RESET_ACTION`,
-    seenIn: 'features/task/states/task/task.action.ts',
+    seenIn: 'features/project/states/task/task.action.ts',
   },
   {
     id: 'updaters',
@@ -49,7 +49,7 @@ private readonly statewise = injectStatewise(taskUpdater);
 
 // reachable from any handle, for the types no manager claims
 provideStatewise({ updaters: [aGlobalUpdater] });`,
-    seenIn: 'features/task/states/task/task.updater.ts',
+    seenIn: 'features/project/states/task/task.updater.ts',
   },
   {
     id: 'precedence',
@@ -99,7 +99,7 @@ export const tallyUpdater = defineUpdater(TallyState, (on) => {
   public readonly taskCount = computed(() => this.tasks().length);
   public readonly countByStatus = computed(() => /* one per status */);
 }`,
-    seenIn: 'features/task/states/task/task.manager.ts',
+    seenIn: 'features/project/states/task/task.manager.ts',
   },
   {
     id: 'effects',
@@ -110,7 +110,7 @@ export const tallyUpdater = defineUpdater(TallyState, (on) => {
   const tasks = await firstValueFrom(this.repository.getAll(user));
   return getAllTaskActions.success(tasks);
 });`,
-    seenIn: 'features/task/states/task/task.effect.ts',
+    seenIn: 'features/project/states/task/task.effect.ts',
   },
   {
     id: 'observable-effects',
@@ -170,7 +170,7 @@ public getAllAsync(): Promise<void> {
   // settles once the effects, and the actions they returned, are done
   return this.statewise.dispatchAsync(getAllTaskActions.request());
 }`,
-    seenIn: 'features/task/states/task/task.manager.ts',
+    seenIn: 'features/project/states/task/task.manager.ts',
   },
   {
     id: 'concurrency',
@@ -182,7 +182,7 @@ public getAllAsync(): Promise<void> {
   async (task) => { ... },
   { concurrency: 'latest', key: (task) => task.id, cancelOn: taskReset },
 );`,
-    seenIn: 'features/task/states/task/task.effect.ts',
+    seenIn: 'features/project/states/task/task.effect.ts',
   },
   {
     id: 'error-recovery',
@@ -201,7 +201,7 @@ on(updateTaskActions.failure, (state, taskId) => {
   const replaced = state.pendingWrites().get(taskId);
   state.tasks.update(carrying(replaced));
 });`,
-    seenIn: 'features/task/states/task/task.updater.ts',
+    seenIn: 'features/project/states/task/task.updater.ts',
   },
   {
     id: 'rendered-state',
