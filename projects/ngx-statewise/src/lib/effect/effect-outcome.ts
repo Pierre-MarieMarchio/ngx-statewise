@@ -32,7 +32,7 @@ export type EffectOutcome =
 export async function resolveEffectOutcome(
   outcome: EffectOutcome,
 ): Promise<readonly Action[]> {
-  const awaited: unknown = isPromise(outcome) ? await outcome : outcome;
+  const awaited: unknown = isThenable(outcome) ? await outcome : outcome;
   const emitted: unknown = isObservable(awaited)
     ? await firstValueFrom(awaited, { defaultValue: undefined })
     : awaited;
@@ -40,8 +40,17 @@ export async function resolveEffectOutcome(
   return toActions(emitted);
 }
 
-function isPromise(value: unknown): value is Promise<unknown> {
-  return value instanceof Promise;
+/**
+ * Duck-typed rather than `instanceof Promise`, deliberately: `zone.js` replaces
+ * the global `Promise` with its own, while a native `async` handler returns a
+ * promise built by the intrinsic constructor. Identity would reject that
+ * promise, and the actions it carries would be taken for an action themselves
+ * and silently dropped.
+ */
+function isThenable(value: unknown): value is PromiseLike<unknown> {
+  return (
+    typeof (value as PromiseLike<unknown> | undefined)?.then === 'function'
+  );
 }
 
 function toActions(value: unknown): readonly Action[] {

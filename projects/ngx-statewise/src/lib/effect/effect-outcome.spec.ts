@@ -48,6 +48,28 @@ describe('resolveEffectOutcome', () => {
     await expectAsync(resolveEffectOutcome(EMPTY)).toBeResolvedTo([]);
   });
 
+  /**
+   * An `async` handler returns a promise built by the intrinsic constructor,
+   * while `zone.js` replaces the global one with `ZoneAwarePromise`. Recognizing
+   * a promise by identity would drop the actions of every such effect, so the
+   * mismatch is reproduced here with a constructor the promise is not an
+   * instance of.
+   */
+  it('awaits a promise that is not an instance of the global Promise', async () => {
+    const intrinsic = globalThis.Promise;
+    const outcome = intrinsic.resolve(second);
+
+    class ForeignPromise<Value> extends intrinsic<Value> {}
+    globalThis.Promise = ForeignPromise;
+
+    try {
+      expect(outcome instanceof globalThis.Promise).toBeFalse();
+      await expectAsync(resolveEffectOutcome(outcome)).toBeResolvedTo([second]);
+    } finally {
+      globalThis.Promise = intrinsic;
+    }
+  });
+
   it('propagates the failure of a promise or of an Observable', async () => {
     const failure = new Error('effect failure');
 
