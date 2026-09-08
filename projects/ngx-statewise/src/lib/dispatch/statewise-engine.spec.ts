@@ -148,7 +148,7 @@ describe('StatewiseEngine', () => {
       );
     });
 
-    it('runs the effects of a reported action, so the cascade survives', async () => {
+    it('runs none of the effects of a misrouted action', async () => {
       declareUpdaterActionTypes(['ENGINE_REPORTED_WITH_EFFECT']);
       const reporting = build('report');
       const calls: string[] = [];
@@ -161,8 +161,22 @@ describe('StatewiseEngine', () => {
         emptyScope,
       );
 
-      expect(calls).toEqual(['ran']);
+      // The effects belong to whoever owns the updater, so running them here
+      // would cascade their actions into a scope that owns nothing.
+      expect(calls).toEqual([]);
       expect(handledErrors.length).toBe(1);
+    });
+
+    it('leaves a misrouted action out of the history', async () => {
+      declareUpdaterActionTypes(['ENGINE_REPORTED_UNRECORDED']);
+      const reporting = build('report');
+
+      await reporting.execute(
+        { type: 'ENGINE_REPORTED_UNRECORDED' },
+        emptyScope,
+      );
+
+      expect(reporting.recordedActions()).toEqual([]);
     });
 
     it('accepts an action no updater ever declared', () => {
@@ -210,6 +224,77 @@ describe('StatewiseEngine', () => {
       expect(() =>
         throwing.execute({ type: 'ENGINE_GLOBALLY_OWNED' }, emptyScope),
       ).not.toThrow();
+    });
+
+    it('runs the effects of an action this scope owns', async () => {
+      declareUpdaterActionTypes(['ENGINE_OWNED_WITH_EFFECT']);
+      const recorder: Recorder = { applied: [] };
+      const calls: string[] = [];
+      const reporting = build('report');
+      effects.register('ENGINE_OWNED_WITH_EFFECT', () => {
+        calls.push('ran');
+      });
+
+      await reporting.execute(
+        { type: 'ENGINE_OWNED_WITH_EFFECT', payload: 1 },
+        scopeOf(['ENGINE_OWNED_WITH_EFFECT', recordingHandler(recorder)]),
+      );
+
+      expect(recorder.applied).toEqual([1]);
+      expect(calls).toEqual(['ran']);
+      expect(handledErrors).toEqual([]);
+    });
+
+    it('runs the effects of an action owned globally, in any scope', async () => {
+      declareUpdaterActionTypes(['ENGINE_GLOBAL_WITH_EFFECT']);
+      const recorder: Recorder = { applied: [] };
+      const calls: string[] = [];
+      const reporting = build('report');
+      globalUpdaters.set(
+        new Map([['ENGINE_GLOBAL_WITH_EFFECT', recordingHandler(recorder)]]),
+      );
+      effects.register('ENGINE_GLOBAL_WITH_EFFECT', () => {
+        calls.push('ran');
+      });
+
+      await reporting.execute(
+        { type: 'ENGINE_GLOBAL_WITH_EFFECT' },
+        emptyScope,
+      );
+
+      expect(calls).toEqual(['ran']);
+      expect(handledErrors).toEqual([]);
+    });
+
+    it('runs the effects of an action no updater claims, in any scope', async () => {
+      const calls: string[] = [];
+      const reporting = build('report');
+      effects.register('ENGINE_UNCLAIMED_WITH_EFFECT', () => {
+        calls.push('ran');
+      });
+
+      await reporting.execute(
+        { type: 'ENGINE_UNCLAIMED_WITH_EFFECT' },
+        emptyScope,
+      );
+
+      expect(calls).toEqual(['ran']);
+      expect(handledErrors).toEqual([]);
+    });
+
+    it('still runs the effects of a misrouted action when told to ignore', async () => {
+      declareUpdaterActionTypes(['ENGINE_IGNORED_WITH_EFFECT']);
+      const calls: string[] = [];
+      effects.register('ENGINE_IGNORED_WITH_EFFECT', () => {
+        calls.push('ran');
+      });
+
+      // What provideStatewiseTesting({ strict: false }) buys: a suite may
+      // exercise effects without attaching a single updater.
+      await engine.execute({ type: 'ENGINE_IGNORED_WITH_EFFECT' }, emptyScope);
+
+      expect(calls).toEqual(['ran']);
+      expect(handledErrors).toEqual([]);
     });
 
     it('stays silent when the reaction is to ignore', async () => {
