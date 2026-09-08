@@ -194,6 +194,20 @@ this.stateRollbackService.setupErrorRollback({
     seenIn: 'core/services/state-rollback.service.ts',
   },
   {
+    id: 'live-state',
+    title: 'Watching the state as it moves',
+    summary:
+      "Reading the managers' signals in a template is all it takes for a view to follow the state: the state page holds no copy and offers no refresh, it just redraws when a signal it read changes. The tally card on it is the counter-example, since plain properties notify nothing.",
+    snippet: `public readonly taskReadings = computed(() => [
+  { label: 'taskCount', value: String(this.taskManager.taskCount()) },
+  ...Object.entries(this.taskManager.countByStatus()).map(
+    ([status, count]) => ({ label: status, value: String(count) }),
+  ),
+]);`,
+    seenIn:
+      'features/live-state/pages/live-state-page/live-state-page.component.ts',
+  },
+  {
     id: 'history',
     title: 'Action history',
     summary:
