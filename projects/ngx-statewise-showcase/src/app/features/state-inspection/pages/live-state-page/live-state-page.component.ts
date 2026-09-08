@@ -12,12 +12,15 @@ import {
   PROJECT_MANAGER,
   TASK_MANAGER,
 } from '@shared/app-common/tokens';
-import { NoticeState, noticeActions } from '@app/features/notice/states';
+import {
+  NoticeState,
+  noticeActions,
+} from '@app/features/state-inspection/states';
 import {
   TallyState,
   tallyActions,
   tallyUpdater,
-} from '@app/features/tally/states';
+} from '@app/features/state-inspection/states';
 
 /** One line of a readout: a label and the value read at render time. */
 export interface StateReading {

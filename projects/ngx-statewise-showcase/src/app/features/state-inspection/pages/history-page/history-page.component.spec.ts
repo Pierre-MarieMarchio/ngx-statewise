@@ -6,8 +6,11 @@ import {
 } from 'ngx-statewise';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
 import { fakeTaskManager } from '@testing/fake-managers';
-import { noticeActions, noticeUpdater } from '@app/features/notice/states';
-import { tallyUpdater } from '@app/features/tally/states';
+import {
+  noticeActions,
+  noticeUpdater,
+} from '@app/features/state-inspection/states';
+import { tallyUpdater } from '@app/features/state-inspection/states';
 import {
   HistoryPageComponent,
   MAX_PAYLOAD_LENGTH,

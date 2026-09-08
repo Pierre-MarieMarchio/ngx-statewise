@@ -16,8 +16,8 @@ import {
   sampleTask,
   sampleUser,
 } from '@testing/fake-managers';
-import { noticeUpdater } from '@app/features/notice/states';
-import { TallyState } from '@app/features/tally/states';
+import { noticeUpdater } from '@app/features/state-inspection/states';
+import { TallyState } from '@app/features/state-inspection/states';
 import { LiveStatePageComponent } from './live-state-page.component';
 
 describe('LiveStatePageComponent', () => {

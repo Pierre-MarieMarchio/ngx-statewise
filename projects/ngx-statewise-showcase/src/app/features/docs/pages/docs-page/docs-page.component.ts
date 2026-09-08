@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
-import { NoticeDemoComponent } from '@app/features/notice/components/notice-demo/notice-demo.component';
-import { TallyDemoComponent } from '@app/features/tally/components/tally-demo/tally-demo.component';
+import { NoticeDemoComponent } from '@app/features/state-inspection/components/notice-demo/notice-demo.component';
+import { TallyDemoComponent } from '@app/features/state-inspection/components/tally-demo/tally-demo.component';
 
 /** One documented mechanism, with the showcase code that exercises it. */
 export interface DocsSection {
@@ -62,7 +62,7 @@ scope.updaters.get(actionType) ?? this.globalUpdaters.get(actionType)
 // so this reaches the global updater, owning no updater at all
 const statewise = injectStatewise();
 statewise.dispatch(noticeActions.raised('saved'));`,
-    seenIn: 'features/notice/states/notice/notice.updater.ts',
+    seenIn: 'features/state-inspection/states/notice/notice.updater.ts',
   },
   {
     id: 'plain-state',
@@ -81,7 +81,7 @@ export const tallyUpdater = defineUpdater(TallyState, (on) => {
     state.lastStep = step;
   });
 });`,
-    seenIn: 'features/tally/states/tally/tally.state.ts',
+    seenIn: 'features/state-inspection/states/tally/tally.state.ts',
   },
   {
     id: 'manager-derived-state',
@@ -234,7 +234,7 @@ public readonly isSaving = computed(
   ),
 ]);`,
     seenIn:
-      'features/live-state/pages/live-state-page/live-state-page.component.ts',
+      'features/state-inspection/pages/live-state-page/live-state-page.component.ts',
   },
   {
     id: 'history',
