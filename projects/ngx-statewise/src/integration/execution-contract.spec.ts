@@ -61,6 +61,13 @@ const concurrentActions = defineActionsGroup({
     completed: payload<string>(),
   },
 });
+const scopedActions = defineActionsGroup({
+  source: 'Scoped',
+  events: {
+    requested: payload<string>(),
+    applied: payload<string>(),
+  },
+});
 
 let effectOnlyStarted: Deferred;
 let effectOnlyGate: Deferred;
@@ -71,6 +78,7 @@ let cascadeSecondGate: Deferred;
 let cascadeFirstFinished: Deferred;
 let concurrentStarted: Map<string, Deferred>;
 let concurrentGates: Map<string, Deferred>;
+let scopedEffectRuns: string[];
 
 @Injectable()
 class ContractEffects {
@@ -110,6 +118,12 @@ class ContractEffects {
     },
   );
 
+  private readonly scoped = createEffect(scopedActions.requested, (value) => {
+    scopedEffectRuns.push(value);
+
+    return scopedActions.applied(value);
+  });
+
   private readonly concurrent = createEffect(
     concurrentActions.started,
     async (value) => {
@@ -128,6 +142,13 @@ function completionUpdater(token: InjectionToken<CompletionState>) {
     });
   });
 }
+
+const scopedUpdater = defineUpdater(FIRST_STATE, (on) => {
+  on(scopedActions.requested, () => undefined);
+  on(scopedActions.applied, (state, value) => {
+    state.completed.push(value);
+  });
+});
 
 const failingUpdater = defineUpdater(FIRST_STATE, (on) => {
   on(failingUpdaterAction, () => {
@@ -155,6 +176,7 @@ describe('public execution contract', () => {
     cascadeFirstFinished = deferred();
     concurrentStarted = new Map();
     concurrentGates = new Map();
+    scopedEffectRuns = [];
     firstState = { completed: [] };
     secondState = { completed: [] };
     handledErrors = [];
@@ -251,6 +273,36 @@ describe('public execution contract', () => {
     await expectAsync(
       failing.dispatchAsync(failingUpdaterAction()),
     ).toBeRejectedWithError('unexpected updater failure');
+  });
+
+  describe('effects belong to the manager owning the action', () => {
+    it('runs them for the manager that owns the updater', async () => {
+      const owner = manager(scopedUpdater);
+
+      await owner.dispatchAsync(scopedActions.requested('kept'));
+
+      expect(scopedEffectRuns).toEqual(['kept']);
+      expect(firstState.completed).toEqual(['kept']);
+    });
+
+    it('runs none of them for a manager that owns nothing of it', async () => {
+      const stranger = manager(completionUpdater(SECOND_STATE));
+
+      await expectAsync(
+        stranger.dispatchAsync(scopedActions.requested('leaked')),
+      ).toBeRejectedWithError(/No updater in scope for "SCOPED_REQUESTED"/);
+
+      // The effect never ran, so nothing cascaded into the wrong scope.
+      expect(scopedEffectRuns).toEqual([]);
+      expect(firstState.completed).toEqual([]);
+      expect(secondState.completed).toEqual([]);
+    });
+
+    it('keeps running them for an action no updater claims', async () => {
+      await expectAsync(
+        statewise.dispatchAsync(emptyObservableAction()),
+      ).toBeResolved();
+    });
   });
 
   it('isolates the scopes of concurrent dispatches of the same action type', async () => {

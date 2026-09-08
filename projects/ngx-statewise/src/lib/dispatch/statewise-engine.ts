@@ -6,6 +6,7 @@ import { EffectRegistry } from '../effect/effect-registry';
 import { PendingEffects } from '../effect/pending-effects';
 import type { RegisteredEffect } from '../effect/registered-effect';
 import { isUpdaterActionTypeDeclared } from '../updater/declared-action-types';
+import type { StateBoundHandler } from '../updater/updater-definition';
 import { ActionHistory } from './action-history';
 import type { DispatchScope } from './dispatch-scope';
 import { GlobalUpdaterRegistry } from './global-updater-registry';
@@ -37,7 +38,17 @@ export class StatewiseEngine {
    * surfaces at the call site instead of being buried in a rejected promise.
    */
   public execute(action: Action, scope: DispatchScope): Promise<void> {
-    this.applyUpdater(action, scope);
+    const handler = this.resolveHandler(action.type, scope);
+
+    if (this.isMisrouted(action.type, handler)) {
+      this.reportMisrouted(action.type);
+
+      // Nothing of this action belongs to this scope, its effects included:
+      // running them here would cascade their actions into the wrong scope.
+      return Promise.resolve();
+    }
+
+    handler?.apply(action.payload);
     this.actionHistory.record(action);
 
     return this.runEffects(action, scope);
@@ -58,34 +69,42 @@ export class StatewiseEngine {
     return this.actionHistory.snapshot();
   }
 
-  /** Applies the single handler owning this action type, if any. */
-  private applyUpdater(action: Action, scope: DispatchScope): void {
-    const handler =
-      scope.updaters.get(action.type) ?? this.globalUpdaters.get(action.type);
-
-    if (handler === undefined) {
-      this.reportMisrouted(action.type);
-      return;
-    }
-
-    handler.apply(action.payload);
+  /** The single handler owning this action type in this scope, if any. */
+  private resolveHandler(
+    actionType: string,
+    scope: DispatchScope,
+  ): StateBoundHandler | undefined {
+    return (
+      scope.updaters.get(actionType) ?? this.globalUpdaters.get(actionType)
+    );
   }
 
   /**
-   * An action type claimed by an updater but absent from this scope means the
-   * dispatch went through the wrong manager: say so rather than do nothing.
+   * Whether the dispatch reached a scope that owns nothing of this action.
    *
+   * An action type claimed by an updater this scope cannot resolve belongs to
+   * another manager. A type no updater claims belongs to every scope — that is
+   * an effect-only action, and it stays valid everywhere.
+   *
+   * `'ignore'` opts out of the whole notion, which is what a test suite
+   * exercising effects without attaching any updater asks for.
+   */
+  private isMisrouted(
+    actionType: string,
+    handler: StateBoundHandler | undefined,
+  ): boolean {
+    return (
+      handler === undefined &&
+      this.misroutedDispatch !== 'ignore' &&
+      isUpdaterActionTypeDeclared(actionType)
+    );
+  }
+
+  /**
    * Reporting rather than throwing keeps a production dispatch from taking the
-   * application down, while still surfacing a state update that never happened.
+   * application down, while still surfacing an action that did nothing.
    */
   private reportMisrouted(actionType: string): void {
-    if (
-      this.misroutedDispatch === 'ignore' ||
-      !isUpdaterActionTypeDeclared(actionType)
-    ) {
-      return;
-    }
-
     if (this.misroutedDispatch === 'throw') {
       throw misroutedActionError(actionType);
     }

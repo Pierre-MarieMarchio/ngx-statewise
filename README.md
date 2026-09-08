@@ -336,6 +336,8 @@ owning that updater, or declare that updater globally with
 provideStatewise({ updaters: [...] }).
 ```
 
+A misrouted dispatch does nothing at all: no state update, and none of the effects registered for that action type either. Those effects belong to whoever owns the updater, and running them here would cascade their actions into a scope that owns nothing of them.
+
 In practice this means an effect must not return another feature's action. Inject that feature's manager and call it instead:
 
 ```typescript
@@ -490,6 +492,20 @@ export const appConfig: ApplicationConfig = {
 
 `createEffect` must be called in an injection context — as a field initializer or in the constructor of an injectable class. Calling it elsewhere throws immediately rather than registering an effect that would never run.
 
+##### Scope
+
+An effect runs for the dispatches of the manager owning its action's updater, and only those. Registration is application-wide, visibility is not: the owner of the updater owns the effects too.
+
+```typescript
+// AUTH_LOADED is handled by authUpdater, attached to AuthManager.
+createEffect(authActions.loaded, () => { ... });
+
+authManager.dispatch(authActions.loaded());   // ✅ the effect runs
+taskManager.dispatch(authActions.loaded());   // ❌ misrouted: nothing runs
+```
+
+An action type no updater claims has no owner, so its effects run for every manager — that is an effect-only action, and it stays valid everywhere. An updater declared globally through `provideStatewise({ updaters: [...] })` is owned by every scope, so its effects run everywhere too.
+
 ##### Lifecycle
 
 A registration lives as long as the injector that created it. An effect class scoped to a component or to a lazy route is unregistered when that injector is destroyed, instead of piling up one more copy of its effects on every instantiation.
@@ -518,6 +534,8 @@ Ignoring the returned handle is perfectly fine: destruction of the owning inject
 - Avoid Infinite Loops: Be careful not to return the input action from the effect (e.g., avoid returning the same action that triggered the effect). This can lead to infinite loops of action dispatching.
 
 - Side Effects: Effects are designed for side effects like API calls, routing, or other asynchronous operations. They should not directly modify the state. That’s the role of Updaters.
+
+- Scope: An effect only runs for the manager owning the updater of its action. Dispatching that action through another manager runs neither the updater nor the effect.
 
 - Effect Registration: don't forget to declare your effect classes in `provideStatewise({ effects: [...] })` so they are instantiated and ready to handle actions.
 
@@ -768,7 +786,7 @@ export class AuthManager {
 }
 ```
 
-What this buys you: two managers can now dispatch the same action type concurrently without sharing state or observation, `dispatchAsync` really awaits the whole cascade including nested effects, an unexpected failure is no longer swallowed, a misrouted dispatch is reported instead of silently skipped, and effects die with the injector that registered them.
+What this buys you: two managers can now dispatch the same action type concurrently without sharing state or observation, `dispatchAsync` really awaits the whole cascade including nested effects, an unexpected failure is no longer swallowed, a misrouted dispatch is reported instead of silently skipped, effects run only for the manager owning their action, and effects die with the injector that registered them.
 
 ## Benefits
 
