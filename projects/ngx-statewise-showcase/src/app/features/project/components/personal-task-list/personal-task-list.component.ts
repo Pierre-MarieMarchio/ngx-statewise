@@ -9,8 +9,8 @@ import {
 } from '@angular/core';
 import { TaskListColumnItem } from '../../models';
 import { MatTableModule } from '@angular/material/table';
-import { AUTH_MANAGER } from '@shared/app-common/tokens';
 import { Task } from '@shared/app-common/models';
+import { AssignedTasksService } from '../../services';
 
 @Component({
   selector: 'app-personal-task-list',
@@ -22,21 +22,9 @@ import { Task } from '@shared/app-common/models';
 export class PersonalTaskListComponent implements OnInit {
   public allTasks = input<Task[]>();
   public taskSelected = output<Task>();
-  private readonly authManager = inject(AUTH_MANAGER);
+  private readonly assigned = inject(AssignedTasksService);
 
-  public tasks = computed(() => {
-    const tasks = this.allTasks() || [];
-    const currentUser = this.authManager.user();
-    const currentUserId = currentUser?.userId;
-
-    if (!currentUserId || !tasks.length) {
-      return [];
-    }
-
-    return tasks.filter((task) =>
-      task.assignedUserIds?.includes(currentUserId),
-    );
-  });
+  public tasks = computed(() => this.assigned.ofCurrentUser(this.allTasks()));
 
   public displayedColumns: string[] = [];
   public readonly columns: TaskListColumnItem[] = [

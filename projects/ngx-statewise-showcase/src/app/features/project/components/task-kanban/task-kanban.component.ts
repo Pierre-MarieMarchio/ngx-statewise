@@ -20,8 +20,9 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { KanbanCardComponent } from '@shared/app-common/components';
-import { STATUSES, Task, TaskStatus } from '@shared/app-common/models';
+import { Task } from '@shared/app-common/models';
 import { PROJECT_MANAGER } from '@shared/app-common/tokens';
+import { TaskBoardService, TaskSelectionService } from '../../services';
 
 @Component({
   selector: 'app-task-kanban',
@@ -43,9 +44,9 @@ export class TaskKanbanComponent {
   public taskChanged = output<Task>();
 
   public readonly projectManager = inject(PROJECT_MANAGER);
+  private readonly board = inject(TaskBoardService);
+  private readonly selection = inject(TaskSelectionService);
   private readonly errorHandler = inject(ErrorHandler);
-
-  private readonly statuses = STATUSES;
 
   /**
    * The order the board shows. Reordering inside one column is presentation
@@ -57,51 +58,45 @@ export class TaskKanbanComponent {
   private readonly orderedTasks = linkedSignal(() => this.tasks() ?? []);
 
   public readonly columns = computed(() =>
-    this.statuses.map((status) => ({
+    this.board.columns.map((status) => ({
       id: status,
-      tasks: this.orderedTasks().filter((task) => task.status === status),
+      tasks: this.selection.inStatus(this.orderedTasks(), status),
     })),
   );
 
-  /**
-   * The keyboard path the CDK does not provide. Dragging is the only way a
-   * mouse has, and it was the only way at all: a card was a `cdkDrag` with no
-   * tabindex and no key handler, which made the showcase's main interaction
-   * unusable without a pointer.
-   */
-  public moveTask(task: Task, offset: number): void {
-    const from = this.statuses.indexOf(task.status);
-    const to = from + offset;
+  public onTaskDrop(event: CdkDragDrop<Task[]>): void {
+    if (event.previousContainer === event.container) {
+      this.reorderShownTasks(event);
 
-    if (to < 0 || to >= this.statuses.length) {
       return;
     }
 
-    this.applyMove({ ...task, status: this.statuses[to] });
+    this.dropInto(event);
+  }
+
+  /** Keyboard path: the CDK provides none, and this board is the main demo. */
+  public moveTask(task: Task, offset: number): void {
+    const moved = this.board.movedBy(task, offset);
+
+    if (moved) {
+      this.taskChanged.emit(moved);
+    }
   }
 
   /** What a screen reader reads on a card, and how to move it. */
   public cardLabel(task: Task): string {
     return `${task.title}, ${task.status}. Use the left and right arrow keys to move it between columns.`;
   }
-  private applyMove(task: Task): void {
-    this.taskChanged.emit(task);
+
+  public getProjectFilteredTasks(
+    projectId: string,
+    tasksToFilter: readonly Task[] | null | undefined,
+  ): Task[] {
+    return this.selection.ofProject(tasksToFilter, projectId);
   }
 
-  public onTaskDrop(event: CdkDragDrop<Task[]>): void {
-    const isSameContainer = event.previousContainer === event.container;
-
-    if (isSameContainer) {
-      this.handleSameColumnMove(event);
-    } else {
-      this.handleCrossColumnMove(event);
-    }
-  }
-
-  private handleSameColumnMove(event: CdkDragDrop<Task[]>): void {
-    const columnTasks = [...event.container.data];
-    moveItemInArray(columnTasks, event.previousIndex, event.currentIndex);
-    this.reorderShownTasks(columnTasks);
+  public getConnectedDropListIds(projectId: string): string[] {
+    return this.board.connectedDropListIds(projectId);
   }
 
   /**
@@ -110,7 +105,10 @@ export class TaskKanbanComponent {
    * rearranges one column, so walk the shown tasks and hand back that column's
    * tasks in their new order as their slots come up.
    */
-  private reorderShownTasks(columnTasks: Task[]): void {
+  private reorderShownTasks(event: CdkDragDrop<Task[]>): void {
+    const columnTasks = [...event.container.data];
+    moveItemInArray(columnTasks, event.previousIndex, event.currentIndex);
+
     const columnIds = new Set(columnTasks.map((task) => task.id));
     const reordered = [...columnTasks];
 
@@ -121,14 +119,14 @@ export class TaskKanbanComponent {
     );
   }
 
-  private handleCrossColumnMove(event: CdkDragDrop<Task[]>): void {
-    const id = event.container.id;
-    const newStatus = id.slice('dropList_'.length, id.lastIndexOf('_'));
+  private dropInto(event: CdkDragDrop<Task[]>): void {
+    const column = this.board.columnOfDropList(event.container.id);
 
-    if (!this.statuses.includes(newStatus as TaskStatus)) {
+    if (column === null) {
       this.errorHandler.handleError(
-        new Error(`invalid status detected: ${newStatus}`),
+        new Error(`invalid drop list id: ${event.container.id}`),
       );
+
       return;
     }
 
@@ -139,31 +137,13 @@ export class TaskKanbanComponent {
       event.currentIndex,
     );
 
-    this.applyMove(this.updateTask(newStatus, event));
-  }
+    const dropped = event.container.data[event.currentIndex];
+    const moved = this.board.inColumn(dropped, column);
 
-  private updateTask(
-    newStatus: string,
-    event: CdkDragDrop<Task[], Task[], Task>,
-  ) {
-    const movedTask = event.container.data[event.currentIndex];
-    const updatedTask: Task = {
-      ...movedTask,
-      status: newStatus as TaskStatus,
-    };
+    // The array CDK mutated is what the template is iterating, so the card
+    // has to carry its new column until the state answers.
+    event.container.data[event.currentIndex] = moved;
 
-    event.container.data[event.currentIndex] = updatedTask;
-    return updatedTask;
-  }
-
-  public getProjectFilteredTasks(
-    projectId: string,
-    tasksToFilter: Task[],
-  ): Task[] {
-    return tasksToFilter?.filter((task) => task.projectId === projectId) || [];
-  }
-
-  public getConnectedDropListIds(projectId: string) {
-    return this.statuses.map((status) => `dropList_${status}_${projectId}`);
+    this.taskChanged.emit(moved);
   }
 }
