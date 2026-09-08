@@ -1,4 +1,9 @@
-import { Component, signal, ViewChild } from '@angular/core';
+import {
+  Component,
+  signal,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   DashboardKanbanComponent,
   DashboardTaskListComponent,
@@ -19,6 +24,7 @@ import { DashboardUserPickerComponent } from '../../components/dashboard-user-pi
   ],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'page',
   },

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,6 +14,7 @@ import { ThemeService } from './theme.service';
     MatIconModule,
     MatButtonModule,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <button (click)="togleTheme()" mat-icon-button class="m-1 color-secondary">
       <mat-icon class="color-secondary icon-outlined">{{

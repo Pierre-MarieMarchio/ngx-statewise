@@ -1,4 +1,9 @@
-import { Component, inject, input } from '@angular/core';
+import {
+  Component,
+  inject,
+  input,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { RouterModule } from '@angular/router';
@@ -17,6 +22,7 @@ import { NavigationItem } from '@app/core/models';
     MatButtonModule,
   ],
   templateUrl: './navigation.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './navigation.component.scss',
 })
 export class NavigationComponent {

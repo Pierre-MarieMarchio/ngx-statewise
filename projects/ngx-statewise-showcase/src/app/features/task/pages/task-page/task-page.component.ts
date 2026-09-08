@@ -1,4 +1,10 @@
-import { Component, inject, signal, ViewChild } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { Task } from '@shared/app-common/models';
@@ -26,6 +32,7 @@ import {
   ],
   templateUrl: './task-page.component.html',
   styleUrl: './task-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'page',
   },

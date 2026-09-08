@@ -1,4 +1,11 @@
-import { Component, computed, inject, signal, OnDestroy } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  signal,
+  OnDestroy,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   CdkDragDrop,
   moveItemInArray,
@@ -26,6 +33,7 @@ import {
     MatExpansionModule,
   ],
   templateUrl: './dashboard-kanban.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './dashboard-kanban.component.scss',
 })
 export class DashboardKanbanComponent implements OnDestroy {

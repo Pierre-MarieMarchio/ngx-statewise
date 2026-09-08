@@ -1,4 +1,10 @@
-import { Component, inject, output, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  output,
+  computed,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Task } from '@shared/app-common/models';
 import { AUTH_MANAGER, TASK_MANAGER } from '@shared/app-common/tokens';
 import { DashboardTaskListColumnItem } from '../../models';
@@ -9,17 +15,25 @@ import { MatCardModule } from '@angular/material/card';
   selector: 'app-dashboard-task-list',
   imports: [MatTableModule, MatCardModule],
   templateUrl: './dashboard-task-list.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './dashboard-task-list.component.scss',
 })
-export class DashboardTaskListComponent implements OnInit {
+export class DashboardTaskListComponent {
   public taskSelected = output<Task>();
 
   private readonly authManager = inject(AUTH_MANAGER);
   private readonly taskManager = inject(TASK_MANAGER);
 
   public tasks = this.taskManager.tasks;
-  public columns: DashboardTaskListColumnItem[] = [];
-  public displayedColumns: string[] = [];
+  public readonly columns = computed(() =>
+    this.allColumns.filter(
+      (col) =>
+        !col.requiredRole || col.requiredRole === this.authManager.user()?.role,
+    ),
+  );
+  public readonly displayedColumns = computed(() =>
+    this.columns().map((col) => col.columnDef),
+  );
 
   private readonly allColumns: DashboardTaskListColumnItem[] = [
     {
@@ -44,14 +58,6 @@ export class DashboardTaskListComponent implements OnInit {
       requiredRole: 'admin',
     },
   ];
-
-  ngOnInit() {
-    this.columns = this.allColumns.filter(
-      (col) =>
-        !col.requiredRole || col.requiredRole === this.authManager.user()?.role,
-    );
-    this.displayedColumns = this.columns.map((c) => c.columnDef);
-  }
 
   selectTask(task: Task) {
     this.taskSelected.emit(task);

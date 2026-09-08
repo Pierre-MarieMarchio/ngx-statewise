@@ -1,4 +1,9 @@
-import { Component, effect, inject } from '@angular/core';
+import {
+  Component,
+  effect,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { ThemeService } from './shared/reusable/dark-mode/theme.service';
@@ -10,6 +15,7 @@ import { navigationItems } from './config/navigation.configuration';
   selector: 'app-root',
   imports: [RouterOutlet, NavigationComponent, MatProgressBarModule],
   templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './app.component.scss',
 })
 export class AppComponent {

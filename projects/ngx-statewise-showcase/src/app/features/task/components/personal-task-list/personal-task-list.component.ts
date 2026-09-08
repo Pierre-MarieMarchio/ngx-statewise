@@ -5,6 +5,7 @@ import {
   input,
   output,
   OnInit,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { TaskListColumnItem } from '../../models';
 import { MatTableModule } from '@angular/material/table';
@@ -15,6 +16,7 @@ import { Task } from '@shared/app-common/models';
   selector: 'app-personal-task-list',
   imports: [MatTableModule],
   templateUrl: './personal-task-list.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './personal-task-list.component.scss',
 })
 export class PersonalTaskListComponent implements OnInit {

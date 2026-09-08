@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { CdkDrag } from '@angular/cdk/drag-drop';
 
@@ -6,6 +6,7 @@ import { CdkDrag } from '@angular/cdk/drag-drop';
   selector: 'app-kanban-card',
   imports: [MatCardModule, CdkDrag],
   templateUrl: './kanban-card.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './kanban-card.component.scss',
 })
 export class KanbanCardComponent<T extends KanbanCardData> {

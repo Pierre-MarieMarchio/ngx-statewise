@@ -1,10 +1,11 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 
 @Component({
   selector: 'app-side-panel',
   imports: [MatSidenavModule],
   templateUrl: './side-panel.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './side-panel.component.scss',
 })
 export class SidePanelComponent {
