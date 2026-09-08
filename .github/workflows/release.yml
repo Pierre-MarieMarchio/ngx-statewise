@@ -1,0 +1,138 @@
+name: Release
+
+# next publishes a beta, main publishes a stable. Both are driven by the
+# conventional-commit history since the last tag, by release-it.
+on:
+  push:
+    branches: [next, main]
+  workflow_dispatch:
+
+# Never cancel a run that may already have published: queue instead.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write # version commit, tag, GitHub release
+  id-token: write # npm provenance
+
+jobs:
+  release:
+    name: Release ${{ github.ref_name == 'main' && 'stable' || 'beta' }}
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          # release-it reads the whole history to decide the version.
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+          # Writes the .npmrc that picks up NODE_AUTH_TOKEN below.
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate workspace
+        run: npm run check
+
+      - name: Fail if the checkout is behind the branch
+        run: |
+          git fetch origin "${{ github.ref_name }}"
+          if [ "$(git rev-list --count HEAD..FETCH_HEAD)" != "0" ]; then
+            echo "::error::${{ github.ref_name }} moved since this run started. Re-run once it settles."
+            exit 1
+          fi
+
+      - name: Configure Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Version, tag, publish and release
+        id: release
+        run: npm run ${{ github.ref_name == 'main' && 'release:stable' || 'release:beta' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # The provenance attestation the id-token permission above pays for.
+          NPM_CONFIG_PROVENANCE: true
+
+      - name: Summarise the run
+        if: always()
+        run: |
+          {
+            echo "## Release"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Branch | \`${{ github.ref_name }}\` |"
+            echo "| Channel | \`${{ github.ref_name == 'main' && 'latest' || 'beta' }}\` |"
+            echo "| Version | \`$(node -p "require('./projects/ngx-statewise/package.json').version")\` |"
+            echo "| Outcome | ${{ job.status }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  back-merge:
+    name: Back-merge main
+    needs: release
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    # A release commit pushed with GITHUB_TOKEN does not trigger workflows, so
+    # this cannot live in a `push: main` workflow of its own — it has to hang
+    # off the run that created the commit.
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [dev, next]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Open a back-merge pull request into ${{ matrix.target }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          git fetch --quiet origin "$TARGET" main
+
+          if [ "$(git rev-list --count "origin/$TARGET..origin/main")" = "0" ]; then
+            echo "\`$TARGET\` already contains \`main\`, nothing to back-merge." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          open=$(gh pr list --base "$TARGET" --head main --state open --json number --jq 'length')
+          if [ "$open" != "0" ]; then
+            echo "A back-merge pull request into \`$TARGET\` is already open." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          {
+            printf 'The release on `main` bumped the version and wrote the changelog. Those\n'
+            printf 'commits have to come back, or this branch keeps releasing from a version\n'
+            printf 'that no longer matches `main`.\n\n'
+            printf '**Merge this with a merge commit, never a squash** — squashing rewrites the\n'
+            printf '`BREAKING CHANGE` footers that drive the next version.\n\n'
+            printf 'On `next` a conflict on `package.json` or `CHANGELOG.md` is expected, since it\n'
+            printf 'still carries the prerelease version. Resolve in favour of `main`.\n'
+          } > body.md
+
+          url=$(gh pr create --base "$TARGET" --head main \
+            --title "chore: back-merge main into $TARGET" \
+            --body-file body.md)
+          echo "Opened $url" >> "$GITHUB_STEP_SUMMARY"

@@ -17,8 +17,6 @@ export default tseslint.config(
       'node_modules/**',
       '.angular/**',
       'eslint.config.js',
-      '**/karma.conf.cjs',
-      '.scripts/**',
     ],
   },
 
