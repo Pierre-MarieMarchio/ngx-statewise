@@ -40,7 +40,11 @@ export class ProjectEffect {
      * Two reloads racing each other have one useful answer between them. And
      * since this effect hands over an Observable, abandoning it unsubscribes
      * the request rather than merely ignoring its answer.
+     *
+     * `mustAnswer` covers the other end of the same pipeline: every branch
+     * above produces an action, so a run answering nothing means the source
+     * ran dry, and that would leave `isLoading` set with nothing to clear it.
      */
-    { concurrency: 'latest', cancelOn: projectReset },
+    { concurrency: 'latest', cancelOn: projectReset, mustAnswer: true },
   );
 }

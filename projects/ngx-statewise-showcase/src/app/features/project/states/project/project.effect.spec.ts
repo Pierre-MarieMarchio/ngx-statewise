@@ -100,17 +100,22 @@ describe('ProjectEffect', () => {
   });
 
   /**
-   * An empty source resolves to no action at all, so nothing settles the
-   * request: the state stays loading rather than being reported as failed.
+   * An empty source resolves to no action at all, and nothing settles the
+   * request. The effect declares `mustAnswer` precisely because every branch
+   * of its pipeline produces an action, so this is reported rather than left
+   * to be discovered through a spinner that never stops.
    */
-  it('leaves the request unanswered when the source completes empty', async () => {
+  it('reports a source that completes without emitting', async () => {
     source = EMPTY;
     setUp();
 
-    await statewise.dispatchAsync(getAllProjectsActions.request());
+    await expect(
+      statewise.dispatchAsync(getAllProjectsActions.request()),
+    ).rejects.toThrow(/produced no action/);
 
+    // Reported, not repaired: settling the state stays the application's job,
+    // through a failure action of its own.
     expect(projectState.projects()).toBeNull();
-    expect(projectState.isError()).toBe(false);
     expect(projectState.isLoading()).toBe(true);
   });
 

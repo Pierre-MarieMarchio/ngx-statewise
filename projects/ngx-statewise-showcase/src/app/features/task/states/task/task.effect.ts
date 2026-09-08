@@ -34,7 +34,7 @@ export class TaskEffect {
         return getAllTaskActions.failure();
       }
     },
-    { concurrency: 'latest', cancelOn: taskReset },
+    { concurrency: 'latest', cancelOn: taskReset, mustAnswer: true },
   );
 
   /**
@@ -60,6 +60,11 @@ export class TaskEffect {
         return updateTaskActions.failure(task.id);
       }
     },
-    { concurrency: 'latest', key: (task) => task.id, cancelOn: taskReset },
+    {
+      concurrency: 'latest',
+      key: (task) => task.id,
+      cancelOn: taskReset,
+      mustAnswer: true,
+    },
   );
 }

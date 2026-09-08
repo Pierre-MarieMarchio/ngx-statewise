@@ -58,7 +58,7 @@ export class AuthEffect {
         return loginActions.failure();
       }
     },
-    { concurrency: 'latest' },
+    { concurrency: 'latest', mustAnswer: true },
   );
 
   public readonly loginSuccessEffect = createEffect(
@@ -115,6 +115,7 @@ export class AuthEffect {
         return authenticateActions.failure();
       }
     },
+    { mustAnswer: true },
   );
 
   public readonly authenticateFailureEffect = createEffect(
@@ -158,6 +159,7 @@ export class AuthEffect {
         return logoutActions.failure();
       }
     },
+    { mustAnswer: true },
   );
 
   public readonly logoutSuccessEffect = createEffect(

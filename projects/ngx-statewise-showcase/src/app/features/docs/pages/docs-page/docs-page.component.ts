@@ -116,12 +116,15 @@ export const tallyUpdater = defineUpdater(TallyState, (on) => {
     id: 'observable-effects',
     title: 'An effect may hand back an Observable',
     summary:
-      'The engine reads a one-shot source itself, so a repository call needs no unwrapping in the effect. Only the first emission counts, and a source completing without emitting is a result without action — which is not the same as firstValueFrom, whose EmptyError would turn that into a failure.',
-    snippet: `createEffect(getAllProjectsActions.request, () =>
-  this.projectRepository.getAll(user).pipe(
-    map((projects) => getAllProjectsActions.success(projects)),
-    catchError(() => of(getAllProjectsActions.failure())),
-  ),
+      'The engine reads a one-shot source itself, so a repository call needs no unwrapping in the effect. Only the first emission counts, and a source completing without emitting is a result without action — which is not the same as firstValueFrom, whose EmptyError would turn that into a failure. That silence is the trap: nothing would answer the request, and isLoading would stay set with nothing to clear it. Every branch of this pipeline produces an action, so the effect says so with mustAnswer and a source running dry is reported instead.',
+    snippet: `createEffect(
+  getAllProjectsActions.request,
+  () =>
+    this.projectRepository.getAll(user).pipe(
+      map((projects) => getAllProjectsActions.success(projects)),
+      catchError(() => of(getAllProjectsActions.failure())),
+    ),
+  { mustAnswer: true },
 );`,
     seenIn: 'features/project/states/project/project.effect.ts',
   },
