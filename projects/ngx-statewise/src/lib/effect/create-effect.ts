@@ -47,6 +47,20 @@ interface EffectRunPolicy {
    * started, never those of another one — and it abandons every key at once.
    */
   readonly cancelOn?: AnyActionCreator | readonly AnyActionCreator[];
+  /**
+   * Declares that this effect always answers with an action, so a run
+   * producing none is a failure rather than a result.
+   *
+   * A one-shot source completing without emitting yields no action, and that
+   * reaches the engine as a deliberate absence of one. Nothing then answers
+   * the request, so whatever its updater set on the way in — an `isLoading`,
+   * typically — is never cleared, and nothing says so. Declare this on any
+   * effect whose pipeline is supposed to always produce something; leave it
+   * off for an effect that only performs a side effect.
+   *
+   * @default false
+   */
+  readonly mustAnswer?: boolean;
 }
 
 /**
@@ -138,6 +152,7 @@ function toRegisteredEffect<Creator extends AnyActionCreator>(
         ? () => SINGLE_GROUP
         : (dispatched) => key(dispatched.payload),
     cancelledBy: cancellingActionTypes(policy?.cancelOn),
+    mustAnswer: policy?.mustAnswer ?? false,
   };
 }
 

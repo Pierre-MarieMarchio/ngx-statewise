@@ -70,6 +70,19 @@ function rejectedEffectShapes(): void {
     concurrency: 'latest',
     key: (value) => String(value),
     cancelOn: [typedActions.cleared],
+    mustAnswer: true,
+  });
+
+  // An action with no payload takes every option but the key.
+  createEffect(typedActions.cleared, () => undefined, {
+    concurrency: 'first',
+    cancelOn: typedActions.assigned,
+    mustAnswer: true,
+  });
+
+  createEffect(typedActions.assigned, () => undefined, {
+    // @ts-expect-error the promise to answer is a flag, not a predicate
+    mustAnswer: () => true,
   });
 
   createEffect(typedActions.assigned, () => undefined, {

@@ -121,6 +121,19 @@ describe('createEffect', () => {
 
       expect(effect.concurrency).toBe('parallel');
       expect(effect.cancelledBy).toEqual([]);
+      expect(effect.mustAnswer).toBe(false);
+    });
+
+    it('carries the promise to always answer with an action', () => {
+      TestBed.runInInjectionContext(() => {
+        createEffect(actions.withPayload, () => undefined, {
+          mustAnswer: true,
+        });
+      });
+
+      const [effect] = registry.triggeredBy(actions.withPayload.type);
+
+      expect(effect.mustAnswer).toBe(true);
     });
 
     it('carries the declared concurrency policy', () => {

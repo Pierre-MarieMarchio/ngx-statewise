@@ -20,6 +20,12 @@ export interface RegisteredEffect {
   readonly keyOf: (action: Action) => string;
   /** Action types abandoning the runs of this effect, possibly none. */
   readonly cancelledBy: readonly string[];
+  /**
+   * Whether a run producing no action at all is a failure. Declared by the
+   * effect, because only the effect knows whether answering nothing is a
+   * result or an accident.
+   */
+  readonly mustAnswer: boolean;
 }
 
 /**

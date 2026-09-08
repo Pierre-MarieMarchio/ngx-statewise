@@ -6,6 +6,7 @@ import { EffectRegistry } from '../effect/effect-registry';
 import { PendingEffects } from '../effect/pending-effects';
 import type { RegisteredEffect } from '../effect/registered-effect';
 import { RunningEffects, type EffectRun } from '../effect/running-effects';
+import { unansweredEffectError } from '../effect/unanswered-effect';
 import { isUpdaterActionTypeDeclared } from '../updater/declared-action-types';
 import type { StateBoundHandler } from '../updater/updater-definition';
 import { ActionHistory } from './action-history';
@@ -174,6 +175,13 @@ export class StatewiseEngine {
       // would let it overwrite the state its successor is building.
       if (run.abortSignal.aborted) {
         return;
+      }
+
+      // Checked after the abandon: a run that was replaced answers nothing on
+      // purpose, and blaming it for that would report a failure the
+      // application did not cause.
+      if (effect.mustAnswer && actions.length === 0) {
+        throw unansweredEffectError(action.type);
       }
 
       await settleAll(actions.map((next) => this.executeSafely(next, scope)));

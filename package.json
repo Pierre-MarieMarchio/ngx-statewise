@@ -63,5 +63,11 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.70.0",
     "vitest": "^4.0.8"
+  },
+  "allowScripts": {
+    "@parcel/watcher": true,
+    "esbuild": true,
+    "lmdb": true,
+    "msgpackr-extract": true
   }
 }

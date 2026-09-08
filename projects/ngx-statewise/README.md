@@ -643,6 +643,32 @@ The policy governs effects, never state: the sequence **Action → Updater → E
 
 So an `isLoading` raised by a request whose effect never ran is cleared by the answer of the run already in flight — under `'first'` there is exactly one answer coming, and under `'latest'` it is the newest run that answers.
 
+#### Promising an answer
+
+An effect returning no action is a valid result: that is what an effect doing nothing but a side effect produces. A one-shot source completing without emitting reaches the engine the same way, as a deliberate absence of action — and the engine cannot tell the two apart.
+
+The difference matters, because the second one leaves a request unanswered. Whatever its updater set on the way in, an `isLoading` typically, is never cleared, and nothing says so. It is the one place where the engine leaves the state inconsistent without a trace.
+
+So the effect says which one it is:
+
+```typescript
+public readonly getAllProjectsEffect = createEffect(
+  getAllProjectsActions.request,
+  () =>
+    this.projectRepository.getAll().pipe(
+      map((projects) => getAllProjectsActions.success(projects)),
+      catchError(() => of(getAllProjectsActions.failure())),
+    ),
+  { mustAnswer: true },
+);
+```
+
+With `mustAnswer`, a run producing no action fails, and that failure travels like any other: `dispatchAsync` rejects, a bare `dispatch` reports to the `ErrorHandler`. Without it, nothing changes — answering nothing stays valid, which is what it has always been.
+
+Declare it on any effect whose pipeline is supposed to always produce something, which in practice is every `request`. Leave it off for an effect that navigates, notifies, or writes to storage and returns nothing.
+
+An abandoned run is never held to the promise. A run superseded under `'latest'`, or dropped through `cancelOn`, answers nothing by design, and blaming it would report a failure the application never caused.
+
 #### Key Notes:
 
 - Promises: Effects can return Promises for single asynchronous operations.
@@ -658,6 +684,8 @@ So an `isLoading` raised by a request whose effect never ran is cleared by the a
 - Effect Registration: don't forget to declare your effect classes in `provideStatewise({ effects: [...] })` so they are instantiated and ready to handle actions.
 
 - Lifecycle: an effect is unregistered with the injector that created it, so component-scoped or route-scoped effect classes never accumulate duplicates.
+
+- Promising an answer: `mustAnswer` turns a run producing no action into a failure. Off by default, so an effect that only performs a side effect stays valid; an abandoned run is never held to it.
 
 - Concurrency: every run goes on in parallel unless the effect declares otherwise. `'latest'` supersedes the run in flight, `'first'` holds a new dispatch back, and `cancelOn` abandons a run on demand. Abandoning drops the answer and unsubscribes the source; it never touches the updater.
 

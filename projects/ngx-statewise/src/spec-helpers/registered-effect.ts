@@ -16,6 +16,7 @@ export function registeredEffect(
     concurrency: 'parallel',
     keyOf: () => '',
     cancelledBy: [],
+    mustAnswer: false,
     ...policy,
   };
 }

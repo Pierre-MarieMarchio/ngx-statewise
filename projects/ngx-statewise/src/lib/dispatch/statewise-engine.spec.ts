@@ -545,6 +545,31 @@ describe('StatewiseEngine', () => {
       expect(childRuns).toBe(2);
     });
 
+    /**
+     * A superseded run answers nothing by design, so holding it to its own
+     * promise would report a failure the application never caused.
+     */
+    it('does not blame an abandoned run for answering nothing', async () => {
+      let release!: () => void;
+      effects.register(
+        'SOURCE',
+        registeredEffect(
+          () =>
+            new Promise<void>((resolve) => {
+              release = resolve;
+            }),
+          { concurrency: 'latest', mustAnswer: true },
+        ),
+      );
+
+      const abandoned = engine.execute({ type: 'SOURCE' }, emptyScope);
+      const current = engine.execute({ type: 'SOURCE' }, emptyScope);
+      release();
+
+      await expect(abandoned).resolves.not.toThrow();
+      await expect(current).rejects.toThrow(/mustAnswer/);
+    });
+
     it('starts no handler for a dispatch its policy holds back', async () => {
       let release!: () => void;
       let runs = 0;
