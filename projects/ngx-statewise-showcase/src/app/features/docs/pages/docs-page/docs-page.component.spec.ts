@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideStatewise } from 'ngx-statewise';
+import { noticeUpdater } from '@app/features/notice/states';
 import { DocsPageComponent, DOCS_SECTIONS } from './docs-page.component';
 
 describe('DocsPageComponent', () => {
@@ -9,6 +11,7 @@ describe('DocsPageComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DocsPageComponent],
+      providers: [provideStatewise({ updaters: [noticeUpdater] })],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DocsPageComponent);

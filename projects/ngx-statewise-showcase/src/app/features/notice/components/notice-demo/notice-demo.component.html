@@ -1,0 +1,26 @@
+<div class="notice-demo">
+  <div class="notice-demo-actions">
+    <button
+      class="primary-btn"
+      mat-stroked-button
+      (click)="raiseFromBareHandle()"
+    >
+      injectStatewise()
+    </button>
+    <button
+      class="primary-btn"
+      mat-stroked-button
+      (click)="raiseFromUnrelatedHandle()"
+    >
+      injectStatewise(projectUpdater)
+    </button>
+    <button mat-button (click)="clear()">clear</button>
+  </div>
+
+  <dl class="notice-demo-readout">
+    <dt>message</dt>
+    <dd data-readout="message">{{ noticeState.message() ?? '(none)' }}</dd>
+    <dt>raised</dt>
+    <dd data-readout="count">{{ noticeState.raisedCount() }}</dd>
+  </dl>
+</div>

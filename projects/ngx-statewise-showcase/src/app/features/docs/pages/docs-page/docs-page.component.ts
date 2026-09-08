@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
+import { NoticeDemoComponent } from '@app/features/notice/components/notice-demo/notice-demo.component';
 
 /** One documented mechanism, with the showcase code that exercises it. */
 export interface DocsSection {
@@ -50,6 +51,19 @@ provideStatewise({ updaters: [aGlobalUpdater] });`,
     seenIn: 'features/task/states/task/task.updater.ts',
   },
   {
+    id: 'precedence',
+    title: 'A manager updater shadows a global one',
+    summary:
+      'Global updaters are a fallback, not an addition: the engine reads the dispatching scope first and only then the global registry. An action type a manager already claims never reaches a global updater, so give global state action types of its own. Both handles below reach the notice updater, and neither owns it.',
+    snippet: `// inside the engine
+scope.updaters.get(actionType) ?? this.globalUpdaters.get(actionType)
+
+// so this reaches the global updater, owning no updater at all
+const statewise = injectStatewise();
+statewise.dispatch(noticeActions.raised('saved'));`,
+    seenIn: 'features/notice/states/notice/notice.updater.ts',
+  },
+  {
     id: 'effects',
     title: 'Effects',
     summary:
@@ -74,7 +88,7 @@ other.dispatch(getAllTaskActions.request()); // misrouted: nothing runs`,
 
 @Component({
   selector: 'app-docs-page',
-  imports: [MatExpansionModule, MatIconModule],
+  imports: [MatExpansionModule, MatIconModule, NoticeDemoComponent],
   templateUrl: './docs-page.component.html',
   styleUrl: './docs-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
