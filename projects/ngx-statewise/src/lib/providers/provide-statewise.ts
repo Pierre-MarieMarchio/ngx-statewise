@@ -32,7 +32,12 @@ export interface StatewiseHistoryOptions {
 export interface StatewiseConfig {
   /** Effect classes, instantiated at startup so their effects register. */
   readonly effects?: readonly Type<unknown>[];
-  /** Updaters applied whichever manager dispatches. */
+  /**
+   * Updaters reachable from whichever manager dispatches, `injectStatewise()`
+   * with no updater at all included. They answer the action types no manager
+   * claims: a scoped updater always wins over a global one, so a type already
+   * owned by a manager never reaches these.
+   */
   readonly updaters?: readonly Updater<unknown>[];
   /** Action history, disabled unless configured. */
   readonly history?: StatewiseHistoryOptions;

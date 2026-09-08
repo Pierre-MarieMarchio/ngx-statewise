@@ -409,3 +409,86 @@ describe('public execution contract', () => {
     expect(secondState.completed).toEqual(['second']);
   });
 });
+
+const GLOBAL_STATE = new InjectionToken<CompletionState>('GLOBAL_STATE');
+
+const globalActions = defineActionsGroup({
+  source: 'Global',
+  events: {
+    /** Claimed by the global updater alone. */
+    noted: payload<string>(),
+    /** Claimed by the global updater and by a manager's own updater. */
+    shared: payload<string>(),
+  },
+});
+
+const globalUpdater = defineUpdater(GLOBAL_STATE, (on) => {
+  on(globalActions.noted, (state, value) => {
+    state.completed.push(`global:${value}`);
+  });
+  on(globalActions.shared, (state, value) => {
+    state.completed.push(`global:${value}`);
+  });
+});
+
+const shadowingUpdater = defineUpdater(FIRST_STATE, (on) => {
+  on(globalActions.shared, (state, value) => {
+    state.completed.push(`scoped:${value}`);
+  });
+});
+
+describe('updaters registered globally', () => {
+  let firstState: CompletionState;
+  let globalState: CompletionState;
+
+  function manager(...updaters: Parameters<typeof injectStatewise>): Statewise {
+    return TestBed.runInInjectionContext(() => injectStatewise(...updaters));
+  }
+
+  beforeEach(() => {
+    firstState = { completed: [] };
+    globalState = { completed: [] };
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideStatewise({ updaters: [globalUpdater] }),
+        { provide: FIRST_STATE, useFactory: () => firstState },
+        { provide: GLOBAL_STATE, useFactory: () => globalState },
+      ],
+    });
+  });
+
+  afterEach(() => {
+    TestBed.resetTestingModule();
+  });
+
+  it('answers a handle that owns no updater at all', async () => {
+    await manager().dispatchAsync(globalActions.noted('bare'));
+
+    expect(globalState.completed).toEqual(['global:bare']);
+  });
+
+  it('answers a manager that owns unrelated updaters', async () => {
+    await manager(orderedUpdater).dispatchAsync(globalActions.noted('other'));
+
+    expect(globalState.completed).toEqual(['global:other']);
+  });
+
+  it('yields to the updater of a manager claiming the same action type', async () => {
+    await manager(shadowingUpdater).dispatchAsync(
+      globalActions.shared('claimed'),
+    );
+
+    expect(firstState.completed).toEqual(['scoped:claimed']);
+    expect(globalState.completed).toEqual([]);
+  });
+
+  it('still answers a manager that does not claim that type', async () => {
+    await manager(orderedUpdater).dispatchAsync(
+      globalActions.shared('unclaimed'),
+    );
+
+    expect(globalState.completed).toEqual(['global:unclaimed']);
+    expect(firstState.completed).toEqual([]);
+  });
+});
