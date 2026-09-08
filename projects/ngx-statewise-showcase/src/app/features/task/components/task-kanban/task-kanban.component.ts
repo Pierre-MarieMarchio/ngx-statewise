@@ -102,10 +102,25 @@ export class TaskKanbanComponent implements OnDestroy {
   }
 
   private handleSameColumnMove(event: CdkDragDrop<Task[]>): void {
-    moveItemInArray(
-      event.container.data,
-      event.previousIndex,
-      event.currentIndex,
+    const columnTasks = [...event.container.data];
+    moveItemInArray(columnTasks, event.previousIndex, event.currentIndex);
+    this.reorderLocalTasks(columnTasks);
+  }
+
+  /**
+   * The template hands CDK a freshly filtered array, so reordering it in place
+   * would be thrown away on the next change detection pass. A reorder only
+   * rearranges one column, so walk the local tasks and hand back that column's
+   * tasks in their new order as their slots come up.
+   */
+  private reorderLocalTasks(columnTasks: Task[]): void {
+    const columnIds = new Set(columnTasks.map((task) => task.id));
+    const reordered = [...columnTasks];
+
+    this.localTasks.update((tasks) =>
+      tasks.map((task) =>
+        columnIds.has(task.id) ? (reordered.shift() ?? task) : task,
+      ),
     );
   }
 
