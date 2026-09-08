@@ -20,7 +20,7 @@ export const DOCS_SECTIONS: DocsSection[] = [
     summary:
       'An action carries a type name and, when it needs one, a payload. A group shares a source across its events, so the type names stay derived instead of hand-written.',
     snippet: `export const getAllTaskActions = defineActionsGroup({
-  source: 'Task',
+  source: 'TASK',
   events: {
     request: emptyPayload,
     success: payload<Task[]>(),

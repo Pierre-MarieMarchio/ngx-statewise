@@ -5,7 +5,7 @@ import { defineActionsGroup, emptyPayload, payload } from 'ngx-statewise';
  * alone, which is what makes them reachable from any dispatch handle.
  */
 export const noticeActions = defineActionsGroup({
-  source: 'Notice',
+  source: 'NOTICE',
   events: {
     raised: payload<string>(),
     cleared: emptyPayload,

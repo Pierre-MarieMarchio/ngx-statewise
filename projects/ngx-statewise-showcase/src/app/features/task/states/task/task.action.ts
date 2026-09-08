@@ -7,7 +7,7 @@ import {
 } from 'ngx-statewise';
 
 export const getAllTaskActions = defineActionsGroup({
-  source: 'Task',
+  source: 'TASK',
   events: {
     request: emptyPayload,
     success: payload<Task[]>(),
@@ -16,7 +16,7 @@ export const getAllTaskActions = defineActionsGroup({
 });
 
 export const updateTaskActions = defineActionsGroup({
-  source: 'Update_Task',
+  source: 'UPDATE_TASK',
   events: {
     request: payload<Task>(),
     success: payload<Task>(),
