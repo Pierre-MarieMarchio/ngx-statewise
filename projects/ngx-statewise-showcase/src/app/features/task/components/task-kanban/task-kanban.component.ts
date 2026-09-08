@@ -1,31 +1,26 @@
 import {
+  CdkDragDrop,
+  CdkDropList,
+  moveItemInArray,
+  transferArrayItem,
+} from '@angular/cdk/drag-drop';
+import {
   ChangeDetectionStrategy,
   Component,
   computed,
   inject,
   input,
+  linkedSignal,
   output,
-  signal,
-  OnDestroy,
 } from '@angular/core';
-import {
-  CdkDragDrop,
-  moveItemInArray,
-  transferArrayItem,
-  CdkDropList,
-} from '@angular/cdk/drag-drop';
-import { MatGridListModule } from '@angular/material/grid-list';
-import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
-import { STATUSES, Task, TaskStatus } from '@shared/app-common/models';
-import { PROJECT_MANAGER, TASK_MANAGER } from '@shared/app-common/tokens';
 import { KanbanCardComponent } from '@shared/app-common/components';
-import {
-  OptimisticStateUpdateService,
-  StateRollbackService,
-} from '@app/core/services';
+import { STATUSES, Task, TaskStatus } from '@shared/app-common/models';
+import { PROJECT_MANAGER } from '@shared/app-common/tokens';
 
 @Component({
   selector: 'app-task-kanban',
@@ -42,52 +37,27 @@ import {
   styleUrl: './task-kanban.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TaskKanbanComponent implements OnDestroy {
+export class TaskKanbanComponent {
   public tasks = input<Task[]>();
   public taskChanged = output<Task>();
 
-  private readonly taskManager = inject(TASK_MANAGER);
   public readonly projectManager = inject(PROJECT_MANAGER);
-  private readonly stateRollbackService = inject(StateRollbackService);
-  private readonly optimisticStateService = inject(
-    OptimisticStateUpdateService,
-  );
 
   private readonly statuses = STATUSES;
-  private readonly localTasks = signal<Task[]>([]);
-  private readonly pendingUpdates = signal<Map<string, Task>>(new Map());
-  private readonly destroyErrorRollback: () => void;
-  private readonly destroyOptimisticTasksState: () => void;
 
-  constructor() {
-    this.destroyErrorRollback = this.stateRollbackService.setupErrorRollback({
-      isError: () => this.taskManager.isError(),
-      originalData: () => this.tasks(),
-      localData: this.localTasks,
-      pendingUpdates: this.pendingUpdates,
-      errorMessage: 'Error detected, rolling back kanban state',
-    });
-
-    this.destroyOptimisticTasksState =
-      this.optimisticStateService.setupOptimisticUpdates({
-        sourceData: () => this.tasks(),
-        pendingUpdates: this.pendingUpdates,
-        localData: this.localTasks,
-        getEntityId: (task) => task.id,
-        isUpdateConfirmed: (sourceTask, pendingTask) =>
-          sourceTask.status === pendingTask.status,
-      });
-  }
-
-  ngOnDestroy() {
-    this.destroyErrorRollback();
-    this.destroyOptimisticTasksState();
-  }
+  /**
+   * The order the board shows. Reordering inside one column is presentation
+   * only — it has no counterpart on the server — so it lives here rather than
+   * in the state, and `linkedSignal` drops it whenever the tasks themselves
+   * change. Moving a card between columns goes through the manager instead,
+   * and the updater applies it optimistically.
+   */
+  private readonly orderedTasks = linkedSignal(() => this.tasks() ?? []);
 
   public readonly columns = computed(() =>
     this.statuses.map((status) => ({
       id: status,
-      tasks: this.localTasks()?.filter((t) => t.status === status),
+      tasks: this.orderedTasks().filter((task) => task.status === status),
     })),
   );
 
@@ -104,20 +74,20 @@ export class TaskKanbanComponent implements OnDestroy {
   private handleSameColumnMove(event: CdkDragDrop<Task[]>): void {
     const columnTasks = [...event.container.data];
     moveItemInArray(columnTasks, event.previousIndex, event.currentIndex);
-    this.reorderLocalTasks(columnTasks);
+    this.reorderShownTasks(columnTasks);
   }
 
   /**
    * The template hands CDK a freshly filtered array, so reordering it in place
    * would be thrown away on the next change detection pass. A reorder only
-   * rearranges one column, so walk the local tasks and hand back that column's
+   * rearranges one column, so walk the shown tasks and hand back that column's
    * tasks in their new order as their slots come up.
    */
-  private reorderLocalTasks(columnTasks: Task[]): void {
+  private reorderShownTasks(columnTasks: Task[]): void {
     const columnIds = new Set(columnTasks.map((task) => task.id));
     const reordered = [...columnTasks];
 
-    this.localTasks.update((tasks) =>
+    this.orderedTasks.update((tasks) =>
       tasks.map((task) =>
         columnIds.has(task.id) ? (reordered.shift() ?? task) : task,
       ),
@@ -140,14 +110,7 @@ export class TaskKanbanComponent implements OnDestroy {
       event.currentIndex,
     );
 
-    const updatedTask = this.updateTask(newStatus, event);
-
-    const currentPending = this.pendingUpdates();
-    const newPending = new Map(currentPending);
-    newPending.set(updatedTask.id, updatedTask);
-    this.pendingUpdates.set(newPending);
-
-    this.taskChanged.emit(updatedTask);
+    this.taskChanged.emit(this.updateTask(newStatus, event));
   }
 
   private updateTask(

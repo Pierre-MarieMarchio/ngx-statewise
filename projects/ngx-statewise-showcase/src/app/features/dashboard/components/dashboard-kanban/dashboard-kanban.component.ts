@@ -1,27 +1,21 @@
 import {
+  CdkDragDrop,
+  CdkDropList,
+  moveItemInArray,
+  transferArrayItem,
+} from '@angular/cdk/drag-drop';
+import {
+  ChangeDetectionStrategy,
   Component,
   computed,
   inject,
-  signal,
-  OnDestroy,
-  ChangeDetectionStrategy,
 } from '@angular/core';
-import {
-  CdkDragDrop,
-  moveItemInArray,
-  transferArrayItem,
-  CdkDropList,
-} from '@angular/cdk/drag-drop';
-import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatGridListModule } from '@angular/material/grid-list';
 import { KanbanCardComponent } from '@shared/app-common/components';
 import { STATUSES, Task, TaskStatus } from '@shared/app-common/models';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
-import {
-  OptimisticStateUpdateService,
-  StateRollbackService,
-} from '@app/core/services';
 
 @Component({
   selector: 'app-dashboard-kanban',
@@ -36,50 +30,22 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './dashboard-kanban.component.scss',
 })
-export class DashboardKanbanComponent implements OnDestroy {
+export class DashboardKanbanComponent {
   private readonly taskManager = inject(TASK_MANAGER);
-  private readonly stateRollbackService = inject(StateRollbackService);
-  private readonly optimisticStateService = inject(
-    OptimisticStateUpdateService,
-  );
 
   private readonly statuses = STATUSES;
+
+  /**
+   * Read straight from the manager: the board shows the state, and the state
+   * already carries the optimistic move. Nothing is copied here, so nothing
+   * has to be rolled back here either.
+   */
   public tasks = this.taskManager.tasks;
-  public tasksError = this.taskManager.isError;
-  private readonly localTasks = signal<Task[]>([]);
-  private readonly pendingUpdates = signal<Map<string, Task>>(new Map());
-  private readonly destroyErrorRollback: () => void;
-  private readonly destroyOptimisticTasksState: () => void;
-
-  constructor() {
-    this.destroyErrorRollback = this.stateRollbackService.setupErrorRollback({
-      isError: () => this.taskManager.isError(),
-      originalData: () => this.tasks()!,
-      localData: this.localTasks,
-      pendingUpdates: this.pendingUpdates,
-      errorMessage: 'Error detected, rolling back kanban state',
-    });
-
-    this.destroyOptimisticTasksState =
-      this.optimisticStateService.setupOptimisticUpdates({
-        sourceData: () => this.tasks()!,
-        pendingUpdates: this.pendingUpdates,
-        localData: this.localTasks,
-        getEntityId: (task) => task.id,
-        isUpdateConfirmed: (sourceTask, pendingTask) =>
-          sourceTask.status === pendingTask.status,
-      });
-  }
-
-  ngOnDestroy() {
-    this.destroyErrorRollback();
-    this.destroyOptimisticTasksState();
-  }
 
   public readonly columns = computed(() =>
     this.statuses.map((status) => ({
       id: status,
-      tasks: this.localTasks()?.filter((t) => t.status === status),
+      tasks: (this.tasks() ?? []).filter((task) => task.status === status),
     })),
   );
 
@@ -117,13 +83,7 @@ export class DashboardKanbanComponent implements OnDestroy {
       event.currentIndex,
     );
 
-    const updatedTask = this.updateTask(newStatus, event);
-    const currentPending = this.pendingUpdates();
-    const newPending = new Map(currentPending);
-    newPending.set(updatedTask.id, updatedTask);
-    this.pendingUpdates.set(newPending);
-
-    this.onTaskChangedhandler(updatedTask);
+    this.taskManager.update(this.updateTask(newStatus, event));
   }
 
   private updateTask(
@@ -138,10 +98,6 @@ export class DashboardKanbanComponent implements OnDestroy {
 
     event.container.data[event.currentIndex] = updatedTask;
     return updatedTask;
-  }
-
-  private onTaskChangedhandler(updatedTask: Task): void {
-    this.taskManager.update(updatedTask);
   }
 
   public getConnectedDropListIds() {

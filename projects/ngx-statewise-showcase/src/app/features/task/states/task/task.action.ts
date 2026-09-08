@@ -20,7 +20,13 @@ export const updateTaskActions = defineActionsGroup({
   events: {
     request: payload<Task>(),
     success: payload<Task>(),
-    failure: emptyPayload,
+    /**
+     * The id of the task whose write failed. A failure has to say which card
+     * it concerns: a payload-less one left the updater with a single flag for
+     * every write in flight, and reverting on it took down the cards the
+     * server had never refused.
+     */
+    failure: payload<string>(),
   },
 });
 

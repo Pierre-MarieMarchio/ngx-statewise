@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { AUTH_MANAGER } from '@shared/app-common/tokens';
 import { createEffect } from 'ngx-statewise';
 import { catchError, map, of } from 'rxjs';
-import { getAllProjectsActions } from './project.action';
+import { getAllProjectsActions, projectReset } from './project.action';
 import { ProjectRepositoryService } from '../../services';
 
 @Injectable({
@@ -36,5 +36,11 @@ export class ProjectEffect {
         }),
       );
     },
+    /**
+     * Two reloads racing each other have one useful answer between them. And
+     * since this effect hands over an Observable, abandoning it unsubscribes
+     * the request rather than merely ignoring its answer.
+     */
+    { concurrency: 'latest', cancelOn: projectReset },
   );
 }

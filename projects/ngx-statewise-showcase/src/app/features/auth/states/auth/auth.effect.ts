@@ -30,6 +30,16 @@ export class AuthEffect {
   private readonly notification = inject(AuthNotificationService);
   private readonly tokenFactory = inject(TokenService);
 
+  /**
+   * One session at a time, and it is the newest attempt that wins.
+   *
+   * Two paths reach this effect: the login form, where a second submit is a
+   * double click and used to produce two navigations and two reloads, and the
+   * dashboard user picker, where a second click is a deliberate switch to
+   * another user. `'first'` would fix the double click by ignoring the switch,
+   * which is the wrong answer for the picker — so the earlier attempt is
+   * abandoned instead, and only the last one reaches the state.
+   */
   public readonly loginRequestEffect = createEffect(
     loginActions.request,
     async (payload) => {
@@ -48,6 +58,7 @@ export class AuthEffect {
         return loginActions.failure();
       }
     },
+    { concurrency: 'latest' },
   );
 
   public readonly loginSuccessEffect = createEffect(
