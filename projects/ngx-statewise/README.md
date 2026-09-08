@@ -10,9 +10,11 @@ A lightweight and intuitive state management library for Angular.
 - [Key Concepts](#key-concepts)
   - [1. States](#1-states)
   - [2. Actions](#2-actions)
-  - [3. Updators](#3-updators)
+  - [3. Updaters](#3-updaters)
   - [4. Effects](#4-effects)
   - [5. Managers](#5-managers)
+- [Testing](#testing)
+- [Migrating from 0.6.x](#migrating-from-06x)
 - [Benefits](#benefits)
 - [When to Use ngx-statewise](#when-to-use-ngx-statewise)
 - [Contributing](#contributing)
@@ -32,27 +34,27 @@ The core concept of ngx-statewise revolves around a clear, predictable flow of a
 
 - **Action with Payload**: Everything starts with an action that carries a payload with the necessary data.
 
-- **Manager Dispatches Action**: The manager dispatches this action, which triggers the appropriate updator.
+- **Manager Dispatches Action**: The manager dispatches this action, which triggers the appropriate updater.
 
-- **Updator Updates State When Registered**: If an updator handles the action, it modifies the state before effects run. Effect-only actions are also valid.
+- **Updater Updates State When Registered**: If an updater handles the action, it modifies the state before effects run. Effect-only actions are also valid.
 
 - **Effect Handles Side Effects**: After the state is updated, any related effect is triggered to handle side operations (like API calls).
 
-- **Chain of Actions**: Effects can dispatch additional actions, which in turn can trigger other updators and effects, creating a chain of operations if needed.
+- **Chain of Actions**: Effects can dispatch additional actions, which in turn can trigger other updaters and effects, creating a chain of operations if needed.
 
 ### Paradigm Shift
 
 While NgRx and NGXS implement state management based on redux-style patterns with stores, reducers, and selectors, ngx-statewise introduces a paradigm shift:
 
-- **Direct Action Flow**: Instead of actions going through a centralized store, actions are directly linked to their updators and effects, making the flow more intuitive.
+- **Direct Action Flow**: Instead of actions going through a centralized store, actions are directly linked to their updaters and effects, making the flow more intuitive.
 
 - **Signals over Observables**: Rather than relying heavily on RxJS observables for everything, ngx-statewise leverages Angular's native signals for state reactivity.
 
-- **Explicit Separation**: The library enforces a clear distinction between state updates (updators) and side effects, making the codebase easier to maintain.
+- **Explicit Separation**: The library enforces a clear distinction between state updates (updaters) and side effects, making the codebase easier to maintain.
 
 - **Simplified Boilerplate**: The amount of code required to implement state management is significantly reduced compared to NgRx or NGXS.
 
-The unidirectional flow (Action → optional Updator → Effect → Potentially More Actions) in ngx-statewise makes state management predictable and easier to debug. When an updator handles an action, its state update is completed before effects execute. Actions without an updator are valid when they exist only to trigger effects.
+The unidirectional flow (Action → optional Updater → Effect → Potentially More Actions) in ngx-statewise makes state management predictable and easier to debug. When an updater handles an action, its state update is completed before effects execute. Actions without an updater are valid when they exist only to trigger effects.
 
 ### Considerations
 
@@ -60,7 +62,7 @@ The unidirectional flow (Action → optional Updator → Effect → Potentially 
 
 - **Action-First Approach**: Unlike some libraries where effects can be triggered independently, ngx-statewise requires an action to be dispatched first, which then updates state before triggering effects. This enforces a specific flow that might require adjustment in thinking if coming from other patterns.
 
-It's important to note that while ngx-statewise supports dispatching individual actions, its primary design intention is to leverage cascading effects - where one action triggers an updator, which leads to an effect, which may then dispatch additional actions, creating powerful chains of operations. This design philosophy particularly shines in complex applications with interconnected state changes and sequential operations.
+It's important to note that while ngx-statewise supports dispatching individual actions, its primary design intention is to leverage cascading effects - where one action triggers an updater, which leads to an effect, which may then dispatch additional actions, creating powerful chains of operations. This design philosophy particularly shines in complex applications with interconnected state changes and sequential operations.
 
 The clear, unidirectional flow with emphasis on cascading effects makes ngx-statewise particularly well-suited for applications where predictable state updates need to trigger complex chains of operations, especially when these operations need to be executed in a specific order while maintaining state consistency throughout the process.
 
@@ -82,18 +84,29 @@ npm install ngx-statewise
 
 ### Setup in your Angular Application
 
-To use ngx-statewise, you need to add the `provideStatewise()` function to your application's providers:
+To use ngx-statewise, add `provideStatewise()` to your application's providers. It is the single entry point of the library: it wires the execution engine and registers your effects and your global updaters.
 
 ```typescript
+import { provideStatewise } from 'ngx-statewise';
+
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideStatewise(),
+    provideStatewise({
+      effects: [AuthEffect, UserEffect],
+    }),
     // other providers
   ],
 };
 ```
 
-This setup ensures that ngx-statewise is properly initialized and can manage state throughout your application.
+`provideStatewise` accepts four optional options:
+
+| Option              | Type                              | Description                                                                                                          |
+| ------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `effects`           | `Type<unknown>[]`                 | Effect classes, instantiated eagerly so their effects are registered at startup.                                     |
+| `updaters`          | `Updater<unknown>[]`              | Updaters available application-wide, whichever manager dispatches.                                                   |
+| `history`           | `{ limit: number }`               | Records the last `limit` actions. Disabled by default; `limit` must be a positive integer.                           |
+| `misroutedDispatch` | `'throw' \| 'report' \| 'ignore'` | What a dispatch reaching the wrong manager does. Throws in development, reports to the `ErrorHandler` in production. |
 
 ## Key Concepts
 
@@ -197,6 +210,16 @@ In this case:
 - The `LOGOUT_ACTION` will be dispatched when the user logs out, with no payload, as indicated by `emptyPayload`.
 - The `SELECT_ITEM_ACTION` will be triggered when an item is selected, and the payload will be a number (likely the item ID).
 
+`defineSingleAction` returns the creator itself, so it is used exactly like a creator coming from an action group:
+
+```typescript
+statewise.dispatch(logoutAction());
+statewise.dispatch(selectItemAction(42));
+
+on(logoutAction, (state) => { ... });
+createEffect(selectItemAction, (id) => { ... });
+```
+
 #### Action Types
 
 Each action (whether part of an action group or a single action) will have its own distinct type. These types are automatically generated based on the action's name and whether it's part of a group or standalone. This allows for clear and consistent action names throughout the application.
@@ -216,151 +239,165 @@ For example:
 
   - For single actions, a name like `LOGOUT` becomes `LOGOUT_ACTION`.
 
-- Action types are used as keys in updators and effects, and they must match exactly.
+- Action types are used as keys in updaters and effects, and they must match exactly.
 
-- The `ofType(action)` helper ensures correct and type-safe usage when wiring actions into updators or effects.
+- The `ofType(action)` helper ensures correct and type-safe usage when wiring actions into updaters or effects.
 
 - Grouping related actions improves clarity and structure, especially for common flows like `request / success / failure`.
 
-### 3. Updators
+### 3. Updaters
 
-Updators are responsible for updating the state in response to actions. The action type key used in the updator must exactly match the type generated by the action definition. Updators focus solely on modifying state data—any side effects or operations not directly related to state updates should be placed in Effects.
+Updaters describe how a state reacts to actions. They deal only with state data: anything else — API calls, navigation, logging — belongs in Effects.
 
-In ngx-statewise, you can define Updators in two main ways: using action type strings directly or using ofType to tie the actions more dynamically to the respective handlers.
-
-#### Defining Updators
-
-##### Interface Implementation
-
-A class implementing Updator must adhere to the `IUpdator` interface. This interface defines two main properties:
-
-- `state`: The current state instance that the updator will modify.
-- `updators`: A registry of action types (as keys) and their corresponding handler functions that update the state.
-
-Every Updator class should implement the IUpdator interface to ensure that it follows the expected structure for state updates and action handling.
-
-##### Using Action Type Strings
-
-In this method, the action type key in the updator must exactly match the type of the action, such as `LOGIN_REQUEST`, `LOGIN_SUCCESS`, etc. This method still works and is useful when action types are simple.
+An updater is declared with `defineUpdater`, outside of any class. It takes the injectable token holding the state, and a callback registering one handler per action.
 
 ```typescript
-import { IUpdator, UpdatorRegistry } from 'ngx-statewise';
+import { defineUpdater } from 'ngx-statewise';
 
-@Injectable({
-  providedIn: "root",
-})
-export class AuthUpdator implements IUpdator<AuthStates> {
-  public readonly state = inject(AuthStates);
+export const authUpdater = defineUpdater(AuthStates, (on) => {
+  on(loginActions.request, (state) => {
+    state.isLoading.set(true);
+    state.asError.set(false);
+  });
 
-  public readonly updators: UpdatorRegistry<AuthStates> = {
-    LOGIN_REQUEST: (state) => {
-      state.isLoading.set(true);
-      state.asError.set(false);
-    },
-    LOGIN_SUCCESS: (state, payload: LoginResponses) => {...},
+  on(loginActions.success, (state, payload) => {
+    state.user.set(payload.user);
+    state.isLoggedIn.set(true);
+    state.isLoading.set(false);
+  });
 
-  };
+  on(logoutAction, (state) => {
+    state.user.set(null);
+    state.isLoggedIn.set(false);
+  });
+});
+```
+
+The state is never resolved at declaration time: `defineUpdater` only records the token. The instance is read from the injector when the updater is attached to a manager, which is what keeps two managers of the same feature isolated from each other.
+
+#### Typing
+
+Handlers are fully inferred from the action creator, no annotation needed:
+
+- `state` is typed by the token passed to `defineUpdater`.
+- `payload` is typed by the action creator. An action without payload produces a handler with no second parameter.
+- A handler must be synchronous. An `async` handler is a compile error, since state must be up to date before effects run.
+
+```typescript
+defineUpdater(AuthStates, (on) => {
+  // ✅ payload is inferred as LoginResponse
+  on(loginActions.success, (state, payload) => { ... });
+
+  // ❌ compile error: this action carries no payload
+  on(logoutAction, (state, payload) => { ... });
+
+  // ❌ compile error: an updater handler must stay synchronous
+  on(loginActions.request, async (state) => { ... });
+});
+```
+
+#### Attaching updaters
+
+##### To a manager
+
+This is the usual case. The manager declares the updaters it owns via `injectStatewise`, and gets back the handle used to dispatch.
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class AuthManager {
+  private readonly statewise = injectStatewise(authUpdater);
 }
 ```
 
-##### Using ofType for More Dynamic Action Matching
-
-A more flexible approach allows you to dynamically match actions to their handlers using `ofType`. This approach is especially useful when using action groups or if the action types need to be referenced programmatically.
-
-```typescript
-import { IUpdator, ofType, UpdatorRegistry } from 'ngx-statewise';
-
-@Injectable({
-  providedIn: "root",
-})
-export class AuthUpdator implements IUpdator<AuthStates> {
-  public readonly state = inject(AuthStates);
-
-  public readonly updators: UpdatorRegistry<AuthStates> = {
-    [ofType(loginActions.request)]: (state) => {
-      state.isLoading.set(true);
-      state.asError.set(false);
-    },
-    [ofType(loginActions.success)]: (state, payload: LoginResponses) => {...},
-  };
-}
-```
-
-**In the second approach:** dynamic action handling is streamlined using `ofType(action)`, which binds specific handlers to defined actions. This promotes modular and reusable code, especially valuable in large-scale applications with numerous actions and complex state flows. By dynamically matching events, it eliminates the need to manually manage action type strings, reducing potential errors and improving overall code maintainability.
-
-#### Registering Updators
+The updaters passed this way are only visible to the dispatches issued through this handle. Two managers may declare the same action types on two different states without ever colliding.
 
 ##### Globally
 
-To make an Updator available throughout the entire app (regardless of the calling Manager), you can register it globally via the `provideUpdators()` helper in the root configuration.
-
-Usage in `app.config.ts`:
+An updater declared in `provideStatewise` applies to every dispatch, whichever manager issues it, when the dispatch scope does not itself handle the action type.
 
 ```typescript
-import { provideUpdators } from 'ngx-statewise';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideUpdators([
-      AuthUpdator,
-      // Add more global Updators here if needed
-    ]),
-    // other providers
-  ],
-};
+provideStatewise({
+  updaters: [authUpdater],
+});
 ```
 
-##### Locally
+A scoped updater always wins over a global one for the same action type.
 
-A Manager can explicitly register its own Updators in its class definition. This restricts their usage to that Manager only, offering strict encapsulation.
+#### Dispatching through the right manager
+
+An updater is only applied by the dispatches of the scope it is attached to. Sending an action to the wrong manager would therefore skip its state update, and that used to happen silently. It no longer does.
+
+`defineUpdater` records the action types it claims as soon as its module is loaded. Dispatching one of those types through a scope that does not handle it throws in development:
+
+```
+[ngx-statewise] No updater in scope for "AUTH_LOADED". This action type is
+handled by an updater attached to another injectStatewise() scope, so this
+dispatch would silently skip its state update. Dispatch it through the manager
+owning that updater, or declare that updater globally with
+provideStatewise({ updaters: [...] }).
+```
+
+A misrouted dispatch does nothing at all: no state update, and none of the effects registered for that action type either. Those effects belong to whoever owns the updater, and running them here would cascade their actions into a scope that owns nothing of them.
+
+In practice this means an effect must not return another feature's action. Inject that feature's manager and call it instead:
 
 ```typescript
-@Injectable({
-  providedIn: 'root',
-})
-export class AuthManager implements IAuthManager {
-  private readonly authUpdator = inject(AuthUpdator);
+public readonly loginSuccessEffect = createEffect(loginActions.success, () => {
+  // ✅ each manager dispatches within its own scope
+  this.projectManager.getAll();
+  this.taskManager.getAll();
 
-  constructor() {
-    registerLocalUpdator(this, this.authUpdator);
-  }
-}
+  // ❌ would throw: PROJECT_REQUEST belongs to the project manager
+  // return getAllProjectsActions.request();
+});
 ```
 
-##### Ad-hoc
+The check costs a set lookup and only runs when no updater matched. An action claimed by no updater at all stays perfectly valid — that is an effect-only action.
 
-For one-off usage or testing scenarios, you can pass an Updator directly to a dispatch call. It will not be registered globally or locally, it is used only for that single dispatch. this does not persist the Updator beyond dispatch.
+##### Development throws, production reports
+
+The detection always runs; only the reaction depends on the environment. Throwing on a user's machine would take down a running application over a state update that is merely missing, so production hands the same error to Angular's `ErrorHandler` and carries on: the dispatch resolves, the effects of the action still run, and whatever you plugged into `ErrorHandler` — a logger, Sentry — receives the report.
+
+Override it when you need to:
 
 ```typescript
-@Injectable({
-  providedIn: 'root',
-})
-export class AuthManager implements IAuthManager {
-  private readonly authUpdator = inject(AuthUpdator);
-
-  public authenticate(): Promise<void> {
-    return dispatchAsync(authenticateActions.request(), this.authUpdator);
-  }
-}
+provideStatewise({
+  // 'throw' in development, 'report' in production.
+  misroutedDispatch: 'report',
+});
 ```
 
-#### Key Notes:
+| Reaction   | Effect                                                        |
+| ---------- | ------------------------------------------------------------- |
+| `'throw'`  | Raises at the dispatch site. The default in development.      |
+| `'report'` | Hands the error to `ErrorHandler`. The default in production. |
+| `'ignore'` | Says nothing, as before the check existed.                    |
 
-- State Updates Only: Updators should focus solely on state updates. Any side effects, such as API calls or complex business logic, should be handled in Effects.
+##### What the check cannot see
 
-- Direct Action Matching: Both methods (using action type strings directly and ofType) provide a simple way to match actions to state updates. The ofType approach adds more flexibility, especially when working with action groups.
+An action type becomes known when the module declaring its updater is loaded. In a lazily loaded feature, that happens with the chunk, so a dispatch aimed at an updater whose chunk has not been loaded yet is not reported.
 
-- Interface Implementation: Every Updator class must implement the IUpdator interface to ensure that the state and updators are properly defined and managed.
+This is a missed detection, never a false alarm: the check never blames a dispatch that would have worked. And when the chunk is absent, neither the updater nor the effects of that feature exist, so the action does nothing at all — which is the bug you were trying to catch in the first place.
 
-- Important: Updators must be defined as class properties exactly as shown in the examples above. If you don't follow this pattern, the updator will not be properly registered in the system and your state updates will not work.
+If a lazily loaded feature must react to actions dispatched before it is reached, declare its updater globally instead of attaching it to a manager:
+
+```typescript
+provideStatewise({ updaters: [authUpdater] });
+```
+
+#### Key Notes
+
+- One action type can only be handled by a single updater within the same scope. A duplicate is reported at startup, not silently ignored.
+- Handlers mutate the state in place, typically through signals. They return nothing.
+- An action handled by no updater is perfectly valid: it merely triggers its effects.
 
 ### 4. Effects
 
 Effects are responsible for handling asynchronous operations such as API calls, navigation, or side effects that are not directly related to state updates. They are created using the `createEffect` utility function and are tied to specific actions.
 
-A key architectural principle in ngx-statewise, _for now_, is that effects always run after state has been updated by an updator. This guarantees that effects operate on the most up-to-date application state. The sequence **Action → Updator → Effect** is enforced by design to ensure predictability and consistency across your application.
+A key architectural principle in ngx-statewise, _for now_, is that effects always run after state has been updated by an updater. This guarantees that effects operate on the most up-to-date application state. The sequence **Action → Updater → Effect** is enforced by design to ensure predictability and consistency across your application.
 
-Effects can return other actions to trigger Updators or even other effects, creating a chain of operations. This design promotes cascading effects, where an initial action triggers a state update, which then leads to one or more effects, each of which can dispatch further actions. Rather than encouraging isolated, standalone actions, ngx-statewise iencourage for sequences of operations, making complex workflows easier to orchestrate.
+Effects can return other actions to trigger Updaters or even other effects, creating a chain of operations. This design promotes cascading effects, where an initial action triggers a state update, which then leads to one or more effects, each of which can dispatch further actions. Rather than encouraging isolated, standalone actions, ngx-statewise encourages sequences of operations, making complex workflows easier to orchestrate.
 
 When creating effects, you must ensure that you don't return the input action directly as it can result in infinite loops. Instead, you should return new actions to trigger the corresponding state updates or other side effects.
 
@@ -402,7 +439,7 @@ export class AuthEffects {
    * This effect listens to the LOGOUT action and performs a simple navigation without returning any new actions.
    * It is an example of an effect returning an empty observable.
    */
-  public readonly logoutEffect = createEffect(logoutAction.action, () => {
+  public readonly logoutEffect = createEffect(logoutAction, () => {
     this.router.navigate(['/']);
     return EMPTY; // No additional action needed after logout
   });
@@ -441,28 +478,53 @@ In the example above, the effect listens for the GET_USER_REQUEST action and use
 
 #### Registering Effects
 
-##### Globally
-
-As with any service in Angular, effects must be properly registered for them to be initialized when the app starts. You can use the `provideEffects` function to register your effects in your app config. Without this registration, the effects won't be initialized and nothing will happen when actions are dispatched.
+Effect classes must be declared in `provideStatewise` so Angular instantiates them at startup. `createEffect` registers itself in the injection context of the class that declares it, which is why the class must be instantiated for its effects to exist. Without this declaration, nothing happens when the action is dispatched.
 
 ```typescript
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideEffects([
-      AuthEffects,
-      UserEffects,
-      // Add all your effect classes here
-    ]),
+    provideStatewise({
+      effects: [AuthEffects, UserEffects],
+    }),
     // other providers
   ],
 };
 ```
 
-By registering your effects with provideEffects, Angular ensures they are instantiated and ready to listen for dispatched actions when the application starts.
+`createEffect` must be called in an injection context — as a field initializer or in the constructor of an injectable class. Calling it elsewhere throws immediately rather than registering an effect that would never run.
 
-##### Locally
+##### Scope
 
-Coming soon.
+An effect runs for the dispatches of the manager owning its action's updater, and only those. Registration is application-wide, visibility is not: the owner of the updater owns the effects too.
+
+```typescript
+// AUTH_LOADED is handled by authUpdater, attached to AuthManager.
+createEffect(authActions.loaded, () => { ... });
+
+authManager.dispatch(authActions.loaded());   // ✅ the effect runs
+taskManager.dispatch(authActions.loaded());   // ❌ misrouted: nothing runs
+```
+
+An action type no updater claims has no owner, so its effects run for every manager — that is an effect-only action, and it stays valid everywhere. An updater declared globally through `provideStatewise({ updaters: [...] })` is owned by every scope, so its effects run everywhere too.
+
+##### Lifecycle
+
+A registration lives as long as the injector that created it. An effect class scoped to a component or to a lazy route is unregistered when that injector is destroyed, instead of piling up one more copy of its effects on every instantiation.
+
+`createEffect` returns an `EffectRef` for the rarer case where you need to stop an effect earlier:
+
+```typescript
+@Injectable()
+export class AuthEffects {
+  private readonly loginEffect = createEffect(loginActions.request, ...);
+
+  public stopListening(): void {
+    this.loginEffect.destroy();
+  }
+}
+```
+
+Ignoring the returned handle is perfectly fine: destruction of the owning injector already unregisters the effect.
 
 #### Key Notes:
 
@@ -472,134 +534,273 @@ Coming soon.
 
 - Avoid Infinite Loops: Be careful not to return the input action from the effect (e.g., avoid returning the same action that triggered the effect). This can lead to infinite loops of action dispatching.
 
-- Side Effects: Effects are designed for side effects like API calls, routing, or other asynchronous operations. They should not directly modify the state. That’s the role of Updators.
+- Side Effects: Effects are designed for side effects like API calls, routing, or other asynchronous operations. They should not directly modify the state. That’s the role of Updaters.
 
-- Effect Registration: Don’t forget to register your effects using provideEffects to ensure that they are initialized and ready to handle actions.
+- Scope: An effect only runs for the manager owning the updater of its action. Dispatching that action through another manager runs neither the updater nor the effect.
+
+- Effect Registration: don't forget to declare your effect classes in `provideStatewise({ effects: [...] })` so they are instantiated and ready to handle actions.
+
+- Lifecycle: an effect is unregistered with the injector that created it, so component-scoped or route-scoped effect classes never accumulate duplicates.
 
 ### 5. Managers
 
-In ngx-statewise, a manager serves as the bridge between your UI and the underlying state logic. It exposes application state as reactive signals and provides a declarative API for triggering actions. This design encourages clear separation of concerns, improves testability, and keeps your state interactions predictable and maintainable.
+In ngx-statewise, a manager is the bridge between your UI and your state logic. It exposes state as reactive signals and offers a declarative API to trigger actions. This keeps components simple, state interactions predictable, and everything testable.
 
-A manager typically includes state accessors (like user, isLoggedIn, etc.) and action handlers. You trigger actions using either `dispatch` or `dispatchAsync`. Use dispatch for synchronous state updates when you don’t need to wait for side effects. Use dispatchAsync when you need to wait for effects to complete—this is especially useful for flows like authentication, where you may need to wait before navigating or updating the UI.
-
-#### State Exposure
-
-Managers are responsible not only for dispatching actions, but also for exposing state in a reactive, declarative way to the components that depend on it. This makes components simpler, as they subscribe directly to signals rather than handling state logic themselves.
-
-Each state slice managed by an `Updator` should be exposed as a `readonly` property in the Manager, using Angular signals (or derived computed signals when needed).
+A manager gets its dispatch handle from `injectStatewise`, passing the updaters it owns.
 
 ```typescript
-@Injectable({
-  providedIn: 'root',
-})
+import { injectStatewise } from 'ngx-statewise';
+
+@Injectable({ providedIn: 'root' })
 export class AuthManager {
   private readonly authStates = inject(AuthStates);
-
-  // State exposure : Read-only computed signals
-  public readonly user = computed(() => this.authStates.user());
-  public readonly isLoggedIn = computed(() => this.authStates.isLoggedIn());
-  public readonly isLoading = computed(() => this.authStates.isLoading());
-  public readonly asError = computed(() => this.authStates.asError());
+  private readonly statewise = injectStatewise(authUpdater);
 }
 ```
 
-By exposing these signals, components using this manager can simply bind to the values without needing to know about actions, effects, or state structure.
+`injectStatewise` must be called in an injection context, like `inject`. It resolves each updater's state through the injector of the caller, once and for all.
+
+#### State Exposure
+
+Managers expose state reactively to the components depending on it, so those components bind to signals rather than handling state logic themselves.
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class AuthManager {
+  private readonly authStates = inject(AuthStates);
+  private readonly statewise = injectStatewise(authUpdater);
+
+  // State exposure: read-only signals
+  public readonly user = this.authStates.user.asReadonly();
+  public readonly isLoggedIn = this.authStates.isLoggedIn.asReadonly();
+  public readonly isLoading = this.authStates.isLoading.asReadonly();
+}
+```
 
 #### Dispatching Actions
 
-You can dispatch actions in different ways depending on your use case and how the associated updator is scoped.
+The handle returned by `injectStatewise` exposes the whole dispatch API:
+
+| Member                  | Returns             | Description                                                                   |
+| ----------------------- | ------------------- | ----------------------------------------------------------------------------- |
+| `dispatch(action)`      | `void`              | Starts the action without waiting for it.                                     |
+| `dispatchAsync(action)` | `Promise<void>`     | Resolves once the whole cascade started by the action is over.                |
+| `waitForEffect(action)` | `Promise<void>`     | Waits for the effects **this manager** started for that action type.          |
+| `waitForAllEffects()`   | `Promise<void>`     | Waits for every effect **this manager** started.                              |
+| `recordedActions()`     | `readonly Action[]` | The recorded actions, application-wide, empty unless `history` is configured. |
+
+`waitForEffect` takes an action creator or an action, never a raw string, so a typo in an action type is a compile error:
+
+```typescript
+await this.statewise.waitForEffect(loginActions.request);
+```
+
+Observation is scoped like dispatch: two managers awaiting the same action type never wait for each other. `recordedActions()` is the exception and is deliberately application-wide.
 
 ##### Synchronous Dispatch
 
 ```typescript
-dispatch(action);
-dispatch(action, scope);
+this.statewise.dispatch(logoutAction());
 ```
 
-For synchronous scenarios, use `dispatch(...)`, which triggers a state update without waiting for any asynchronous operations or effects to complete. This is ideal when you want to trigger state changes immediately and don't need to wait for any side effects (like API calls) to finish. The state update is done synchronously, and the flow continues without blocking.
+`dispatch` applies the updater immediately, then starts the effects without waiting for them. Use it when you don't need to know when the side effects are done.
 
 ##### Asynchronous Dispatch
 
 ```typescript
-await dispatchAsync(action);
-await dispatchAsync(action, scope);
+await this.statewise.dispatchAsync(loginActions.request(credentials));
 ```
 
-For asynchronous scenarios, use `dispatchAsync(...)`, which returns a `Promise<void>` that resolves after all directly triggered effects and all actions returned by those effects have completed recursively. Fire-and-forget dispatches started imperatively inside an effect are independent unless the effect explicitly awaits them. Unexpected updater or effect errors reject the returned Promise.
+`dispatchAsync` returns a `Promise<void>` that resolves once every effect triggered by the action, and every action those effects returned, have completed recursively. This is what you want for flows like authentication, where navigation must wait for the outcome.
 
-#### Dispatch Updator scope
+##### Error handling
 
-When dispatching an action, it is important to resolve the appropriate `Updator` to update the state correctly. You can define the scope of the IUpdator in several ways, depending on whether you want to use globally, locally, or explicitly defined updators.
+The two dispatches differ in how they report failures, and the difference is deliberate:
 
-| Pattern                       | Scope    | Description                                                                                                                                        |
-| ----------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dispatch(action)`            | Global   | Uses a globally registered `Updator`, available app-wide.                                                                                          |
-| `dispatch(action, this)`      | Local    | Uses a local `Updator` registered explicitly within the Manager via `registerLocalUpdator(...)`. It is scoped to the Manager.                      |
-| `dispatch(action, myUpdator)` | Explicit | Uses a specific `Updator` instance passed directly to the dispatch, without persisting it globally or locally. Ideal for one-off cases or testing. |
+| Failure           | `dispatch`                            | `dispatchAsync`     |
+| ----------------- | ------------------------------------- | ------------------- |
+| An updater throws | Throws synchronously at the call site | Rejects the promise |
+| An effect fails   | Reported to Angular's `ErrorHandler`  | Rejects the promise |
+
+An updater failure is a programming error: it surfaces where it happened rather than being buried in a promise nobody awaits. An effect failure is an execution error: with `dispatch` nobody is there to receive it, so it goes to the `ErrorHandler`; with `dispatchAsync` the caller gets it.
+
+When several effects run for the same action, ngx-statewise waits for all of them before reporting the first failure. A failing effect never leaves its siblings running unobserved.
 
 #### Example: `AuthManager`
 
 ```typescript
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AuthManager {
   private readonly authStates = inject(AuthStates);
-  private readonly authUpdator = inject(AuthUpdator);
+  private readonly statewise = injectStatewise(authUpdater);
 
-  constructor() {
-    registerLocalUpdator(this, this.authUpdator);
+  // State exposure: read-only signals
+  public readonly user = this.authStates.user.asReadonly();
+  public readonly isLoggedIn = this.authStates.isLoggedIn.asReadonly();
+  public readonly isLoading = this.authStates.isLoading.asReadonly();
+
+  // Awaits the whole login cascade
+  public login(credentials: LoginSubmit): Promise<void> {
+    return this.statewise.dispatchAsync(loginActions.request(credentials));
   }
 
-  // State exposure : Read-only computed signals
-  public readonly user = computed(() => this.authStates.user());
-  public readonly isLoggedIn = computed(() => this.authStates.isLoggedIn());
-  public readonly isLoading = computed(() => this.authStates.isLoading());
-  public readonly asError = computed(() => this.authStates.asError());
-
-  // Using local updator
-  public async login(credentials: LoginSubmit): Promise<void> {
-    await dispatchAsync(loginActions.request(credentials), this);
-  }
-
-  // Using a directly injected updator
-  public authenticate(): Promise<void> {
-    return dispatchAsync(authenticateActions.request(), this.authUpdator);
-  }
-
-  // Using local updator again (sync version)
-  public authenticateT(): void {
-    dispatch(authenticateActions.request(), this);
-  }
-
-  // Using global updators (if provided globally)
+  // Fire and forget
   public logout(): void {
-    dispatch(logoutAction.action());
+    this.statewise.dispatch(logoutAction());
   }
 }
 ```
 
 #### Key Notes:
 
-- Managers serve as the central coordination layer between your components and the application logic. They expose state using signals or derived properties, and dispatch actions to trigger state changes or side effects. This abstraction provides a consistent, typed, and testable API for interacting with your application’s reactive state.
+- Managers are the coordination layer between your components and your logic. They expose state as signals and dispatch actions, giving a consistent, typed and testable API.
 
-- Updators define how the state is updated in response to actions. They can be registered globally, making them available app-wide, or locally, scoped to a specific manager for better encapsulation. In advanced scenarios, they can also be passed inline to a single dispatch call, offering maximum flexibility without polluting global scope.
+- Updaters describe how state reacts. They are attached to a manager through `injectStatewise`, or made global through `provideStatewise`. A manager only ever sees the updaters it declared, plus the global ones.
 
-- Effects are responsible for performing asynchronous or side-effect-driven operations like API calls, routing, or logging. For now, all effects are registered globally, but support for locally scoped or inline effects (similar to updators) is planned in future versions to offer more control and composability.
+- Effects handle asynchronous or side-effecting operations. They are registered globally, from the effect classes listed in `provideStatewise`.
 
-- The overall architecture of ngx-statewise is designed to promote composability, maintainability, and clear separation of concerns. Each part—Managers, Updators, and Effects—has a focused responsibility, making your application’s state flow more predictable, scalable, and easier to reason about over time.
+- Each part — Managers, Updaters, Effects — has one focused responsibility, which keeps the state flow predictable and easy to reason about as the application grows.
+
+## Testing
+
+The `ngx-statewise/testing` entry point wires the library into a `TestBed` and gives you the two things a test usually needs: a way to let effects settle, and a way to relax the misrouted-dispatch check.
+
+```typescript
+import { captureStatewiseDeclarations, drainEffects, provideStatewiseTesting } from 'ngx-statewise/testing';
+```
+
+| Export                             | Description                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `provideStatewiseTesting(config?)` | Same options as `provideStatewise`, plus `strict`. `strict: false` silences the misrouted-dispatch check entirely — it reports nothing either, so a suite asserting an empty `ErrorHandler` stays green. The action history is enabled by default, so a test can assert what was dispatched without configuring anything. |
+| `drainEffects()`                   | Resolves once every effect in flight in the current `TestBed` is over, whichever manager started it.                                                                                                                                                                                                                      |
+| `captureStatewiseDeclarations()`   | Records the updater declarations known right now and returns the function restoring them.                                                                                                                                                                                                                                 |
+
+### Letting a fire-and-forget dispatch settle
+
+`dispatch` does not return a promise, so a test asserting on its side effects needs to wait for them:
+
+```typescript
+TestBed.configureTestingModule({
+  providers: [provideStatewiseTesting({ effects: [TaskEffect] })],
+});
+
+manager.refresh(); // calls statewise.dispatch(...)
+await drainEffects();
+
+expect(manager.tasks()).toHaveSize(3);
+```
+
+### Dispatching without attaching an updater
+
+A test that only exercises effects can dispatch an action whose updater it never attached. That is exactly what the misrouted-dispatch check forbids, so turn it off for that suite:
+
+```typescript
+TestBed.configureTestingModule({
+  providers: [provideStatewiseTesting({ strict: false, effects: [AuthEffect] })],
+});
+```
+
+### Declaring updaters inside tests
+
+`defineUpdater` records its action types when the module is loaded, and a suite calling it inside its tests would leak those declarations into the following ones. Capture and restore around it:
+
+```typescript
+let restoreDeclarations: () => void;
+
+beforeEach(() => (restoreDeclarations = captureStatewiseDeclarations()));
+afterEach(() => restoreDeclarations());
+```
+
+Prefer `strict: false` when you simply want the check off: it is scoped to one `TestBed`, whereas the declarations are module-level.
+
+## Migrating from 0.6.x
+
+The execution core was rewritten. The public API is smaller and the concepts have not changed, but the names and the wiring did.
+
+| 0.6.x                                         | Now                                                                                             |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `IUpdator` / `UpdatorRegistry` class          | `defineUpdater(StateToken, (on) => ...)`                                                        |
+| `provideUpdators([...])`                      | `provideStatewise({ updaters: [...] })`                                                         |
+| `provideEffects([...])`                       | `provideStatewise({ effects: [...] })`                                                          |
+| `registerLocalUpdator(this, updator)`         | `injectStatewise(updater)`                                                                      |
+| `dispatch(action, scope)`                     | `statewise.dispatch(action)`                                                                    |
+| `dispatchAsync(action, scope)`                | `statewise.dispatchAsync(action)`                                                               |
+| `waitForEffect(type)` / `waitForAllEffects()` | `statewise.waitForEffect(creator)` / `statewise.waitForAllEffects()`, now scoped to the manager |
+| `defineSingleAction(...).action`              | `defineSingleAction(...)` returns the creator itself                                            |
+| type `StatewiseRef`                           | type `Statewise`                                                                                |
+| type `UpdaterDefinition<State>`               | type `Updater<State>`                                                                           |
+| type `SWEffects`                              | type `EffectOutcome`                                                                            |
+
+Action creators (`defineActionsGroup`, `defineSingleAction`, `payload`, `emptyPayload`, `ofType`) are unchanged, and the generated action strings are identical. `createEffect` keeps its signature and now returns an `EffectRef`, which you can ignore.
+
+Three behaviours changed beyond the renames:
+
+- **Dispatching an action owned by another manager now throws in dev mode** instead of doing nothing, and reports to the `ErrorHandler` in production. If an effect used to return another feature's action, call that feature's manager instead. See [Dispatching through the right manager](#dispatching-through-the-right-manager).
+- **An effect runs only for the manager owning its action's updater.** Registration is still application-wide; visibility is not. A misrouted dispatch runs nothing at all — neither the updater nor the effects. Actions no updater claims keep running their effects everywhere. See [Scope](#scope).
+- **`waitForEffect` and `waitForAllEffects` are scoped to the manager** that owns them, and `waitForEffect` no longer accepts a raw action-type string.
+
+An updater class becomes a declaration:
+
+```typescript
+// Before
+@Injectable({ providedIn: 'root' })
+export class AuthUpdator implements IUpdator<AuthStates> {
+  public readonly state = inject(AuthStates);
+
+  public readonly updators: UpdatorRegistry<AuthStates> = {
+    [ofType(loginActions.request)]: (state) => {
+      state.isLoading.set(true);
+    },
+  };
+}
+
+// After
+export const authUpdater = defineUpdater(AuthStates, (on) => {
+  on(loginActions.request, (state) => {
+    state.isLoading.set(true);
+  });
+});
+```
+
+And a manager takes its handle instead of calling the global functions:
+
+```typescript
+// Before
+export class AuthManager {
+  private readonly authUpdator = inject(AuthUpdator);
+
+  constructor() {
+    registerLocalUpdator(this, this.authUpdator);
+  }
+
+  public login(credentials: LoginSubmit): Promise<void> {
+    return dispatchAsync(loginActions.request(credentials), this);
+  }
+}
+
+// After
+export class AuthManager {
+  private readonly statewise = injectStatewise(authUpdater);
+
+  public login(credentials: LoginSubmit): Promise<void> {
+    return this.statewise.dispatchAsync(loginActions.request(credentials));
+  }
+}
+```
+
+What this buys you: two managers can now dispatch the same action type concurrently without sharing state or observation, `dispatchAsync` really awaits the whole cascade including nested effects, an unexpected failure is no longer swallowed, a misrouted dispatch is reported instead of silently skipped, effects run only for the manager owning their action, and effects die with the injector that registered them.
 
 ## Benefits
 
-- **Intuitive Action Flow**: Unlike traditional Redux-based libraries, ngx-statewise implements a direct, intuitive flow where actions connect directly to updators and effects. This reduces cognitive overhead and makes the state management pattern easier to understand and implement.
+- **Intuitive Action Flow**: Unlike traditional Redux-based libraries, ngx-statewise implements a direct, intuitive flow where actions connect directly to updaters and effects. This reduces cognitive overhead and makes the state management pattern easier to understand and implement.
 
 - **Signals-First Approach**: Leveraging Angular's native signals for reactive state management, ngx-statewise offers superior performance with automatic UI updates when state changes. This eliminates the need for manual subscription handling that's common with Observable-based solutions.
 
-- **Enforced Unidirectional Flow**: The library's design enforces a predictable sequence (Action → Updator → Effect → Potentially More Actions) that makes debugging and reasoning about application state much simpler. By ensuring state is updated before effects run, all side effects work with the latest state data.
+- **Enforced Unidirectional Flow**: The library's design enforces a predictable sequence (Action → Updater → Effect → Potentially More Actions) that makes debugging and reasoning about application state much simpler. By ensuring state is updated before effects run, all side effects work with the latest state data.
 
 - **Cascading Effects**: ngx-statewise excels at creating powerful chains of operations through its cascading effects design. One action can trigger state updates which lead to effects that dispatch additional actions, making complex workflows easier to orchestrate and maintain.
 
-- **Clear Separation of Concerns**: The library enforces explicit boundaries between state updates (updators) and side effects, leading to more maintainable code that's easier to test and reason about.
+- **Clear Separation of Concerns**: The library enforces explicit boundaries between state updates (updaters) and side effects, leading to more maintainable code that's easier to test and reason about.
 
 ## When to Use ngx-statewise
 
