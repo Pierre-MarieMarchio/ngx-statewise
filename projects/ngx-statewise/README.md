@@ -354,6 +354,41 @@ public readonly loginSuccessEffect = createEffect(loginActions.success, () => {
 });
 ```
 
+##### Reaching that manager without a module cycle
+
+The instruction above is easy to give and, past the first feature, not obvious to follow. Importing `TaskManager` from the task feature usually means importing its barrel, and that barrel exports the task effect too — which imports the auth manager, which is where you started. The cycle is not in your code, it is in the shape of the imports.
+
+Break it with an interface and a token, in a module neither feature owns:
+
+```typescript
+// shared/tokens/task-manager.interface.ts — what the caller needs, nothing more
+export interface ITaskManager {
+  readonly tasks: Signal<Task[]>;
+  getAll(): void;
+}
+
+// shared/tokens/task-manager.token.ts — no import of the feature at all
+export const TASK_MANAGER = new InjectionToken<ITaskManager>('TASK_MANAGER');
+```
+
+The application config is the one place that knows both sides, and `useExisting` keeps it the same instance rather than a second one:
+
+```typescript
+providers: [provideStatewise({ effects: [AuthEffect, TaskEffect] }), { provide: TASK_MANAGER, useExisting: TaskManager }];
+```
+
+The effect then injects the token:
+
+```typescript
+export class AuthEffect {
+  private readonly taskManager = inject(TASK_MANAGER);
+}
+```
+
+Two things fall out of this beyond the cycle. The interface states what one feature actually needs of another, which is a much smaller surface than the manager's own. And a test double is now an object of that shape, so a component or an effect can be mounted without pulling in the real feature.
+
+Within one feature, inject the class directly — there is no cycle to break, and a token would only add indirection.
+
 The check costs a set lookup and only runs when no updater matched. An action claimed by no updater at all stays perfectly valid — that is an effect-only action.
 
 ##### Development throws, production reports
