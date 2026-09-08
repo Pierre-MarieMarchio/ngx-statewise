@@ -150,11 +150,12 @@ createEffect(loginActions.success, () => {
     id: 'scoping',
     title: 'An effect runs for the manager owning its action',
     summary:
-      'A dispatch reaching a scope that owns nothing of the action does not run its effects either: cascading their actions into the wrong scope would corrupt another manager. In development that misrouted dispatch throws; in production it reaches the ErrorHandler.',
+      'A dispatch reaching a scope that owns nothing of the action does not run its effects either: cascading their actions into the wrong scope would corrupt another manager. In development that misrouted dispatch throws; in production it reaches the ErrorHandler. The state page has a button for it, and shows what comes back — this application replaces the default ErrorHandler with one that keeps failures as state instead of dropping them in the console.',
     snippet: `// TASK_REQUEST is claimed by taskUpdater, which this handle does not own
 const other = injectStatewise(projectUpdater);
 other.dispatch(getAllTaskActions.request()); // misrouted: nothing runs`,
-    seenIn: 'projects/ngx-statewise/src/integration/execution-contract.spec.ts',
+    seenIn:
+      'features/state-inspection/pages/live-state-page/live-state-page.component.ts',
   },
   {
     id: 'dispatch-modes',

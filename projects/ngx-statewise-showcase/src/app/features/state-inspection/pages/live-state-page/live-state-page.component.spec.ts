@@ -16,6 +16,10 @@ import {
   sampleTask,
   sampleUser,
 } from '@testing/fake-managers';
+// Imported for its side effect as much as its value: `defineUpdater` records
+// the action types it claims when its module loads, which is what lets the
+// engine recognise a misrouted dispatch of one of them.
+import { taskUpdater } from '@app/features/project/states/task/task.updater';
 import { noticeUpdater } from '@app/features/state-inspection/states';
 import { TallyState } from '@app/features/state-inspection/states';
 import { LiveStatePageComponent } from './live-state-page.component';
@@ -160,5 +164,32 @@ describe('LiveStatePageComponent', () => {
 
     expect(taskReloads).toBe(1);
     expect(projectReloads).toBe(1);
+  });
+  describe('a dispatch sent to the wrong manager', () => {
+    it('shows nothing failed until something does', () => {
+      expect(host().textContent).toContain('Nothing has failed yet.');
+    });
+
+    /**
+     * The check has existed for a while and the showcase had no executable
+     * demonstration of it — only prose and a code literal on the docs page.
+     */
+    it('refuses it and says which manager owns the action', () => {
+      expect(taskUpdater.handlers.size).toBeGreaterThan(0);
+
+      click('dispatch a misrouted action');
+
+      const shown = host().querySelector('[data-card="errors"]')?.textContent;
+
+      expect(shown).toContain('No updater in scope for "TASK_REQUEST"');
+      expect(host().textContent).not.toContain('Nothing has failed yet.');
+    });
+
+    it('lets the reader clear what it collected', () => {
+      click('dispatch a misrouted action');
+      click('clear');
+
+      expect(host().textContent).toContain('Nothing has failed yet.');
+    });
   });
 });
