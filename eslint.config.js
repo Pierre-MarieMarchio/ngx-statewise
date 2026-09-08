@@ -6,8 +6,9 @@ import tseslint from 'typescript-eslint';
 
 /**
  * The library carries a published contract, so it is linted with type-aware
- * strict rules. The showcase is application code and gets a lighter set: its
- * job is to exercise the library, not to be an example of lint compliance.
+ * strict rules. The showcase and the documentation site are application code
+ * and get a lighter set: their job is to exercise and to describe the library,
+ * not to be an example of lint compliance.
  */
 export default tseslint.config(
   {
@@ -86,6 +87,27 @@ export default tseslint.config(
 
   {
     files: ['projects/ngx-statewise-showcase/**/*.html'],
+    extends: [...angular.configs.templateRecommended],
+  },
+
+  {
+    files: ['projects/ngx-statewise-docs/**/*.ts'],
+    extends: [
+      eslint.configs.recommended,
+      ...tseslint.configs.recommended,
+      ...angular.configs.tsRecommended,
+    ],
+    processor: angular.processInlineTemplates,
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+
+  {
+    files: ['projects/ngx-statewise-docs/**/*.html'],
     extends: [...angular.configs.templateRecommended],
   },
 

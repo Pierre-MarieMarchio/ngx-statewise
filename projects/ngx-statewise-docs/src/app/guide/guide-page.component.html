@@ -1,0 +1,46 @@
+<div class="guide">
+  <article
+    class="guide__body"
+    (click)="onContentClick($event)"
+    [innerHTML]="html()"
+  ></article>
+
+  <nav class="guide__pager" aria-label="Guide pages">
+    @if (previous(); as target) {
+      <a
+        class="guide__pager-link guide__pager-link--previous"
+        [routerLink]="['/guide', target.slug]"
+      >
+        <span class="guide__pager-label">Previous</span>
+        <span class="guide__pager-title">{{ target.title }}</span>
+      </a>
+    }
+    @if (next(); as target) {
+      <a
+        class="guide__pager-link guide__pager-link--next"
+        [routerLink]="['/guide', target.slug]"
+      >
+        <span class="guide__pager-label">Next</span>
+        <span class="guide__pager-title">{{ target.title }}</span>
+      </a>
+    }
+  </nav>
+</div>
+
+@if (headings().length > 0) {
+  <aside class="toc" aria-label="On this page">
+    <p class="toc__title">On this page</p>
+    <ul class="toc__list">
+      @for (heading of headings(); track heading.id) {
+        <li class="toc__item" [class.toc__item--nested]="heading.depth > 2">
+          <a
+            class="toc__link"
+            [routerLink]="['/guide', page().slug]"
+            [fragment]="heading.id"
+            >{{ heading.text }}</a
+          >
+        </li>
+      }
+    </ul>
+  </aside>
+}

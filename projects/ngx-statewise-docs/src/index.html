@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <title>ngx-statewise</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Documentation for ngx-statewise, a lightweight signals-first state management library for Angular."
+    />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <script>
+      // Applies the stored theme before the first paint. Without it every page
+      // load would show the default theme until Angular boots and corrects it.
+      // The key is mirrored from src/app/ui-state/theme.ts.
+      (function () {
+        try {
+          var stored = localStorage.getItem('ngx-statewise-docs-theme');
+          if (stored === 'dark' || stored === 'light') {
+            document.documentElement.setAttribute('data-theme', stored);
+          }
+        } catch (error) {
+          // Storage blocked: the default in the markup above stands.
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <docs-root></docs-root>
+  </body>
+</html>
