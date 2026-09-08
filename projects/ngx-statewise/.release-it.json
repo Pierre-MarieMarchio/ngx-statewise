@@ -1,0 +1,29 @@
+{
+  "$schema": "../../node_modules/release-it/schema/release-it.json",
+  "git": {
+    "tagName": "ngx-statewise@${version}",
+    "tagAnnotation": "ngx-statewise@${version}",
+    "commitMessage": "chore(release): ngx-statewise@${version}",
+    "requireBranch": ["main", "next"],
+    "requireCleanWorkingDir": true,
+    "push": true
+  },
+  "npm": {
+    "publishPath": "../../dist/ngx-statewise"
+  },
+  "github": {
+    "release": true,
+    "releaseName": "ngx-statewise@${version}"
+  },
+  "hooks": {
+    "after:bump": "cd ../.. && npm run build:library"
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": { "name": "angular" },
+      "infile": "CHANGELOG.md",
+      "tagName": "ngx-statewise@${version}",
+      "gitRawCommitsOpts": { "path": "projects/ngx-statewise" }
+    }
+  }
+}

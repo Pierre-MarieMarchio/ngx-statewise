@@ -1,0 +1,64 @@
+version: 2
+
+# Dependabot is the cheapest reviewer this repository has: the 46 advisories
+# that were sitting in the lerna tree, and the workflow actions that drifted
+# four majors behind, would both have arrived as pull requests instead of being
+# found by hand.
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    target-branch: dev
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      # Angular moves as one set or not at all: a partial bump fails the peer
+      # ranges of the packages left behind.
+      angular:
+        patterns:
+          - '@angular/*'
+          - '@angular-devkit/*'
+          - angular-eslint
+          - ng-packagr
+      lint-and-format:
+        patterns:
+          - eslint
+          - '@eslint/*'
+          - typescript-eslint
+          - prettier
+          - 'eslint-config-*'
+      release-tooling:
+        patterns:
+          - release-it
+          - '@release-it/*'
+          - '@commitlint/*'
+          - husky
+      test-tooling:
+        patterns:
+          - vitest
+          - '@vitest/*'
+          - jsdom
+          - jasmine-core
+          - '@types/jasmine'
+          - 'karma*'
+    ignore:
+      # TypeScript is pinned by Angular's peer range (>=6.0 <6.1). A bump only
+      # becomes possible when Angular itself widens it, so let Angular lead.
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    target-branch: dev
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns: ['*']
