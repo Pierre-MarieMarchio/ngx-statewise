@@ -35,6 +35,7 @@ export const appConfig: ApplicationConfig = {
     provideStatewise({
       effects: [AuthEffect, TaskEffect, ProjectEffect],
       updaters: [noticeUpdater],
+      history: { limit: 50 },
     }),
 
     { provide: AUTH_MANAGER, useExisting: AuthManager },

@@ -12,6 +12,11 @@ export const navigationItems: NavigationItem[] = [
     route: 'task',
   },
   {
+    icon: 'History',
+    label: 'History',
+    route: 'history',
+  },
+  {
     icon: 'Menu_Book',
     label: 'Docs',
     route: 'docs',
