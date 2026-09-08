@@ -29,7 +29,10 @@
           "options": {
             "runner": "vitest",
             "tsConfig": "projects/ngx-statewise/tsconfig.spec.json",
-            "coverageInclude": ["projects/ngx-statewise/src/lib/**/*.ts"],
+            "coverageInclude": [
+              "projects/ngx-statewise/src/lib/**/*.ts",
+              "projects/ngx-statewise/testing/src/**/*.ts"
+            ],
             "coverageReporters": ["html", "lcovonly", "text-summary"],
             "coverageThresholds": {
               "statements": 100,
