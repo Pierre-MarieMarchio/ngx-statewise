@@ -13,16 +13,17 @@ export interface ActionIdentity {
 }
 
 /**
- * The dispatch handle a manager gets from `injectStatewise`. Dispatch and
- * effect observation are scoped to this handle; the recorded actions are
- * application-wide.
+ * The dispatch handle a manager gets from `injectStatewise`. Everything on it
+ * is scoped to this handle: what it dispatches, and the effects it observes.
+ *
+ * The action history is deliberately absent. It is application-wide, so a
+ * scoped handle is the wrong place to read it from — inject `ActionHistory`.
  */
 export interface Statewise {
   dispatch(action: Action): void;
   dispatchAsync(action: Action): Promise<void>;
   waitForEffect(action: ActionIdentity): Promise<void>;
   waitForAllEffects(): Promise<void>;
-  recordedActions(): readonly Action[];
 }
 
 /** The handle bound to the updaters of one `injectStatewise` call. */
@@ -53,9 +54,5 @@ export class ScopedStatewiseRef implements Statewise {
   /** Waits only for the effects this handle started. */
   public waitForAllEffects(): Promise<void> {
     return this.engine.waitForAllEffects(this.scope);
-  }
-
-  public recordedActions(): readonly Action[] {
-    return this.engine.recordedActions();
   }
 }

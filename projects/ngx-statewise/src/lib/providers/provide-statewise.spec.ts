@@ -2,6 +2,7 @@ import { ErrorHandler, Injectable, InjectionToken } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { defineActionsGroup, emptyPayload, payload } from '../action';
+import { ActionHistory } from '../dispatch/action-history';
 import type { DispatchScope } from '../dispatch/dispatch-scope';
 import { StatewiseEngine } from '../dispatch/statewise-engine';
 import { createEffect } from '../effect';
@@ -183,7 +184,7 @@ describe('provideStatewise', () => {
 
       await engine.execute(provideActions.ponged(), NO_SCOPE);
 
-      expect(engine.recordedActions()).toEqual([]);
+      expect(TestBed.inject(ActionHistory).snapshot()).toEqual([]);
     });
 
     it('retains the latest actions up to the configured limit', async () => {
@@ -193,7 +194,9 @@ describe('provideStatewise', () => {
       await engine.execute(provideActions.ponged(), NO_SCOPE);
       await engine.execute(provideActions.pinged(1), NO_SCOPE);
 
-      expect(engine.recordedActions()).toEqual([provideActions.pinged(1)]);
+      expect(TestBed.inject(ActionHistory).snapshot()).toEqual([
+        provideActions.pinged(1),
+      ]);
     });
 
     it('requires a positive integer limit', () => {

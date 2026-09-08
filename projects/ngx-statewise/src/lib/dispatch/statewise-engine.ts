@@ -65,10 +65,6 @@ export class StatewiseEngine {
     return this.pendingEffects.waitForScope(scope);
   }
 
-  public recordedActions(): readonly Action[] {
-    return this.actionHistory.snapshot();
-  }
-
   /** The single handler owning this action type in this scope, if any. */
   private resolveHandler(
     actionType: string,
