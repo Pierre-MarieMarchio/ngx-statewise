@@ -1,20 +1,19 @@
 # Actions
 
-An action is a statement of intent: something happened, and here is what came
-with it. It carries a type — a string identifying the event — and optionally a
-payload.
+An action states an intent: something happened, and this is what came with it.
+It carries a type, a string identifying the event, and an optional payload.
 
-You never write that string by hand. Declare actions in a group when they
-belong to one flow, or on their own when they stand alone, and the types are
-generated for you, consistently and typed.
+You never write that string by hand. Declare actions in a group when they belong
+to one flow, or on their own when they stand alone, and ngx-statewise generates
+the types for you.
 
 ## Action groups
 
-When using defineActionsGroup, action types are automatically created by combining the source (a base name) and event name. This is useful when dealing with a set of related actions, such as loading states or error handling, allowing you to organize actions under a common source.
+`defineActionsGroup` builds each action type from the source, a base name, and the name of the event. Use it for a set of related actions, such as a loading flow or error handling, gathered under a common source.
 
-For example, with a source of 'LOGIN', events like 'request' will automatically become 'LOGIN_REQUEST', 'success' will become 'LOGIN_SUCCESS', and so on.
+With a source of `'LOGIN'`, the event `request` becomes `LOGIN_REQUEST`, `success` becomes `LOGIN_SUCCESS`, and so on.
 
-Here's an example of how you would define a group of related actions:
+The following example declares a group of related actions:
 
 ```typescript
 import { defineActionsGroup, payload, emptyPayload } from 'ngx-statewise';
@@ -31,17 +30,17 @@ export const loginActions = defineActionsGroup({
 });
 ```
 
-In the above example:
+In that group:
 
-- The `LOGIN_REQUEST` action will be triggered when a login request is made, with a payload of type `LoginSubmit`.
-- The `LOGIN_SUCCESS` action will be triggered when the login operation succeeds, with a payload of type `LoginResponse`.
-- The `LOGIN_FAILURE`, `LOGIN_CANCEL`, actions don't require payloads, so they are defined with emptyPayload.
+- `LOGIN_REQUEST` carries a `LoginSubmit` payload, and you dispatch it when a login request is made.
+- `LOGIN_SUCCESS` carries a `LoginResponse` payload, and you dispatch it when the login succeeds.
+- `LOGIN_FAILURE` and `LOGIN_CANCEL` need no payload, so they use `emptyPayload`.
 
 ## Single actions
 
-For single actions that do not require grouping, you can use defineSingleAction. These actions will automatically be suffixed with `_ACTION` to ensure their uniqueness.
+Use `defineSingleAction` for an action that belongs to no group. It suffixes the type with `_ACTION`, which keeps it unique.
 
-For example, `'LOGOUT'` becomes `'LOGOUT_ACTION'`, and `'SELECT_ITEM'` becomes `'SELECT_ITEM_ACTION'`. Here's how you define them:
+`'LOGOUT'` becomes `'LOGOUT_ACTION'`, and `'SELECT_ITEM'` becomes `'SELECT_ITEM_ACTION'`. Declare them like this:
 
 ```typescript
 import { defineSingleAction, emptyPayload, payload } from 'ngx-statewise';
@@ -57,12 +56,12 @@ export const selectItemAction = defineSingleAction('SELECT_ITEM', payload<number
 > `LOGOUT_ACTION`. Pass the source already upper-cased to a single action, as
 > the examples above do, or the two conventions will not match.
 
-In this case:
+In that example:
 
-- The `LOGOUT_ACTION` will be dispatched when the user logs out, with no payload, as indicated by `emptyPayload`.
-- The `SELECT_ITEM_ACTION` will be triggered when an item is selected, and the payload will be a number (likely the item ID).
+- `LOGOUT_ACTION` carries no payload, as `emptyPayload` declares. Dispatch it when the user logs out.
+- `SELECT_ITEM_ACTION` carries a number, the id of the selected item.
 
-`defineSingleAction` returns the creator itself, so it is used exactly like a creator coming from an action group:
+`defineSingleAction` returns the creator itself, so you use it exactly like a creator coming from an action group:
 
 ```typescript
 statewise.dispatch(logoutAction());
@@ -74,19 +73,16 @@ createEffect(selectItemAction, (id) => { ... });
 
 ## Action types
 
-Each action (whether part of an action group or a single action) will have its own distinct type. These types are automatically generated based on the action's name and whether it's part of a group or standalone. This allows for clear and consistent action names throughout the application.
+Every action has its own type, whether it belongs to a group or stands alone. ngx-statewise generates that type from the name of the action and from the way it was declared:
 
-For example:
-
-- The `loginActions.request` action will have the type `LOGIN_REQUEST`.
-- The `logoutAction` will have the type `LOGOUT_ACTION`.
+- `loginActions.request` has the type `LOGIN_REQUEST`.
+- `logoutAction` has the type `LOGOUT_ACTION`.
 
 ## Key notes
 
 - `defineActionsGroup` for a flow, `defineSingleAction` for a standalone
   operation. Both produce creators used the same way.
-- The generated string is the key updaters and effects match on, so it has to
-  agree exactly. `ofType(creator)` returns it, typed, instead of you writing it
-  out.
-- Grouping `request / success / failure` under one source keeps a flow readable
-  at a glance, and keeps its types from colliding with another feature's.
+- Updaters and effects match on the generated string, so it has to agree
+  exactly. `ofType(creator)` returns it, typed.
+- Grouping `request / success / failure` under one source keeps a flow readable,
+  and keeps its types from colliding with another feature's.

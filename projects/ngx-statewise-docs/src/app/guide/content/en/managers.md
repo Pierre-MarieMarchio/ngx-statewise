@@ -2,8 +2,8 @@
 
 A manager is the only part of a feature your components should know about. It
 exposes the state as read-only signals and offers named methods instead of
-dispatches, so a component asks for `login(credentials)` rather than assembling
-an action.
+dispatches, so a component calls `login(credentials)` rather than assembling an
+action.
 
 It is also the unit of scope: a manager applies the updaters it declared, and
 observes only the effects it started.
@@ -20,11 +20,11 @@ export class AuthManager {
 }
 ```
 
-`injectStatewise` must be called in an injection context, like `inject`. It resolves each updater's state through the injector of the caller, once and for all.
+Call `injectStatewise` in an injection context, like `inject`. It resolves each updater's state through the injector of the caller, once and for all.
 
 ## Exposing state
 
-Managers expose state reactively to the components depending on it, so those components bind to signals rather than handling state logic themselves.
+A manager exposes state as read-only signals, so the components depending on it bind to those signals instead of handling state logic themselves.
 
 ```typescript
 @Injectable({ providedIn: 'root' })
@@ -56,7 +56,7 @@ The handle returned by `injectStatewise` exposes the whole dispatch API:
 await this.statewise.waitForEffect(loginActions.request);
 ```
 
-Observation is scoped like dispatch: two managers awaiting the same action type never wait for each other. The action history is not on the handle at all: it is application-wide, so it is injected instead — `inject(ActionHistory).snapshot()`.
+Observation is scoped like dispatch: two managers awaiting the same action type never wait for each other. The action history is application-wide, so you inject it rather than read it from the handle: `inject(ActionHistory).snapshot()`.
 
 ### Synchronous dispatch
 
@@ -72,20 +72,20 @@ this.statewise.dispatch(logoutAction());
 await this.statewise.dispatchAsync(loginActions.request(credentials));
 ```
 
-`dispatchAsync` returns a `Promise<void>` that resolves once every effect triggered by the action, and every action those effects returned, have completed recursively. This is what you want for flows like authentication, where navigation must wait for the outcome.
+`dispatchAsync` returns a `Promise<void>` that resolves once every effect triggered by the action, and every action those effects returned, have completed recursively. Use it for flows like authentication, where navigation must wait for the outcome.
 
 ### Error handling
 
-The two dispatches differ in how they report failures, and the difference is deliberate:
+The two dispatches report failures differently:
 
 | Failure           | `dispatch`                            | `dispatchAsync`     |
 | ----------------- | ------------------------------------- | ------------------- |
 | An updater throws | Throws synchronously at the call site | Rejects the promise |
 | An effect fails   | Reported to Angular's `ErrorHandler`  | Rejects the promise |
 
-An updater failure is a programming error: it surfaces where it happened rather than being buried in a promise nobody awaits. An effect failure is an execution error: with `dispatch` nobody is there to receive it, so it goes to the `ErrorHandler`; with `dispatchAsync` the caller gets it.
+An updater failure is a programming error, so it surfaces where it happened instead of being buried in a promise nobody awaits. An effect failure is an execution error: with `dispatch` nobody is there to receive it, so it goes to the `ErrorHandler`, and with `dispatchAsync` the caller gets it.
 
-When several effects run for the same action, ngx-statewise waits for all of them before reporting the first failure. A failing effect never leaves its siblings running unobserved.
+When several effects run for the same action, ngx-statewise waits for all of them before reporting the first failure.
 
 ## Example: `AuthManager`
 

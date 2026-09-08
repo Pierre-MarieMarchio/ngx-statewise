@@ -1,28 +1,30 @@
 # Effects
 
-An effect is the asynchronous half of a feature: API calls, navigation,
-storage, logging — everything that is not a state change. You declare one with
+An effect is the asynchronous half of a feature: API calls, navigation, storage,
+logging, everything that is not a state change. You declare one with
 `createEffect`, bound to a single action.
 
 Effects always run **after** the updater, so they never read stale state. The
-sequence **action → updater → effect** is not a convention here, it is enforced.
+library enforces the sequence **action → updater → effect**.
 
 An effect may return another action, and that action goes through the same
-cycle: its updater, then its own effects. This is how a flow like "log in, load
-the workspace, then navigate" is expressed — as a chain, not as a callback tree.
-Never return the action that triggered the effect: that is an infinite cascade,
-and nothing will stop it for you.
+cycle: its updater, then its own effects. A flow like "log in, load the
+workspace, then navigate" is a chain of those actions rather than a tree of
+callbacks.
 
 A handler may return an action, a promise, an observable, or nothing.
-Observables are read once — ngx-statewise takes the first emission and stops
-listening — so a long-lived stream belongs in an application-level
-subscription, not in an effect.
+ngx-statewise reads an observable once: it takes the first emission and stops
+listening. Put a long-lived stream in an application-level subscription instead.
+
+> [!WARNING]
+> Never return the action that triggered the effect. It produces an infinite
+> cascade, and nothing stops it for you.
 
 ## Defining an effect
 
-The `createEffect` utility allows you to create an effect linked to a particular action. By default, it expects a Promise, but you can also return Observables within the effect.
+`createEffect` links an effect to one action. It expects a promise by default, and it also accepts an observable.
 
-Here's an example of an effect that uses a Promise:
+The following effect returns a promise:
 
 ```typescript
 @Injectable({
@@ -63,9 +65,9 @@ export class AuthEffects {
 
 ## Returning an observable
 
-You can return an Observable for a one-shot asynchronous operation. Only its first emission is processed. An Observable that completes without emitting, such as `EMPTY`, is treated like an effect returning `void`.
+Return an observable for a one-shot asynchronous operation. ngx-statewise processes its first emission only. An observable that completes without emitting, such as `EMPTY`, counts as an effect returning `void`.
 
-Here’s an example of an effect using an Observable:
+The following effect fetches a user and maps the response to an action:
 
 ```typescript
 @Injectable({
@@ -89,11 +91,9 @@ export class UserEffects {
 }
 ```
 
-In the example above, the effect listens for the GET_USER_REQUEST action and uses an Observable to handle the asynchronous operation of fetching user data.
-
 ## Registering effects
 
-Effect classes must be declared in `provideStatewise` so Angular instantiates them at startup. `createEffect` registers itself in the injection context of the class that declares it, which is why the class must be instantiated for its effects to exist. Without this declaration, nothing happens when the action is dispatched.
+Declare every effect class in `provideStatewise`, so Angular instantiates it at startup. `createEffect` registers itself in the injection context of the class declaring it, so that class has to be instantiated for its effects to exist. Without the declaration, dispatching the action does nothing.
 
 ```typescript
 export const appConfig: ApplicationConfig = {
@@ -106,11 +106,11 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-`createEffect` must be called in an injection context — as a field initializer or in the constructor of an injectable class. Calling it elsewhere throws immediately rather than registering an effect that would never run.
+Call `createEffect` in an injection context: as a field initializer, or in the constructor of an injectable class. Calling it elsewhere throws immediately rather than registering an effect that would never run.
 
 ### Scope
 
-An effect runs for the dispatches of the manager owning its action's updater, and only those. Registration is application-wide, visibility is not: the owner of the updater owns the effects too.
+An effect runs for the dispatches of the manager owning its action's updater, and only those. Registration is application-wide, and visibility follows the updater: whoever owns it owns the effects too.
 
 ```typescript
 // AUTH_LOADED is handled by authUpdater, attached to AuthManager.
@@ -120,11 +120,11 @@ authManager.dispatch(authActions.loaded());   // ✅ the effect runs
 taskManager.dispatch(authActions.loaded());   // ❌ misrouted: nothing runs
 ```
 
-An action type no updater claims has no owner, so its effects run for every manager — that is an effect-only action, and it stays valid everywhere. An updater declared globally through `provideStatewise({ updaters: [...] })` is owned by every scope, so its effects run everywhere too.
+An action type that no updater claims has no owner, so its effects run for every manager. That is an effect-only action, and it stays valid everywhere. An updater declared globally through `provideStatewise({ updaters: [...] })` belongs to every scope, so its effects run everywhere too.
 
 ### Lifecycle
 
-A registration lives as long as the injector that created it. An effect class scoped to a component or to a lazy route is unregistered when that injector is destroyed, instead of piling up one more copy of its effects on every instantiation.
+A registration lives as long as the injector that created it. An effect class scoped to a component or to a lazy route is unregistered when that injector is destroyed, so instantiating it again never piles up a second copy of its effects.
 
 `createEffect` returns an `EffectRef` for the rarer case where you need to stop an effect earlier:
 
@@ -139,14 +139,14 @@ export class AuthEffects {
 }
 ```
 
-Ignoring the returned handle is perfectly fine: destruction of the owning injector already unregisters the effect.
+You can ignore the returned handle. Destroying the owning injector already unregisters the effect.
 
 ## Key notes
 
 - Return a promise, an observable, an action, or nothing at all. An observable
   is read once: its first emission becomes the action, and completing without
   emitting produces none.
-- Never return the action that triggered the effect. That is an infinite
+- Never return the action that triggered the effect. It produces an infinite
   cascade, and nothing stops it for you.
 - Effects do not touch state. That is the updater's job, and it has already run.
 - Declare every effect class in `provideStatewise({ effects: [...] })`, or it is

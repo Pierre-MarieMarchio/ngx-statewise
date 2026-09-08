@@ -1,15 +1,15 @@
 # Introduction
 
 ngx-statewise is a state management library for Angular built on signals. State
-lives in plain injectable classes, actions carry intent, updaters apply it, and
+lives in plain injectable classes. Actions carry intent, updaters apply it, and
 effects handle everything that is not a state change.
 
-It aims at the middle ground: more structure than a handful of services passed
-around by hand, far less ceremony than NgRx or NGXS.
+It sits between a handful of services passed around by hand and the ceremony of
+NgRx or NGXS.
 
 ## The flow
 
-Every change follows the same path, and it only goes one way.
+Every change follows the same path, in one direction.
 
 1. **An action carries the intent**, and its payload. Nothing happens until one
    is dispatched.
@@ -21,21 +21,20 @@ Every change follows the same path, and it only goes one way.
    logging.
 5. **Effects may return further actions**, which start the same cycle again.
 
-That last step is the point. A login action updates the state, its effect calls
-the API, and the action it returns updates the state again — one chain, awaited
-end to end by a single `dispatchAsync`.
+An effect that returns an action starts a cascade. A login action updates the
+state, its effect calls the API, and the action it returns updates the state
+again. One `dispatchAsync` awaits the whole chain.
 
-Two consequences are worth stating outright, because they are what you get in
-exchange for the structure:
+Two consequences follow from that order:
 
 - An effect never sees stale state. The updater has already run.
-- An action that no updater handles is perfectly valid. It exists to trigger
-  effects, and nothing warns you about it.
+- An action that no updater handles is valid. It exists to trigger effects, and
+  nothing warns you about it.
 
 ## How it differs from NgRx and NGXS
 
-Both are excellent, and both are built on a centralised store with reducers and
-selectors. ngx-statewise is not.
+NgRx and NGXS are built on a centralised store with reducers and selectors.
+ngx-statewise is not.
 
 |                   | NgRx / NGXS                               | ngx-statewise                                          |
 | ----------------- | ----------------------------------------- | ------------------------------------------------------ |
@@ -45,22 +44,21 @@ selectors. ngx-statewise is not.
 | Wiring an action  | Action, reducer case, selector, effect    | Action, updater handler, effect                        |
 | Dispatch target   | The global store                          | The manager owning the state                           |
 
-The practical difference is that an action is wired directly to the updater and
-the effects that care about it, instead of travelling through a store that
-everything subscribes to. There is less indirection to follow when you are
-reading unfamiliar code, and less to write when you are adding a feature.
+An action is wired directly to its updater and to the effects that care about
+it, instead of travelling through a store everything subscribes to. You follow
+less indirection when reading unfamiliar code, and write less when adding a
+feature.
 
-The trade is that there is no single object holding the whole application state.
-If you rely on that — one place to serialise, to time-travel, to inspect — this
-is not the library for you.
+In exchange, no single object holds the whole application state. If you need one
+place to serialise it, to replay it or to inspect it, this is not the library
+for you.
 
 ## What to expect
 
-- **Dispatch is scoped.** A manager only applies the updaters it declared.
-  Sending an action to the wrong manager is a mistake the library reports rather
-  than swallows — see
+- **Dispatch is scoped.** A manager applies only the updaters it declared. The
+  library reports an action sent to the wrong manager instead of swallowing it.
+  See
   [dispatching through the right manager](/guide/updaters#dispatching-through-the-right-manager).
-- **An action always comes first.** Effects cannot be triggered on their own,
-  which is a real adjustment if you are used to reacting to a stream directly.
-- **Derived state is `computed`.** There is no selector layer to compose, which
-  is simpler until you want something a selector library would have given you.
+- **An action always comes first.** You cannot trigger an effect on its own.
+  Expect an adjustment if you are used to reacting to a stream directly.
+- **Derived state is `computed`.** There is no selector layer to compose.

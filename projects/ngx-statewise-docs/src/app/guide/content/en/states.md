@@ -1,15 +1,15 @@
 # States
 
-A state is a plain injectable class holding the data of one feature. There is
-no store to register it with and no shape to declare: whatever fields you put
-on it _are_ the state.
+A state is a plain injectable class holding the data of one feature. You do not
+register it with a store or declare its shape: the fields you put on the class
+are the state.
 
-Its fields are usually signals, so components track them on their own. Plain
+Use signals for those fields, so components track them on their own. Plain
 properties work too, at the cost of updating the view yourself.
 
 ## With signals
 
-This is the recommended shape. A component reading one of these signals in its template re-renders when an updater writes to it, with nothing to subscribe to and nothing to tear down.
+Signals are the recommended shape. A component reading one of them in its template re-renders when an updater writes to it, with nothing to subscribe to and nothing to tear down.
 
 ```typescript
 @Injectable({
@@ -25,7 +25,7 @@ export class AuthStates {
 
 ## With plain properties
 
-Nothing forces signals. Updaters write plain properties just as happily — but a component reading one has no way of knowing it changed, so you are back to marking it for check yourself. Mixing both in the same class is allowed, and occasionally useful for data no template reads.
+Updaters write plain properties too. A component reading one has no way of knowing it changed, so you mark it for check yourself. You can mix both in the same class, which is occasionally useful for data no template reads.
 
 ```typescript
 @Injectable({

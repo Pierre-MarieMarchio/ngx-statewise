@@ -1,8 +1,8 @@
 # Updaters
 
-Updaters describe how a state reacts to actions. They deal only with state data: anything else — API calls, navigation, logging — belongs in Effects.
+An updater describes how a state reacts to actions. It only writes state data: API calls, navigation and everything else belong in effects.
 
-An updater is declared with `defineUpdater`, outside of any class. It takes the injectable token holding the state, and a callback registering one handler per action.
+You declare an updater with `defineUpdater`, outside any class. It takes the injectable token holding the state, and a callback registering one handler per action.
 
 ```typescript
 import { defineUpdater } from 'ngx-statewise';
@@ -26,11 +26,11 @@ export const authUpdater = defineUpdater(AuthStates, (on) => {
 });
 ```
 
-The state is never resolved at declaration time: `defineUpdater` only records the token. The instance is read from the injector when the updater is attached to a manager, which is what keeps two managers of the same feature isolated from each other.
+`defineUpdater` records the token and resolves nothing at declaration time. The instance is read from the injector when the updater is attached to a manager, which keeps two managers of the same feature isolated from each other.
 
 ## Typing
 
-Handlers are fully inferred from the action creator, no annotation needed:
+Handlers are inferred from the action creator, with no annotation to write:
 
 - `state` is typed by the token passed to `defineUpdater`.
 - `payload` is typed by the action creator. An action without payload produces a handler with no second parameter.
@@ -53,7 +53,7 @@ defineUpdater(AuthStates, (on) => {
 
 ### To a manager
 
-This is the usual case. The manager declares the updaters it owns via `injectStatewise`, and gets back the handle used to dispatch.
+This is the usual case. The manager declares the updaters it owns with `injectStatewise`, and gets back the handle it dispatches through.
 
 ```typescript
 @Injectable({ providedIn: 'root' })
@@ -62,7 +62,7 @@ export class AuthManager {
 }
 ```
 
-The updaters passed this way are only visible to the dispatches issued through this handle. Two managers may declare the same action types on two different states without ever colliding.
+The updaters passed this way are only visible to the dispatches issued through this handle. Two managers may declare the same action types on two different states without colliding.
 
 ### Globally
 
@@ -78,7 +78,7 @@ A scoped updater always wins over a global one for the same action type.
 
 ## Dispatching through the right manager
 
-An updater is only applied by the dispatches of the scope it is attached to. Sending an action to the wrong manager would therefore skip its state update, and that used to happen silently. It no longer does.
+A dispatch applies only the updaters attached to its own scope. An action sent to the wrong manager therefore skips its state update. That used to happen silently, and the library now detects it.
 
 `defineUpdater` records the action types it claims as soon as its module is loaded. Dispatching one of those types through a scope that does not handle it throws in development:
 
@@ -90,9 +90,9 @@ owning that updater, or declare that updater globally with
 provideStatewise({ updaters: [...] }).
 ```
 
-A misrouted dispatch does nothing at all: no state update, and none of the effects registered for that action type either. Those effects belong to whoever owns the updater, and running them here would cascade their actions into a scope that owns nothing of them.
+A misrouted dispatch does nothing at all: no state update, and none of the effects registered for that action type either. Those effects belong to the owner of the updater, and running them here would cascade their actions into a scope that owns none of them.
 
-In practice this means an effect must not return another feature's action. Inject that feature's manager and call it instead:
+An effect must therefore not return another feature's action. Inject that feature's manager and call it instead:
 
 ```typescript
 public readonly loginSuccessEffect = createEffect(loginActions.success, () => {
@@ -105,11 +105,16 @@ public readonly loginSuccessEffect = createEffect(loginActions.success, () => {
 });
 ```
 
-The check costs a set lookup and only runs when no updater matched. An action claimed by no updater at all stays perfectly valid — that is an effect-only action.
+The check costs a set lookup and only runs when no updater matched. An action that no updater claims stays valid: it is an effect-only action.
 
 ### Development throws, production reports
 
-The detection always runs; only the reaction depends on the environment. Throwing on a user's machine would take down a running application over a state update that is merely missing, so production hands the same error to Angular's `ErrorHandler` and carries on: the dispatch resolves, the effects of the action still run, and whatever you plugged into `ErrorHandler` — a logger, Sentry — receives the report.
+The detection always runs. Only the reaction depends on the environment. Throwing on a user's machine would take down a running application over a state update that is merely missing, so production hands the same error to Angular's `ErrorHandler` instead. The dispatch then resolves without doing anything: no state update, and no effects either.
+
+> [!NOTE]
+> `'report'` changes who hears about the mistake, not what happens. A misrouted
+> dispatch does nothing under all three reactions. Only `'throw'` stops the
+> caller.
 
 Override it when you need to:
 
@@ -124,13 +129,13 @@ provideStatewise({
 | ---------- | ------------------------------------------------------------- |
 | `'throw'`  | Raises at the dispatch site. The default in development.      |
 | `'report'` | Hands the error to `ErrorHandler`. The default in production. |
-| `'ignore'` | Says nothing, as before the check existed.                    |
+| `'ignore'` | Says nothing and carries on.                                  |
 
 ### What the check cannot see
 
 An action type becomes known when the module declaring its updater is loaded. In a lazily loaded feature, that happens with the chunk, so a dispatch aimed at an updater whose chunk has not been loaded yet is not reported.
 
-This is a missed detection, never a false alarm: the check never blames a dispatch that would have worked. And when the chunk is absent, neither the updater nor the effects of that feature exist, so the action does nothing at all — which is the bug you were trying to catch in the first place.
+The check misses that case rather than raising a false alarm: it never blames a dispatch that would have worked. When the chunk is absent, neither the updater nor the effects of that feature exist, so the action does nothing at all.
 
 If a lazily loaded feature must react to actions dispatched before it is reached, declare its updater globally instead of attaching it to a manager:
 
@@ -140,6 +145,6 @@ provideStatewise({ updaters: [authUpdater] });
 
 ## Key notes
 
-- One action type can only be handled by a single updater within the same scope. A duplicate is reported at startup, not silently ignored.
+- One action type can only be handled by a single updater within the same scope. A duplicate is reported at startup.
 - Handlers mutate the state in place, typically through signals. They return nothing.
-- An action handled by no updater is perfectly valid: it merely triggers its effects.
+- An action that no updater handles is valid: it triggers its effects and nothing else.

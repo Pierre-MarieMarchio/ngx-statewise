@@ -8,7 +8,7 @@ npm install ngx-statewise
 
 ## Setting up your application
 
-To use ngx-statewise, add `provideStatewise()` to your application's providers. It is the single entry point of the library: it wires the execution engine and registers your effects and your global updaters.
+Add `provideStatewise()` to your application's providers. It is the entry point of the library: it wires the execution engine and registers your effects and your global updaters.
 
 ```typescript
 import { provideStatewise } from 'ngx-statewise';
@@ -37,5 +37,5 @@ export const appConfig: ApplicationConfig = {
 > where you call it, before anything is injected, so `{ limit: 0 }` or a
 > fractional value fails at startup rather than silently recording nothing.
 
-Omitting `history` altogether is what disables the history — that is the
-default, and it is not an error.
+Leave `history` out to disable the history. That is the default, and it is not
+an error.

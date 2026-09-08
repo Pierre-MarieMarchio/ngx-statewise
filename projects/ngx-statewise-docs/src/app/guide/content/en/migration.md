@@ -1,7 +1,7 @@
 # Migrating from 0.6.x
 
-The execution core was rewritten. The public API is smaller and the concepts
-have not changed, but the names and the wiring did.
+The execution core was rewritten. The concepts have not changed, but the public
+API is smaller, and the names and the wiring are different.
 
 ## What was renamed
 
@@ -27,9 +27,9 @@ Action creators (`defineActionsGroup`, `defineSingleAction`, `payload`, `emptyPa
 Four behaviours changed beyond the renames:
 
 - **Dispatching an action owned by another manager now throws in dev mode** instead of doing nothing, and reports to the `ErrorHandler` in production. If an effect used to return another feature's action, call that feature's manager instead. See [Dispatching through the right manager](/guide/updaters#dispatching-through-the-right-manager).
-- **An effect runs only for the manager owning its action's updater.** Registration is still application-wide; visibility is not. A misrouted dispatch runs nothing at all — neither the updater nor the effects. Actions no updater claims keep running their effects everywhere. See [Scope](/guide/effects#scope).
+- **An effect runs only for the manager owning its action's updater.** Registration is still application-wide, and visibility now follows the updater. A misrouted dispatch runs nothing at all, neither the updater nor the effects. Actions no updater claims keep running their effects everywhere. See [Scope](/guide/effects#scope).
 - **`waitForEffect` and `waitForAllEffects` are scoped to the manager** that owns them, and `waitForEffect` no longer accepts a raw action-type string.
-- **The action history left the dispatch handle.** `recordedActions()` is gone from `Statewise`; inject `ActionHistory` and call `snapshot()`. The history was always application-wide, so a handle that scopes everything else was the wrong place to read it from — and reading it forced an `injectStatewise()` with no updater at all, purely to get at a global. `snapshot()` returns the same plain array as before.
+- **The action history left the dispatch handle.** `recordedActions()` is gone from `Statewise`: inject `ActionHistory` and call `snapshot()`, which returns the same plain array as before. The history was always application-wide, while the handle scopes everything else, and reading it forced an `injectStatewise()` call with no updater at all.
 
 ## Before and after
 
@@ -56,7 +56,7 @@ export const authUpdater = defineUpdater(AuthStates, (on) => {
 });
 ```
 
-And a manager takes its handle instead of calling the global functions:
+A manager takes its handle instead of calling the global functions:
 
 ```typescript
 // Before
@@ -84,4 +84,12 @@ export class AuthManager {
 
 ## What this buys you
 
-Two managers can now dispatch the same action type concurrently without sharing state or observation, `dispatchAsync` really awaits the whole cascade including nested effects, an unexpected failure is no longer swallowed, a misrouted dispatch is reported instead of silently skipped, effects run only for the manager owning their action, and effects die with the injector that registered them.
+After the rewrite:
+
+- Two managers dispatch the same action type concurrently without sharing state
+  or observation.
+- `dispatchAsync` awaits the whole cascade, nested effects included.
+- An unexpected failure is no longer swallowed.
+- A misrouted dispatch is reported instead of silently skipped.
+- An effect runs only for the manager owning its action.
+- An effect is unregistered with the injector that registered it.
