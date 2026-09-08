@@ -33,25 +33,9 @@ import { Task, TaskPriority, TaskStatus } from '@shared/app-common/models';
 export class TaskDetailsComponent {
   selectedTask = input<Task | null>();
   closed = output<void>();
-  modify = output<Task>();
-  delete = output<string>();
 
   onCloseClick() {
     this.closed.emit();
-  }
-
-  onModifyClick() {
-    const task = this.selectedTask();
-    if (task) {
-      this.modify.emit(task);
-    }
-  }
-
-  onDeleteClick() {
-    const task = this.selectedTask();
-    if (task) {
-      this.delete.emit(task.id);
-    }
   }
 
   getStatusColor(status: TaskStatus): string {

@@ -22,24 +22,17 @@ describe('TaskDetailsComponent', () => {
     );
   });
 
-  it('emits closed, modify and delete for the selected task', async () => {
+  /** Reached from the template, unlike the two outputs that used to sit here. */
+  it('reports the close the panel asked for', async () => {
     const fixture = await mount();
-    const component = fixture.componentInstance;
-
     const closed: string[] = [];
-    const modified: string[] = [];
-    const deleted: string[] = [];
-    component.closed.subscribe(() => closed.push('closed'));
-    component.modify.subscribe((task) => modified.push(task.id));
-    component.delete.subscribe((id) => deleted.push(id));
+    fixture.componentInstance.closed.subscribe(() => closed.push('closed'));
 
-    component.onCloseClick();
-    component.onModifyClick();
-    component.onDeleteClick();
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('.close-btn')
+      ?.click();
 
     expect(closed).toEqual(['closed']);
-    expect(modified).toEqual(['task-1']);
-    expect(deleted).toEqual(['task-1']);
   });
 
   it('reports an overdue due date only while the task is not done', async () => {

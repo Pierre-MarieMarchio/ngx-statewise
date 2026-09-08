@@ -58,7 +58,7 @@
                   [class.overdue]="
                     isDueDateOverdue(
                       selectedTask()!.dueDate,
-                      $safeNavigationMigration(selectedTask()?.status)
+                      selectedTask()?.status
                     )
                   "
                 >
@@ -72,7 +72,7 @@
                   [class.overdue]="
                     isDueDateOverdue(
                       selectedTask()!.dueDate,
-                      $safeNavigationMigration(selectedTask()?.status)
+                      selectedTask()?.status
                     )
                   "
                 >
@@ -80,7 +80,7 @@
                   @if (
                     isDueDateOverdue(
                       selectedTask()!.dueDate,
-                      $safeNavigationMigration(selectedTask()?.status)
+                      selectedTask()?.status
                     )
                   ) {
                     <mat-icon class="warning-icon">warning</mat-icon>

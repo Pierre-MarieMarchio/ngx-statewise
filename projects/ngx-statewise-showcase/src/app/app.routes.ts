@@ -69,13 +69,4 @@ export const routes: Routes = [
     title: 'Ngx-Statewise',
     canActivate: [loggedOutGuard],
   },
-  {
-    path: 'project',
-    loadComponent: () =>
-      import('./features/project/pages/project-page/projects-page.component').then(
-        (m) => m.ProjectsPageComponent,
-      ),
-    title: 'Ngx-Statewise',
-    canActivate: [loggedOutGuard],
-  },
 ];
