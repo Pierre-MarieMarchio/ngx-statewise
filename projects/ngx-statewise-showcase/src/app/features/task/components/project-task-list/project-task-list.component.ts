@@ -1,12 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   input,
   output,
-  OnInit,
 } from '@angular/core';
-import { PROJECT_MANAGER } from '@shared/app-common/tokens';
+import { AUTH_MANAGER, PROJECT_MANAGER } from '@shared/app-common/tokens';
 import { TaskListColumnItem } from '../../models';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -21,14 +21,24 @@ import { Task } from '@shared/app-common/models';
   providers: [provideNativeDateAdapter()],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProjectTaskListComponent implements OnInit {
+export class ProjectTaskListComponent {
   public tasks = input<Task[]>();
   public taskSelected = output<Task>();
 
   public projectManager = inject(PROJECT_MANAGER);
+  private readonly authManager = inject(AUTH_MANAGER);
 
-  public displayedColumns: string[] = [];
-  public readonly columns: TaskListColumnItem[] = [
+  public readonly columns = computed(() =>
+    this.allColumns.filter(
+      (col) =>
+        !col.requiredRole || col.requiredRole === this.authManager.user()?.role,
+    ),
+  );
+  public readonly displayedColumns = computed(() =>
+    this.columns().map((col) => col.columnDef),
+  );
+
+  private readonly allColumns: TaskListColumnItem[] = [
     {
       columnDef: 'title',
       header: 'Title',
@@ -54,10 +64,6 @@ export class ProjectTaskListComponent implements OnInit {
       requiredRole: 'admin',
     },
   ];
-
-  public ngOnInit() {
-    this.displayedColumns = this.columns.map((c) => c.columnDef);
-  }
 
   public selectTask(task: Task) {
     this.taskSelected.emit(task);

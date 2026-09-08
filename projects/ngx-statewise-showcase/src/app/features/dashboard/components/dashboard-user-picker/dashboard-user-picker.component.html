@@ -1,7 +1,7 @@
 <mat-button-toggle-group
   name="UserSelection"
   (change)="onSelectionChange($event)"
-  [value]="getCurrentUserEmail()"
+  [value]="currentUserName()"
 >
   <mat-button-toggle value="admin">Admin</mat-button-toggle>
   <mat-button-toggle value="user1">User 1</mat-button-toggle>
