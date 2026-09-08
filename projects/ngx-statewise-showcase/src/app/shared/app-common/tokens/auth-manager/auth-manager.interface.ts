@@ -7,6 +7,9 @@ export interface IAuthManager {
   isLoggedIn: Signal<boolean>;
   isLoading: Signal<boolean>;
 
+  /** Derived from the user, so a role check never reads the state twice. */
+  isAdmin: Signal<boolean>;
+
   login(credential: LoginSubmit): Promise<void>;
   authenticate(): Promise<void>;
   logout(): void;
