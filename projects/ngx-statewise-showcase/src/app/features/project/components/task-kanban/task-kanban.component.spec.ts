@@ -1,10 +1,8 @@
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { TestBed } from '@angular/core/testing';
 import { Task } from '@shared/app-common/models';
-import { PROJECT_MANAGER, TASK_MANAGER } from '@shared/app-common/tokens';
+import { PROJECT_MANAGER } from '@shared/app-common/tokens';
 import {
   fakeProjectManager,
-  fakeTaskManager,
   sampleProject,
   sampleTask,
 } from '@testing/fake-managers';
@@ -32,12 +30,16 @@ const TASKS = [
   sampleTask({ id: 'c', projectId: 'project-2', status: 'todo' }),
 ];
 
+/**
+ * The board itself is covered by `KanbanComponent`'s own specs. What is left
+ * here is the adapting: one board per project, and what a move means for the
+ * page above.
+ */
 describe('TaskKanbanComponent', () => {
   const mount = async () => {
     await TestBed.configureTestingModule({
       imports: [TaskKanbanComponent],
       providers: [
-        { provide: TASK_MANAGER, useValue: fakeTaskManager(TASKS) },
         { provide: PROJECT_MANAGER, useValue: fakeProjectManager(PROJECTS) },
       ],
     }).compileComponents();
@@ -45,143 +47,115 @@ describe('TaskKanbanComponent', () => {
     const fixture = TestBed.createComponent(TaskKanbanComponent);
     fixture.componentRef.setInput('tasks', TASKS);
     fixture.detectChanges();
+
     return fixture;
   };
 
-  it('renders one panel per project', async () => {
+  it('renders one board per project', async () => {
     const fixture = await mount();
 
     expect(
-      (fixture.nativeElement as HTMLElement).querySelectorAll(
-        'mat-expansion-panel',
-      ).length,
+      (fixture.nativeElement as HTMLElement).querySelectorAll('app-kanban')
+        .length,
     ).toBe(PROJECTS.length);
   });
 
-  it('scopes each drop list to a status and a project', async () => {
-    const fixture = await mount();
-
-    expect(
-      fixture.componentInstance.getConnectedDropListIds('project-2'),
-    ).toEqual([
-      'dropList_todo_project-2',
-      'dropList_in-progress_project-2',
-      'dropList_done_project-2',
-    ]);
-  });
-
-  it('keeps only the tasks of the project it lists', async () => {
+  it('builds the columns of one project only', async () => {
     const fixture = await mount();
 
     expect(
       fixture.componentInstance
-        .getProjectFilteredTasks('project-1', TASKS)
-        .map((task) => task.id),
-    ).toEqual(['a', 'a2', 'b']);
-  });
-
-  it('groups the tasks by status across projects', async () => {
-    const fixture = await mount();
-
-    expect(
-      fixture.componentInstance
-        .columns()
-        .map((column) => [column.id, column.tasks?.length]),
+        .columnsOf('project-1')
+        .map((column) => [column.id, column.items.map((task) => task.id)]),
     ).toEqual([
-      ['todo', 3],
-      ['in-progress', 0],
-      ['done', 1],
+      ['todo', ['a', 'a2']],
+      ['in-progress', []],
+      ['done', ['b']],
     ]);
   });
 
-  it('keeps a task reordered inside its own column', async () => {
-    const fixture = await mount();
-    const component = fixture.componentInstance;
+  it('says so when there is no project to draw a board for', async () => {
+    await TestBed.configureTestingModule({
+      imports: [TaskKanbanComponent],
+      providers: [
+        { provide: PROJECT_MANAGER, useValue: fakeProjectManager([]) },
+      ],
+    }).compileComponents();
 
-    const todoOf = (projectId: string): string[] =>
-      component
-        .getProjectFilteredTasks(
-          projectId,
-          component.columns().find((column) => column.id === 'todo')?.tasks ??
-            [],
-        )
-        .map((task) => task.id);
-
-    expect(todoOf('project-1')).toEqual(['a', 'a2']);
-
-    const container = {
-      id: 'dropList_todo_project-1',
-      data: component.getProjectFilteredTasks(
-        'project-1',
-        component.columns().find((column) => column.id === 'todo')?.tasks ?? [],
-      ),
-    };
-
-    component.onTaskDrop({
-      previousContainer: container,
-      container,
-      previousIndex: 0,
-      currentIndex: 1,
-    } as unknown as CdkDragDrop<Task[]>);
+    const fixture = TestBed.createComponent(TaskKanbanComponent);
     fixture.detectChanges();
 
-    expect(todoOf('project-1')).toEqual(['a2', 'a']);
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'No project, so no board to draw.',
+    );
   });
 
-  it('leaves the other projects untouched by a reorder', async () => {
+  it('reports a move to the page above, in its new column', async () => {
     const fixture = await mount();
-    const component = fixture.componentInstance;
+    const changed: Task[] = [];
+    fixture.componentInstance.taskChanged.subscribe((task) =>
+      changed.push(task),
+    );
 
-    const container = {
-      id: 'dropList_todo_project-1',
-      data: component.getProjectFilteredTasks(
-        'project-1',
-        component.columns().find((column) => column.id === 'todo')?.tasks ?? [],
-      ),
-    };
-
-    component.onTaskDrop({
-      previousContainer: container,
-      container,
-      previousIndex: 0,
-      currentIndex: 1,
-    } as unknown as CdkDragDrop<Task[]>);
-    fixture.detectChanges();
-
-    expect(
-      component
-        .getProjectFilteredTasks(
-          'project-2',
-          component.columns().find((column) => column.id === 'todo')?.tasks ??
-            [],
-        )
-        .map((task) => task.id),
-    ).toEqual(['c']);
-  });
-  describe('without a pointer', () => {
-    it('reports a keyboard move to its page, like a drop', async () => {
-      const fixture = await mount();
-      const changed: Task[] = [];
-      fixture.componentInstance.taskChanged.subscribe((task) =>
-        changed.push(task),
-      );
-
-      fixture.componentInstance.moveTask(TASKS[0], 1);
-
-      expect(changed).toEqual([{ ...TASKS[0], status: 'in-progress' }]);
+    fixture.componentInstance.onTaskMoved({
+      item: TASKS[0],
+      from: 'todo',
+      to: 'in-progress',
     });
 
-    it('makes every card a tab stop with a name', async () => {
-      const fixture = await mount();
-      const cards = (fixture.nativeElement as HTMLElement).querySelectorAll(
-        'app-kanban-card',
-      );
+    expect(changed).toEqual([{ ...TASKS[0], status: 'in-progress' }]);
+  });
 
-      expect(cards.length).toBeGreaterThan(0);
-      for (const card of Array.from(cards)) {
-        expect(card.getAttribute('tabindex')).toBe('0');
-        expect(card.getAttribute('aria-label')).toContain('arrow keys');
-      }
+  it('reports nothing for a column it cannot read as a status', async () => {
+    const fixture = await mount();
+    const changed: Task[] = [];
+    fixture.componentInstance.taskChanged.subscribe((task) =>
+      changed.push(task),
+    );
+
+    fixture.componentInstance.onTaskMoved({
+      item: TASKS[0],
+      from: 'todo',
+      to: 'nowhere',
+    });
+
+    expect(changed).toEqual([]);
+  });
+
+  describe('reordering inside one column', () => {
+    const todoOf = (
+      fixture: { componentInstance: TaskKanbanComponent },
+      projectId: string,
+    ): string[] =>
+      fixture.componentInstance
+        .columnsOf(projectId)
+        .find((column) => column.id === 'todo')
+        ?.items.map((task) => task.id) ?? [];
+
+    it('keeps the new order', async () => {
+      const fixture = await mount();
+
+      expect(todoOf(fixture, 'project-1')).toEqual(['a', 'a2']);
+
+      fixture.componentInstance.onColumnReordered({
+        columnId: 'todo',
+        items: [TASKS[1], TASKS[0]],
+      });
+      fixture.detectChanges();
+
+      expect(todoOf(fixture, 'project-1')).toEqual(['a2', 'a']);
+    });
+
+    it('leaves the other projects where they were', async () => {
+      const fixture = await mount();
+
+      fixture.componentInstance.onColumnReordered({
+        columnId: 'todo',
+        items: [TASKS[1], TASKS[0]],
+      });
+      fixture.detectChanges();
+
+      expect(todoOf(fixture, 'project-2')).toEqual(['c']);
     });
   });
 });
