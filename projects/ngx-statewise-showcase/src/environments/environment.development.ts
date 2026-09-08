@@ -4,5 +4,4 @@ export const environment = {
 
   // local storage key name
   ACCESS_TOKEN_KEY: 'ACCESS_TOKEN_KEY',
-  REFRESH_TOKEN_KEY: 'REFRESH_TOKEN_KEY',
 };

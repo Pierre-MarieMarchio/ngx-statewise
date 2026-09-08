@@ -32,7 +32,10 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideHttpClient(
       withFetch(),
-      withInterceptors([fakeApiInterceptor, accessTokenInterceptor]),
+      // The fake API answers without calling `next`, so it terminates the
+      // chain and has to come last. The other way round, the access-token
+      // interceptor was never reached at all.
+      withInterceptors([accessTokenInterceptor, fakeApiInterceptor]),
     ),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
