@@ -326,7 +326,7 @@ A scoped updater always wins over a global one for the same action type.
 
 An updater is only applied by the dispatches of the scope it is attached to. Sending an action to the wrong manager would therefore skip its state update, and that used to happen silently. It no longer does.
 
-`defineUpdater` records the action types it claims as soon as its module is loaded. In dev mode, dispatching one of those types through a scope that does not handle it throws:
+`defineUpdater` records the action types it claims as soon as its module is loaded. Dispatching one of those types through a scope that does not handle it throws in development:
 
 ```
 [ngx-statewise] No updater in scope for "AUTH_LOADED". This action type is
@@ -349,7 +349,26 @@ public readonly loginSuccessEffect = createEffect(loginActions.success, () => {
 });
 ```
 
-The check costs a set lookup, only runs when no updater matched, and is disabled outside dev mode. An action claimed by no updater at all stays perfectly valid — that is an effect-only action.
+The check costs a set lookup and only runs when no updater matched. An action claimed by no updater at all stays perfectly valid — that is an effect-only action.
+
+##### Development throws, production reports
+
+The detection always runs; only the reaction depends on the environment. Throwing on a user's machine would take down a running application over a state update that is merely missing, so production hands the same error to Angular's `ErrorHandler` and carries on: the dispatch resolves, the effects of the action still run, and whatever you plugged into `ErrorHandler` — a logger, Sentry — receives the report.
+
+Override it when you need to:
+
+```typescript
+provideStatewise({
+  // 'throw' in development, 'report' in production.
+  misroutedDispatch: 'report',
+});
+```
+
+| Reaction   | Effect                                                        |
+| ---------- | ------------------------------------------------------------- |
+| `'throw'`  | Raises at the dispatch site. The default in development.      |
+| `'report'` | Hands the error to `ErrorHandler`. The default in production. |
+| `'ignore'` | Says nothing, as before the check existed.                    |
 
 ##### What the check cannot see
 
@@ -631,11 +650,11 @@ The `ngx-statewise/testing` entry point wires the library into a `TestBed` and g
 import { captureStatewiseDeclarations, drainEffects, provideStatewiseTesting } from 'ngx-statewise/testing';
 ```
 
-| Export                             | Description                                                                                                                                                         |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `provideStatewiseTesting(config?)` | Same options as `provideStatewise`, plus `strict`. The action history is enabled by default, so a test can assert what was dispatched without configuring anything. |
-| `drainEffects()`                   | Resolves once every effect in flight in the current `TestBed` is over, whichever manager started it.                                                                |
-| `captureStatewiseDeclarations()`   | Records the updater declarations known right now and returns the function restoring them.                                                                           |
+| Export                             | Description                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `provideStatewiseTesting(config?)` | Same options as `provideStatewise`, plus `strict`. `strict: false` silences the misrouted-dispatch check entirely — it reports nothing either, so a suite asserting an empty `ErrorHandler` stays green. The action history is enabled by default, so a test can assert what was dispatched without configuring anything. |
+| `drainEffects()`                   | Resolves once every effect in flight in the current `TestBed` is over, whichever manager started it.                                                                                                                                                                                                                      |
+| `captureStatewiseDeclarations()`   | Records the updater declarations known right now and returns the function restoring them.                                                                                                                                                                                                                                 |
 
 ### Letting a fire-and-forget dispatch settle
 

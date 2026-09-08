@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import {
   provideStatewise,
-  ɵSTRICT_DISPATCH,
+  ɵMISROUTED_DISPATCH_REACTION,
   type StatewiseConfig,
 } from 'ngx-statewise';
 
@@ -30,7 +30,12 @@ export function provideStatewiseTesting(
 
   return makeEnvironmentProviders([
     provideStatewise({ history: { limit: 100 }, ...statewise }),
-    // Provided after provideStatewise, so this value wins.
-    ...(strict ? [] : [{ provide: ɵSTRICT_DISPATCH, useValue: false }]),
+    // Provided after provideStatewise, so this value wins. A relaxed suite
+    // asks for silence, not for a report: it dispatches without an updater
+    // on purpose, and an ErrorHandler asserting no error must stay green.
+    {
+      provide: ɵMISROUTED_DISPATCH_REACTION,
+      useValue: strict ? 'throw' : 'ignore',
+    },
   ]);
 }

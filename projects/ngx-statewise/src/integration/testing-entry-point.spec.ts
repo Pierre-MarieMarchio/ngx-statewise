@@ -1,4 +1,4 @@
-import { InjectionToken } from '@angular/core';
+import { ErrorHandler, InjectionToken } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
   createEffect,
@@ -49,6 +49,7 @@ class SlowEffects {
 
 describe('ngx-statewise/testing', () => {
   let box: Box;
+  let handledErrors: unknown[];
 
   function configure(
     config?: Parameters<typeof provideStatewiseTesting>[0],
@@ -57,6 +58,12 @@ describe('ngx-statewise/testing', () => {
       providers: [
         provideStatewiseTesting(config),
         { provide: BOX, useFactory: () => box },
+        {
+          provide: ErrorHandler,
+          useValue: {
+            handleError: (error: unknown) => handledErrors.push(error),
+          },
+        },
       ],
     });
   }
@@ -67,6 +74,7 @@ describe('ngx-statewise/testing', () => {
 
   beforeEach(() => {
     box = { value: 0 };
+    handledErrors = [];
   });
 
   afterEach(() => {
@@ -107,6 +115,14 @@ describe('ngx-statewise/testing', () => {
         scope().dispatchAsync(testingActions.owned(1)),
       ).toBeResolved();
       expect(box.value).toBe(0);
+    });
+
+    it('reports nothing either, so a relaxed suite stays quiet', async () => {
+      configure({ strict: false });
+
+      await scope().dispatchAsync(testingActions.owned(1));
+
+      expect(handledErrors).toEqual([]);
     });
   });
 

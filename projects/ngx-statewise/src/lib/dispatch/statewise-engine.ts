@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { ErrorHandler, Inject, Injectable } from '@angular/core';
 
 import type { Action } from '../action';
 import { resolveEffectOutcome } from '../effect/effect-outcome';
@@ -9,7 +9,11 @@ import { isUpdaterActionTypeDeclared } from '../updater/declared-action-types';
 import { ActionHistory } from './action-history';
 import type { DispatchScope } from './dispatch-scope';
 import { GlobalUpdaterRegistry } from './global-updater-registry';
-import { misroutedActionError, STRICT_DISPATCH } from './strict-dispatch';
+import {
+  misroutedActionError,
+  MISROUTED_DISPATCH_REACTION,
+  type MisroutedDispatchReaction,
+} from './misrouted-dispatch';
 
 /**
  * Runs actions: applies their updater, then their effects, and recursively the
@@ -23,7 +27,9 @@ export class StatewiseEngine {
     private readonly globalUpdaters: GlobalUpdaterRegistry,
     private readonly pendingEffects: PendingEffects,
     private readonly actionHistory: ActionHistory,
-    @Inject(STRICT_DISPATCH) private readonly strictDispatch: boolean,
+    private readonly errorHandler: ErrorHandler,
+    @Inject(MISROUTED_DISPATCH_REACTION)
+    private readonly misroutedDispatch: MisroutedDispatchReaction,
   ) {}
 
   /**
@@ -58,7 +64,7 @@ export class StatewiseEngine {
       scope.updaters.get(action.type) ?? this.globalUpdaters.get(action.type);
 
     if (handler === undefined) {
-      this.assertNotMisrouted(action.type);
+      this.reportMisrouted(action.type);
       return;
     }
 
@@ -68,11 +74,23 @@ export class StatewiseEngine {
   /**
    * An action type claimed by an updater but absent from this scope means the
    * dispatch went through the wrong manager: say so rather than do nothing.
+   *
+   * Reporting rather than throwing keeps a production dispatch from taking the
+   * application down, while still surfacing a state update that never happened.
    */
-  private assertNotMisrouted(actionType: string): void {
-    if (this.strictDispatch && isUpdaterActionTypeDeclared(actionType)) {
+  private reportMisrouted(actionType: string): void {
+    if (
+      this.misroutedDispatch === 'ignore' ||
+      !isUpdaterActionTypeDeclared(actionType)
+    ) {
+      return;
+    }
+
+    if (this.misroutedDispatch === 'throw') {
       throw misroutedActionError(actionType);
     }
+
+    this.errorHandler.handleError(misroutedActionError(actionType));
   }
 
   private runEffects(action: Action, scope: DispatchScope): Promise<void> {
