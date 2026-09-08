@@ -191,6 +191,7 @@ In the above example:
 - The `LOGIN_REQUEST` action will be triggered when a login request is made, with a payload of type `LoginSubmit`.
 - The `LOGIN_SUCCESS` action will be triggered when the login operation succeeds, with a payload of type `LoginResponse`.
 - The `LOGIN_FAILURE`, `LOGIN_CANCEL`, actions don't require payloads, so they are defined with emptyPayload.
+- `LOGIN_CANCEL` only cancels something if an effect declares it through `cancelOn` — see [Concurrency](#concurrency). Declared on its own, it is an ordinary action like any other.
 
 #### Single Action
 
@@ -526,6 +527,86 @@ export class AuthEffects {
 
 Ignoring the returned handle is perfectly fine: destruction of the owning injector already unregisters the effect.
 
+#### Concurrency
+
+By default, every dispatch starts its own run of the effect, and each answers when it answers. That is what you want most of the time, and it is what the engine has always done. It is not what you want when two runs write the same thing: the slow one answering last overwrites the fast one, and the state ends up holding the older intent.
+
+A third parameter declares the policy governing the runs of an effect:
+
+```typescript
+public readonly updateTaskEffect = createEffect(
+  updateTaskActions.request,
+  async (task) => {
+    const updated = await firstValueFrom(this.taskRepository.update(task));
+
+    return updateTaskActions.success(updated);
+  },
+  { concurrency: 'latest', key: (task) => task.id },
+);
+```
+
+| Policy       | While a run is in flight, a new dispatch…  |
+| ------------ | ------------------------------------------ |
+| `'parallel'` | starts its own run beside it. The default. |
+| `'latest'`   | abandons that run and replaces it.         |
+| `'first'`    | starts no run at all.                      |
+
+##### What competes with what
+
+Two runs compete only when they share all three of: the same effect, the same dispatch scope, and the same concurrency key. Two managers dispatching the same action never supersede one another, and neither do two effects registered on it.
+
+The key is what makes `'latest'` usable on a list. Without one, every run of the effect competes, so moving a second card would abandon the write of the first. `key` derives it from the payload, one group per returned value:
+
+```typescript
+{ concurrency: 'latest', key: (task) => task.id }
+```
+
+##### What an abandoned run does
+
+- Its `abortSignal` fires.
+- A subscribed Observable is unsubscribed — which is what actually aborts an `HttpClient` request.
+- The actions it was about to return are dropped. They never reach an updater.
+- Its own failure is swallowed: nothing awaits the answer of a run that has been replaced.
+- The `dispatchAsync` that started it resolves, without error. Its cascade is over; it simply produced nothing.
+
+A promise cannot be cancelled, so the work behind one goes on regardless. What the policy guarantees is that its answer is dropped — and that the handler is told, so it can stop the work itself:
+
+```typescript
+public readonly searchEffect = createEffect(
+  searchActions.request,
+  async (term, { abortSignal }) => {
+    const response = await fetch(`/api/search?q=${term}`, { signal: abortSignal });
+
+    return searchActions.success(await response.json());
+  },
+  { concurrency: 'latest' },
+);
+```
+
+The context comes after the payload. An action carrying no payload still has that first parameter — it is `undefined` — so its handler reads `(_, { abortSignal })`. One call shape covers every effect, which is why a handler written before the context existed still compiles untouched.
+
+##### Cancelling explicitly
+
+`cancelOn` names the actions that abandon the runs of an effect:
+
+```typescript
+public readonly loginEffect = createEffect(
+  loginActions.request,
+  async (credentials, { abortSignal }) => { ... },
+  { cancelOn: loginActions.cancel },
+);
+```
+
+Dispatching `loginActions.cancel()` then abandons the login in flight, with the same consequences as a supersession. Pass an array to name several cancelling actions.
+
+Cancellation is scoped like dispatch: a manager abandons the runs it started, never another manager's. And it abandons every concurrency key of that effect at once — there is no per-key cancellation.
+
+##### The state is not concerned
+
+The policy governs effects, never state: the sequence **Action → Updater → Effect** is untouched. A dispatch that `'first'` holds back still goes through its updater, and so does the one superseding a run under `'latest'`.
+
+So an `isLoading` raised by a request whose effect never ran is cleared by the answer of the run already in flight — under `'first'` there is exactly one answer coming, and under `'latest'` it is the newest run that answers.
+
 #### Key Notes:
 
 - Promises: Effects can return Promises for single asynchronous operations.
@@ -541,6 +622,8 @@ Ignoring the returned handle is perfectly fine: destruction of the owning inject
 - Effect Registration: don't forget to declare your effect classes in `provideStatewise({ effects: [...] })` so they are instantiated and ready to handle actions.
 
 - Lifecycle: an effect is unregistered with the injector that created it, so component-scoped or route-scoped effect classes never accumulate duplicates.
+
+- Concurrency: every run goes on in parallel unless the effect declares otherwise. `'latest'` supersedes the run in flight, `'first'` holds a new dispatch back, and `cancelOn` abandons a run on demand. Abandoning drops the answer and unsubscribes the source; it never touches the updater.
 
 ### 5. Managers
 

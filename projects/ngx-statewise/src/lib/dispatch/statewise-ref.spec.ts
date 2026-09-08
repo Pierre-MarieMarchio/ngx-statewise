@@ -1,7 +1,10 @@
 import type { ErrorHandler } from '@angular/core';
 
+import { registeredEffect } from '../../spec-helpers/registered-effect';
 import { EffectRegistry } from '../effect/effect-registry';
 import { PendingEffects } from '../effect/pending-effects';
+import type { RegisteredEffect } from '../effect/registered-effect';
+import { RunningEffects } from '../effect/running-effects';
 import type { StateBoundHandler } from '../updater/updater-definition';
 import { ActionHistory } from './action-history';
 import type { DispatchScope } from './dispatch-scope';
@@ -32,6 +35,11 @@ describe('ScopedStatewiseRef', () => {
     return refWith({ updaters: new Map() });
   }
 
+  /** Registers a handler as an effect declaring no options. */
+  function register(actionType: string, run: RegisteredEffect['run']): void {
+    effects.register(actionType, registeredEffect(run));
+  }
+
   beforeEach(() => {
     effects = new EffectRegistry();
     handled = [];
@@ -43,6 +51,7 @@ describe('ScopedStatewiseRef', () => {
     history = new ActionHistory(10);
     engine = new StatewiseEngine(
       effects,
+      new RunningEffects(),
       new GlobalUpdaterRegistry(),
       new PendingEffects(),
       history,
@@ -54,7 +63,7 @@ describe('ScopedStatewiseRef', () => {
   describe('dispatch', () => {
     it('starts the dispatch without waiting for it', () => {
       const seen: string[] = [];
-      effects.register('SOURCE', () => {
+      register('SOURCE', () => {
         seen.push('ran');
       });
 
@@ -65,7 +74,7 @@ describe('ScopedStatewiseRef', () => {
 
     it('reports an asynchronous effect failure to the ErrorHandler', async () => {
       const effectFailure = new Error('effect failure');
-      effects.register('SOURCE', () => Promise.reject(effectFailure));
+      register('SOURCE', () => Promise.reject(effectFailure));
       const ref = plainRef();
 
       ref.dispatch({ type: 'SOURCE' });
@@ -89,7 +98,7 @@ describe('ScopedStatewiseRef', () => {
 
   describe('dispatchAsync', () => {
     it('resolves once the cascade is over', async () => {
-      effects.register('SOURCE', () => Promise.resolve({ type: 'CHILD' }));
+      register('SOURCE', () => Promise.resolve({ type: 'CHILD' }));
 
       await expect(
         plainRef().dispatchAsync({ type: 'SOURCE' }),
@@ -113,7 +122,7 @@ describe('ScopedStatewiseRef', () => {
 
     it('rejects on an effect failure without reporting it twice', async () => {
       const effectFailure = new Error('effect failure');
-      effects.register('SOURCE', () => Promise.reject(effectFailure));
+      register('SOURCE', () => Promise.reject(effectFailure));
 
       await expect(
         plainRef().dispatchAsync({ type: 'SOURCE' }),
@@ -134,7 +143,7 @@ describe('ScopedStatewiseRef', () => {
 
     it('observes only the effects it started itself', async () => {
       let release!: () => void;
-      effects.register(
+      register(
         'SOURCE',
         () =>
           new Promise<void>((resolve) => {

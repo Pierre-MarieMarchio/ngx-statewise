@@ -1,8 +1,11 @@
 import type { ErrorHandler } from '@angular/core';
 
 import type { Action } from '../action';
+import { registeredEffect } from '../../spec-helpers/registered-effect';
 import { EffectRegistry } from '../effect/effect-registry';
 import { PendingEffects } from '../effect/pending-effects';
+import type { RegisteredEffect } from '../effect/registered-effect';
+import { RunningEffects } from '../effect/running-effects';
 import { declareUpdaterActionTypes } from '../updater/declared-action-types';
 import type { StateBoundHandler } from '../updater/updater-definition';
 import { ActionHistory } from './action-history';
@@ -39,6 +42,7 @@ function scopeOf(...entries: [string, StateBoundHandler][]): DispatchScope {
 
 describe('StatewiseEngine', () => {
   let effects: EffectRegistry;
+  let runningEffects: RunningEffects;
   let globalUpdaters: GlobalUpdaterRegistry;
   let pendingEffects: PendingEffects;
   let history: ActionHistory;
@@ -52,6 +56,7 @@ describe('StatewiseEngine', () => {
   ): StatewiseEngine {
     return new StatewiseEngine(
       effects,
+      runningEffects,
       globalUpdaters,
       pendingEffects,
       history,
@@ -60,8 +65,14 @@ describe('StatewiseEngine', () => {
     );
   }
 
+  /** Registers a handler as an effect declaring no options. */
+  function register(actionType: string, run: RegisteredEffect['run']): void {
+    effects.register(actionType, registeredEffect(run));
+  }
+
   beforeEach(() => {
     effects = new EffectRegistry();
+    runningEffects = new RunningEffects();
     globalUpdaters = new GlobalUpdaterRegistry();
     pendingEffects = new PendingEffects();
     history = new ActionHistory(10);
@@ -152,7 +163,7 @@ describe('StatewiseEngine', () => {
       declareUpdaterActionTypes(['ENGINE_REPORTED_WITH_EFFECT']);
       const reporting = build('report');
       const calls: string[] = [];
-      effects.register('ENGINE_REPORTED_WITH_EFFECT', () => {
+      register('ENGINE_REPORTED_WITH_EFFECT', () => {
         calls.push('ran');
       });
 
@@ -231,7 +242,7 @@ describe('StatewiseEngine', () => {
       const recorder: Recorder = { applied: [] };
       const calls: string[] = [];
       const reporting = build('report');
-      effects.register('ENGINE_OWNED_WITH_EFFECT', () => {
+      register('ENGINE_OWNED_WITH_EFFECT', () => {
         calls.push('ran');
       });
 
@@ -253,7 +264,7 @@ describe('StatewiseEngine', () => {
       globalUpdaters.set(
         new Map([['ENGINE_GLOBAL_WITH_EFFECT', recordingHandler(recorder)]]),
       );
-      effects.register('ENGINE_GLOBAL_WITH_EFFECT', () => {
+      register('ENGINE_GLOBAL_WITH_EFFECT', () => {
         calls.push('ran');
       });
 
@@ -269,7 +280,7 @@ describe('StatewiseEngine', () => {
     it('runs the effects of an action no updater claims, in any scope', async () => {
       const calls: string[] = [];
       const reporting = build('report');
-      effects.register('ENGINE_UNCLAIMED_WITH_EFFECT', () => {
+      register('ENGINE_UNCLAIMED_WITH_EFFECT', () => {
         calls.push('ran');
       });
 
@@ -285,7 +296,7 @@ describe('StatewiseEngine', () => {
     it('still runs the effects of a misrouted action when told to ignore', async () => {
       declareUpdaterActionTypes(['ENGINE_IGNORED_WITH_EFFECT']);
       const calls: string[] = [];
-      effects.register('ENGINE_IGNORED_WITH_EFFECT', () => {
+      register('ENGINE_IGNORED_WITH_EFFECT', () => {
         calls.push('ran');
       });
 
@@ -311,10 +322,10 @@ describe('StatewiseEngine', () => {
   describe('effects', () => {
     it('runs every effect registered for the action', async () => {
       const calls: string[] = [];
-      effects.register('SOURCE', () => {
+      register('SOURCE', () => {
         calls.push('first');
       });
-      effects.register('SOURCE', () => {
+      register('SOURCE', () => {
         calls.push('second');
       });
 
@@ -325,7 +336,7 @@ describe('StatewiseEngine', () => {
 
     it('hands the whole action to the effect', async () => {
       const seen: Action[] = [];
-      effects.register('SOURCE', (action) => {
+      register('SOURCE', (action) => {
         seen.push(action);
       });
 
@@ -336,7 +347,7 @@ describe('StatewiseEngine', () => {
 
     it('executes the actions an effect returns, in the same scope', async () => {
       const recorder: Recorder = { applied: [] };
-      effects.register('SOURCE', () => ({
+      register('SOURCE', () => ({
         type: 'CHILD',
         payload: 'from-effect',
       }));
@@ -355,8 +366,8 @@ describe('StatewiseEngine', () => {
         releaseChild = resolve;
       });
       let finished = false;
-      effects.register('SOURCE', () => ({ type: 'CHILD' }));
-      effects.register('CHILD', async () => {
+      register('SOURCE', () => ({ type: 'CHILD' }));
+      register('CHILD', async () => {
         await childGate;
       });
 
@@ -376,7 +387,7 @@ describe('StatewiseEngine', () => {
 
     it('reports a synchronous effect failure as a rejection', async () => {
       const failure = new Error('synchronous effect failure');
-      effects.register('SOURCE', () => {
+      register('SOURCE', () => {
         throw failure;
       });
 
@@ -387,7 +398,7 @@ describe('StatewiseEngine', () => {
 
     it('reports an asynchronous effect failure as a rejection', async () => {
       const failure = new Error('asynchronous effect failure');
-      effects.register('SOURCE', () => Promise.reject(failure));
+      register('SOURCE', () => Promise.reject(failure));
 
       await expect(
         engine.execute({ type: 'SOURCE' }, emptyScope),
@@ -396,10 +407,8 @@ describe('StatewiseEngine', () => {
 
     it('waits for the sibling effects of a failing one before rejecting', async () => {
       let siblingFinished = false;
-      effects.register('SOURCE', () =>
-        Promise.reject(new Error('failing effect')),
-      );
-      effects.register('SOURCE', async () => {
+      register('SOURCE', () => Promise.reject(new Error('failing effect')));
+      register('SOURCE', async () => {
         await Promise.resolve();
         await Promise.resolve();
         siblingFinished = true;
@@ -413,7 +422,7 @@ describe('StatewiseEngine', () => {
 
     it('surfaces a failing cascaded action without dropping its siblings', async () => {
       const recorder: Recorder = { applied: [] };
-      effects.register('SOURCE', () => [
+      register('SOURCE', () => [
         { type: 'FAILING' },
         { type: 'SIBLING', payload: 'kept' },
       ]);
@@ -431,7 +440,7 @@ describe('StatewiseEngine', () => {
 
   describe('observation', () => {
     it('records the action and its cascade in the history', async () => {
-      effects.register('SOURCE', () => ({ type: 'CHILD' }));
+      register('SOURCE', () => ({ type: 'CHILD' }));
 
       await engine.execute({ type: 'SOURCE' }, emptyScope);
 
@@ -447,7 +456,7 @@ describe('StatewiseEngine', () => {
         release = resolve;
       });
       let settled = false;
-      effects.register('SOURCE', () => gate);
+      register('SOURCE', () => gate);
 
       const execution = engine.execute({ type: 'SOURCE' }, emptyScope);
       const waiting = engine.waitForEffect(emptyScope, 'SOURCE').then(() => {
@@ -465,7 +474,7 @@ describe('StatewiseEngine', () => {
     it('ignores the effects started by another scope', async () => {
       const other = scopeOf();
       let release!: () => void;
-      effects.register(
+      register(
         'SOURCE',
         () =>
           new Promise<void>((resolve) => {
@@ -485,12 +494,83 @@ describe('StatewiseEngine', () => {
     });
 
     it('waits for all the effects of its own scope', async () => {
-      effects.register('SOURCE', () => Promise.resolve());
+      register('SOURCE', () => Promise.resolve());
 
       const execution = engine.execute({ type: 'SOURCE' }, emptyScope);
 
       await expect(engine.waitForAllEffects(emptyScope)).resolves.not.toThrow();
       await execution;
+    });
+  });
+  describe('concurrency policy', () => {
+    /**
+     * The run was abandoned while its cascade was still going, so the failure
+     * of that cascade concerns nobody: whoever awaited it has been replaced.
+     * Reporting it would blame the caller for work it no longer owns.
+     */
+    it('swallows the failure of a cascade abandoned along the way', async () => {
+      let failChild!: (reason: Error) => void;
+      let childStarted!: () => void;
+      const childGate = new Promise<void>((_, reject) => {
+        failChild = reject;
+      });
+      const started = new Promise<void>((resolve) => {
+        childStarted = resolve;
+      });
+      let childRuns = 0;
+
+      effects.register(
+        'SOURCE',
+        registeredEffect(() => ({ type: 'CHILD' }), { concurrency: 'latest' }),
+      );
+      register('CHILD', async () => {
+        childRuns += 1;
+
+        // Only the cascade of the first run is held, so the run replacing it
+        // finishes cleanly.
+        if (childRuns === 1) {
+          childStarted();
+          await childGate;
+        }
+      });
+
+      const abandoned = engine.execute({ type: 'SOURCE' }, emptyScope);
+      await started;
+
+      const current = engine.execute({ type: 'SOURCE' }, emptyScope);
+      failChild(new Error('failure nobody awaits'));
+
+      await expect(abandoned).resolves.not.toThrow();
+      await expect(current).resolves.not.toThrow();
+      expect(childRuns).toBe(2);
+    });
+
+    it('starts no handler for a dispatch its policy holds back', async () => {
+      let release!: () => void;
+      let runs = 0;
+      effects.register(
+        'SOURCE',
+        registeredEffect(
+          () => {
+            runs += 1;
+
+            return new Promise<void>((resolve) => {
+              release = resolve;
+            });
+          },
+          { concurrency: 'first' },
+        ),
+      );
+
+      const held = engine.execute({ type: 'SOURCE' }, emptyScope);
+      await expect(
+        engine.execute({ type: 'SOURCE' }, emptyScope),
+      ).resolves.not.toThrow();
+
+      expect(runs).toBe(1);
+
+      release();
+      await held;
     });
   });
 });

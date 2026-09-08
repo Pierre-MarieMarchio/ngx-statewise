@@ -5,6 +5,7 @@ import { resolveEffectOutcome } from '../effect/effect-outcome';
 import { EffectRegistry } from '../effect/effect-registry';
 import { PendingEffects } from '../effect/pending-effects';
 import type { RegisteredEffect } from '../effect/registered-effect';
+import { RunningEffects, type EffectRun } from '../effect/running-effects';
 import { isUpdaterActionTypeDeclared } from '../updater/declared-action-types';
 import type { StateBoundHandler } from '../updater/updater-definition';
 import { ActionHistory } from './action-history';
@@ -25,6 +26,7 @@ import {
 export class StatewiseEngine {
   public constructor(
     private readonly effects: EffectRegistry,
+    private readonly runningEffects: RunningEffects,
     private readonly globalUpdaters: GlobalUpdaterRegistry,
     private readonly pendingEffects: PendingEffects,
     private readonly actionHistory: ActionHistory,
@@ -109,34 +111,83 @@ export class StatewiseEngine {
   }
 
   private runEffects(action: Action, scope: DispatchScope): Promise<void> {
-    const effects = this.effects.get(action.type);
+    this.abandonRunsCancelledBy(action.type, scope);
 
     return settleAll(
-      effects.map((effect) => this.runEffect(effect, action, scope)),
+      this.effects
+        .triggeredBy(action.type)
+        .map((effect) => this.runEffect(effect, action, scope)),
     );
   }
 
   /**
-   * Runs one effect and the actions it yields. A handler failing synchronously
-   * is reported exactly like one failing asynchronously.
+   * Abandons before starting anything, so an action that both cancels and
+   * triggers an effect replaces its own runs instead of competing with them.
    */
+  private abandonRunsCancelledBy(
+    actionType: string,
+    scope: DispatchScope,
+  ): void {
+    for (const effect of this.effects.cancelledBy(actionType)) {
+      this.runningEffects.cancel(effect, scope);
+    }
+  }
+
   private runEffect(
     effect: RegisteredEffect,
     action: Action,
     scope: DispatchScope,
   ): Promise<void> {
-    let outcome: Promise<void>;
+    const run = this.runningEffects.start(effect, scope, effect.keyOf(action));
 
-    try {
-      outcome = resolveEffectOutcome(effect(action)).then((actions) =>
-        settleAll(actions.map((next) => this.executeSafely(next, scope))),
-      );
-    } catch (error) {
-      // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- rethrowing the caught value untouched
-      outcome = Promise.reject(error);
+    if (run === undefined) {
+      // `'first'`: a run of this group is still in flight, so this dispatch
+      // starts no handler at all. Its updater has been applied all the same.
+      return Promise.resolve();
     }
 
-    return this.pendingEffects.track(scope, action.type, outcome);
+    return this.pendingEffects.track(
+      scope,
+      action.type,
+      this.completeRun(effect, action, scope, run),
+    );
+  }
+
+  /**
+   * Runs one effect and the actions it yields. A handler failing synchronously
+   * is reported exactly like one failing asynchronously, since an `async`
+   * method turns a synchronous throw into a rejection.
+   */
+  private async completeRun(
+    effect: RegisteredEffect,
+    action: Action,
+    scope: DispatchScope,
+    run: EffectRun,
+  ): Promise<void> {
+    try {
+      const actions = await resolveEffectOutcome(
+        effect.run(action, { abortSignal: run.abortSignal }),
+        run.abortSignal,
+      );
+
+      // The answer of an abandoned run is stale by definition: dispatching it
+      // would let it overwrite the state its successor is building.
+      if (run.abortSignal.aborted) {
+        return;
+      }
+
+      await settleAll(actions.map((next) => this.executeSafely(next, scope)));
+    } catch (error) {
+      // Nobody awaits the answer of a run we deliberately abandoned, so its
+      // failure is not the caller's to handle either.
+      if (run.abortSignal.aborted) {
+        return;
+      }
+
+      throw error;
+    } finally {
+      run.finish();
+    }
   }
 
   /** Keeps a failing cascaded action from cancelling the actions beside it. */
