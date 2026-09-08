@@ -3,9 +3,9 @@
 A lightweight and intuitive state management library for Angular. Simpler than
 NgRx, more structured than DIY.
 
-**📖 [Read the guide](projects/ngx-statewise/README.md)** — the complete
-documentation lives with the package, so what you read here and what npm ships
-are the same document.
+**📖 [Read the documentation](https://pierre-mariemarchio.github.io/ngx-statewise/)**
+— the guide lives on the site, which is its single source of truth. The
+[package README](projects/ngx-statewise/README.md) is the overview npm shows.
 
 ```bash
 npm install ngx-statewise
@@ -74,15 +74,17 @@ chain.
 
 | Path                                                                 | What it is                              |
 | -------------------------------------------------------------------- | --------------------------------------- |
-| [`projects/ngx-statewise`](projects/ngx-statewise)                   | The library, and the guide              |
+| [`projects/ngx-statewise`](projects/ngx-statewise)                   | The library                             |
 | [`projects/ngx-statewise/testing`](projects/ngx-statewise/testing)   | The `ngx-statewise/testing` entry point |
 | [`projects/ngx-statewise-showcase`](projects/ngx-statewise-showcase) | A demo application, not published       |
+| [`projects/ngx-statewise-docs`](projects/ngx-statewise-docs)         | The documentation site, not published   |
 
 ## Working on the repo
 
 ```bash
 npm install
 npm start          # serve the showcase
+npm run start:docs # serve the documentation site
 npm run check      # format, lint, tests with coverage, build everything
 ```
 
@@ -96,8 +98,12 @@ The library is held to full statement, line and function coverage and to 95%
 branch coverage, currently met at 100%. The gate is the `coverageThresholds` of
 its `test` target in [`angular.json`](angular.json).
 
+[`.github/workflows/deploy-docs.yml`](.github/workflows/deploy-docs.yml)
+prerenders the documentation site and publishes it to GitHub Pages on every
+push to `main`.
+
 Coming from 0.6.x? See
-[Migrating](projects/ngx-statewise/README.md#migrating-from-06x).
+[Migrating](https://pierre-mariemarchio.github.io/ngx-statewise/guide/migration).
 
 ## Contributing
 
