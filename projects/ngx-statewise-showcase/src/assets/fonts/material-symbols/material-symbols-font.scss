@@ -1,0 +1,16 @@
+// Served from the repository rather than fetched from fonts.googleapis.com.
+// The production build inlines a remote stylesheet at build time, which made
+// `npm run check` depend on reaching Google over the network and fail without
+// it. Declaring the same family locally keeps the rendering identical and the
+// build offline.
+//
+// The file is the variable font Google serves for this family, weights 100-700,
+// carrying every icon: the showcase names icons by ligature, and a subset would
+// silently render an unlisted name as plain text.
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  src: url('./MaterialSymbolsOutlined.woff2') format('woff2');
+  font-weight: 100 700;
+  font-style: normal;
+  font-display: block;
+}
