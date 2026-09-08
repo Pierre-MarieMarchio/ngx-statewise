@@ -1,23 +1,27 @@
 import { DOCUMENT, Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { THEME_CLASSES, THEME_STORAGE_KEY, isTheme, type Theme } from './theme';
+import {
+  FALLBACK_THEME,
+  LIGHT_QUERY,
+  THEME_CLASSES,
+  THEME_STORAGE_KEY,
+  isThemeChoice,
+  type Theme,
+  type ThemeChoice,
+} from './theme';
 
 /**
- * The two places the theme lives outside Angular: `localStorage` and the
- * `<html>` class the stylesheet keys off. Reading and writing storage is a
- * no-op while prerendering, where there is none.
+ * The three places the theme lives outside Angular: `localStorage`, the
+ * operating system, and the class on the root element the stylesheet keys off.
+ * Every method is inert while prerendering, where none of them exist.
  */
 @Injectable({ providedIn: 'root' })
 export class ThemeEnvironment {
   private readonly document = inject(DOCUMENT);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
-  /**
-   * The theme to start on: a stored choice if there is one, otherwise the
-   * system preference. Mirrors the inline script in `index.html`, which does
-   * the same thing before Angular boots.
-   */
-  public read(): Theme | null {
+  /** The stored choice, or null when there is none to honour. */
+  public readChoice(): ThemeChoice | null {
     if (!this.isBrowser) {
       return null;
     }
@@ -27,36 +31,51 @@ export class ThemeEnvironment {
     try {
       const stored: unknown = localStorage.getItem(THEME_STORAGE_KEY);
 
-      if (isTheme(stored)) {
-        return stored;
-      }
+      return isThemeChoice(stored) ? stored : null;
     } catch {
-      // Blocked: fall through to the system preference.
-    }
-
-    return this.systemPreference();
-  }
-
-  private systemPreference(): Theme | null {
-    if (typeof matchMedia !== 'function') {
       return null;
     }
-
-    return matchMedia('(prefers-color-scheme: light)').matches
-      ? 'light'
-      : 'dark';
   }
 
-  public write(theme: Theme): void {
+  public writeChoice(choice: ThemeChoice): void {
     if (!this.isBrowser) {
       return;
     }
 
     try {
-      localStorage.setItem(THEME_STORAGE_KEY, theme);
+      localStorage.setItem(THEME_STORAGE_KEY, choice);
     } catch {
-      // Reading it back will simply fall back to the default next time.
+      // Reading it back will fall through to the system next time.
     }
+  }
+
+  public systemTheme(): Theme {
+    if (!this.isBrowser || typeof matchMedia !== 'function') {
+      return FALLBACK_THEME;
+    }
+
+    return matchMedia(LIGHT_QUERY).matches ? 'light' : 'dark';
+  }
+
+  /**
+   * Calls back when the operating system changes, so a reader on `system`
+   * sees the page follow it without reloading.
+   */
+  public watchSystem(onChange: (theme: Theme) => void): () => void {
+    if (!this.isBrowser || typeof matchMedia !== 'function') {
+      return () => undefined;
+    }
+
+    const query = matchMedia(LIGHT_QUERY);
+    const listener = (event: MediaQueryListEvent): void => {
+      onChange(event.matches ? 'light' : 'dark');
+    };
+
+    query.addEventListener('change', listener);
+
+    return () => {
+      query.removeEventListener('change', listener);
+    };
   }
 
   public apply(theme: Theme): void {

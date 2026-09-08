@@ -46,7 +46,7 @@
   gap: var(--space-2);
   margin-bottom: var(--space-5);
   padding: var(--space-3) var(--space-4);
-  border-left: 3px solid var(--mat-sys-tertiary);
+  border-left: 3px solid var(--accent-2);
   border-radius: var(--radius);
   background-color: var(--surface-subtle);
   color: var(--text-muted);
@@ -58,7 +58,7 @@
   height: 1.1rem;
   margin-top: 0.2rem;
   flex: none;
-  color: var(--mat-sys-tertiary);
+  color: var(--accent-2);
 }
 
 .notice__text {
@@ -127,7 +127,7 @@
   /* The chevron leans toward its direction on hover — the one motion on the
      card, and it points at what happens next. */
   &:hover .pager__icon {
-    color: var(--mat-sys-primary);
+    color: var(--accent);
   }
 }
 
@@ -230,7 +230,7 @@
     bottom: var(--space-1);
     width: 2px;
     border-radius: 1px;
-    background-color: var(--mat-sys-primary);
+    background-color: var(--accent);
     opacity: 0;
     transform: scaleY(0.4);
     transform-origin: center;
@@ -255,7 +255,7 @@
 }
 
 .toc__link--active {
-  color: var(--mat-sys-primary);
+  color: var(--accent);
   font-weight: var(--weight-normal);
 
   &::before {
@@ -265,7 +265,7 @@
 }
 
 /* --- Narrow ------------------------------------------------------------- */
-@media (max-width: 78rem) {
+@media (max-width: 72rem) {
   :host {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;

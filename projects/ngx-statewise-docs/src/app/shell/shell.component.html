@@ -18,7 +18,13 @@
   </button>
 
   <a class="header__brand" [routerLink]="homeLink()">
-    <span class="header__brand-mark" aria-hidden="true"></span>
+    <img
+      class="header__brand-mark"
+      src="icon-logo.png"
+      alt=""
+      width="20"
+      height="22"
+    />
     <span class="header__brand-name">ngx-statewise</span>
   </a>
 
@@ -34,41 +40,69 @@
       <kbd class="header__search-keys">⌘K</kbd>
     </button>
 
-    <nav class="language" [attr.aria-label]="text().language">
-      <docs-icon class="language__icon" name="translate" />
-      @for (option of localeOptions(); track option.locale.code) {
-        @if (option.isCurrent) {
-          <span
-            class="language__link language__link--current"
-            aria-current="true"
+    <!-- Popovers rather than a hand-rolled dropdown: light dismiss, Escape and
+         the top layer come from the platform. -->
+    <div class="menu">
+      <button
+        class="header__icon-button"
+        type="button"
+        popovertarget="theme-menu"
+        [attr.aria-label]="text().theme"
+        [title]="text().theme"
+      >
+        <docs-icon [name]="themeIcon()" />
+      </button>
+
+      <div class="menu__panel" id="theme-menu" popover>
+        <p class="menu__title">{{ text().theme }}</p>
+        @for (option of themeOptions(); track option.choice) {
+          <button
+            class="menu__item"
+            type="button"
+            popovertarget="theme-menu"
+            popovertargetaction="hide"
+            [attr.aria-pressed]="option.isCurrent"
+            (click)="chooseTheme(option.choice)"
           >
-            {{ option.locale.label }}
-          </span>
-        } @else {
+            <docs-icon class="menu__item-icon" [name]="option.icon" />
+            <span class="menu__item-label">{{ option.label }}</span>
+            @if (option.isCurrent) {
+              <docs-icon class="menu__item-check" name="check" />
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="menu">
+      <button
+        class="header__icon-button"
+        type="button"
+        popovertarget="language-menu"
+        [attr.aria-label]="text().language"
+        [title]="text().language"
+      >
+        <docs-icon name="translate" />
+      </button>
+
+      <div class="menu__panel" id="language-menu" popover>
+        <p class="menu__title">{{ text().language }}</p>
+        @for (option of localeOptions(); track option.locale.code) {
           <a
-            class="language__link"
+            class="menu__item"
             [href]="option.href"
             [attr.hreflang]="option.locale.htmlLang"
             [attr.lang]="option.locale.htmlLang"
+            [attr.aria-current]="option.isCurrent ? 'true' : null"
           >
-            {{ option.locale.label }}
+            <span class="menu__item-label">{{ option.locale.label }}</span>
+            @if (option.isCurrent) {
+              <docs-icon class="menu__item-check" name="check" />
+            }
           </a>
         }
-      }
-    </nav>
-
-    <button
-      class="header__icon-button"
-      type="button"
-      [attr.aria-label]="
-        theme() === 'dark'
-          ? text().switchToLightTheme
-          : text().switchToDarkTheme
-      "
-      (click)="toggleTheme()"
-    >
-      <docs-icon [name]="theme() === 'dark' ? 'dark-mode' : 'light-mode'" />
-    </button>
+      </div>
+    </div>
 
     <a class="header__link" [href]="npmUrl" target="_blank" rel="noreferrer">
       npm
@@ -115,12 +149,17 @@
   </main>
 </div>
 
-<footer class="footer text-muted">
-  <p class="footer__text">
-    {{ text().footerLicence }} {{ text().footerFoundAProblem }}
-    <a [href]="repositoryUrl + '/issues'" target="_blank" rel="noreferrer">
-      {{ text().footerOpenAnIssue }} </a
-    >.
+<footer class="footer">
+  <p class="footer__text text-muted">
+    {{ text().footerLicence }}
+    <a
+      class="footer__link"
+      [href]="repositoryUrl"
+      target="_blank"
+      rel="noreferrer"
+    >
+      GitHub
+    </a>
   </p>
 </footer>
 

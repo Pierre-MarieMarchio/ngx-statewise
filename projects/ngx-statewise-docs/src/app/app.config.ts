@@ -41,7 +41,7 @@ export const appConfig: ApplicationConfig = {
       updaters: [docsUiUpdater],
     }),
     provideAppInitializer(() => {
-      inject(DocsUiManager).restoreTheme();
+      inject(DocsUiManager).start();
     }),
   ],
 };

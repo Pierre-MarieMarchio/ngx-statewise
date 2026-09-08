@@ -1,69 +1,68 @@
-@use '@angular/material' as mat;
-
 /* ---------------------------------------------------------------------------
-   The palettes, the theme classes and the token overrides are the showcase's,
-   so the two applications of this repository look like one product. Copied
-   rather than imported across projects: the showcase is a private demo, and
-   the documentation site must not break if it moves or goes away.
+   The palette comes from the project's own logo, sampled from
+   public/icon-logo.png: the shield runs #dd0031 to #582bc3, red into violet.
 
-   On top of them, a NEUTRAL surface and text ramp. Material's generated
-   surfaces are tinted by the primary palette — in the dark theme they resolve
-   to #161215, #231e22, #2d292c, all faintly pink — which reads warm and busy
-   under long-form prose. The showcase already fights this by forcing
-   `--mat-sys-surface: #262627`; this takes the same decision consistently.
+   No `mat.theme()` here. The site uses no Material component, only the tokens
+   it emits, and those derive every surface from the primary hue — in the dark
+   theme they resolve to #161215 and #231e22, both faintly pink, which reads
+   warm under long-form prose. Dropping the mixin removes 140 unused custom
+   properties, and lets the accents be the logo's own rather than Material's
+   nearest tonal step.
 
-   The split is: neutrals carry the page, magenta and violet carry the accents.
-   Same hues as the showcase, applied where they earn their keep.
+   Neutrals carry the page. The two brand colours are spent on links, on the
+   active marker, and on the logo itself.
    --------------------------------------------------------------------------- */
 
-.light {
-  background-color: var(--mat-sys-background);
-  color: var(--mat-sys-on-background);
+/* The gradient of the mark. Decorative, so it is the logo's exact values in
+   both themes; only text and interactive accents are re-cut for contrast. */
+:root {
+  --brand-red: #dd0031;
+  --brand-violet: #582bc3;
+  --brand-gradient: linear-gradient(
+    118deg,
+    var(--brand-red),
+    var(--brand-violet)
+  );
+}
 
-  /* Neutral ramp */
+.light {
+  color-scheme: light;
+
+  /* Surfaces */
   --surface-page: #ffffff;
   --surface-subtle: #f7f7f8;
   --surface-raised: #ffffff;
   --surface-sunken: #f2f2f4;
   --surface-hover: rgb(0 0 0 / 4%);
-  --surface-code: #f7f7f8;
+  --surface-code: #f8f8f9;
 
-  /* Hairlines. Two weights: one that separates, one that merely suggests. */
+  /* Hairlines: one that separates, one that merely suggests. */
   --border: #e6e5e9;
-  --border-strong: #d6d4da;
+  --border-strong: #d5d3da;
 
-  --text-strong: #1c1b1f;
-  --text: #333;
-  /* 5.42:1 — the old #746e7c passed at 4.92:1 with no margin to spare. */
-  --text-muted: #6b6572;
-  /* 4.61:1. The tier below cannot be lighter and still pass AA, so faint and
-     muted are separated by size and weight, not by more grey. */
-  --text-faint: #78737f;
+  /* Text. Ratios against --surface-page. */
+  --text-strong: #16161a; /* 17.9:1 */
+  --text: #333; /* 12.6:1 */
+  --text-muted: #6b6572; /*  5.6:1 */
+  --text-faint: #78737f; /*  4.6:1 */
 
-  --shadow-raised: 0 1px 2px rgb(0 0 0 / 6%), 0 4px 12px rgb(0 0 0 / 4%);
+  /* Accents. The logo's own values already clear AA on white. */
+  --accent: #dd0031; /*  5.1:1 */
+  --accent-hover: #b80028;
+  --on-accent: #ffffff;
+  --accent-soft: #fdeef1;
+  --accent-2: #582bc3; /*  8.2:1 */
+  --danger: #b3261e;
 
-  @include mat.theme(
-    (
-      color: (
-        primary: mat.$magenta-palette,
-        tertiary: mat.$violet-palette,
-        theme-type: light,
-      ),
-      typography: Roboto,
-    ),
-    $overrides: ('on-background': #333, 'background': white)
-  );
+  --shadow-raised:
+    0 1px 2px rgb(16 16 26 / 6%), 0 8px 24px -6px rgb(16 16 26 / 10%);
 }
 
 .dark {
-  background-color: var(--mat-sys-background);
-  color: var(--mat-sys-on-background);
+  color-scheme: dark;
 
-  --mat-sys-surface: #262627 !important;
-
-  /* Neutral ramp, lifted off pure black. #f3f3f3 on #0f0f11 is 17:1 — pure
-     white on near-black, which halates under long-form prose. This keeps the
-     showcase's hues and trades a little contrast for readability. */
+  /* Lifted off pure black: #f3f3f3 on #0f0f11 is 17:1, and pure white on
+     near-black halates over a column of prose. */
   --surface-page: #17171a;
   --surface-subtle: #1c1c20;
   --surface-raised: #232327;
@@ -71,36 +70,26 @@
   --surface-hover: rgb(255 255 255 / 6%);
   --surface-code: #131316;
 
-  /* #232125 is the border the showcase draws its side navigation with, lifted
-     with the rest of the ramp. A hairline is decoration, not a control, so
-     WCAG 1.4.11's 3:1 does not apply to it. */
   --border: #2a282e;
   --border-strong: #3a373f;
 
-  --text-strong: #f5f5f7;
-  --text: #d8d6da;
-  --text-muted: rgb(158 154 164);
-  --text-faint: rgb(135 131 142); /* 4.83:1 */
+  --text-strong: #f5f5f7; /* 16.4:1 */
+  --text: #d8d6da; /* 12.4:1 */
+  --text-muted: #9e9aa4; /*  6.5:1 */
+  --text-faint: #87838e; /*  4.8:1 */
 
-  --shadow-raised: 0 1px 2px rgb(0 0 0 / 40%), 0 6px 18px rgb(0 0 0 / 28%);
+  /* Same hues as the logo — 347deg and 258deg — lightened until they read.
+     The logo values themselves are 3.5:1 and 2.2:1 here, so they are kept for
+     the mark and replaced for anything carrying words. */
+  --accent: #ff5c80; /*  6.0:1 */
+  --accent-hover: #ff7d99;
+  --on-accent: #3d0010;
+  --accent-soft: #2a1620;
+  --accent-2: #a580ff; /*  6.1:1 */
+  --danger: #ffb4ab;
 
-  @include mat.theme(
-    (
-      color: (
-        primary: mat.$magenta-palette,
-        tertiary: mat.$violet-palette,
-        theme-type: dark,
-      ),
-      typography: Roboto,
-    ),
-    $overrides: (
-      'on-background': #f3f3f3,
-      /* Overridden to the body colour by the showcase, which makes it useless
-         as a muted tone — use --text-muted instead. Kept for parity. */
-        'on-surface-variant': #f3f3f3,
-      'background': #0f0f11
-    )
-  );
+  --shadow-raised:
+    0 1px 2px rgb(0 0 0 / 45%), 0 10px 28px -8px rgb(0 0 0 / 55%);
 }
 
 /* Utility for the muted tier, so a template need not know the token name. */

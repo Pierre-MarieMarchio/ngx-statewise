@@ -31,7 +31,7 @@ body {
 }
 
 a {
-  color: var(--mat-sys-primary);
+  color: var(--accent);
   text-underline-offset: 0.15em;
   text-decoration-thickness: 1px;
 }
@@ -39,7 +39,7 @@ a {
 /* One focus ring for the whole site. Keyboard users get it; a pointer click
    does not, which is what :focus-visible is for. */
 :focus-visible {
-  outline: 2px solid var(--mat-sys-primary);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -49,7 +49,7 @@ main:focus {
 }
 
 ::selection {
-  background-color: color-mix(in srgb, var(--mat-sys-primary) 26%, transparent);
+  background-color: color-mix(in srgb, var(--accent) 26%, transparent);
 }
 
 /* Thin, neutral scrollbars: the sidebar and the table of contents both scroll,
@@ -90,8 +90,8 @@ main:focus {
   z-index: 100;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius);
-  background-color: var(--mat-sys-primary);
-  color: var(--mat-sys-on-primary);
+  background-color: var(--accent);
+  color: var(--on-accent);
   font-size: var(--text-base);
   font-weight: var(--weight-normal);
 
@@ -386,7 +386,7 @@ main:focus {
 }
 
 .code-block__copy--copied {
-  color: var(--mat-sys-primary);
+  color: var(--accent);
 
   svg {
     /* A short, small pop. Enough to notice, not enough to watch. */
@@ -421,7 +421,7 @@ main:focus {
 }
 
 .callout--note {
-  --callout-accent: var(--mat-sys-tertiary);
+  --callout-accent: var(--accent-2);
 }
 
 .callout--tip {
@@ -429,7 +429,7 @@ main:focus {
 }
 
 .callout--important {
-  --callout-accent: var(--mat-sys-primary);
+  --callout-accent: var(--accent);
 }
 
 .callout--warning {
@@ -437,7 +437,7 @@ main:focus {
 }
 
 .callout--caution {
-  --callout-accent: var(--mat-sys-error);
+  --callout-accent: var(--danger);
 }
 
 .callout__label {

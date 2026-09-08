@@ -14,22 +14,15 @@
 }
 
 .hero__title {
-  width: fit-content;
-  margin: var(--space-3) 0 0;
-  font-size: clamp(2.25rem, 6vw, 3.25rem);
-  font-weight: var(--weight-bold);
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  /* The two showcase palettes, used once, on the one word that carries the
-     brand. Everywhere else the accents stay in the details. */
-  background-image: linear-gradient(
-    100deg,
-    var(--mat-sys-primary),
-    var(--mat-sys-tertiary)
-  );
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+  margin: var(--space-4) 0 0;
+  line-height: 0;
+}
+
+/* The logo of the project, not a reproduction of it in CSS. Its own gradient
+   is the brand; nothing here recolours it. */
+.hero__logo {
+  width: clamp(13rem, 34vw, 17rem);
+  height: auto;
 }
 
 .hero__tagline {
@@ -71,16 +64,12 @@
 
 .button--primary {
   border-color: transparent;
-  background-color: var(--mat-sys-primary);
-  color: var(--mat-sys-on-primary);
+  background-color: var(--accent);
+  color: var(--on-accent);
 
   &:hover {
     border-color: transparent;
-    background-color: color-mix(
-      in srgb,
-      var(--mat-sys-primary) 88%,
-      var(--text-strong)
-    );
+    background-color: color-mix(in srgb, var(--accent) 88%, var(--text-strong));
   }
 }
 
@@ -218,15 +207,5 @@
 @media (min-width: 48rem) {
   .contents__list {
     grid-template-columns: 1fr 1fr;
-  }
-}
-
-/* Under forced colours the gradient is discarded, and a transparent colour
-   would leave the site's name invisible. */
-@media (forced-colors: active) {
-  .hero__title {
-    background-image: none;
-    color: CanvasText;
-    -webkit-text-fill-color: CanvasText;
   }
 }

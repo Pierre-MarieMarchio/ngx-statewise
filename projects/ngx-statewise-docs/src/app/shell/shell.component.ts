@@ -19,7 +19,7 @@ import {
   type Locale,
 } from '../i18n';
 import { NPM_URL, REPOSITORY_URL, SITE_URL } from '../site';
-import { DocsUiManager } from '../ui-state';
+import { DocsUiManager, THEME_CHOICES, type ThemeChoice } from '../ui-state';
 import { SearchDialogComponent } from '../search/search-dialog.component';
 import { IconComponent } from './icon.component';
 
@@ -65,6 +65,26 @@ export class ShellComponent {
 
   protected readonly theme = this.ui.theme;
   protected readonly navOpen = this.ui.navOpen;
+
+  /** The icon on the closed menu reflects what is painted, not what was picked:
+      on `system` it shows the theme the system is currently asking for. */
+  protected readonly themeIcon = computed(() =>
+    this.ui.themeChoice() === 'system'
+      ? ('system-theme' as const)
+      : THEME_ICONS[this.ui.theme()],
+  );
+
+  protected readonly themeOptions = computed(() => {
+    const text = this.text();
+    const current = this.ui.themeChoice();
+
+    return THEME_CHOICES.map((choice) => ({
+      choice,
+      icon: THEME_MENU_ICONS[choice],
+      label: THEME_LABELS[choice](text),
+      isCurrent: choice === current,
+    }));
+  });
 
   private readonly search = viewChild.required(SearchDialogComponent);
 
@@ -115,8 +135,8 @@ export class ShellComponent {
     }
   }
 
-  protected toggleTheme(): void {
-    this.ui.toggleTheme();
+  protected chooseTheme(choice: ThemeChoice): void {
+    this.ui.chooseTheme(choice);
   }
 
   protected toggleNav(): void {
@@ -169,3 +189,27 @@ export class ShellComponent {
     add('alternate', `${SITE_URL}${this.pathIn(DEFAULT_LOCALE)}`, 'x-default');
   }
 }
+
+const THEME_ICONS = {
+  light: 'light-mode',
+  dark: 'dark-mode',
+} as const;
+
+const THEME_MENU_ICONS = {
+  light: 'light-mode',
+  dark: 'dark-mode',
+  system: 'system-theme',
+} as const;
+
+const THEME_LABELS: Record<
+  ThemeChoice,
+  (text: {
+    themeLight: string;
+    themeDark: string;
+    themeSystem: string;
+  }) => string
+> = {
+  light: (text) => text.themeLight,
+  dark: (text) => text.themeDark,
+  system: (text) => text.themeSystem,
+};

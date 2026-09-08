@@ -10,7 +10,9 @@ export type IconName =
   | 'chevron-right'
   | 'edit'
   | 'info'
-  | 'search';
+  | 'search'
+  | 'system-theme'
+  | 'check';
 
 /**
  * The handful of icons this site uses, traced in the Material Symbols outlined
