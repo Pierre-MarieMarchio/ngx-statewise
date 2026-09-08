@@ -116,6 +116,6 @@ describe('createEffect', () => {
   it('refuses to register outside an injection context', () => {
     expect(() => {
       createEffect(actions.withoutPayload, () => undefined);
-    }).toThrowError(/injection context/i);
+    }).toThrow(/injection context/i);
   });
 });

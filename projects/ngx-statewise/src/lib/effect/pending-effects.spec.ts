@@ -29,9 +29,9 @@ describe('PendingEffects', () => {
   });
 
   it('resolves immediately when nothing is pending', async () => {
-    await expectAsync(pending.waitFor(scope, 'UNKNOWN')).toBeResolved();
-    await expectAsync(pending.waitForScope(scope)).toBeResolved();
-    await expectAsync(pending.waitForAll()).toBeResolved();
+    await expect(pending.waitFor(scope, 'UNKNOWN')).resolves.not.toThrow();
+    await expect(pending.waitForScope(scope)).resolves.not.toThrow();
+    await expect(pending.waitForAll()).resolves.not.toThrow();
   });
 
   it('returns the tracked effect untouched', async () => {
@@ -58,12 +58,12 @@ describe('PendingEffects', () => {
 
     first.open();
     await matching;
-    expect(matchingSettled).toBeTrue();
-    expect(scopeSettled).toBeFalse();
+    expect(matchingSettled).toBe(true);
+    expect(scopeSettled).toBe(false);
 
     second.open();
     await whole;
-    expect(scopeSettled).toBeTrue();
+    expect(scopeSettled).toBe(true);
   });
 
   it('waits for every occurrence of the same action type', async () => {
@@ -79,11 +79,11 @@ describe('PendingEffects', () => {
 
     first.open();
     await first.promise;
-    expect(settled).toBeFalse();
+    expect(settled).toBe(false);
 
     second.open();
     await waiting;
-    expect(settled).toBeTrue();
+    expect(settled).toBe(true);
   });
 
   describe('scope isolation', () => {
@@ -91,8 +91,10 @@ describe('PendingEffects', () => {
       const other = gate();
       void pending.track(otherScope, 'SHARED_TYPE', other.promise);
 
-      await expectAsync(pending.waitFor(scope, 'SHARED_TYPE')).toBeResolved();
-      await expectAsync(pending.waitForScope(scope)).toBeResolved();
+      await expect(
+        pending.waitFor(scope, 'SHARED_TYPE'),
+      ).resolves.not.toThrow();
+      await expect(pending.waitForScope(scope)).resolves.not.toThrow();
 
       other.open();
       await other.promise;
@@ -108,11 +110,11 @@ describe('PendingEffects', () => {
       });
 
       await Promise.resolve();
-      expect(settled).toBeFalse();
+      expect(settled).toBe(false);
 
       other.open();
       await waiting;
-      expect(settled).toBeTrue();
+      expect(settled).toBe(true);
     });
 
     it('keeps the two scopes of one action type apart', async () => {
@@ -128,7 +130,7 @@ describe('PendingEffects', () => {
 
       mine.open();
       await waiting;
-      expect(mineSettled).toBeTrue();
+      expect(mineSettled).toBe(true);
 
       theirs.open();
       await theirs.promise;
@@ -141,16 +143,16 @@ describe('PendingEffects', () => {
     void pending.track(scope, 'DONE', finished);
     await finished;
 
-    await expectAsync(pending.waitFor(scope, 'DONE')).toBeResolved();
-    await expectAsync(pending.waitForAll()).toBeResolved();
+    await expect(pending.waitFor(scope, 'DONE')).resolves.not.toThrow();
+    await expect(pending.waitForAll()).resolves.not.toThrow();
   });
 
   it('forgets a failed occurrence without hiding its error', async () => {
     const failure = new Error('pending failure');
     const tracked = pending.track(scope, 'FAILED', Promise.reject(failure));
 
-    await expectAsync(tracked).toBeRejectedWith(failure);
-    await expectAsync(pending.waitFor(scope, 'FAILED')).toBeResolved();
+    await expect(tracked).rejects.toEqual(failure);
+    await expect(pending.waitFor(scope, 'FAILED')).resolves.not.toThrow();
   });
 
   it('reports completion, not success, to unrelated observers', async () => {
@@ -160,7 +162,7 @@ describe('PendingEffects', () => {
 
     failing.fail(new Error('unobserved failure'));
 
-    await expectAsync(waiting).toBeResolved();
-    await expectAsync(tracked).toBeRejected();
+    await expect(waiting).resolves.not.toThrow();
+    await expect(tracked).rejects.toThrow();
   });
 });

@@ -112,7 +112,7 @@ describe('indexUpdaters', () => {
       }),
     ]);
 
-    expect(() => indexUpdaters(resolved)).toThrowError(
+    expect(() => indexUpdaters(resolved)).toThrow(
       /Two updaters attached to the same scope both handle "RESOLVE_SHARED_ACTION"/,
     );
   });

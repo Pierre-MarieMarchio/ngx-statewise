@@ -111,9 +111,9 @@ describe('StatewiseEngine', () => {
     });
 
     it('accepts an action no updater handles', async () => {
-      await expectAsync(
+      await expect(
         engine.execute({ type: 'UNHANDLED' }, emptyScope),
-      ).toBeResolved();
+      ).resolves.not.toThrow();
     });
 
     it('lets an updater failure escape synchronously', () => {
@@ -131,16 +131,16 @@ describe('StatewiseEngine', () => {
 
       expect(() =>
         throwing.execute({ type: 'ENGINE_OWNED_ELSEWHERE' }, emptyScope),
-      ).toThrowError(/No updater in scope for "ENGINE_OWNED_ELSEWHERE"/);
+      ).toThrow(/No updater in scope for "ENGINE_OWNED_ELSEWHERE"/);
     });
 
     it('reports the same action instead of throwing', async () => {
       declareUpdaterActionTypes(['ENGINE_REPORTED']);
       const reporting = build('report');
 
-      await expectAsync(
+      await expect(
         reporting.execute({ type: 'ENGINE_REPORTED' }, emptyScope),
-      ).toBeResolved();
+      ).resolves.not.toThrow();
 
       expect(handledErrors.length).toBe(1);
       expect((handledErrors[0] as Error).message).toMatch(
@@ -300,9 +300,9 @@ describe('StatewiseEngine', () => {
     it('stays silent when the reaction is to ignore', async () => {
       declareUpdaterActionTypes(['ENGINE_OWNED_ELSEWHERE']);
 
-      await expectAsync(
+      await expect(
         engine.execute({ type: 'ENGINE_OWNED_ELSEWHERE' }, emptyScope),
-      ).toBeResolved();
+      ).resolves.not.toThrow();
 
       expect(handledErrors).toEqual([]);
     });
@@ -367,11 +367,11 @@ describe('StatewiseEngine', () => {
         });
 
       await Promise.resolve();
-      expect(finished).toBeFalse();
+      expect(finished).toBe(false);
 
       releaseChild();
       await execution;
-      expect(finished).toBeTrue();
+      expect(finished).toBe(true);
     });
 
     it('reports a synchronous effect failure as a rejection', async () => {
@@ -380,18 +380,18 @@ describe('StatewiseEngine', () => {
         throw failure;
       });
 
-      await expectAsync(
+      await expect(
         engine.execute({ type: 'SOURCE' }, emptyScope),
-      ).toBeRejectedWith(failure);
+      ).rejects.toEqual(failure);
     });
 
     it('reports an asynchronous effect failure as a rejection', async () => {
       const failure = new Error('asynchronous effect failure');
       effects.register('SOURCE', () => Promise.reject(failure));
 
-      await expectAsync(
+      await expect(
         engine.execute({ type: 'SOURCE' }, emptyScope),
-      ).toBeRejectedWith(failure);
+      ).rejects.toEqual(failure);
     });
 
     it('waits for the sibling effects of a failing one before rejecting', async () => {
@@ -405,10 +405,10 @@ describe('StatewiseEngine', () => {
         siblingFinished = true;
       });
 
-      await expectAsync(
+      await expect(
         engine.execute({ type: 'SOURCE' }, emptyScope),
-      ).toBeRejected();
-      expect(siblingFinished).toBeTrue();
+      ).rejects.toThrow();
+      expect(siblingFinished).toBe(true);
     });
 
     it('surfaces a failing cascaded action without dropping its siblings', async () => {
@@ -422,9 +422,9 @@ describe('StatewiseEngine', () => {
         ['SIBLING', recordingHandler(recorder)],
       );
 
-      await expectAsync(
-        engine.execute({ type: 'SOURCE' }, scope),
-      ).toBeRejectedWithError('cascaded updater failure');
+      await expect(engine.execute({ type: 'SOURCE' }, scope)).rejects.toThrow(
+        'cascaded updater failure',
+      );
       expect(recorder.applied).toEqual(['kept']);
     });
   });
@@ -455,11 +455,11 @@ describe('StatewiseEngine', () => {
       });
 
       await Promise.resolve();
-      expect(settled).toBeFalse();
+      expect(settled).toBe(false);
 
       release();
       await Promise.all([execution, waiting]);
-      expect(settled).toBeTrue();
+      expect(settled).toBe(true);
     });
 
     it('ignores the effects started by another scope', async () => {
@@ -475,10 +475,10 @@ describe('StatewiseEngine', () => {
 
       const execution = engine.execute({ type: 'SOURCE' }, other);
 
-      await expectAsync(
+      await expect(
         engine.waitForEffect(emptyScope, 'SOURCE'),
-      ).toBeResolved();
-      await expectAsync(engine.waitForAllEffects(emptyScope)).toBeResolved();
+      ).resolves.not.toThrow();
+      await expect(engine.waitForAllEffects(emptyScope)).resolves.not.toThrow();
 
       release();
       await execution;
@@ -489,7 +489,7 @@ describe('StatewiseEngine', () => {
 
       const execution = engine.execute({ type: 'SOURCE' }, emptyScope);
 
-      await expectAsync(engine.waitForAllEffects(emptyScope)).toBeResolved();
+      await expect(engine.waitForAllEffects(emptyScope)).resolves.not.toThrow();
       await execution;
     });
   });

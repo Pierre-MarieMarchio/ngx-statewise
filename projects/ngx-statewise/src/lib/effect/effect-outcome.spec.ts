@@ -7,45 +7,46 @@ const second = { type: 'SECOND', payload: 2 } as const;
 
 describe('resolveEffectOutcome', () => {
   it('yields no action when the effect returns nothing', async () => {
-    await expectAsync(resolveEffectOutcome(undefined)).toBeResolvedTo([]);
-    await expectAsync(
+    await expect(resolveEffectOutcome(undefined)).resolves.toEqual([]);
+    await expect(
       resolveEffectOutcome(null as unknown as undefined),
-    ).toBeResolvedTo([]);
+    ).resolves.toEqual([]);
   });
 
   it('wraps a single action and keeps an array of actions as is', async () => {
-    await expectAsync(resolveEffectOutcome(first)).toBeResolvedTo([first]);
-    await expectAsync(resolveEffectOutcome([first, second])).toBeResolvedTo([
+    await expect(resolveEffectOutcome(first)).resolves.toEqual([first]);
+    await expect(resolveEffectOutcome([first, second])).resolves.toEqual([
       first,
       second,
     ]);
-    await expectAsync(resolveEffectOutcome([])).toBeResolvedTo([]);
+    await expect(resolveEffectOutcome([])).resolves.toEqual([]);
   });
 
   it('awaits promised results, including a promised Observable', async () => {
-    await expectAsync(
+    await expect(
       resolveEffectOutcome(Promise.resolve(second)),
-    ).toBeResolvedTo([second]);
-    await expectAsync(
+    ).resolves.toEqual([second]);
+    await expect(
       resolveEffectOutcome(Promise.resolve(undefined)),
-    ).toBeResolvedTo([]);
-    await expectAsync(
+    ).resolves.toEqual([]);
+    await expect(
       resolveEffectOutcome(Promise.resolve(of(second))),
-    ).toBeResolvedTo([second]);
+    ).resolves.toEqual([second]);
   });
 
   it('reads an Observable as a one-shot source', async () => {
-    await expectAsync(resolveEffectOutcome(of(first))).toBeResolvedTo([first]);
-    await expectAsync(resolveEffectOutcome(of([first, second]))).toBeResolvedTo(
-      [first, second],
-    );
-    await expectAsync(resolveEffectOutcome(of(first, second))).toBeResolvedTo([
+    await expect(resolveEffectOutcome(of(first))).resolves.toEqual([first]);
+    await expect(resolveEffectOutcome(of([first, second]))).resolves.toEqual([
+      first,
+      second,
+    ]);
+    await expect(resolveEffectOutcome(of(first, second))).resolves.toEqual([
       first,
     ]);
   });
 
   it('accepts an empty Observable as a result without action', async () => {
-    await expectAsync(resolveEffectOutcome(EMPTY)).toBeResolvedTo([]);
+    await expect(resolveEffectOutcome(EMPTY)).resolves.toEqual([]);
   });
 
   /**
@@ -63,8 +64,8 @@ describe('resolveEffectOutcome', () => {
     globalThis.Promise = ForeignPromise;
 
     try {
-      expect(outcome instanceof globalThis.Promise).toBeFalse();
-      await expectAsync(resolveEffectOutcome(outcome)).toBeResolvedTo([second]);
+      expect(outcome instanceof globalThis.Promise).toBe(false);
+      await expect(resolveEffectOutcome(outcome)).resolves.toEqual([second]);
     } finally {
       globalThis.Promise = intrinsic;
     }
@@ -73,11 +74,11 @@ describe('resolveEffectOutcome', () => {
   it('propagates the failure of a promise or of an Observable', async () => {
     const failure = new Error('effect failure');
 
-    await expectAsync(
-      resolveEffectOutcome(Promise.reject(failure)),
-    ).toBeRejectedWith(failure);
-    await expectAsync(
+    await expect(resolveEffectOutcome(Promise.reject(failure))).rejects.toEqual(
+      failure,
+    );
+    await expect(
       resolveEffectOutcome(throwError(() => failure)),
-    ).toBeRejectedWith(failure);
+    ).rejects.toEqual(failure);
   });
 });

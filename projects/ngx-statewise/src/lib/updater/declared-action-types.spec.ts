@@ -22,14 +22,14 @@ describe('updater action-type declarations', () => {
   });
 
   it('reports an unknown type as undeclared', () => {
-    expect(isUpdaterActionTypeDeclared('DECLARED_NEVER_SEEN')).toBeFalse();
+    expect(isUpdaterActionTypeDeclared('DECLARED_NEVER_SEEN')).toBe(false);
   });
 
   it('records every type it is given', () => {
     declareUpdaterActionTypes(['DECLARED_A', 'DECLARED_B']);
 
-    expect(isUpdaterActionTypeDeclared('DECLARED_A')).toBeTrue();
-    expect(isUpdaterActionTypeDeclared('DECLARED_B')).toBeTrue();
+    expect(isUpdaterActionTypeDeclared('DECLARED_A')).toBe(true);
+    expect(isUpdaterActionTypeDeclared('DECLARED_B')).toBe(true);
   });
 
   it('accepts the same type twice without duplicating it', () => {
@@ -50,19 +50,19 @@ describe('updater action-type declarations', () => {
     declareUpdaterActionTypes(['DECLARED_TRANSIENT']);
     restoreUpdaterActionTypes(snapshot);
 
-    expect(isUpdaterActionTypeDeclared('DECLARED_KEPT')).toBeTrue();
-    expect(isUpdaterActionTypeDeclared('DECLARED_TRANSIENT')).toBeFalse();
+    expect(isUpdaterActionTypeDeclared('DECLARED_KEPT')).toBe(true);
+    expect(isUpdaterActionTypeDeclared('DECLARED_TRANSIENT')).toBe(false);
   });
 
   it('is fed by defineUpdater as soon as the updater is declared', () => {
     const action = defineSingleAction('DECLARED_BY_DEFINE', emptyPayload);
 
-    expect(isUpdaterActionTypeDeclared(action.type)).toBeFalse();
+    expect(isUpdaterActionTypeDeclared(action.type)).toBe(false);
 
     defineUpdater({} as never, (on) => {
       on(action, () => undefined);
     });
 
-    expect(isUpdaterActionTypeDeclared(action.type)).toBeTrue();
+    expect(isUpdaterActionTypeDeclared(action.type)).toBe(true);
   });
 });
