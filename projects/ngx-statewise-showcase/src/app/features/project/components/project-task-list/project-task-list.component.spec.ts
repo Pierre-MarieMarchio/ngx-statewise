@@ -1,16 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { AUTH_SESSION } from '@app/features/common';
 import { Project } from '@app/features/project/models';
-import { Task } from '../../models';
+import { ProjectManager } from '@app/features/project/states/project/project.manager';
 import {
   fakeAuthSession,
-  FakeAuthSession,
   fakeProjectManager,
   sampleUser,
 } from '@testing/fake-managers';
 import { openFirstRow } from '@testing/task-table';
+import { Task } from '../../models';
 import { ProjectTaskListComponent } from './project-task-list.component';
-import { AUTH_SESSION } from '@app/features/common';
-import { ProjectManager } from '@app/features/project/states/project/project.manager';
 
 const PROJECTS: Project[] = [
   { id: 'p-1', title: 'Analytics Dashboard', color: 'orange' },
@@ -39,25 +38,25 @@ const TASKS: Task[] = [
   },
 ];
 
+/**
+ * What this view decides is the grouping, and that a table inside an accordion
+ * asks for capped columns. Which columns a role may see is asserted once in
+ * `app-task-table`'s own spec.
+ */
 describe('ProjectTaskListComponent', () => {
   let fixture: ComponentFixture<ProjectTaskListComponent>;
-  let authManager: FakeAuthSession;
 
   const host = (): HTMLElement => fixture.nativeElement as HTMLElement;
 
-  const headers = (): string[] =>
-    Array.from(host().querySelectorAll<HTMLElement>('th[mat-header-cell]')).map(
-      (cell) => cell.textContent?.trim() ?? '',
-    );
-
   beforeEach(async () => {
-    authManager = fakeAuthSession(sampleUser({ role: 'admin' }));
-
     await TestBed.configureTestingModule({
       imports: [ProjectTaskListComponent],
       providers: [
         { provide: ProjectManager, useValue: fakeProjectManager(PROJECTS) },
-        { provide: AUTH_SESSION, useValue: authManager },
+        {
+          provide: AUTH_SESSION,
+          useValue: fakeAuthSession(sampleUser({ role: 'admin' })),
+        },
       ],
     }).compileComponents();
 
@@ -73,44 +72,23 @@ describe('ProjectTaskListComponent', () => {
   });
 
   it('keeps only the tasks of the project it lists', () => {
-    const component = fixture.componentInstance;
-
     expect(
-      component
+      fixture.componentInstance
         .groups()
         .find((group) => group.project.id === 'p-1')
         ?.tasks.map((task) => task.id),
     ).toEqual(['t-1']);
   });
 
-  it('shows the organisation column to an admin', () => {
-    expect(headers()).toEqual([
-      'Title',
-      'Status',
-      'Priority',
-      'Organisation',
-      'Open',
-    ]);
+  /** A table in an accordion cannot spread, so it asks for capped columns. */
+  it('caps the columns of the table it mounts', () => {
+    const capped = Array.from(
+      host().querySelectorAll<HTMLElement>('th[mat-header-cell]'),
+    ).map((cell) => cell.style.width || null);
+
+    expect(capped).toEqual([null, '200px', '200px', '200px', null]);
   });
 
-  it('hides the organisation column from a contributor', () => {
-    authManager.user.set(sampleUser({ role: 'contributor' }));
-    fixture.detectChanges();
-
-    expect(headers()).toEqual(['Title', 'Status', 'Priority', 'Open']);
-  });
-
-  it('hides the organisation column while no user is known', () => {
-    authManager.user.set(null);
-    fixture.detectChanges();
-
-    expect(headers()).toEqual(['Title', 'Status', 'Priority', 'Open']);
-  });
-
-  /**
-   * The row click is a mouse shortcut. This button is the path a keyboard has,
-   * and the shared column's spec holds the rest of its behaviour.
-   */
   it('opens a task from a named button, once', () => {
     expect(openFirstRow(fixture)).toEqual({
       name: 'Open Wire the columns to the role',

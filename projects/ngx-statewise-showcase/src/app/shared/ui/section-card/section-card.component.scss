@@ -1,0 +1,27 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.section-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 20rem;
+  padding: 1rem;
+  background-color: transparent;
+}
+
+.section-card-title {
+  box-sizing: border-box;
+  margin: 0 0 1rem;
+  padding: 0.5rem;
+  background-color: rgba(96, 165, 250, 0.25);
+}
+
+.section-card-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}

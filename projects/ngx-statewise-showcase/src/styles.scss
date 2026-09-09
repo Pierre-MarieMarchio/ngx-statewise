@@ -22,6 +22,14 @@ body {
   --nav-width: clamp(80px, 10vw, 110px);
 
   /*
+   * What a page's body has left under the chrome above it — a page title, and
+   * on the board a tab header too. It was written as `calc(100vh - 187px)` in
+   * four sheets: four copies of a sum nobody would ever recalculate, and any
+   * change to the title's size falsified all four in silence.
+   */
+  --page-body-height: calc(100vh - 187px);
+
+  /*
    * One hue per priority, and the only place they are written. The kanban card
    * takes them solid for its border, the details panel derives a translucent
    * fill from the same value — before this, the two were separate literals in

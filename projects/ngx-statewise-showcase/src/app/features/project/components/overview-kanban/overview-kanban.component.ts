@@ -4,7 +4,6 @@ import {
   computed,
   inject,
 } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
 import { TaskBoardService, TaskSelectionService } from '../../services';
 import { Task } from '../../models';
 import {
@@ -13,13 +12,14 @@ import {
   type KanbanMove,
 } from '@shared/ui/kanban';
 import { TaskManager } from '@app/features/project/states/task/task.manager';
+import { SectionCardComponent } from '@shared/ui/section-card';
+import { TaskCardBodyComponent } from '../task-card-body/task-card-body.component';
 
 @Component({
   selector: 'app-overview-kanban',
-  imports: [KanbanComponent, MatCardModule],
+  imports: [KanbanComponent, SectionCardComponent, TaskCardBodyComponent],
   templateUrl: './overview-kanban.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './overview-kanban.component.scss',
 })
 export class OverviewKanbanComponent {
   private readonly taskManager = inject(TaskManager);

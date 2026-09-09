@@ -6,25 +6,29 @@ import {
   input,
   output,
 } from '@angular/core';
-import { TaskColumnsService, TaskSelectionService } from '../../services';
-import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { MatTableModule } from '@angular/material/table';
-import { TaskOpenColumnComponent } from '../task-open-column/task-open-column.component';
+import { ProjectManager } from '@app/features/project/states/project/project.manager';
 import { Project, Task } from '../../models';
+import { TaskSelectionService } from '../../services';
+import { TaskTableComponent } from '../task-table/task-table.component';
 
 interface ProjectTasks {
   readonly project: Project;
   readonly tasks: readonly Task[];
 }
-import { ProjectManager } from '@app/features/project/states/project/project.manager';
 
+/**
+ * Every project, each over its own table.
+ *
+ * What is left here after the table moved into `app-task-table` is the
+ * grouping — and the columns it asks for are capped, because a table inside an
+ * accordion cannot spread.
+ */
 @Component({
   selector: 'app-project-task-list',
-  imports: [MatExpansionModule, MatTableModule, TaskOpenColumnComponent],
+  imports: [MatExpansionModule, TaskTableComponent],
   templateUrl: './project-task-list.component.html',
   styleUrl: './project-task-list.component.scss',
-  providers: [provideNativeDateAdapter()],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectTaskListComponent {
@@ -33,10 +37,6 @@ export class ProjectTaskListComponent {
 
   public projectManager = inject(ProjectManager);
   private readonly selection = inject(TaskSelectionService);
-  private readonly taskColumns = inject(TaskColumnsService);
-
-  public readonly columns = this.taskColumns.cappedColumns;
-  public readonly displayedColumns = this.taskColumns.displayedColumns;
 
   /**
    * One group per project, built once per change. The template used to call a
@@ -49,8 +49,4 @@ export class ProjectTaskListComponent {
       tasks: this.selection.ofProject(this.tasks(), project.id),
     })),
   );
-
-  public selectTask(task: Task) {
-    this.taskSelected.emit(task);
-  }
 }

@@ -11,7 +11,7 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 187px);
+  height: var(--page-body-height);
   margin-right: 1rem;
 }
 

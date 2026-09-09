@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { AUTH_SESSION } from '@app/features/common';
 import {
   fakeAuthSession,
   FakeAuthSession,
@@ -6,7 +7,6 @@ import {
 } from '@testing/fake-managers';
 import { openedSampleTask, openFirstRow } from '@testing/task-table';
 import { PersonalTaskListComponent } from './personal-task-list.component';
-import { AUTH_SESSION } from '@app/features/common';
 
 const TASKS = [
   sampleTask({ id: 'mine', assignedUserIds: ['user-1'] }),
@@ -14,6 +14,10 @@ const TASKS = [
   sampleTask({ id: 'unassigned', assignedUserIds: undefined }),
 ];
 
+/**
+ * What this view decides is what "mine" means. The table it mounts holds the
+ * columns and the role that filters them, and its own spec asserts those.
+ */
 describe('PersonalTaskListComponent', () => {
   let authManager: FakeAuthSession;
 
@@ -51,37 +55,19 @@ describe('PersonalTaskListComponent', () => {
     expect(fixture.componentInstance.tasks()).toEqual([]);
   });
 
-  /**
-   * It used to show a fixed three, alone among the four tables in filtering
-   * nothing. It follows the role now, like its siblings.
-   */
-  it('offers the organisation column to an admin, and not to anyone else', async () => {
+  /** And says so in its own words rather than the table's default. */
+  it('says nothing is assigned rather than nothing exists', async () => {
     const fixture = await mount();
-    const headers = () =>
-      Array.from(
-        (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
-          'th[mat-header-cell]',
-        ),
-      ).map((cell) => cell.textContent?.trim());
-
-    expect(headers()).toEqual([
-      'Title',
-      'Status',
-      'Priority',
-      'Organisation',
-      'Open',
-    ]);
-
-    authManager.user.set({ userId: 'user-1', role: 'member' });
+    authManager.user.set(null);
     fixture.detectChanges();
 
-    expect(headers()).toEqual(['Title', 'Status', 'Priority', 'Open']);
+    expect(
+      (fixture.nativeElement as HTMLElement)
+        .querySelector('.empty-state')
+        ?.textContent?.trim(),
+    ).toBe('No task is assigned to you.');
   });
 
-  /**
-   * The row click is a mouse shortcut. This button is the path a keyboard has,
-   * and the shared column's spec holds the rest of its behaviour.
-   */
   it('opens a task from a named button, once', async () => {
     expect(openFirstRow(await mount())).toEqual(openedSampleTask('mine'));
   });

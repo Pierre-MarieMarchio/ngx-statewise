@@ -11,12 +11,12 @@ import { SidePanelComponent } from '@shared/ui/side-panel';
 import { DataStateComponent } from '@shared/ui/data-state';
 import { TaskDetailsComponent } from '@app/features/project/components';
 import {
-  TaskKanbanComponent,
-  AllTaskListComponent,
   PersonalTaskListComponent,
   ProjectFormComponent,
   ProjectTaskListComponent,
   TaskFormComponent,
+  TaskKanbanComponent,
+  TaskTableComponent,
 } from '@app/features/project/components';
 import { ProjectDraft, TaskDraft } from '@app/features/project/models';
 import { TaskManager } from '@app/features/project/states/task/task.manager';
@@ -26,7 +26,6 @@ import { ProjectManager } from '@app/features/project/states/project/project.man
   selector: 'app-board-page',
   imports: [
     SidePanelComponent,
-    AllTaskListComponent,
     DataStateComponent,
     TaskDetailsComponent,
     MatIconModule,
@@ -36,6 +35,7 @@ import { ProjectManager } from '@app/features/project/states/project/project.man
     ProjectTaskListComponent,
     TaskFormComponent,
     TaskKanbanComponent,
+    TaskTableComponent,
   ],
   templateUrl: './board-page.component.html',
   styleUrl: './board-page.component.scss',

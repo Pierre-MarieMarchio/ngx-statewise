@@ -23,3 +23,13 @@
   display: flex;
   gap: 0.5rem;
 }
+
+/*
+ * What a tab's body fills. It was `all-task-list`'s own container before that
+ * component turned out to be `app-task-table` and a height, and nothing else.
+ */
+.tab-body {
+  box-sizing: border-box;
+  padding-top: 1rem;
+  min-height: var(--page-body-height);
+}

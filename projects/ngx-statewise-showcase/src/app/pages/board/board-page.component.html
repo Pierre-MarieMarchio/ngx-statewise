@@ -54,10 +54,12 @@
           <mat-icon class="tab-icon">view_list</mat-icon>
           All Tasks
         </ng-template>
-        <app-all-task-list
-          (taskSelected)="selectTask($event)"
-          [tasks]="taskManager.tasks()"
-        />
+        <div class="tab-body">
+          <app-task-table
+            [tasks]="taskManager.tasks()"
+            (taskSelected)="selectTask($event)"
+          />
+        </div>
       </mat-tab>
       <mat-tab>
         <ng-template mat-tab-label>

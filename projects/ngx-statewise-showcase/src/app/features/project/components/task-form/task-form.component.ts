@@ -10,10 +10,10 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { PanelFormComponent } from '@shared/ui/panel-form';
 import {
   PRIORITIES,
   Project,
@@ -30,10 +30,9 @@ import {
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatButtonModule,
+    PanelFormComponent,
   ],
   templateUrl: './task-form.component.html',
-  styleUrl: './task-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskFormComponent {

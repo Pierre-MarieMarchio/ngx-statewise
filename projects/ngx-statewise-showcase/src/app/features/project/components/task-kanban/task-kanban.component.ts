@@ -7,8 +7,8 @@ import {
   linkedSignal,
   output,
 } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { TaskCardBodyComponent } from '../task-card-body/task-card-body.component';
 import { Project, Task } from '../../models';
 import {
   KanbanComponent,
@@ -26,7 +26,7 @@ interface ProjectBoard {
 
 @Component({
   selector: 'app-task-kanban',
-  imports: [KanbanComponent, MatCardModule, MatExpansionModule],
+  imports: [KanbanComponent, MatExpansionModule, TaskCardBodyComponent],
   templateUrl: './task-kanban.component.html',
   styleUrl: './task-kanban.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

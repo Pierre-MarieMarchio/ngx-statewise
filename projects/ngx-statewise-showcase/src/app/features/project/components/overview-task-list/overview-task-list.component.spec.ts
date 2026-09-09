@@ -1,28 +1,27 @@
 import { TestBed } from '@angular/core/testing';
+import { AUTH_SESSION } from '@app/features/common';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
 import {
   fakeAuthSession,
-  FakeAuthSession,
   fakeTaskManager,
   sampleTask,
-  sampleUser,
 } from '@testing/fake-managers';
 import { openedSampleTask, openFirstRow } from '@testing/task-table';
 import { OverviewTaskListComponent } from './overview-task-list.component';
-import { AUTH_SESSION } from '@app/features/common';
-import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 const TASKS = [sampleTask(), sampleTask({ id: 'task-2' })];
 
+/**
+ * What this panel decides is which tasks it shows and that a selection reaches
+ * its caller. Which columns a role may see is `app-task-table`'s, and is
+ * asserted there once rather than in each of the views that mount it.
+ */
 describe('OverviewTaskListComponent', () => {
-  let authManager: FakeAuthSession;
-
   const mount = async () => {
-    authManager = fakeAuthSession();
-
     await TestBed.configureTestingModule({
       imports: [OverviewTaskListComponent],
       providers: [
-        { provide: AUTH_SESSION, useValue: authManager },
+        { provide: AUTH_SESSION, useValue: fakeAuthSession() },
         { provide: TaskManager, useValue: fakeTaskManager(TASKS) },
       ],
     }).compileComponents();
@@ -41,19 +40,6 @@ describe('OverviewTaskListComponent', () => {
     ).toBe(TASKS.length);
   });
 
-  it('drops the organisation column for a contributor', async () => {
-    const fixture = await mount();
-    authManager.user.set(sampleUser({ role: 'contributor' }));
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.displayedColumns()).toEqual([
-      'title',
-      'status',
-      'priority',
-      'open',
-    ]);
-  });
-
   it('emits the task of the clicked row', async () => {
     const fixture = await mount();
     const selected: string[] = [];
@@ -68,10 +54,7 @@ describe('OverviewTaskListComponent', () => {
     expect(selected).toEqual(['task-1']);
   });
 
-  /**
-   * The row click is a mouse shortcut. This button is the path a keyboard has,
-   * and the shared column's spec holds the rest of its behaviour.
-   */
+  /** The table's action button has to reach this panel's own output. */
   it('opens a task from a named button, once', async () => {
     expect(openFirstRow(await mount())).toEqual(openedSampleTask());
   });

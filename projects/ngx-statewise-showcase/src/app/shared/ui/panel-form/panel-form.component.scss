@@ -1,20 +1,26 @@
-.task-form {
+:host {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   padding: 1.5rem;
 }
 
-.task-form-title {
+.panel-form-title {
   margin: 0;
 }
 
-.task-form-refusal {
+.panel-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.panel-form-refusal {
   margin: 0;
   color: var(--mat-sys-error);
 }
 
-.task-form-actions {
+.panel-form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
