@@ -189,13 +189,6 @@ const flowFiles = [
   'task.manager.ts',
 ].map((name) => join(taskFlow, name));
 
-const [claimedGzip] = claimedIn(
-  /the whole ([\d.]+) kB gzipped comes along/,
-  'gzipped size',
-);
-
-check('the gzipped size it quotes', claimedGzip, measured, 'the build');
-
 const readme = readFileSync(
   join(root, 'projects', 'ngx-statewise', 'README.md'),
   'utf8',
@@ -229,6 +222,42 @@ if (claimedTypeCount !== committedTypes.length) {
       `${String(committedTypes.length)}: ${committedTypes.join(', ')}.\n` +
       `Update the README and the API page's table together.`,
   );
+}
+
+// --- the two weight figures, said in two places -----------------------------
+// What they must equal is only measurable through Angular's own pipeline, which
+// costs an install and three production builds — `npm run measure:size`, with
+// its own ceiling. What is cheap and worth doing on every commit is checking
+// that the two documents quoting them still agree, because a number updated in
+// one place and not the other is the ordinary way this rots.
+function weightFigures(text, where) {
+  const rows = [
+    ...text.matchAll(
+      /\|\s*(the action helpers only|every public export)\s*\|\s*([\d.]+) kB\s*\|/g,
+    ),
+  ];
+
+  if (rows.length !== 2) {
+    fail(
+      `expected two weight rows in ${where}, found ${String(rows.length)} — ` +
+        `this script is out of step`,
+    );
+  }
+
+  return Object.fromEntries(rows.map((row) => [row[1], Number(row[2])]));
+}
+
+const inGuide = weightFigures(why, 'the "Why" page');
+const inReadme = weightFigures(readme, 'the library README');
+
+for (const what of Object.keys(inGuide)) {
+  if (inGuide[what] !== inReadme[what]) {
+    fail(
+      `"${what}" weighs ${String(inGuide[what])} kB on the "Why" page and ` +
+        `${String(inReadme[what])} kB in the README. One of them was updated ` +
+        `alone — re-run \`npm run measure:size\` and write the same number twice.`,
+    );
+  }
 }
 
 const [claimedFiles, claimedLines] = claimedIn(
@@ -296,5 +325,6 @@ console.log(
   `verify:claims — version ${publishedVersion}, ` +
     `${String(measured)} kB minified and gzipped, ` +
     `${String(committedTypes.length)} exported types, ` +
+    `the two weight figures agreeing across both documents, ` +
     `and the boilerplate figures of the "Why" page. All as claimed.`,
 );

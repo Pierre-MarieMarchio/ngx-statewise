@@ -137,6 +137,29 @@ wiring are not. Four behaviours changed beyond the renames:
 → [Migrating from 0.6.x](https://pierre-mariemarchio.github.io/ngx-statewise/guide/migration)
 has the full rename table and before/after examples.
 
+## What it weighs
+
+Through Angular's own production pipeline, as the delta against the same
+application built without the library:
+
+| What you import         | Adds, gzipped |
+| ----------------------- | ------------- |
+| the action helpers only | 0.2 kB        |
+| every public export     | 4.2 kB        |
+
+```bash
+npm run measure:size
+```
+
+Three production builds of one throwaway application — nothing imported, the
+helpers only, everything — so what is reported is the library's cost and not
+Angular's. Both figures carry a ceiling in that script, because a measurement
+without one is taken once and never again.
+
+The 4.8 kB the documentation site publishes is a different question answered
+honestly: that is the whole barrel bundled on its own, which is what "how big
+is this package" means. The table above is what importing it costs you.
+
 ## Zoneless, and SSR
 
 Both are supported, and both answers are measured rather than assumed.
