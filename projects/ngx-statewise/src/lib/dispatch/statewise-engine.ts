@@ -21,6 +21,24 @@ import {
 } from './misrouted-dispatch';
 
 /**
+ * A cascade offering itself for adoption while its handler runs.
+ *
+ * Carries the path an adopted dispatch inherits, which is what lets the bound
+ * see a cycle closing through a manager: without it, every call to a
+ * third-party manager starts a fresh cascade of depth one, and two effects
+ * calling each other spin until the stack gives way.
+ */
+interface OpenCascade {
+  readonly path: readonly string[];
+  /**
+   * Filled by adoption, and awaited by the host once its handler has
+   * answered. This is what makes the wait transitive: a cascade crossing a
+   * manager boundary stays one tree of promises instead of two.
+   */
+  readonly branches: Promise<void>[];
+}
+
+/**
  * Runs actions: asks their interceptors, applies their updater, then their
  * effects, and recursively the actions those effects return. The returned
  * promise settles once the whole cascade started by the action is over.
@@ -41,6 +59,17 @@ export class StatewiseEngine {
   ) {}
 
   /**
+   * The cascade whose effect handler is running right now, if any.
+   *
+   * A field rather than an argument threaded through, because what reaches
+   * the engine is a call from a third-party manager, and a manager knows
+   * nothing of the cascade that called it. Synchronous by nature: past an
+   * `await` no asynchronous context survives here — `AsyncLocalStorage` does
+   * not exist in a browser, and zone.js is excluded by construction.
+   */
+  private openCascade: OpenCascade | undefined;
+
+  /**
    * An updater failure is a programming error and escapes synchronously, so it
    * surfaces at the call site instead of being buried in a rejected promise.
    * An interceptor failure is the same kind of error, and escapes the same
@@ -54,6 +83,14 @@ export class StatewiseEngine {
     scope: DispatchScope,
     path: readonly string[] = [],
   ): Promise<void> {
+    // A root dispatch reaching the engine while an effect handler runs was
+    // emitted by that handler, through the third-party manager the guide
+    // prescribes for crossing a feature boundary. It belongs to the cascade
+    // of that handler, and inherits its path.
+    if (path.length === 0 && this.openCascade !== undefined) {
+      return this.adopt(action, scope, this.openCascade);
+    }
+
     const cascade = [...path, action.type];
 
     // Raised before anything is applied, so an action the bound refuses
@@ -97,6 +134,47 @@ export class StatewiseEngine {
 
   public waitForAllEffects(scope: DispatchScope): Promise<void> {
     return this.pendingEffects.waitForScope(scope);
+  }
+
+  /**
+   * Runs an action as part of the cascade adopting it.
+   *
+   * Taken through the protected path on purpose: the bound throws
+   * synchronously, and the caller here is a manager that has not asked to
+   * catch anybody else's cascade. A refusal must reject the cascade, not
+   * escape at the call site of the manager.
+   */
+  private adopt(
+    action: Action,
+    scope: DispatchScope,
+    host: OpenCascade,
+  ): Promise<void> {
+    const running = this.executeSafely(action, scope, host.path);
+
+    host.branches.push(running);
+
+    return running;
+  }
+
+  /**
+   * Runs an effect handler with its cascade open for adoption.
+   *
+   * Around the call alone, never around the `await` that follows it: a window
+   * held open for the whole duration of an effect would adopt dispatches that
+   * merely overlap it and belong to nobody.
+   */
+  private withOpenCascade<Outcome>(
+    cascade: OpenCascade,
+    run: () => Outcome,
+  ): Outcome {
+    const enclosing = this.openCascade;
+    this.openCascade = cascade;
+
+    try {
+      return run();
+    } finally {
+      this.openCascade = enclosing;
+    }
   }
 
   /** The single handler owning this action type in this scope, if any. */
@@ -218,11 +296,14 @@ export class StatewiseEngine {
     run: EffectRun,
     cascade: readonly string[],
   ): Promise<void> {
+    const adopted: Promise<void>[] = [];
+
     try {
-      const actions = await resolveEffectOutcome(
-        effect.run(action, { abortSignal: run.abortSignal }),
-        run.abortSignal,
+      const outcome = this.withOpenCascade(
+        { path: cascade, branches: adopted },
+        () => effect.run(action, { abortSignal: run.abortSignal }),
       );
+      const actions = await resolveEffectOutcome(outcome, run.abortSignal);
 
       // The answer of an abandoned run is stale by definition: dispatching it
       // would let it overwrite the state its successor is building.
@@ -237,9 +318,13 @@ export class StatewiseEngine {
         throw unansweredEffectError(action.type);
       }
 
-      await settleAll(
-        actions.map((next) => this.executeSafely(next, scope, cascade)),
-      );
+      // The actions the handler answered, and the cascades it started through
+      // another manager while it ran: both belong to this dispatch, so both
+      // are awaited here.
+      await settleAll([
+        ...actions.map((next) => this.executeSafely(next, scope, cascade)),
+        ...adopted,
+      ]);
     } catch (error) {
       // Nobody awaits the answer of a run we deliberately abandoned, so its
       // failure is not the caller's to handle either.

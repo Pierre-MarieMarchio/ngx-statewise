@@ -920,6 +920,125 @@ describe('StatewiseEngine', () => {
     });
   });
 
+  /**
+   * The guide forbids returning another feature's action and prescribes
+   * calling that feature's manager instead. That call leaves the tree of
+   * promises the dispatch is holding, so the cascade it starts has to be
+   * adopted back into it — which is what these three specs pin, limit
+   * included.
+   */
+  describe('across manager boundaries', () => {
+    let downstreamScope: DispatchScope;
+    let pingScope: DispatchScope;
+    let pongScope: DispatchScope;
+
+    /**
+     * What a third-party manager does when an effect calls it: `dispatch()`
+     * hands the action to the engine on the manager's own scope, and reports a
+     * failure to the ErrorHandler because nobody is awaiting it.
+     */
+    function dispatchThroughManager(
+      action: Action,
+      scope: DispatchScope,
+    ): void {
+      const execution = engine.execute(action, scope);
+
+      void execution.catch((error: unknown) => {
+        errorHandler.handleError(error);
+      });
+    }
+
+    beforeEach(() => {
+      downstreamScope = scopeOf();
+      pingScope = scopeOf();
+      pongScope = scopeOf();
+    });
+
+    /**
+     * The shape of `auth.effect.ts:64-69`: a synchronous handler calls the
+     * downstream manager and hands nothing back to await. The dispatch used
+     * to settle while that reload was still in flight, which is the one thing
+     * the guide promises it never does.
+     */
+    it('waits for a cascade an effect started through another manager', async () => {
+      let downstreamFinished = false;
+      register('UPSTREAM', () => {
+        dispatchThroughManager({ type: 'DOWNSTREAM' }, downstreamScope);
+      });
+      register('DOWNSTREAM', async () => {
+        await drainMicrotasks();
+        downstreamFinished = true;
+      });
+
+      await engine.execute({ type: 'UPSTREAM' }, emptyScope);
+
+      expect(downstreamFinished).toBe(true);
+      expect(handledErrors).toEqual([]);
+    });
+
+    /**
+     * The measured limit of the mechanism, and it does not move: a dispatch
+     * emitted past an `await` cannot be attributed to the handler that
+     * emitted it, because no asynchronous context survives here. This spec
+     * exists so nobody later believes the limit went away — and the limit
+     * falls exactly where the caller already holds a promise of its own, an
+     * `await` having necessarily given it one.
+     */
+    it('does not wait for a cascade started past an await', async () => {
+      let downstreamFinished = false;
+      register('UPSTREAM', async () => {
+        await Promise.resolve();
+        dispatchThroughManager({ type: 'DOWNSTREAM' }, downstreamScope);
+      });
+      register('DOWNSTREAM', async () => {
+        await drainMicrotasks();
+        downstreamFinished = true;
+      });
+
+      await engine.execute({ type: 'UPSTREAM' }, emptyScope);
+
+      expect(downstreamFinished).toBe(false);
+
+      // Still in flight, and observable the way the guide tells a consumer to
+      // observe it: through the promise the manager call hands back.
+      await engine.waitForAllEffects(downstreamScope);
+      expect(downstreamFinished).toBe(true);
+    });
+
+    /**
+     * The bound counts a path, and a call to a third-party manager used to
+     * arrive with an empty one — so a cycle closing through two managers was
+     * a fresh cascade of depth one at every turn, and it span until the stack
+     * gave way, 327 turns in, while the dispatch that started it resolved
+     * normally and the caller learnt nothing.
+     */
+    it('stops a cycle closing through two managers', async () => {
+      let pings = 0;
+      register('PING', () => {
+        pings += 1;
+        dispatchThroughManager({ type: 'PONG' }, pongScope);
+      });
+      register('PONG', () => {
+        dispatchThroughManager({ type: 'PING' }, pingScope);
+      });
+      engine = build('ignore', 6);
+
+      await expect(engine.execute({ type: 'PING' }, pingScope)).rejects.toThrow(
+        /maxCascadeDepth/,
+      );
+
+      expect(pings).toBeLessThanOrEqual(6);
+
+      // Every intermediate manager dispatched fire-and-forget, so each is
+      // told of the refusal as well — that is what `dispatch()` asks for.
+      // What must be gone is what used to happen instead: a stack overflow,
+      // escaping as a rejection nobody observes.
+      expect(
+        handledErrors.filter((error) => error instanceof RangeError),
+      ).toEqual([]);
+    });
+  });
+
   describe('concurrency policy', () => {
     /**
      * The run was abandoned while its cascade was still going, so the failure

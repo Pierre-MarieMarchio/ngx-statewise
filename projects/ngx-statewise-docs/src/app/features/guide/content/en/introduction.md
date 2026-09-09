@@ -43,7 +43,9 @@ Five steps, always in this order.
 
 An effect that returns an action starts a cascade. A login action updates the
 state, its effect calls the API, and the action it returns updates the state
-again. One `dispatchAsync` awaits the whole chain.
+again. One `dispatchAsync` awaits the whole chain — including the part of it a
+synchronous handler started through another feature's manager, which is how a
+cascade crosses a feature boundary.
 
 > [!IMPORTANT]
 > Two consequences follow from that order, and they are the reason the order

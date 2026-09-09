@@ -32,7 +32,8 @@ Components re-render when they read a value, and there is nothing to
 unsubscribe.
 
 **Cascades you can await.** `dispatchAsync` resolves when the whole chain is
-over, nested effects included:
+over — nested effects included, and other features' managers included when a
+synchronous handler called them:
 
 ```typescript
 await this.auth.login(credentials);
