@@ -9,7 +9,7 @@ import {
   DashboardKanbanComponent,
   DashboardTaskListComponent,
 } from '../../components';
-import { SidePanelComponent } from '@app/core/layouts';
+import { SidePanelComponent } from '@shared/ui/side-panel';
 import { Task } from '@shared/app-common/models';
 import {
   DataStateComponent,

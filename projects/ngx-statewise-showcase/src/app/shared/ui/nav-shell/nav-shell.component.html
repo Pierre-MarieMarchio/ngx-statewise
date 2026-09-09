@@ -10,8 +10,8 @@
       >
         <img class="side-nav-logo-img" src="icon-logo.png" alt="" />
       </a>
-      @if (logedInDisplay()) {
-        @for (item of navigationitems(); track item.label) {
+      @if (isLoggedIn()) {
+        @for (item of navigationItems(); track item.label) {
           @if (item.href) {
             <!-- Leaves the application, so a plain link and a new tab. -->
             <a
@@ -44,10 +44,10 @@
     </mat-nav-list>
   </div>
   <div class="footer-toggles">
-    @if (logedInDisplay()) {
+    @if (isLoggedIn()) {
       <div class="footer-groupe-button color-secondary">
         <button
-          (click)="handleLogout()"
+          (click)="logout.emit()"
           disableRipple="true"
           class=".no-hover-button"
           mat-icon-button

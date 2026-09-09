@@ -9,7 +9,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { Task } from '@shared/app-common/models';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
-import { SidePanelComponent } from '@app/core/layouts';
+import { SidePanelComponent } from '@shared/ui/side-panel';
 import {
   DataStateComponent,
   TaskDetailsComponent,

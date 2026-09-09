@@ -1,4 +1,4 @@
-import { NavigationItem } from '@app/core/models';
+import { NavigationItem } from '@shared/ui/nav-shell';
 
 export const navigationItems: NavigationItem[] = [
   {
