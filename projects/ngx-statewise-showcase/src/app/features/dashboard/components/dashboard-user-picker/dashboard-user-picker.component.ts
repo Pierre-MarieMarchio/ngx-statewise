@@ -25,7 +25,6 @@ const DEMO_CREDENTIALS = {
   selector: 'app-dashboard-user-picker',
   imports: [MatButtonToggleModule],
   templateUrl: './dashboard-user-picker.component.html',
-  styleUrl: './dashboard-user-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardUserPickerComponent {

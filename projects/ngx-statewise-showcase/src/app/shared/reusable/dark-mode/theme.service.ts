@@ -5,14 +5,16 @@ import { Theme } from './theme.enum';
   providedIn: 'root',
 })
 export class ThemeService {
-  public themeSignal = signal<Theme>(Theme.DARK);
+  private readonly theme = signal<Theme>(Theme.DARK);
+
+  public readonly themeSignal = this.theme.asReadonly();
 
   public setTheme(value: Theme): void {
-    this.themeSignal.set(value);
+    this.theme.set(value);
   }
 
   public updateTheme(): void {
-    this.themeSignal.update((value) =>
+    this.theme.update((value) =>
       value === Theme.DARK ? Theme.LIGHT : Theme.DARK,
     );
   }

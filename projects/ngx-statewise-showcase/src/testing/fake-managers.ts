@@ -142,7 +142,6 @@ export const fakeProjectManager = (
     isLoading: signal(false),
     projectCount: computed(() => projectsSignal()?.length ?? 0),
     getAll: () => undefined,
-    getAllAsync: () => Promise.resolve(),
     settled: () => Promise.resolve(),
     reset: () => Promise.resolve(),
   };
