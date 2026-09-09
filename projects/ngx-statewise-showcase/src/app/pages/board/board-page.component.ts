@@ -18,6 +18,7 @@ import {
   ProjectTaskListComponent,
 } from '@app/features/project/components';
 import { TaskManager } from '@app/features/project/states/task/task.manager';
+import { ProjectManager } from '@app/features/project/states/project/project.manager';
 
 @Component({
   selector: 'app-board-page',
@@ -43,6 +44,12 @@ export class BoardPageComponent {
   @ViewChild('taskPanel') taskPanel!: SidePanelComponent;
 
   public readonly taskManager = inject(TaskManager);
+  /**
+   * Two of the four tabs group by project, so a project load that failed is
+   * this page's problem to report — it used to be invisible here, and
+   * permanent.
+   */
+  public readonly projectManager = inject(ProjectManager);
 
   public selectedTask = signal<Task | null>(null);
 

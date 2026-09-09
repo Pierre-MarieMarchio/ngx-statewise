@@ -204,19 +204,24 @@ export interface FakeProjectManager extends IProjectReload {
   isError: WritableSignal<boolean>;
   isLoading: WritableSignal<boolean>;
   readonly projectCount: ReturnType<typeof computed<number>>;
+  readonly calls: string[];
 }
 
 export const fakeProjectManager = (
   projects: Project[] = [sampleProject()],
 ): FakeProjectManager => {
   const projectsSignal = signal(projects);
+  const calls: string[] = [];
 
   return {
     projects: projectsSignal,
     isError: signal(false),
     isLoading: signal(false),
     projectCount: computed(() => projectsSignal().length),
-    getAll: () => undefined,
+    calls,
+    getAll: () => {
+      calls.push('getAll');
+    },
     settled: () => Promise.resolve(),
     reset: () => Promise.resolve(),
   };

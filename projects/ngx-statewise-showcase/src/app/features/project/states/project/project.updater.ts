@@ -11,6 +11,7 @@ export const projectUpdater = defineUpdater(ProjectState, (on) => {
 
   on(getAllProjectsActions.request, (state) => {
     state.isLoading.set(true);
+    state.isError.set(false);
   });
 
   on(getAllProjectsActions.success, (state, projects) => {

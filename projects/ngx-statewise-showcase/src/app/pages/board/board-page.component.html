@@ -9,6 +9,13 @@
       [retryable]="true"
       (retried)="taskManager.getAll()"
     />
+    <app-data-state
+      label="projects"
+      [loading]="projectManager.isLoading()"
+      [error]="projectManager.isError()"
+      [retryable]="true"
+      (retried)="projectManager.getAll()"
+    />
     <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
       <mat-tab>
         <ng-template mat-tab-label>
