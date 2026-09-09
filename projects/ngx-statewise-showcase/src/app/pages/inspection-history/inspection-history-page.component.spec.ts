@@ -14,6 +14,7 @@ import {
 } from './inspection-history-page.component';
 import { TaskManager } from '@app/features/project/states/task/task.manager';
 import { at } from '@testing/at';
+import { pressKey } from '@testing/keyboard';
 
 describe('InspectionHistoryPageComponent', () => {
   let fixture: ComponentFixture<InspectionHistoryPageComponent>;
@@ -38,6 +39,25 @@ describe('InspectionHistoryPageComponent', () => {
 
   const readout = (name: string): string =>
     host().querySelector(`[data-readout="${name}"]`)?.textContent?.trim() ?? '';
+
+  const selectedChips = (): string[] =>
+    Array.from(host().querySelectorAll<HTMLElement>('[data-tracked]'))
+      .filter((chip) => chip.querySelector('[aria-selected="true"]'))
+      .map((chip) => chip.getAttribute('data-tracked') ?? '');
+
+  /** The option is the focusable element; the chip host is presentational. */
+  const pressEnter = (type: string): void => {
+    const option = host().querySelector(
+      `[data-tracked="${type}"] [role="option"]`,
+    );
+
+    if (!option) {
+      throw new Error(`no chip option for ${type}`);
+    }
+
+    pressKey(option, 'Enter');
+    fixture.detectChanges();
+  };
 
   /** The columns, named: reading a row by a bare index rots on every change. */
   const POSITION = 0;
@@ -140,21 +160,25 @@ describe('InspectionHistoryPageComponent', () => {
     ]);
   });
 
+  /**
+   * Pressing the chip, not calling the method: the filter used to hang off a
+   * `(click)` on `<mat-chip-option>` that ENTER never produces, so it could be
+   * cleared by keyboard but never set.
+   */
   it('narrows the table to the type filtered on, and back again', () => {
     click('raise a notice');
     click('increment the tally');
 
     expect(rows().length).toBe(2);
 
-    fixture.componentInstance.filterBy('TALLY_INCREMENTED');
-    fixture.detectChanges();
+    pressEnter('TALLY_INCREMENTED');
 
     expect(rows().map((row) => row[TYPE])).toEqual(['TALLY_INCREMENTED']);
     expect(readout('filter')).toBe('TALLY_INCREMENTED');
 
-    fixture.componentInstance.filterBy('TALLY_INCREMENTED');
-    fixture.detectChanges();
+    pressEnter('TALLY_INCREMENTED');
 
+    expect(fixture.componentInstance.selectedType()).toBeNull();
     expect(rows().length).toBe(2);
   });
 
@@ -169,14 +193,20 @@ describe('InspectionHistoryPageComponent', () => {
     expect(rows().map((row) => row[POSITION])).toEqual(['1', '2']);
   });
 
-  it('clears the filter', () => {
+  /**
+   * The chip and the filter used to be two states: the option carried its own
+   * `[selected]`, so clearing one left the other showing.
+   */
+  it('clears the filter, and the chip with it', () => {
     click('raise a notice');
-    fixture.componentInstance.filterBy('NOTICE_RAISED');
-    fixture.detectChanges();
+    pressEnter('NOTICE_RAISED');
+
+    expect(selectedChips()).toEqual(['NOTICE_RAISED']);
 
     click('clear filter');
 
     expect(fixture.componentInstance.selectedType()).toBeNull();
+    expect(selectedChips()).toEqual([]);
   });
 
   it('leaves the payload column empty for an action carrying none', () => {
