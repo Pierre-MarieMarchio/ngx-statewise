@@ -31,10 +31,6 @@ export class ProjectManager implements IProjectManager {
     this.statewise.dispatch(getAllProjectsActions.request());
   }
 
-  public getAllAsync(): Promise<void> {
-    return this.statewise.dispatchAsync(getAllProjectsActions.request());
-  }
-
   public reset(): Promise<void> {
     return this.statewise.dispatchAsync(projectReset());
   }

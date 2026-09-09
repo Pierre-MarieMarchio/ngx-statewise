@@ -49,14 +49,6 @@ export abstract class LocalStorageService {
     }
   }
 
-  protected clear(): void {
-    try {
-      localStorage.clear();
-    } catch (error) {
-      this.errorHandler.handleError(error);
-    }
-  }
-
   /** A blocked read is a missing value, not a crash at startup. */
   private read(key: string): string | null {
     try {
