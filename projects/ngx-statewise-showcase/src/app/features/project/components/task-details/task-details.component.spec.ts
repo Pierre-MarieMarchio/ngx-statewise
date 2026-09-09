@@ -1,11 +1,22 @@
 import { TestBed } from '@angular/core/testing';
-import { sampleTask } from '@testing/fake-managers';
+import { TEAM_DIRECTORY } from '@app/features/project/ports';
+import { ProjectManager } from '@app/features/project/states/project/project.manager';
+import {
+  fakeProjectManager,
+  fakeTeamDirectory,
+  sampleProject,
+  sampleTask,
+} from '@testing/fake-managers';
 import { TaskDetailsComponent } from './task-details.component';
 
 describe('TaskDetailsComponent', () => {
   const mount = async (task = sampleTask()) => {
     await TestBed.configureTestingModule({
       imports: [TaskDetailsComponent],
+      providers: [
+        { provide: TEAM_DIRECTORY, useValue: fakeTeamDirectory() },
+        { provide: ProjectManager, useValue: fakeProjectManager() },
+      ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(TaskDetailsComponent);
@@ -47,6 +58,48 @@ describe('TaskDetailsComponent', () => {
         'mat-chip.mat-mdc-chip-highlighted',
       ).length,
     ).toBe(2);
+  });
+
+  /**
+   * The two fields that used to print a UUID at the reader. Both fall back to
+   * the id, which is the honest answer while a directory is still on its way.
+   */
+  describe('what it makes of an id', () => {
+    it('names the assignees rather than listing their ids', async () => {
+      const fixture = await mount();
+      const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+      expect(text).toContain('admin');
+      expect(text).not.toContain('user-1');
+    });
+
+    it('falls back to the id nobody answers to', async () => {
+      const fixture = await mount(sampleTask({ assignedUserIds: ['user-9'] }));
+
+      expect(
+        (fixture.nativeElement as HTMLElement).textContent ?? '',
+      ).toContain('user-9');
+    });
+
+    /*
+     * The project's name sits behind the second tab, and Material attaches an
+     * inactive tab body only once its tab is activated — so there is no DOM
+     * here to read it off, and the derivation is what this asserts.
+     */
+    it('names the project, and falls back to its id', async () => {
+      const fixture = await mount();
+
+      expect(fixture.componentInstance.projectName()).toBe(
+        sampleProject().title,
+      );
+
+      fixture.componentRef.setInput(
+        'selectedTask',
+        sampleTask({ projectId: 'project-9' }),
+      );
+
+      expect(fixture.componentInstance.projectName()).toBe('project-9');
+    });
   });
 
   /**

@@ -6,6 +6,7 @@ import {
   ITaskReload,
   SessionUser,
 } from '@app/features/common';
+import { ITeamDirectory, TeamMember } from '@app/features/project/ports';
 import {
   Project,
   ProjectDraft,
@@ -68,6 +69,32 @@ export interface FakeAuthSession extends IAuthSession {
 export const fakeAuthSession = (
   user: SessionUser | null = sampleUser(),
 ): FakeAuthSession => ({ user: signal(user) });
+
+export const sampleMembers = (): TeamMember[] => [
+  { id: 'user-1', name: 'admin' },
+  { id: 'user-2', name: 'user1' },
+];
+
+/**
+ * Narrow, like the kernel's doubles, although the port is `features/project`'s
+ * own: it is read across a boundary all the same, and a spec that needs more
+ * of it than two members is reaching past its subject.
+ */
+export interface FakeTeamDirectory extends ITeamDirectory {
+  members: WritableSignal<readonly TeamMember[]>;
+}
+
+export const fakeTeamDirectory = (
+  members: readonly TeamMember[] = sampleMembers(),
+): FakeTeamDirectory => {
+  const known = signal(members);
+
+  return {
+    members: known,
+    nameOf: (userId) =>
+      known().find((member) => member.id === userId)?.name ?? userId,
+  };
+};
 
 export interface FakeTaskReload extends ITaskReload {
   readonly calls: string[];

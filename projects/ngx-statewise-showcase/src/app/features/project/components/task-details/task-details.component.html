@@ -114,7 +114,7 @@
                   ) {
                     <mat-chip color="primary">
                       <mat-icon matChipAvatar>person</mat-icon>
-                      {{ userId }}
+                      {{ directory.nameOf(userId) }}
                     </mat-chip>
                   }
                 </mat-chip-set>
@@ -145,9 +145,7 @@
                 <mat-icon>folder</mat-icon>
                 <strong>Project</strong>
               </div>
-              <span class="metadata-value">{{
-                selectedTask()!.projectId
-              }}</span>
+              <span class="metadata-value">{{ projectName() }}</span>
             </div>
 
             <div class="metadata-item">

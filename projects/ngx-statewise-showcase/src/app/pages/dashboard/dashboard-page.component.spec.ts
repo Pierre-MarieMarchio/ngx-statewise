@@ -6,6 +6,7 @@ import {
   fakeProjectManager,
   fakeTaskManager,
   fakeTaskReload,
+  fakeTeamDirectory,
   sampleTask,
 } from '@testing/fake-managers';
 import { DashboardPageComponent } from './dashboard-page.component';
@@ -15,6 +16,7 @@ import {
   PROJECT_RELOAD,
   TASK_RELOAD,
 } from '@app/features/common';
+import { TEAM_DIRECTORY } from '@app/features/project/ports';
 import { ProjectManager } from '@app/features/project/states/project/project.manager';
 import { TaskManager } from '@app/features/project/states/task/task.manager';
 
@@ -33,6 +35,9 @@ describe('DashboardPageComponent', () => {
         { provide: PROJECT_RELOAD, useValue: fakeProjectReload() },
         { provide: TaskManager, useValue: fakeTaskManager([sampleTask()]) },
         { provide: ProjectManager, useValue: fakeProjectManager() },
+        // The details panel names its assignees through the port
+        // `features/project` declares and the composition answers.
+        { provide: TEAM_DIRECTORY, useValue: fakeTeamDirectory() },
       ],
     }).compileComponents();
 

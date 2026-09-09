@@ -2,6 +2,7 @@ import { defineUpdater } from 'ngx-statewise';
 import { AuthState } from './auth.state';
 import {
   authenticateActions,
+  getMembersActions,
   loginActions,
   logoutActions,
 } from './auth.action';
@@ -49,6 +50,18 @@ export const authUpdater = defineUpdater(AuthState, (on) => {
     state.isLoading.set(false);
   });
 
+  on(getMembersActions.success, (state, members) => {
+    state.members.set(members);
+  });
+
+  /**
+   * Emptied rather than left as it was. Names we can no longer confirm would
+   * go on being shown as though the directory were current; ids are honest.
+   */
+  on(getMembersActions.failure, (state) => {
+    state.members.set([]);
+  });
+
   on(logoutActions.request, (state) => {
     state.isLoading.set(true);
     state.isError.set(false);
@@ -58,6 +71,9 @@ export const authUpdater = defineUpdater(AuthState, (on) => {
     state.user.set(null);
     state.isLoggedIn.set(false);
     state.isLoading.set(false);
+    // The next session may be in another organisation, and these were this
+    // one's colleagues.
+    state.members.set([]);
   });
 
   /**

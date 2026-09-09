@@ -6,11 +6,13 @@ import {
   FakeProjectManager,
   fakeTaskManager,
   FakeTaskManager,
+  fakeTeamDirectory,
   sampleTask,
 } from '@testing/fake-managers';
 import { BoardPageComponent } from './board-page.component';
 import { AuthManager } from '@app/features/auth/states';
 import { AUTH_SESSION } from '@app/features/common';
+import { TEAM_DIRECTORY } from '@app/features/project/ports';
 import { ProjectManager } from '@app/features/project/states/project/project.manager';
 import { TaskManager } from '@app/features/project/states/task/task.manager';
 
@@ -31,6 +33,9 @@ describe('BoardPageComponent', () => {
         { provide: AUTH_SESSION, useValue: fakeAuthSession() },
         { provide: TaskManager, useValue: taskManager },
         { provide: ProjectManager, useValue: projectManager },
+        // The details panel names its assignees through the port
+        // `features/project` declares and the composition answers.
+        { provide: TEAM_DIRECTORY, useValue: fakeTeamDirectory() },
       ],
     }).compileComponents();
 

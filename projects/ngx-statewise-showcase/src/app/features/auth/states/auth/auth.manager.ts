@@ -22,6 +22,12 @@ export class AuthManager implements IAuthSession {
   public readonly isLoading = this.authStates.isLoading.asReadonly();
   public readonly isError = this.authStates.isError.asReadonly();
 
+  /**
+   * The organisation's members. Read outside auth through a port another
+   * feature declares, never by importing this manager.
+   */
+  public readonly members = this.authStates.members.asReadonly();
+
   /** Derived rather than stored: the role lives in the user, nowhere else. */
   public readonly isAdmin = computed(() => this.user()?.role === 'admin');
 

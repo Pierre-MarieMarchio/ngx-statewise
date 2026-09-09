@@ -47,6 +47,7 @@ export class FakeBackend {
         'http://localhost/api/Task': () => this.handleGetAllTask(),
         'http://localhost/api/Task/search': () => this.handleSearchTask(),
         'http://localhost/api/Project': () => this.handleGetAllProject(),
+        'http://localhost/api/User': () => this.handleGetAllUser(),
       },
       PATCH: {
         'http://localhost/api/Task': () => this.handleUpdateTask(),
@@ -322,6 +323,32 @@ export class FakeBackend {
     if (!user) return { error: this.respond400Error('user does not exist') };
 
     return { user };
+  }
+
+  /**
+   * The organisation's members, so an assignee can be named rather than shown
+   * as a UUID. `UsersDB` already knew how to answer this; nothing asked.
+   *
+   * Mapped field by field, and that is the point: a row here carries a
+   * password and two tokens, and a spread would hand all three to the browser.
+   * What leaves is what a directory needs.
+   */
+  private handleGetAllUser(): HttpResponse<unknown> {
+    const asking = this.requestingUser();
+
+    if ('error' in asking) return asking.error;
+
+    return this.respondSuccess(
+      this.usersDB
+        .findByOrganizationId(asking.user, asking.user.organizationId)
+        .map((member) => ({
+          userId: member.id,
+          userName: member.username,
+          email: member.email,
+          role: member.role,
+          organizationId: member.organizationId,
+        })),
+    );
   }
 
   private handleGetAllProject(): HttpResponse<unknown> {
