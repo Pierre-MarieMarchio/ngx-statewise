@@ -2,6 +2,9 @@ import { computed, inject, Injectable } from '@angular/core';
 import { AUTH_SESSION } from '@app/features/common';
 import { Task, TaskListColumnItem } from '../models';
 
+/** The action column, spelled the same way by the four templates. */
+const OPEN_TASK_COLUMN = 'open';
+
 /**
  * Which columns a role may see.
  *
@@ -47,9 +50,16 @@ export class TaskColumnsService {
     );
   });
 
-  public readonly displayedColumns = computed(() =>
-    this.columns().map((column) => column.columnDef),
-  );
+  /**
+   * What a table renders: the columns the role may see, then the action that
+   * opens a row. The action is not one of `all` — no role decides it and it
+   * reads nothing off the task — but it is the keyboard path to the detail
+   * panel, so every table ends with it.
+   */
+  public readonly displayedColumns = computed(() => [
+    ...this.columns().map((column) => column.columnDef),
+    OPEN_TASK_COLUMN,
+  ]);
 
   /**
    * The same columns for the board's table, which sits inside an accordion and

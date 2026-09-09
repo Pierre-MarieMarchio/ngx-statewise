@@ -49,6 +49,7 @@ describe('AllTaskListComponent', () => {
       'Status',
       'Priority',
       'Organisation',
+      'Open',
     ]);
   });
 
@@ -61,6 +62,7 @@ describe('AllTaskListComponent', () => {
       'Title',
       'Status',
       'Priority',
+      'Open',
     ]);
   });
 
@@ -74,6 +76,30 @@ describe('AllTaskListComponent', () => {
     (fixture.nativeElement as HTMLElement)
       .querySelector<HTMLElement>('tr[mat-row]')
       ?.click();
+
+    expect(selected).toEqual(['task-1']);
+  });
+
+  /**
+   * The row click is a mouse shortcut. This button is the path a keyboard has,
+   * and stopping the propagation is what keeps one press to one selection.
+   */
+  it('opens a task from a named button, once', async () => {
+    const fixture = await mount();
+    const selected: string[] = [];
+    fixture.componentInstance.taskSelected.subscribe((task) =>
+      selected.push(task.id),
+    );
+
+    const open = (
+      fixture.nativeElement as HTMLElement
+    ).querySelector<HTMLButtonElement>('td.open-cell button');
+
+    expect(open?.getAttribute('aria-label')).toBe(
+      'Open Wire the showcase to a smoke test',
+    );
+
+    open?.click();
 
     expect(selected).toEqual(['task-1']);
   });

@@ -83,20 +83,47 @@ describe('ProjectTaskListComponent', () => {
   });
 
   it('shows the organisation column to an admin', () => {
-    expect(headers()).toEqual(['Title', 'Status', 'Priority', 'Organisation']);
+    expect(headers()).toEqual([
+      'Title',
+      'Status',
+      'Priority',
+      'Organisation',
+      'Open',
+    ]);
   });
 
   it('hides the organisation column from a contributor', () => {
     authManager.user.set(sampleUser({ role: 'contributor' }));
     fixture.detectChanges();
 
-    expect(headers()).toEqual(['Title', 'Status', 'Priority']);
+    expect(headers()).toEqual(['Title', 'Status', 'Priority', 'Open']);
   });
 
   it('hides the organisation column while no user is known', () => {
     authManager.user.set(null);
     fixture.detectChanges();
 
-    expect(headers()).toEqual(['Title', 'Status', 'Priority']);
+    expect(headers()).toEqual(['Title', 'Status', 'Priority', 'Open']);
+  });
+
+  /**
+   * The row click is a mouse shortcut. This button is the path a keyboard has,
+   * and stopping the propagation is what keeps one press to one selection.
+   */
+  it('opens a task from a named button, once', () => {
+    const selected: string[] = [];
+    fixture.componentInstance.taskSelected.subscribe((task) =>
+      selected.push(task.id),
+    );
+
+    const open = host().querySelector<HTMLButtonElement>('td.open-cell button');
+
+    expect(open?.getAttribute('aria-label')).toBe(
+      'Open Wire the columns to the role',
+    );
+
+    open?.click();
+
+    expect(selected).toEqual(['t-1']);
   });
 });
