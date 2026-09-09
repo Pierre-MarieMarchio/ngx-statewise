@@ -25,6 +25,7 @@ const claimSource = join(
   'ngx-statewise-docs',
   'src',
   'app',
+  'core',
   'site.ts',
 );
 

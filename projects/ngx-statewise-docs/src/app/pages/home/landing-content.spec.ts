@@ -1,5 +1,5 @@
-import { findGuidePage } from '../guide/guide-pages';
-import { LOCALES, type LocaleCode } from '../i18n';
+import { findGuidePage } from '../../features/guide/guide-pages';
+import { LOCALES, type LocaleCode } from '../../core/i18n';
 import { COMPARISON, DOORS, NOT_FOR } from './landing-content';
 
 /** Every string the landing page carries outside the interface vocabulary. */

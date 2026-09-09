@@ -1,4 +1,4 @@
-import { renderOptions as options } from '../../testing/render-options';
+import { renderOptions as options } from '../../../testing/render-options';
 import { renderGuide, slugify } from './markdown';
 
 /** Stands in for `Location.prepareExternalUrl` under a subpath deployment. */

@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from '../i18n';
+import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from '../../core/i18n';
 import {
   GUIDE_PAGES,
   GUIDE_SECTIONS,
@@ -8,7 +8,7 @@ import {
   type GuidePage,
   type Translated,
 } from './guide-pages';
-import { renderOptions } from '../../testing/render-options';
+import { renderOptions } from '../../../testing/render-options';
 import { renderGuide } from './markdown';
 
 /** Every `id="…"` the rendered page carries, heading anchors included. */

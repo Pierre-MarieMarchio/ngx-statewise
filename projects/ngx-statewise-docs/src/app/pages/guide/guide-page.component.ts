@@ -14,16 +14,17 @@ import {
 import { Location } from '@angular/common';
 import { DomSanitizer, Meta, Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
-import { CurrentPagePath, LOCALE, calloutLabels, uiStrings } from '../i18n';
-import { REPOSITORY_URL } from '../site';
+import { CurrentPagePath, LOCALE, uiStrings } from '../../core/i18n';
+import { calloutLabels } from '../../features/guide/callout-labels';
+import { REPOSITORY_URL } from '../../core/site';
 import {
   GUIDE_PAGES,
   GUIDE_SECTIONS,
   guideContent,
   type GuidePage,
-} from './guide-pages';
-import { IconComponent } from '../shell/icon.component';
-import { renderGuide } from './markdown';
+} from '../../features/guide/guide-pages';
+import { IconComponent } from '../../shared/ui/icon/icon.component';
+import { renderGuide } from '../../features/guide/markdown';
 
 /** How long the copy button stays in its confirmed state. */
 const COPIED_FEEDBACK_MS = 1600;
@@ -106,7 +107,7 @@ export class GuidePageComponent {
   /** Where the markdown behind this page lives, in the locale being shown. */
   protected readonly editUrl = computed(
     () =>
-      `${REPOSITORY_URL}/blob/dev/projects/ngx-statewise-docs/src/app/guide/content/${this.content().locale}/${this.page().slug}.md`,
+      `${REPOSITORY_URL}/blob/dev/projects/ngx-statewise-docs/src/app/features/guide/content/${this.content().locale}/${this.page().slug}.md`,
   );
 
   public constructor() {

@@ -1,4 +1,3 @@
-import type { CalloutKind, CalloutLabels } from '../guide/callout';
 import { DEFAULT_LOCALE, type LocaleCode } from './locale';
 import { DE } from './strings/de';
 import { EN } from './strings/en';
@@ -101,21 +100,4 @@ const BY_LOCALE: Record<LocaleCode, UiStrings> = {
 
 export function uiStrings(code: LocaleCode): UiStrings {
   return BY_LOCALE[code] ?? BY_LOCALE[DEFAULT_LOCALE.code];
-}
-
-const CALLOUT_KEYS: Record<CalloutKind, keyof UiStrings> = {
-  note: 'calloutNote',
-  tip: 'calloutTip',
-  important: 'calloutImportant',
-  warning: 'calloutWarning',
-  caution: 'calloutCaution',
-};
-
-/** The callout labels, in the shape the markdown renderer wants them. */
-export function calloutLabels(code: LocaleCode): CalloutLabels {
-  const strings = uiStrings(code);
-
-  return Object.fromEntries(
-    Object.entries(CALLOUT_KEYS).map(([kind, key]) => [kind, strings[key]]),
-  ) as CalloutLabels;
 }

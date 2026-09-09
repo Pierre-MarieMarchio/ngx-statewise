@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from '../i18n';
+import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from '../../core/i18n';
 import actionsEn from './content/en/actions.md';
 import apiEn from './content/en/api.md';
 import effectsEn from './content/en/effects.md';
@@ -162,7 +162,7 @@ export function guideContent(page: GuidePage, code: LocaleCode): GuideContent {
  * prerender and every spec in the suite rather than shipping a blank sidebar
  * entry. Two things it cannot see from inside the bundle — a markdown file
  * nobody imported, and a slug that disagrees with its filename — are what
- * `npm run verify:guide` checks against the filesystem instead.
+ * `npm run verify:docs` checks against the filesystem instead.
  */
 export function defineGuideSections(
   sections: readonly SectionSource[],

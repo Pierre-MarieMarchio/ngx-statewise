@@ -7,4 +7,4 @@ export {
   type Locale,
   type LocaleCode,
 } from './locale';
-export { calloutLabels, uiStrings, type UiStrings } from './ui-strings';
+export { uiStrings, type UiStrings } from './ui-strings';

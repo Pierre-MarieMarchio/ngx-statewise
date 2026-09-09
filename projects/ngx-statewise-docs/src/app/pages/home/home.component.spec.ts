@@ -2,9 +2,18 @@ import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { provideStatewiseTesting } from 'ngx-statewise/testing';
-import { DEMO_LATENCY_MS, FlowDemoEffect, flowDemoUpdater } from '../flow-demo';
-import { GUIDE_PAGES } from '../guide/guide-pages';
-import { CurrentPagePath, LOCALE, findLocale, type LocaleCode } from '../i18n';
+import {
+  DEMO_LATENCY_MS,
+  FlowDemoEffect,
+  flowDemoUpdater,
+} from '../../features/flow-demo';
+import { GUIDE_PAGES } from '../../features/guide/guide-pages';
+import {
+  CurrentPagePath,
+  LOCALE,
+  findLocale,
+  type LocaleCode,
+} from '../../core/i18n';
 import { HomeComponent } from './home.component';
 
 function mount(code: LocaleCode = 'en') {

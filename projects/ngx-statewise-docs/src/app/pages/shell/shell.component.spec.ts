@@ -1,16 +1,20 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { drainEffects, provideStatewiseTesting } from 'ngx-statewise/testing';
-import { GUIDE_PAGES, GUIDE_SECTIONS } from '../guide/guide-pages';
+import { GUIDE_PAGES, GUIDE_SECTIONS } from '../../features/guide/guide-pages';
 import {
   CurrentPagePath,
   LOCALES,
   LOCALE,
   findLocale,
   type LocaleCode,
-} from '../i18n';
-import { LIBRARY_VERSION } from '../site';
-import { DocsUiEffect, THEME_CLASSES, docsUiUpdater } from '../ui-state';
+} from '../../core/i18n';
+import { LIBRARY_VERSION } from '../../core/site';
+import {
+  DocsUiEffect,
+  THEME_CLASSES,
+  docsUiUpdater,
+} from '../../core/ui-state';
 import { ShellComponent } from './shell.component';
 
 function configure(code: LocaleCode = 'en') {

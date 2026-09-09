@@ -1,4 +1,6 @@
 /**
+ * What the documentation site's own build cannot check about itself.
+ *
  * Two things about a guide page cannot be checked from inside the bundle.
  *
  * A markdown file nobody imported is invisible: it compiles, the suite passes,
@@ -9,6 +11,11 @@
  * Everything else a page needs is checked while the module loads, so it fails
  * the prerender and the whole suite. See `defineGuideSections`.
  *
+ * And one thing about its layers: the import law in eslint.config.js has to
+ * name each feature one by one, so this fails if that list and app/features/
+ * ever stop agreeing — a feature nobody added to the list is a feature the
+ * cross-feature rule does not cover.
+ *
  * Runs in `npm run check`.
  */
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
@@ -16,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const guide = join(root, 'projects/ngx-statewise-docs/src/app/guide');
+const guide = join(root, 'projects/ngx-statewise-docs/src/app/features/guide');
 const content = join(guide, 'content');
 const registry = join(guide, 'guide-pages.ts');
 
@@ -27,7 +34,10 @@ function fail(message) {
 }
 
 // --- the locales, read from the one place that declares them ---------------
-const locale = readFileSync(join(guide, '..', 'i18n', 'locale.ts'), 'utf8');
+const locale = readFileSync(
+  join(guide, '..', '..', 'core', 'i18n', 'locale.ts'),
+  'utf8',
+);
 const codes = [...locale.matchAll(/^\s*(?:\{\s*)?code: '([^']+)'/gm)].map(
   (match) => match[1],
 );
@@ -37,6 +47,18 @@ if (codes.length === 0) {
 }
 
 const [defaultCode] = codes;
+
+// --- the place the content used to live ------------------------------------
+// The guide moved from app/guide/ to app/features/guide/. A page written to
+// the old path still parses, still formats, and is simply never served, which
+// is the failure this whole script exists to prevent.
+const former = join(root, 'projects/ngx-statewise-docs/src/app/guide');
+
+if (existsSync(former)) {
+  fail(
+    `src/app/guide/ exists again. The guide lives in src/app/features/guide/ — move what is in there across, and delete it.`,
+  );
+}
 
 // --- what the registry imports ---------------------------------------------
 const source = readFileSync(registry, 'utf8');
@@ -124,15 +146,44 @@ for (const name of pagesOf(defaultCode)) {
   }
 }
 
+// --- the features the import law names -------------------------------------
+const app = join(root, 'projects/ngx-statewise-docs/src/app');
+const features = readdirSync(join(app, 'features'), { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name)
+  .sort();
+
+const eslintConfig = readFileSync(join(root, 'eslint.config.js'), 'utf8');
+const named = [...eslintConfig.matchAll(/^\s*'\.\.\/([a-z0-9-]+)',$/gm)]
+  .map((match) => match[1])
+  .sort();
+
+const unnamed = features.filter((feature) => !named.includes(feature));
+const stale = named.filter((feature) => !features.includes(feature));
+
+if (unnamed.length > 0) {
+  fail(
+    `eslint.config.js does not name ${unnamed.map((f) => `features/${f}`).join(', ')} in the docs site's cross-feature rule, so nothing stops another feature importing it.\n` +
+      `  Add '../${unnamed[0]}' and '../${unnamed[0]}/**' to that rule's group.`,
+  );
+}
+
+if (stale.length > 0) {
+  fail(
+    `eslint.config.js names ${stale.map((f) => `features/${f}`).join(', ')} in the docs site's cross-feature rule, and there is no such feature. Remove it.`,
+  );
+}
+
 // --- verdict ---------------------------------------------------------------
 if (problems.length > 0) {
   console.error(
-    `verify:guide — ${problems.length} problem${problems.length === 1 ? '' : 's'}:\n\n` +
+    `verify:docs — ${problems.length} problem${problems.length === 1 ? '' : 's'}:\n\n` +
       problems.map((problem) => `- ${problem}`).join('\n'),
   );
   process.exit(1);
 }
 
 console.log(
-  `verify:guide — ${imported.size} markdown file${imported.size === 1 ? '' : 's'}, each imported once and named after its slug.`,
+  `verify:docs — ${imported.size} markdown file${imported.size === 1 ? '' : 's'}, each imported once and named after its slug; ` +
+    `${features.length} feature${features.length === 1 ? '' : 's'} named by the import law.`,
 );

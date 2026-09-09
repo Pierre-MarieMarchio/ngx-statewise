@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
-import { LOCALE, findLocale } from '../i18n';
+import { LOCALE, findLocale } from '../../../core/i18n';
 import { SearchDialogComponent } from './search-dialog.component';
 
 function mount() {

@@ -7,10 +7,10 @@ import {
 } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
-import { FlowDemoComponent, FlowDemoManager } from '../flow-demo';
-import { GUIDE_SECTIONS } from '../guide/guide-pages';
-import { CurrentPagePath, LOCALE, uiStrings } from '../i18n';
-import { LIBRARY_GZIP_KB, REPOSITORY_URL } from '../site';
+import { FlowDemoComponent, FlowDemoManager } from '../../features/flow-demo';
+import { GUIDE_SECTIONS } from '../../features/guide/guide-pages';
+import { CurrentPagePath, LOCALE, uiStrings } from '../../core/i18n';
+import { LIBRARY_GZIP_KB, REPOSITORY_URL } from '../../core/site';
 import { COMPARISON, DOORS, NOT_FOR, type Door } from './landing-content';
 
 @Component({

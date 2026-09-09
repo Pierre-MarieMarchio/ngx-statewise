@@ -111,6 +111,89 @@ export default tseslint.config(
     extends: [...angular.configs.templateRecommended],
   },
 
+  // The documentation site's import law, which the folder names alone would
+  // only imply. Each layer may reach downwards and never sideways or up:
+  //
+  //   pages/      composes. May import core, features and shared.
+  //   features/   the guide, and the live demo on the landing page.
+  //               May import core and shared. Never another feature.
+  //   shared/ui/  presentational and business-free. May import core.
+  //   core/       i18n, the site's own UI state, the site's constants.
+  //               Imports nothing else under app/.
+  //
+  // Only app.routes.ts reaches into pages/, which is why nothing below is
+  // allowed to. Paths are matched as written, so a layer is named by the
+  // segment a relative import has to climb through to reach it.
+  {
+    files: ['projects/ngx-statewise-docs/src/app/core/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/features/**', '**/pages/**', '**/shared/**'],
+              message:
+                'core/ is infrastructure: it names no part of the documentation, and imports nothing else under app/.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    files: ['projects/ngx-statewise-docs/src/app/shared/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/features/**', '**/pages/**'],
+              message:
+                'shared/ui/ is presentational and business-free. It may import core/, and nothing above it.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    files: ['projects/ngx-statewise-docs/src/app/features/*/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/pages/**'],
+              message:
+                'a feature does not reach into a page. The page composes the feature, not the other way round.',
+            },
+            {
+              // Named one by one, because the shape that would express this in
+              // one line — `../!(..)/**`, "one level up, but not `../..`" —
+              // matches nothing here: no-restricted-imports does not read
+              // extglob, so such a pattern silently guards no import at all.
+              // `verify:docs` fails if this list stops matching app/features/.
+              group: [
+                '../guide',
+                '../guide/**',
+                '../flow-demo',
+                '../flow-demo/**',
+                '../../features/**',
+              ],
+              message:
+                'no feature imports another feature. What two features both need belongs to core/ or shared/, or is composed in pages/.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // The compatibility fixture. Not type-aware on purpose: `ngx-statewise`
   // resolves there only through the root tsconfig's mapping to `dist/`, which
   // does not exist yet when `check` reaches the lint step. Its type-check is a

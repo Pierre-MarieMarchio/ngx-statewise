@@ -1,9 +1,9 @@
 import type { Routes } from '@angular/router';
-import { GUIDE_PAGES } from './guide/guide-pages';
-import { GuidePageComponent } from './guide/guide-page.component';
-import { HomeComponent } from './home/home.component';
-import { DEFAULT_LOCALE, LOCALE, LOCALES } from './i18n';
-import { ShellComponent } from './shell/shell.component';
+import { GUIDE_PAGES } from './features/guide/guide-pages';
+import { GuidePageComponent } from './pages/guide/guide-page.component';
+import { HomeComponent } from './pages/home/home.component';
+import { DEFAULT_LOCALE, LOCALE, LOCALES } from './core/i18n';
+import { ShellComponent } from './pages/shell/shell.component';
 
 const FIRST_PAGE = GUIDE_PAGES[0].slug;
 

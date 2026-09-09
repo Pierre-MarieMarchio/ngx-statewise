@@ -1,4 +1,4 @@
-import type { LocaleCode } from '../i18n';
+import type { LocaleCode } from '../../core/i18n';
 
 /** A value the landing page must have in every locale. */
 type Translated = Record<LocaleCode, string>;

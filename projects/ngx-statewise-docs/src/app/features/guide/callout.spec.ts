@@ -1,7 +1,7 @@
 import {
   TEST_CALLOUT_LABELS as LABELS,
   renderOptions,
-} from '../../testing/render-options';
+} from '../../../testing/render-options';
 import { CALLOUT_KINDS } from './callout';
 import { renderGuide } from './markdown';
 

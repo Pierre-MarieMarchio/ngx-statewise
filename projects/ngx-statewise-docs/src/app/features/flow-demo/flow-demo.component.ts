@@ -4,7 +4,7 @@ import {
   computed,
   inject,
 } from '@angular/core';
-import { LOCALE, uiStrings } from '../i18n';
+import { LOCALE, uiStrings } from '../../core/i18n';
 import { FlowDemoManager } from './flow-demo.manager';
 
 /**

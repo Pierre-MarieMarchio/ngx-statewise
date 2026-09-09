@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { Location } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { GUIDE_SECTIONS } from '../guide/guide-pages';
+import { GUIDE_SECTIONS } from '../../features/guide/guide-pages';
 import {
   CurrentPagePath,
   DEFAULT_LOCALE,
@@ -17,7 +17,7 @@ import {
   LOCALES,
   uiStrings,
   type Locale,
-} from '../i18n';
+} from '../../core/i18n';
 import {
   CHANGELOG_URL,
   LIBRARY_VERSION,
@@ -25,10 +25,14 @@ import {
   RELEASES_URL,
   REPOSITORY_URL,
   SITE_URL,
-} from '../site';
-import { DocsUiManager, THEME_CHOICES, type ThemeChoice } from '../ui-state';
-import { SearchDialogComponent } from '../search/search-dialog.component';
-import { IconComponent } from './icon.component';
+} from '../../core/site';
+import {
+  DocsUiManager,
+  THEME_CHOICES,
+  type ThemeChoice,
+} from '../../core/ui-state';
+import { SearchDialogComponent } from './search/search-dialog.component';
+import { IconComponent } from '../../shared/ui/icon/icon.component';
 
 /** Marks the head elements this component owns, so it can replace its own. */
 const OWNED_BY_SHELL = 'data-docs-alternate';

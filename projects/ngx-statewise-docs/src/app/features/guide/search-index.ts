@@ -3,9 +3,9 @@ import {
   GUIDE_SECTIONS,
   guideContent,
   type GuidePage,
-} from '../guide/guide-pages';
-import type { LocaleCode } from '../i18n';
-import { slugify } from '../guide/markdown';
+} from './guide-pages';
+import type { LocaleCode } from '../../core/i18n';
+import { slugify } from './markdown';
 
 export interface SearchEntry {
   /** The page this lands on. */

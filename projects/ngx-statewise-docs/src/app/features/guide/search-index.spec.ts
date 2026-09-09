@@ -1,4 +1,4 @@
-import { GUIDE_PAGES, findGuidePage } from '../guide/guide-pages';
+import { GUIDE_PAGES, findGuidePage } from './guide-pages';
 import { buildSearchIndex, searchIndex } from './search-index';
 
 describe('the search index', () => {

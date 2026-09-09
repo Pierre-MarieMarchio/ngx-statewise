@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { Router, provideRouter } from '@angular/router';
-import { LOCALE, findLocale, type LocaleCode } from '../i18n';
+import { LOCALE, findLocale, type LocaleCode } from '../../core/i18n';
 import {
   GUIDE_PAGES,
   findGuidePage,
   guideContent,
   type GuidePage,
-} from './guide-pages';
+} from '../../features/guide/guide-pages';
 import { GuidePageComponent } from './guide-page.component';
 
 function configure(code: LocaleCode = 'en') {
