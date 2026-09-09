@@ -43,6 +43,20 @@ function scopeOf(...entries: [string, StateBoundHandler][]): DispatchScope {
   return { updaters: new Map(entries) };
 }
 
+/**
+ * Crosses a macrotask boundary, which drains every microtask behind it.
+ *
+ * A rejection travelling from one branch up to the caller crosses a number of
+ * microtasks nobody should have to count. Waiting for a macrotask instead makes
+ * "the failure has had every chance to arrive" an ordering fact rather than a
+ * race, and costs no wall-clock time to speak of.
+ */
+function drainMicrotasks(): Promise<void> {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, 0);
+  });
+}
+
 describe('StatewiseEngine', () => {
   let effects: EffectRegistry;
   let interceptors: InterceptorRegistry;
@@ -358,6 +372,27 @@ describe('StatewiseEngine', () => {
       expect(seen).toEqual([{ type: 'SOURCE', payload: 42 }]);
     });
 
+    /**
+     * The library's headline guarantee: an effect always reads state its
+     * updater has already settled. Asserted on what the handler saw on its
+     * synchronous entry, not on the state once the cascade is over — the
+     * latter holds whichever order the engine applies the two in.
+     */
+    it('has applied the updater before an effect handler starts', async () => {
+      const recorder: Recorder = { applied: [] };
+      const seenOnEntry: unknown[][] = [];
+      register('SOURCE', () => {
+        seenOnEntry.push([...recorder.applied]);
+      });
+
+      await engine.execute(
+        { type: 'SOURCE', payload: 1 },
+        scopeOf(['SOURCE', recordingHandler(recorder)]),
+      );
+
+      expect(seenOnEntry).toEqual([[1]]);
+    });
+
     it('executes the actions an effect returns, in the same scope', async () => {
       const recorder: Recorder = { applied: [] };
       register('SOURCE', () => ({
@@ -431,6 +466,69 @@ describe('StatewiseEngine', () => {
         engine.execute({ type: 'SOURCE' }, emptyScope),
       ).rejects.toThrow();
       expect(siblingFinished).toBe(true);
+    });
+
+    /**
+     * Three effects on one action: one failing late, one failing early, one
+     * succeeding late. The arrangement separates two guarantees a single
+     * failing effect cannot tell apart — "waits for every sibling" and
+     * "reports the first failure, not the fastest" — so each is asserted on
+     * its own.
+     */
+    describe('several effects failing on one action', () => {
+      const failedLate = new Error('registered first, failing late');
+      const failedEarly = new Error('registered second, failing early');
+
+      let releaseLate!: () => void;
+      let lateSiblingFinished: boolean;
+      let lateSiblingFinishedWhenReported: boolean | undefined;
+      let reported: Promise<unknown>;
+
+      beforeEach(() => {
+        const lateGate = new Promise<void>((resolve) => {
+          releaseLate = resolve;
+        });
+        lateSiblingFinished = false;
+        lateSiblingFinishedWhenReported = undefined;
+
+        register('SOURCE', async () => {
+          await lateGate;
+
+          throw failedLate;
+        });
+        register('SOURCE', () => {
+          throw failedEarly;
+        });
+        register('SOURCE', async () => {
+          await lateGate;
+          lateSiblingFinished = true;
+        });
+
+        reported = engine.execute({ type: 'SOURCE' }, emptyScope).then(
+          () => undefined,
+          (error: unknown) => {
+            lateSiblingFinishedWhenReported = lateSiblingFinished;
+
+            return error;
+          },
+        );
+      });
+
+      it('waits for every sibling branch before failing', async () => {
+        // The early failure has had every chance to be reported by now, while
+        // both late branches are still held by their gate.
+        await drainMicrotasks();
+        releaseLate();
+        await reported;
+
+        expect(lateSiblingFinishedWhenReported).toBe(true);
+      });
+
+      it('reports the first branch that failed, not the fastest', async () => {
+        releaseLate();
+
+        await expect(reported).resolves.toBe(failedLate);
+      });
     });
 
     it('surfaces a failing cascaded action without dropping its siblings', async () => {
