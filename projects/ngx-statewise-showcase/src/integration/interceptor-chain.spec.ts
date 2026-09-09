@@ -11,8 +11,9 @@ import { firstValueFrom } from 'rxjs';
 import { AuthTokenService } from '@app/features/auth/services';
 import { AuthManager } from '@app/features/auth/states';
 import { accessTokenInterceptor } from '@app/features/auth/interceptors';
+import { at } from '@testing/at';
 
-const [ADMIN] = USERS;
+const ADMIN = at(USERS, 0);
 const TASKS_URL = `${environment.API_BASE_URL}/Task`;
 
 /** What the task endpoint needs beyond the bearer. */

@@ -90,11 +90,13 @@ export class KanbanComponent<Item extends KanbanCardData> {
       return;
     }
 
-    this.itemMoved.emit({
-      item: from.items[event.previousIndex],
-      from: from.id,
-      to: to.id,
-    });
+    const moved = from.items[event.previousIndex];
+
+    if (!moved) {
+      return;
+    }
+
+    this.itemMoved.emit({ item: moved, from: from.id, to: to.id });
   }
 
   /** The keyboard path, which the CDK does not provide. */
@@ -106,11 +108,13 @@ export class KanbanComponent<Item extends KanbanCardData> {
     const columns = this.columns();
     const target =
       columns.findIndex((candidate) => candidate.id === column.id) + offset;
+    // Reading past either end hands back nothing, which is the bounds check.
+    const destination = columns[target];
 
-    if (target < 0 || target >= columns.length) {
+    if (!destination) {
       return;
     }
 
-    this.itemMoved.emit({ item, from: column.id, to: columns[target].id });
+    this.itemMoved.emit({ item, from: column.id, to: destination.id });
   }
 }

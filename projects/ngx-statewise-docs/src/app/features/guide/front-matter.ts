@@ -43,7 +43,7 @@ const FENCE = '---';
 export function parsePageSource(source: string): ParsedPage {
   const lines = source.split('\n');
 
-  if (lines[0].trim() !== FENCE) {
+  if (lines[0]?.trim() !== FENCE) {
     return { metadata: new Map(), body: source };
   }
 

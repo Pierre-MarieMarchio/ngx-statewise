@@ -13,6 +13,7 @@ import {
   TRACKED_ACTION_TYPES,
 } from './inspection-history-page.component';
 import { TaskManager } from '@app/features/project/states/task/task.manager';
+import { at } from '@testing/at';
 
 describe('InspectionHistoryPageComponent', () => {
   let fixture: ComponentFixture<InspectionHistoryPageComponent>;
@@ -91,7 +92,7 @@ describe('InspectionHistoryPageComponent', () => {
     click('refresh');
 
     expect(rows().map((row) => row[1])).toEqual(['NOTICE_RAISED']);
-    expect(rows()[0][2]).toBe('"from elsewhere"');
+    expect(at(at(rows(), 0), 2)).toBe('"from elsewhere"');
   });
 
   /**
@@ -179,7 +180,7 @@ describe('InspectionHistoryPageComponent', () => {
     outside.dispatch(noticeActions.raised('x'.repeat(MAX_PAYLOAD_LENGTH * 2)));
     click('refresh');
 
-    const payload = rows()[0][2];
+    const payload = at(at(rows(), 0), 2);
 
     expect(payload.length).toBe(MAX_PAYLOAD_LENGTH + 1);
     expect(payload.endsWith('…')).toBe(true);
@@ -189,6 +190,6 @@ describe('InspectionHistoryPageComponent', () => {
     outside.dispatch(noticeActions.raised('short'));
     click('refresh');
 
-    expect(rows()[0][2]).toBe('"short"');
+    expect(at(at(rows(), 0), 2)).toBe('"short"');
   });
 });

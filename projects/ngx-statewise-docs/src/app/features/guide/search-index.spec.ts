@@ -1,5 +1,6 @@
 import { GUIDE_PAGES, findGuidePage } from './guide-pages';
 import { buildSearchIndex, searchIndex } from './search-index';
+import { at } from '../../../testing/at';
 
 describe('the search index', () => {
   const index = buildSearchIndex('en');
@@ -37,15 +38,15 @@ describe('the search index', () => {
     const results = searchIndex(index, 'effec');
 
     expect(results.length).toBeGreaterThan(0);
-    expect(results[0].slug).toBe('effects');
-    expect(results[0].fragment).toBeUndefined();
+    expect(at(results, 0).slug).toBe('effects');
+    expect(at(results, 0).fragment).toBeUndefined();
   });
 
   it('finds a section by its own words', () => {
     const results = searchIndex(index, 'lifecycle');
 
-    expect(results[0].slug).toBe('effects');
-    expect(results[0].fragment).toBe('lifecycle');
+    expect(at(results, 0).slug).toBe('effects');
+    expect(at(results, 0).fragment).toBe('lifecycle');
   });
 
   it('finds a page through its summary, not only its title', () => {
@@ -72,6 +73,6 @@ describe('the search index', () => {
     const french = buildSearchIndex('fr');
     const results = searchIndex(french, 'démarrage');
 
-    expect(results[0]?.slug).toBe('getting-started');
+    expect(at(results, 0)?.slug).toBe('getting-started');
   });
 });

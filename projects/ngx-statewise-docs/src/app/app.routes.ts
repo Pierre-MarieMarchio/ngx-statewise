@@ -5,7 +5,18 @@ import { HomeComponent } from './pages/home/home.component';
 import { DEFAULT_LOCALE, LOCALE, LOCALES } from './core/i18n';
 import { ShellComponent } from './pages/shell/shell.component';
 
-const FIRST_PAGE = GUIDE_PAGES[0].slug;
+// Every locale's `/guide` redirects here, so a guide declaring no page is a
+// build with nowhere to send them — said out loud rather than read off an
+// empty array.
+const [firstPage] = GUIDE_PAGES;
+
+if (firstPage === undefined) {
+  throw new Error(
+    '[docs] The guide declares no page, so /guide has nothing to open.',
+  );
+}
+
+const FIRST_PAGE = firstPage.slug;
 
 /**
  * One subtree per locale, each providing its `LOCALE` so the shell and the
