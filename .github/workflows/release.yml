@@ -96,6 +96,25 @@ jobs:
             echo "| Outcome | ${{ job.status }} |"
           } >> "$GITHUB_STEP_SUMMARY"
 
+  # The site states the version it documents and `verify:claims` fails when it
+  # disagrees with the manifest, so the release commit carries both — see the
+  # `after:bump` hook in projects/ngx-statewise/.release-it.json. Deploying
+  # from here rather than from the push that commit makes is what keeps the
+  # site behind npm rather than ahead of it: a publish that failed deploys
+  # nothing, and readers are never sent to a version they cannot install.
+  docs:
+    name: Documentation site
+    needs: release
+    # `next` publishes a beta; the site documents what `latest` installs.
+    if: github.ref_name == 'main'
+    uses: ./.github/workflows/deploy-docs.yml
+    with:
+      after-release: true
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
   back-merge:
     name: Back-merge main
     needs: release
