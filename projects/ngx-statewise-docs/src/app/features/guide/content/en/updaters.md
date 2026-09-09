@@ -206,6 +206,65 @@ nor the effects of that feature exist, so the action does nothing at all.
 If a lazily loaded feature has to react to actions dispatched before it is
 reached, declare its updater globally instead of attaching it to a manager.
 
+## Request status
+
+A `request` / `success` / `failure` group almost always moves the same two
+flags, and writing them by hand is where a specific bug lives: the `request`
+handler forgetting to clear the error of the previous attempt. A reload that
+succeeds then leaves a stale failure on screen, and no test notices, because
+every assertion about the success still passes. This repository shipped exactly
+that.
+
+`requestStatus` writes the three handlers for you, and that line is the one it
+exists for:
+
+```typescript title="task.updater.ts"
+export const taskUpdater = defineUpdater(TaskState, (on) => {
+  requestStatus(on, getAllTaskActions, {
+    loading: (state) => state.isLoading,
+    error: (state) => state.isError,
+    onSuccess: (state, tasks) => {
+      state.tasks.set(tasks);
+    },
+  });
+});
+```
+
+Which is the same as writing:
+
+```typescript
+on(getAllTaskActions.request, (state) => {
+  state.isLoading.set(true);
+  state.isError.set(false); // ← the one people forget
+});
+
+on(getAllTaskActions.success, (state, tasks) => {
+  state.isLoading.set(false);
+  state.tasks.set(tasks);
+});
+
+on(getAllTaskActions.failure, (state) => {
+  state.isLoading.set(false);
+  state.isError.set(true);
+});
+```
+
+`onRequest`, `onSuccess` and `onFailure` are all optional and each takes the
+payload of its own action. They are not decoration: an updater allows **one
+handler per action type**, so without them adopting this helper would mean
+giving up the data a success carries. The flags settle first, then your handler
+runs, so it can overrule one if it has a reason to.
+
+> [!NOTE]
+> It is optional, and it is deliberately not the answer to everything. A flow
+> whose rollback point is per entity, or whose failure has to reconcile an
+> optimistic write, is still three handlers written out — and it should be.
+> That is logic, not boilerplate. The showcase keeps both shapes side by side
+> for exactly that reason.
+
+It needs signals, because it reads the two flags off the state and writes them.
+An updater holding plain properties writes its handlers by hand.
+
 ## Key notes
 
 - One action type, one updater, within the same scope. A duplicate always
@@ -216,5 +275,8 @@ reached, declare its updater globally instead of attaching it to a manager.
   nothing.
 - An action no updater handles is valid: it triggers its effects and nothing
   else.
+- `requestStatus` is the one shortcut, and only for the two flags of a request
+  flow. It is optional, and it never hides what a success does with its
+  payload.
 
 Next: [Effects](/guide/effects).
