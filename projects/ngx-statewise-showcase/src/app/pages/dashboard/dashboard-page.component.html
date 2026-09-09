@@ -1,19 +1,21 @@
 <app-side-panel #dashboardPanel>
-  <div class="dashboard-page-header-container">
-    <h1 class="dashboard-page-header">Dashboard</h1>
-  </div>
-  <app-user-picker />
+  <div slot="view-content">
+    <div class="dashboard-page-header-container">
+      <h1 class="dashboard-page-header">Dashboard</h1>
+    </div>
+    <app-user-picker />
 
-  <app-data-state
-    label="tasks"
-    [loading]="taskManager.isLoading() || taskManager.isSaving()"
-    [error]="taskManager.isError()"
-    [retryable]="true"
-    (retried)="taskManager.getAll()"
-  />
-  <div class="dashboard-container" slot="view-content">
-    <app-overview-task-list (taskSelected)="selectTask($event)" />
-    <app-overview-kanban />
+    <app-data-state
+      label="tasks"
+      [loading]="taskManager.isLoading() || taskManager.isSaving()"
+      [error]="taskManager.isError()"
+      [retryable]="true"
+      (retried)="taskManager.getAll()"
+    />
+    <div class="dashboard-container">
+      <app-overview-task-list (taskSelected)="selectTask($event)" />
+      <app-overview-kanban />
+    </div>
   </div>
 
   <app-task-details
