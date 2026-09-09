@@ -5,8 +5,10 @@ import { EffectRegistry } from '../effect/effect-registry';
 import { PendingEffects } from '../effect/pending-effects';
 import type { RegisteredEffect } from '../effect/registered-effect';
 import { RunningEffects } from '../effect/running-effects';
+import { InterceptorRegistry } from '../interceptor/interceptor-registry';
 import type { StateBoundHandler } from '../updater/updater-definition';
 import { ActionHistory, keepAction } from './action-history';
+import { DEFAULT_MAX_CASCADE_DEPTH } from './cascade-depth';
 import type { DispatchScope } from './dispatch-scope';
 import { GlobalUpdaterRegistry } from './global-updater-registry';
 import { StatewiseEngine } from './statewise-engine';
@@ -51,12 +53,14 @@ describe('ScopedStatewiseRef', () => {
     history = new ActionHistory(10, keepAction);
     engine = new StatewiseEngine(
       effects,
+      new InterceptorRegistry(),
       new RunningEffects(),
       new GlobalUpdaterRegistry(),
       new PendingEffects(),
       history,
       errorHandler,
       'ignore',
+      DEFAULT_MAX_CASCADE_DEPTH,
     );
   });
 

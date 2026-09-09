@@ -6,9 +6,12 @@ import { EffectRegistry } from '../effect/effect-registry';
 import { PendingEffects } from '../effect/pending-effects';
 import type { RegisteredEffect } from '../effect/registered-effect';
 import { RunningEffects } from '../effect/running-effects';
+import { InterceptorRegistry } from '../interceptor/interceptor-registry';
+import type { RegisteredInterceptor } from '../interceptor/registered-interceptor';
 import { declareUpdaterActionTypes } from '../updater/declared-action-types';
 import type { StateBoundHandler } from '../updater/updater-definition';
 import { ActionHistory, keepAction } from './action-history';
+import { DEFAULT_MAX_CASCADE_DEPTH } from './cascade-depth';
 import type { DispatchScope } from './dispatch-scope';
 import { GlobalUpdaterRegistry } from './global-updater-registry';
 import type { MisroutedDispatchReaction } from './misrouted-dispatch';
@@ -42,6 +45,7 @@ function scopeOf(...entries: [string, StateBoundHandler][]): DispatchScope {
 
 describe('StatewiseEngine', () => {
   let effects: EffectRegistry;
+  let interceptors: InterceptorRegistry;
   let runningEffects: RunningEffects;
   let globalUpdaters: GlobalUpdaterRegistry;
   let pendingEffects: PendingEffects;
@@ -53,15 +57,18 @@ describe('StatewiseEngine', () => {
 
   function build(
     misroutedDispatch: MisroutedDispatchReaction,
+    maxCascadeDepth: number = DEFAULT_MAX_CASCADE_DEPTH,
   ): StatewiseEngine {
     return new StatewiseEngine(
       effects,
+      interceptors,
       runningEffects,
       globalUpdaters,
       pendingEffects,
       history,
       errorHandler,
       misroutedDispatch,
+      maxCascadeDepth,
     );
   }
 
@@ -70,8 +77,14 @@ describe('StatewiseEngine', () => {
     effects.register(actionType, registeredEffect(run));
   }
 
+  /** Registers a handler as an interceptor guarding an action type. */
+  function guard(actionType: string, ask: RegisteredInterceptor['ask']): void {
+    interceptors.register(actionType, { ask });
+  }
+
   beforeEach(() => {
     effects = new EffectRegistry();
+    interceptors = new InterceptorRegistry();
     runningEffects = new RunningEffects();
     globalUpdaters = new GlobalUpdaterRegistry();
     pendingEffects = new PendingEffects();
@@ -502,6 +515,313 @@ describe('StatewiseEngine', () => {
       await execution;
     });
   });
+  describe('interceptors', () => {
+    it('hands the dispatched payload to the interceptor', async () => {
+      const seen: unknown[] = [];
+      guard('GUARDED', (action) => {
+        seen.push(action.payload);
+      });
+
+      await engine.execute({ type: 'GUARDED', payload: 7 }, emptyScope);
+
+      expect(seen).toEqual([7]);
+    });
+
+    it('lets the action through when the interceptor returns nothing', async () => {
+      const recorder: Recorder = { applied: [] };
+      guard('GUARDED', () => undefined);
+
+      await engine.execute(
+        { type: 'GUARDED', payload: 1 },
+        scopeOf(['GUARDED', recordingHandler(recorder)]),
+      );
+
+      expect(recorder.applied).toEqual([1]);
+    });
+
+    it('lets the action through when the interceptor grants it', async () => {
+      const recorder: Recorder = { applied: [] };
+      guard('GUARDED', () => true);
+
+      await engine.execute(
+        { type: 'GUARDED', payload: 1 },
+        scopeOf(['GUARDED', recordingHandler(recorder)]),
+      );
+
+      expect(recorder.applied).toEqual([1]);
+    });
+
+    it('asks the interceptor before the updater is applied', async () => {
+      const order: string[] = [];
+      guard('GUARDED', () => {
+        order.push('asked');
+      });
+
+      await engine.execute(
+        { type: 'GUARDED' },
+        {
+          updaters: new Map([
+            [
+              'GUARDED',
+              {
+                state: {},
+                apply: (): void => {
+                  order.push('applied');
+                },
+              },
+            ],
+          ]),
+        },
+      );
+
+      expect(order).toEqual(['asked', 'applied']);
+    });
+
+    it('asks every interceptor of one action type, in registration order', async () => {
+      const order: string[] = [];
+      guard('GUARDED', () => {
+        order.push('first');
+      });
+      guard('GUARDED', () => {
+        order.push('second');
+      });
+
+      await engine.execute({ type: 'GUARDED' }, emptyScope);
+
+      expect(order).toEqual(['first', 'second']);
+    });
+
+    it('stops asking at the first refusal', async () => {
+      const order: string[] = [];
+      guard('GUARDED', () => {
+        order.push('refusing');
+
+        return false;
+      });
+      guard('GUARDED', () => {
+        order.push('never asked');
+      });
+
+      await engine.execute({ type: 'GUARDED' }, emptyScope);
+
+      expect(order).toEqual(['refusing']);
+    });
+
+    it('asks nothing on a misrouted dispatch', () => {
+      declareUpdaterActionTypes(['ENGINE_GUARDED_ELSEWHERE']);
+      const order: string[] = [];
+      guard('ENGINE_GUARDED_ELSEWHERE', () => {
+        order.push('asked');
+      });
+
+      expect(() =>
+        build('throw').execute(
+          { type: 'ENGINE_GUARDED_ELSEWHERE' },
+          emptyScope,
+        ),
+      ).toThrow(/No updater in scope/);
+      expect(order).toEqual([]);
+    });
+
+    it('lets an interceptor failure escape at the call site', () => {
+      const failure = new Error('interceptor failure');
+      guard('GUARDED', () => {
+        throw failure;
+      });
+
+      expect(() => engine.execute({ type: 'GUARDED' }, emptyScope)).toThrow(
+        failure,
+      );
+    });
+
+    /**
+     * The four consequences of a refusal, asserted one at a time: asserting
+     * them together would not say which of them holds.
+     */
+    describe('a refusal', () => {
+      it('applies no updater', async () => {
+        const recorder: Recorder = { applied: [] };
+        guard('REFUSED', () => false);
+
+        await engine.execute(
+          { type: 'REFUSED', payload: 1 },
+          scopeOf(['REFUSED', recordingHandler(recorder)]),
+        );
+
+        expect(recorder.applied).toEqual([]);
+      });
+
+      it('starts no effect', async () => {
+        let runs = 0;
+        register('REFUSED', () => {
+          runs += 1;
+        });
+        guard('REFUSED', () => false);
+
+        await engine.execute({ type: 'REFUSED' }, emptyScope);
+
+        expect(runs).toBe(0);
+      });
+
+      it('records no history entry', async () => {
+        guard('REFUSED', () => false);
+
+        await engine.execute({ type: 'REFUSED' }, emptyScope);
+
+        expect(history.snapshot()).toEqual([]);
+      });
+
+      it('settles the execution instead of failing it', async () => {
+        guard('REFUSED', () => false);
+
+        await expect(
+          engine.execute({ type: 'REFUSED' }, emptyScope),
+        ).resolves.not.toThrow();
+      });
+
+      it('is not reported to the ErrorHandler', async () => {
+        guard('REFUSED', () => false);
+
+        await engine.execute({ type: 'REFUSED' }, emptyScope);
+
+        expect(handledErrors).toEqual([]);
+      });
+
+      /**
+       * A refusal stops what the action would start, not what it was told to
+       * stop: the runs it cancels are abandoned before any interceptor is
+       * asked, so a `cancelOn` declaration holds whatever the verdict is.
+       */
+      it('still abandons the runs the refused action cancels', async () => {
+        let release!: () => void;
+        let aborted: boolean | undefined;
+        effects.register(
+          'HELD',
+          registeredEffect(
+            async (_action, { abortSignal }) => {
+              await new Promise<void>((resolve) => {
+                release = resolve;
+              });
+              aborted = abortSignal.aborted;
+            },
+            { cancelledBy: ['REFUSED'] },
+          ),
+        );
+        guard('REFUSED', () => false);
+
+        const held = engine.execute({ type: 'HELD' }, emptyScope);
+        await engine.execute({ type: 'REFUSED' }, emptyScope);
+        release();
+        await held;
+
+        expect(aborted).toBe(true);
+      });
+
+      /**
+       * `execute` is the single path every action takes, so an interceptor
+       * guards a cascaded action exactly as it guards a dispatched one. The
+       * branch stops there without failing the dispatch that started it.
+       */
+      it('stops a cascaded action without failing its dispatch', async () => {
+        const recorder: Recorder = { applied: [] };
+        register('SOURCE', () => ({ type: 'REFUSED', payload: 1 }));
+        guard('REFUSED', () => false);
+
+        await expect(
+          engine.execute(
+            { type: 'SOURCE' },
+            scopeOf(['REFUSED', recordingHandler(recorder)]),
+          ),
+        ).resolves.not.toThrow();
+
+        expect(recorder.applied).toEqual([]);
+        expect(history.snapshot()).toEqual([{ type: 'SOURCE' }]);
+      });
+    });
+  });
+
+  describe('cascade bound', () => {
+    it("stops two effects returning each other's action", async () => {
+      register('PING', () => ({ type: 'PONG' }));
+      register('PONG', () => ({ type: 'PING' }));
+
+      await expect(
+        engine.execute({ type: 'PING' }, emptyScope),
+      ).rejects.toThrow(/PING → PONG → PING/);
+    });
+
+    it('names the whole path of the cascade it stopped', async () => {
+      register('SOURCE', () => ({ type: 'CHILD' }));
+      register('CHILD', () => ({ type: 'GRANDCHILD' }));
+      engine = build('ignore', 2);
+
+      await expect(
+        engine.execute({ type: 'SOURCE' }, emptyScope),
+      ).rejects.toThrow('SOURCE → CHILD → GRANDCHILD');
+    });
+
+    it('lets a cascade reaching the bound exactly through', async () => {
+      const recorder: Recorder = { applied: [] };
+      register('SOURCE', () => ({ type: 'CHILD' }));
+      engine = build('ignore', 2);
+
+      await engine.execute(
+        { type: 'SOURCE' },
+        scopeOf(['CHILD', recordingHandler(recorder)]),
+      );
+
+      expect(recorder.applied).toEqual([undefined]);
+    });
+
+    /**
+     * The bound is checked before anything is applied, so the action it
+     * refuses leaves nothing behind — otherwise a half-applied cascade would
+     * be harder to reason about than the one that was stopped.
+     */
+    it('leaves no trace of the action it refused', async () => {
+      const recorder: Recorder = { applied: [] };
+      let blockedEffectRuns = 0;
+      register('SOURCE', () => ({ type: 'BLOCKED' }));
+      register('BLOCKED', () => {
+        blockedEffectRuns += 1;
+      });
+      engine = build('ignore', 1);
+
+      await expect(
+        engine.execute(
+          { type: 'SOURCE' },
+          scopeOf(['BLOCKED', recordingHandler(recorder)]),
+        ),
+      ).rejects.toThrow(/maxCascadeDepth/);
+
+      expect(recorder.applied).toEqual([]);
+      expect(blockedEffectRuns).toBe(0);
+      expect(history.snapshot()).toEqual([{ type: 'SOURCE' }]);
+    });
+
+    /**
+     * Depth is what the bound counts, not breadth: a fan-out of siblings all
+     * sits at the same level, and stopping it would fire on a cascade that
+     * was going to end.
+     */
+    it('counts the depth of a cascade, not the actions it fans out', async () => {
+      const recorder: Recorder = { applied: [] };
+      register('SOURCE', () => [
+        { type: 'CHILD', payload: 'first' },
+        { type: 'CHILD', payload: 'second' },
+        { type: 'CHILD', payload: 'third' },
+      ]);
+      engine = build('ignore', 2);
+
+      await engine.execute(
+        { type: 'SOURCE' },
+        scopeOf(['CHILD', recordingHandler(recorder)]),
+      );
+
+      expect(recorder.applied).toEqual(['first', 'second', 'third']);
+    });
+  });
+
   describe('concurrency policy', () => {
     /**
      * The run was abandoned while its cascade was still going, so the failure

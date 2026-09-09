@@ -31,6 +31,9 @@ const provideActions = defineActionsGroup({
     // Deliberately handled by no updater: effect-only actions stay valid.
     pinged: payload<number>(),
     ponged: emptyPayload,
+    // Two effects returning each other's action: the cascade never ends.
+    looped: emptyPayload,
+    bounced: emptyPayload,
   },
 });
 
@@ -55,6 +58,17 @@ class CounterEffect {
   private readonly onPing = createEffect(provideActions.pinged, (amount) => {
     effectRuns.push(amount);
   });
+}
+
+@Injectable()
+class CycleEffect {
+  private readonly onLoop = createEffect(provideActions.looped, () =>
+    provideActions.bounced(),
+  );
+
+  private readonly onBounce = createEffect(provideActions.bounced, () =>
+    provideActions.looped(),
+  );
 }
 
 describe('provideStatewise', () => {
@@ -219,6 +233,44 @@ describe('provideStatewise', () => {
 
     it('accepts a valid limit', () => {
       expect(() => provideStatewise({ history: { limit: 10 } })).not.toThrow();
+    });
+  });
+
+  describe('cascade bound', () => {
+    function configureCycle(maxCascadeDepth?: number): StatewiseEngine {
+      configure(provideStatewise({ effects: [CycleEffect], maxCascadeDepth }));
+
+      return TestBed.inject(StatewiseEngine);
+    }
+
+    it('stops an endless cascade on the default bound', async () => {
+      await expect(
+        configureCycle().execute(provideActions.looped(), NO_SCOPE),
+      ).rejects.toThrow(
+        /PROVIDEPROBE_LOOPED → PROVIDEPROBE_BOUNCED → PROVIDEPROBE_LOOPED/,
+      );
+    });
+
+    it('applies the bound the application configured', async () => {
+      await expect(
+        configureCycle(1).execute(provideActions.looped(), NO_SCOPE),
+      ).rejects.toThrow('exceeded maxCascadeDepth (1)');
+    });
+
+    it('requires a positive integer bound', () => {
+      const message =
+        '[ngx-statewise] maxCascadeDepth must be a positive integer.';
+
+      expect(() => provideStatewise({ maxCascadeDepth: 0 })).toThrow(message);
+      expect(() => provideStatewise({ maxCascadeDepth: -1 })).toThrow(message);
+      expect(() => provideStatewise({ maxCascadeDepth: 1.5 })).toThrow(message);
+      expect(() => provideStatewise({ maxCascadeDepth: Number.NaN })).toThrow(
+        message,
+      );
+    });
+
+    it('accepts a valid bound', () => {
+      expect(() => provideStatewise({ maxCascadeDepth: 10 })).not.toThrow();
     });
   });
 });

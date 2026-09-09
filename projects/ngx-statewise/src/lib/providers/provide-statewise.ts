@@ -15,6 +15,10 @@ import {
   keepAction,
   type ActionRedaction,
 } from '../dispatch/action-history';
+import {
+  DEFAULT_MAX_CASCADE_DEPTH,
+  MAX_CASCADE_DEPTH,
+} from '../dispatch/cascade-depth';
 import { GlobalUpdaterRegistry } from '../dispatch/global-updater-registry';
 import { StatewiseEngine } from '../dispatch/statewise-engine';
 import {
@@ -24,6 +28,7 @@ import {
 } from '../dispatch/misrouted-dispatch';
 import { EffectRegistry } from '../effect/effect-registry';
 import { PendingEffects } from '../effect/pending-effects';
+import { InterceptorRegistry } from '../interceptor/interceptor-registry';
 import { RunningEffects } from '../effect/running-effects';
 import { indexUpdaters, resolveUpdaters } from '../updater/resolve-updaters';
 import type { Updater } from '../updater/updater-definition';
@@ -58,6 +63,15 @@ export interface StatewiseConfig {
    * reports to the `ErrorHandler` in production.
    */
   readonly misroutedDispatch?: MisroutedDispatchReaction;
+  /**
+   * How many actions one cascade may chain, the dispatched action included.
+   * Beyond it the cascade is stopped and the whole path is raised, which is
+   * what keeps two effects returning each other's action from exhausting the
+   * heap. Must be a positive integer.
+   *
+   * @default 50
+   */
+  readonly maxCascadeDepth?: number;
 }
 
 /** Wires the execution engine, the effects and the global updaters. */
@@ -65,11 +79,13 @@ export function provideStatewise(
   config: StatewiseConfig = {},
 ): EnvironmentProviders {
   const historyLimit = resolveHistoryLimit(config.history);
+  const maxCascadeDepth = resolveMaxCascadeDepth(config.maxCascadeDepth);
   const effects = config.effects ?? [];
   const updaters = config.updaters ?? [];
 
   return makeEnvironmentProviders([
     EffectRegistry,
+    InterceptorRegistry,
     PendingEffects,
     RunningEffects,
     GlobalUpdaterRegistry,
@@ -80,6 +96,7 @@ export function provideStatewise(
       provide: ACTION_HISTORY_REDACTION,
       useValue: config.history?.redact ?? keepAction,
     },
+    { provide: MAX_CASCADE_DEPTH, useValue: maxCascadeDepth },
     {
       provide: MISROUTED_DISPATCH_REACTION,
       useFactory: (): MisroutedDispatchReaction =>
@@ -111,4 +128,23 @@ function resolveHistoryLimit(
   }
 
   return history.limit;
+}
+
+/**
+ * Rejects a bound that would not bound anything. Zero or less would stop
+ * every cascade at its root, which is not a smaller limit but a different
+ * behaviour: `execute` would throw before applying any updater at all.
+ */
+function resolveMaxCascadeDepth(maxCascadeDepth: number | undefined): number {
+  if (maxCascadeDepth === undefined) {
+    return DEFAULT_MAX_CASCADE_DEPTH;
+  }
+
+  if (!Number.isInteger(maxCascadeDepth) || maxCascadeDepth <= 0) {
+    throw new Error(
+      '[ngx-statewise] maxCascadeDepth must be a positive integer.',
+    );
+  }
+
+  return maxCascadeDepth;
 }
