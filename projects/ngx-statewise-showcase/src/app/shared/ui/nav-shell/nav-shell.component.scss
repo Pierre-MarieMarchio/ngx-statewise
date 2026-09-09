@@ -5,7 +5,7 @@
   justify-content: space-between;
   width: var(--nav-width);
   height: 100vh;
-  border-right: 1px solid #232125;
+  border-right: 1px solid var(--rail-border);
   overflow-y: auto;
   overflow-x: auto;
 
@@ -49,7 +49,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: #746e7c;
+      color: var(--color-secondary);
       position: relative;
       transition:
         color 0.3s ease,
@@ -67,7 +67,7 @@
       }
 
       &.active-link {
-        color: var(--Icon-active);
+        color: var(--icon-active);
 
         &::before {
           width: 3px;
@@ -131,6 +131,86 @@
 
         .footer-icon {
           color: var(--mat-sys-on-background);
+        }
+      }
+    }
+  }
+}
+
+/*
+ * The bar. Same links, same order, laid across the bottom — see
+ * `app.component.scss` for why a bar rather than a drawer or a thinner rail.
+ */
+@media (max-width: 600px) {
+  .side-nav-container {
+    position: fixed;
+    z-index: 2;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-right: 0;
+    border-top: 1px solid var(--rail-border);
+    background-color: var(--mat-sys-background);
+    overflow: visible;
+
+    .side-nav-content {
+      flex-direction: row;
+      flex: 1;
+
+      /* The logo is a link home the bar has no room for; the rail keeps it. */
+      .side-nav-logo {
+        display: none;
+      }
+
+      .side-nav-items {
+        display: flex;
+        justify-content: space-around;
+      }
+
+      .nav-groupe-icon {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.7rem;
+
+        /* The active mark runs along the top edge rather than down the side. */
+        &::before {
+          top: 0;
+          width: 100%;
+          height: 0;
+        }
+
+        &.active-link::before {
+          width: 100%;
+          height: 3px;
+        }
+
+        /* Nothing lifts on a touch screen: there is no hover to lift out of. */
+        &:not(.active-link):hover {
+          transform: none;
+        }
+
+        .nav-icon {
+          height: 24px;
+          width: 24px;
+          font-size: 22px;
+        }
+      }
+    }
+
+    .footer-toggles {
+      flex-direction: row;
+      align-items: center;
+      padding: 0 0.5rem;
+
+      .footer-groupe-button {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.7rem;
+
+        &:hover {
+          transform: none;
         }
       }
     }

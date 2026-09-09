@@ -43,9 +43,10 @@ import { Task } from '../../models';
       </th>
       <td mat-cell *matCellDef="let task" class="open-cell">
         <!--
-          The row click is a mouse shortcut; this button is the path a keyboard
-          has, and the only one that announces itself. It stops the propagation
-          so one press stays one selection.
+          The one way to open a task: the row carries no click of its own, since
+          a table row cannot be focused and a shortcut no keyboard can reach is
+          not one. The propagation stops here so that one press stays one
+          selection whatever a caller puts the table inside.
         -->
         <button
           mat-icon-button

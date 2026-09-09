@@ -1,39 +1,51 @@
 @if (selectedTask()) {
+  <!--
+    The heading is the task. It used to be the word "Task details" at 2.5 rem
+    above the title at half that, so the largest text on the panel named the
+    container rather than what was in it — and the two forms that share this
+    panel led with a heading of their own, at a third size again.
+  -->
   <div class="task-header">
-    <div class="header-content">
-      <h2 class="header-title">TASK DETAILS</h2>
+    <h2 class="header-title">{{ selectedTask()!.title }}</h2>
+    <div class="task-header-actions">
+      @if (editable()) {
+        <button
+          mat-icon-button
+          class="edit-btn"
+          aria-label="Edit this task"
+          (click)="onEditClick()"
+        >
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          class="delete-btn"
+          aria-label="Delete this task"
+          (click)="onDeleteClick()"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      }
+      <button
+        mat-icon-button
+        class="close-btn"
+        aria-label="Close the task details"
+        (click)="onCloseClick()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
     </div>
-    <button
-      mat-icon-button
-      class="close-btn"
-      aria-label="Close the task details"
-      (click)="onCloseClick()"
-    >
-      <mat-icon>close</mat-icon>
-    </button>
   </div>
 
   <div class="task-content">
-    <div class="task-title-section">
-      <h2 class="task-title">{{ selectedTask()!.title }}</h2>
-    </div>
-
+    <!--
+      The same two marks the tables draw, from the same components. They were
+      `mat-chip`s here and grey lowercase words there — one idea rendered twice
+      and agreeing on nothing.
+    -->
     <div class="task-meta">
-      <mat-chip-set>
-        <!-- `selected` is MatChipOption's; on a plain MatChip it is inert. -->
-        <mat-chip [class]="'status-' + selectedTask()!.status" highlighted>
-          <mat-icon matChipAvatar>{{
-            presentation.statusIcon(selectedTask()!.status)
-          }}</mat-icon>
-          {{ selectedTask()!.status | titlecase }}
-        </mat-chip>
-        <mat-chip [class]="'priority-' + selectedTask()!.priority" highlighted>
-          <mat-icon matChipAvatar>{{
-            presentation.priorityIcon(selectedTask()!.priority)
-          }}</mat-icon>
-          {{ selectedTask()!.priority | titlecase }}
-        </mat-chip>
-      </mat-chip-set>
+      <app-status-badge [status]="selectedTask()!.status" />
+      <app-priority-badge [priority]="selectedTask()!.priority" />
     </div>
 
     <mat-divider class="section-divider"></mat-divider>
@@ -107,17 +119,9 @@
                 <h3>Assigned users</h3>
               </div>
               <div class="users-content">
-                <mat-chip-set>
-                  @for (
-                    userId of selectedTask()!.assignedUserIds;
-                    track userId
-                  ) {
-                    <mat-chip color="primary">
-                      <mat-icon matChipAvatar>person</mat-icon>
-                      {{ userId }}
-                    </mat-chip>
-                  }
-                </mat-chip-set>
+                @for (userId of selectedTask()!.assignedUserIds; track userId) {
+                  <app-user-chip [userId]="userId" />
+                }
               </div>
             </div>
           }
@@ -145,9 +149,7 @@
                 <mat-icon>folder</mat-icon>
                 <strong>Project</strong>
               </div>
-              <span class="metadata-value">{{
-                selectedTask()!.projectId
-              }}</span>
+              <span class="metadata-value">{{ projectName() }}</span>
             </div>
 
             <div class="metadata-item">
@@ -185,11 +187,12 @@
     </mat-tab-group>
   </div>
 } @else {
-  <div class="empty-state">
-    <div class="empty-content">
-      <mat-icon class="empty-icon">assignment</mat-icon>
-      <h3>No Task Selected</h3>
-      <p>Select a task from the list to view its details</p>
-    </div>
-  </div>
+  <!--
+    The one shared empty state, like every list has. This used to be thirty
+    lines of its own with an icon and a heading — a second design of empty for
+    a panel that is empty far less often than any list is.
+  -->
+  <p class="empty-state">
+    Pick a task from the board or a table, and it opens here.
+  </p>
 }

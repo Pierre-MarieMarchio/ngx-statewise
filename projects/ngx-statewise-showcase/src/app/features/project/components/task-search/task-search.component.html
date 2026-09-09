@@ -1,0 +1,38 @@
+<mat-form-field
+  class="task-search-field"
+  subscriptSizing="dynamic"
+  appearance="outline"
+>
+  <mat-label>Search tasks</mat-label>
+  <!--
+    `aria-label` says what the `mat-label` already says. The form field pairs
+    the two at runtime with a generated `id`/`for`, which no static analyser
+    can see, so the name is stated here as well — it is the same name either
+    way, and a screen reader reads it once.
+  -->
+  <input
+    matInput
+    type="search"
+    aria-label="Search tasks"
+    [value]="query()"
+    (input)="onInput($any($event.target).value)"
+  />
+
+  @if (query() !== '') {
+    <button
+      matSuffix
+      mat-icon-button
+      type="button"
+      aria-label="Clear the search"
+      (click)="clear()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+</mat-form-field>
+
+<!--
+  The region exists before it has anything to say: one inserted along with its
+  text is announced by no screen reader reliably.
+-->
+<output class="visually-hidden">{{ searching() ? 'Searching' : '' }}</output>

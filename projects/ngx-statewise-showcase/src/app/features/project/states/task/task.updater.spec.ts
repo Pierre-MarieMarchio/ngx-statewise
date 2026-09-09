@@ -5,7 +5,9 @@ import { injectStatewise, type Statewise } from 'ngx-statewise';
 import { provideStatewiseTesting } from 'ngx-statewise/testing';
 import {
   createTaskActions,
+  deleteTaskActions,
   getAllTaskActions,
+  searchTaskActions,
   taskReset,
   updateTaskActions,
 } from './task.action';
@@ -19,6 +21,12 @@ const moved = (task: Task, status: Task['status']): Task => ({
   ...task,
   status,
 });
+
+const REFUSED = 'assign someone to this task before marking it done';
+
+/** A refusal for one card, carrying what the server said about it. */
+const refusing = (taskId: string) =>
+  updateTaskActions.failure({ taskId, reason: REFUSED });
 
 /**
  * No effects are registered, so a dispatch runs the updater and nothing else.
@@ -63,10 +71,30 @@ describe('taskUpdater', () => {
 
   it('puts the card back when its write fails', () => {
     statewise.dispatch(updateTaskActions.request(moved(TODO, 'done')));
-    statewise.dispatch(updateTaskActions.failure('a'));
+    statewise.dispatch(refusing('a'));
 
     expect(statusOf('a')).toBe('todo');
-    expect(state.isError()).toBe(true);
+    expect(state.saveError()).toBe(REFUSED);
+  });
+
+  /**
+   * `isError` belongs to reading the list, like `isLoading` beside it. A
+   * refused write used to light that banner, which reads "the tasks could not
+   * be loaded" and offers a "Try again" that reloads everything — an answer to
+   * a question nobody had asked.
+   */
+  it('says why it was refused without claiming the list failed', () => {
+    statewise.dispatch(updateTaskActions.request(moved(TODO, 'done')));
+    statewise.dispatch(refusing('a'));
+
+    expect(state.isError()).toBe(false);
+  });
+
+  it('drops the reason once another write starts', () => {
+    statewise.dispatch(refusing('a'));
+    statewise.dispatch(updateTaskActions.request(moved(OTHER, 'done')));
+
+    expect(state.saveError()).toBeNull();
   });
 
   /**
@@ -78,7 +106,7 @@ describe('taskUpdater', () => {
     statewise.dispatch(updateTaskActions.request(moved(TODO, 'done')));
     statewise.dispatch(updateTaskActions.request(moved(OTHER, 'in-progress')));
 
-    statewise.dispatch(updateTaskActions.failure('a'));
+    statewise.dispatch(refusing('a'));
 
     expect(statusOf('a')).toBe('todo');
     expect(statusOf('b')).toBe('in-progress');
@@ -88,7 +116,7 @@ describe('taskUpdater', () => {
     statewise.dispatch(updateTaskActions.request(moved(TODO, 'done')));
     statewise.dispatch(updateTaskActions.success(moved(TODO, 'done')));
 
-    statewise.dispatch(updateTaskActions.failure('a'));
+    statewise.dispatch(refusing('a'));
 
     expect(statusOf('a')).toBe('done');
   });
@@ -98,7 +126,7 @@ describe('taskUpdater', () => {
 
     statewise.dispatch(taskReset());
     statewise.dispatch(getAllTaskActions.success([TODO, OTHER]));
-    statewise.dispatch(updateTaskActions.failure('a'));
+    statewise.dispatch(refusing('a'));
 
     // The reset dropped the point of return, so the refusal restores nothing.
     expect(statusOf('a')).toBe('todo');
@@ -191,6 +219,39 @@ describe('taskUpdater', () => {
 
       expect(state.isCreating()).toBe(false);
       expect(state.createError()).toBeNull();
+    });
+  });
+
+  describe('removing one', () => {
+    it('takes it out of the list', () => {
+      statewise.dispatch(deleteTaskActions.success('a'));
+
+      expect(state.tasks().map((task) => task.id)).toEqual(['b']);
+    });
+
+    /**
+     * And out of the matches too: a search that found it would go on showing a
+     * row the server no longer has.
+     */
+    it('takes it out of what a search matched', () => {
+      statewise.dispatch(searchTaskActions.success([TODO, OTHER]));
+
+      statewise.dispatch(deleteTaskActions.success('a'));
+
+      expect(state.matches()?.map((task) => task.id)).toEqual(['b']);
+    });
+
+    it('leaves the matches alone while there is no search', () => {
+      statewise.dispatch(deleteTaskActions.success('a'));
+
+      expect(state.matches()).toBeNull();
+    });
+
+    it('keeps the reason it was refused, and the row', () => {
+      statewise.dispatch(deleteTaskActions.failure('no such task'));
+
+      expect(state.saveError()).toBe('no such task');
+      expect(state.tasks().map((task) => task.id)).toEqual(['a', 'b']);
     });
   });
 });

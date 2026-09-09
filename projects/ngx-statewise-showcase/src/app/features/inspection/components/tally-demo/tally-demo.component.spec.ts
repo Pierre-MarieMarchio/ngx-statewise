@@ -70,7 +70,7 @@ describe('TallyDemoComponent', () => {
 
   it('zeroes both fields on reset', () => {
     click('+ 5');
-    click('reset');
+    click('Reset');
 
     expect(tallyState.total).toBe(0);
     expect(readout('total')).toBe('0');

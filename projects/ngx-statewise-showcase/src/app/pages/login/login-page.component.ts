@@ -10,6 +10,10 @@ import { LoginSubmit } from '@app/features/auth/models';
   templateUrl: './login-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './login-page.component.scss',
+  /* The only page that was missing it, which is why it had no height to centre in. */
+  host: {
+    class: 'page',
+  },
 })
 export class LoginPageComponent {
   public readonly authManager = inject(AuthManager);

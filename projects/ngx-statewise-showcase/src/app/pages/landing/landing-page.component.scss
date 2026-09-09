@@ -12,10 +12,13 @@
     max-height: 60vh;
   }
 
+  /*
+   * In the flow, under the logo. It was `position: absolute; bottom: 10vh`,
+   * so the gap between the only two things on the page grew and shrank with
+   * the window and belonged to neither of them.
+   */
   .sign-in-btn {
-    position: absolute;
-    margin: 1rem;
-    bottom: 10vh;
+    margin-top: 2rem;
   }
 }
 

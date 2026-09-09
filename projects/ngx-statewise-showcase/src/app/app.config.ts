@@ -25,6 +25,7 @@ import { TaskEffect, TaskManager } from './features/project/states';
 import { ProjectEffect, ProjectManager } from './features/project/states';
 import { noticeUpdater, TallyGuard } from './features/inspection/states';
 import { AUTH_SESSION, PROJECT_RELOAD, TASK_RELOAD } from './features/common';
+import { provideTeamDirectory } from './pages/team-directory.provider';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -56,6 +57,10 @@ export const appConfig: ApplicationConfig = {
     { provide: AUTH_SESSION, useExisting: AuthManager },
     { provide: TASK_RELOAD, useExisting: TaskManager },
     { provide: PROJECT_RELOAD, useExisting: ProjectManager },
+
+    // And the one port a feature declares for itself: `features/project` asks
+    // who a task may be assigned to, and the composition answers it from auth.
+    provideTeamDirectory(),
 
     provideAppInitializer(async () => {
       const authManager = inject(AuthManager);

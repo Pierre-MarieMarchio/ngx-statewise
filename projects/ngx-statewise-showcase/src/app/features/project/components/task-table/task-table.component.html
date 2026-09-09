@@ -1,0 +1,58 @@
+@if (!tasks().length) {
+  <p class="empty-state">{{ emptyMessage() }}</p>
+} @else {
+  <table mat-table [dataSource]="tasks()">
+    <!--
+      Tracked by the column name rather than by the object: `cappedColumns`
+      spreads each definition into a new one, so tracking by identity rebuilt
+      every cell of every table whenever the signed-in role changed.
+    -->
+    @for (column of columns(); track column.columnDef) {
+      <ng-container [matColumnDef]="column.columnDef">
+        <th mat-header-cell *matHeaderCellDef [style.width]="column.maxWidth">
+          {{ column.header }}
+        </th>
+        <!--
+          A status and a priority are coloured marks everywhere else in this
+          application; a table was the one place they read as grey lowercase
+          words. The column says which shape it has, and the text form stays
+          the fallback — and stays what the cell says to anything that cannot
+          draw a badge.
+        -->
+        <td mat-cell *matCellDef="let row" [style.width]="column.maxWidth">
+          @switch (column.kind) {
+            @case ('status') {
+              <app-status-badge [status]="row.status" />
+            }
+            @case ('priority') {
+              <app-priority-badge [priority]="row.priority" />
+            }
+            @case ('people') {
+              <span class="task-table-people">
+                @for (userId of row.assignedUserIds ?? []; track userId) {
+                  <app-user-chip [userId]="userId" />
+                } @empty {
+                  {{ column.cell(row) }}
+                }
+              </span>
+            }
+            @default {
+              {{ column.cell(row) }}
+            }
+          }
+        </td>
+      </ng-container>
+    }
+
+    <app-task-open-column (opened)="taskSelected.emit($event)" />
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+    <!--
+      Opening a task is the button in `app-task-open-column` and nothing else.
+      The row itself used to carry a `(click)` as a mouse shortcut; a `<tr>` is
+      not focusable, so that shortcut had no keyboard equivalent it could ever
+      grow, and one interactive path is worth more than two unequal ones.
+    -->
+    <tr mat-row *matRowDef="let item; columns: displayedColumns()"></tr>
+  </table>
+}

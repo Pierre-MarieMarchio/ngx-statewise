@@ -1,7 +1,7 @@
 <form [formGroup]="loginForm" (ngSubmit)="handleSubmit()">
   <mat-card class="login-card" appearance="outlined">
     <mat-card-header>
-      <mat-card-title>Sign In</mat-card-title>
+      <mat-card-title>Sign in</mat-card-title>
       <mat-card-subtitle
         >Use account admin&#64;admin and password admin to
         continue</mat-card-subtitle
@@ -12,7 +12,7 @@
     </mat-card-header>
     <mat-card-content class="login-card-content">
       <mat-form-field subscriptSizing="dynamic" appearance="outline">
-        <mat-label>e-mail</mat-label>
+        <mat-label>E-mail</mat-label>
         <input formControlName="email" matInput type="email" required />
         <!-- Material wires mat-error to the input through aria-describedby. -->
         @if (loginForm.controls.email.hasError('required')) {
@@ -21,7 +21,7 @@
       </mat-form-field>
 
       <mat-form-field subscriptSizing="dynamic" appearance="outline">
-        <mat-label>password</mat-label>
+        <mat-label>Password</mat-label>
         <input
           formControlName="password"
           [type]="isPasswordHided() ? 'password' : 'text'"
@@ -29,7 +29,6 @@
           required
         />
         <button
-          class="mr-2"
           type="button"
           mat-icon-button
           matSuffix
@@ -39,7 +38,7 @@
           [attr.aria-pressed]="!isPasswordHided()"
           (click)="hidePassword($event)"
         >
-          <mat-icon class="icon-outlined">{{
+          <mat-icon>{{
             isPasswordHided() ? 'visibility_off' : 'visibility'
           }}</mat-icon>
         </button>
@@ -51,7 +50,7 @@
     <mat-card-actions class="login-card-footer">
       <a mat-button [routerLink]="['/']">Back to home</a>
       <button type="submit" mat-stroked-button [disabled]="pending()">
-        Sign In
+        Sign in
       </button>
     </mat-card-actions>
   </mat-card>

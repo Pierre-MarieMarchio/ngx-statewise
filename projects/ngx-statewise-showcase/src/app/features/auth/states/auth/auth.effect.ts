@@ -2,6 +2,7 @@ import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import {
   authenticateActions,
+  getMembersActions,
   loginActions,
   logoutActions,
 } from './auth.action';
@@ -58,12 +59,19 @@ export class AuthEffect {
     { concurrency: 'latest', mustAnswer: true },
   );
 
+  /**
+   * The two features are reloaded through their own handles, as the guide's
+   * rule asks. The directory is not: it is auth's own list, so this returns
+   * auth's own action and the cascade is visible as one.
+   */
   public readonly loginSuccessEffect = createEffect(
     loginActions.success,
-    () => {
+    (session) => {
       this.projectManager.getAll();
       this.taskManager.getAll();
       this.router.navigate(['/']);
+
+      return getMembersActions.request(session.userId);
     },
   );
 
@@ -135,10 +143,34 @@ export class AuthEffect {
 
   public readonly authenticateSuccessEffect = createEffect(
     authenticateActions.success,
-    () => {
+    (user) => {
       this.projectManager.getAll();
       this.taskManager.getAll();
+
+      return getMembersActions.request(user.userId);
     },
+  );
+
+  /**
+   * `'latest'` and keyed by nobody: there is one organisation to read at a
+   * time, and a cold start that both renews a token and signs in asks twice
+   * for the same list. A failure is reported but says nothing on screen —
+   * the panel falls back to ids.
+   */
+  public readonly getMembersRequestEffect = createEffect(
+    getMembersActions.request,
+    async (userId) => {
+      try {
+        return getMembersActions.success(
+          await firstValueFrom(this.authRepository.members(userId)),
+        );
+      } catch (error) {
+        this.errorHandler.handleError(error);
+
+        return getMembersActions.failure();
+      }
+    },
+    { concurrency: 'latest', mustAnswer: true },
   );
 
   public readonly logoutRequestEffect = createEffect(

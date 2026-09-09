@@ -78,7 +78,7 @@ describe('TaskOpenColumnComponent', () => {
     ).toEqual(['Open Wire the showcase to a smoke test', 'Open Second']);
   });
 
-  /** One press is one selection: the row is listening to the same click. */
+  /** One press is one selection, whatever a caller listens to above. */
   it('reports the task without the row hearing the press too', async () => {
     const fixture = await mount();
     const host = fixture.nativeElement as HTMLElement;

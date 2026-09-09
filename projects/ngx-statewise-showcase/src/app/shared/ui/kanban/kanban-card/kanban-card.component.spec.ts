@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { sampleTask } from '@testing/fake-managers';
 import { KanbanCardComponent } from './kanban-card.component';
 
 describe('KanbanCardComponent', () => {
@@ -9,7 +8,6 @@ describe('KanbanCardComponent', () => {
     }).compileComponents();
 
     const fixture = TestBed.createComponent(KanbanCardComponent);
-    fixture.componentRef.setInput('data', sampleTask());
     fixture.componentRef.setInput('cardType', 'high');
     fixture.detectChanges();
 
@@ -19,5 +17,24 @@ describe('KanbanCardComponent', () => {
     expect(host.querySelector('.card-type-indicator')?.classList).toContain(
       'indicator-high',
     );
+  });
+
+  /**
+   * The board puts the drag on this host, so the card must not bring one of
+   * its own — two `cdkDrag` in one card is how the placeholder ended up inside
+   * the element that was supposed to move.
+   */
+  it('carries no drag of its own', async () => {
+    await TestBed.configureTestingModule({
+      imports: [KanbanCardComponent],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(KanbanCardComponent);
+    fixture.componentRef.setInput('cardType', 'low');
+    fixture.detectChanges();
+
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('[cdkdrag]'),
+    ).toBeNull();
   });
 });

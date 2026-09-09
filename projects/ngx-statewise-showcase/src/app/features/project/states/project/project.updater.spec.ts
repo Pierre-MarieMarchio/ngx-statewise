@@ -4,8 +4,11 @@ import { provideStatewiseTesting } from 'ngx-statewise/testing';
 import { sampleProject } from '@testing/fake-managers';
 import {
   createProjectActions,
+  deleteProjectActions,
   getAllProjectsActions,
+  projectSelected,
   projectReset,
+  updateProjectActions,
 } from './project.action';
 import { ProjectState } from './project.state';
 import { projectUpdater } from './project.updater';
@@ -146,6 +149,150 @@ describe('projectUpdater', () => {
 
       expect(state.isCreating()).toBe(false);
       expect(state.createError()).toBeNull();
+    });
+  });
+
+  /**
+   * Choosing is a decision, not a request: there is no effect behind this
+   * action, and the state is right the moment it is dispatched.
+   */
+  describe('choosing a project', () => {
+    it('keeps what was chosen, and lets it be unchosen', () => {
+      statewise.dispatch(projectSelected('project-1'));
+      expect(state.selectedProjectId()).toBe('project-1');
+
+      statewise.dispatch(projectSelected(null));
+      expect(state.selectedProjectId()).toBeNull();
+    });
+
+    /**
+     * Leaving a dangling id would not show the wrong project — the derivation
+     * finds nothing — but every list scoped by it filters down to nothing, so
+     * the screens would go empty rather than back to showing everything.
+     */
+    it('drops a choice the next read no longer holds', () => {
+      statewise.dispatch(projectSelected('project-1'));
+
+      statewise.dispatch(
+        getAllProjectsActions.success([sampleProject({ id: 'project-2' })]),
+      );
+
+      expect(state.selectedProjectId()).toBeNull();
+    });
+
+    it('keeps a choice the next read still holds', () => {
+      statewise.dispatch(projectSelected('project-1'));
+
+      statewise.dispatch(
+        getAllProjectsActions.success([sampleProject({ id: 'project-1' })]),
+      );
+
+      expect(state.selectedProjectId()).toBe('project-1');
+    });
+
+    it('is forgotten along with the projects on a reset', () => {
+      statewise.dispatch(projectSelected('project-1'));
+
+      statewise.dispatch(projectReset());
+
+      expect(state.selectedProjectId()).toBeNull();
+    });
+  });
+
+  describe('renaming one', () => {
+    it('puts the answer in the list, in place', () => {
+      statewise.dispatch(
+        getAllProjectsActions.success([
+          sampleProject({ id: 'p-1', title: 'Before' }),
+          sampleProject({ id: 'p-2', title: 'Other' }),
+        ]),
+      );
+
+      statewise.dispatch(
+        updateProjectActions.success(
+          sampleProject({ id: 'p-1', title: 'After' }),
+        ),
+      );
+
+      expect(state.projects().map((project) => project.title)).toEqual([
+        'After',
+        'Other',
+      ]);
+      expect(state.isSaving()).toBe(false);
+    });
+
+    it('keeps the refusal, and the list as it was', () => {
+      statewise.dispatch(
+        getAllProjectsActions.success([
+          sampleProject({ id: 'p-1', title: 'Before' }),
+        ]),
+      );
+
+      statewise.dispatch(updateProjectActions.request(sampleProject()));
+      expect(state.isSaving()).toBe(true);
+
+      statewise.dispatch(
+        updateProjectActions.failure('a project is already called "x"'),
+      );
+
+      expect(state.saveError()).toBe('a project is already called "x"');
+      expect(state.isSaving()).toBe(false);
+      expect(state.projects().map((project) => project.title)).toEqual([
+        'Before',
+      ]);
+    });
+  });
+
+  describe('removing one', () => {
+    it('takes it out of the list', () => {
+      statewise.dispatch(
+        getAllProjectsActions.success([
+          sampleProject({ id: 'p-1' }),
+          sampleProject({ id: 'p-2' }),
+        ]),
+      );
+
+      statewise.dispatch(deleteProjectActions.success('p-1'));
+
+      expect(state.projects().map((project) => project.id)).toEqual(['p-2']);
+    });
+
+    /** What no longer exists cannot go on being the one the screens show. */
+    it('unchooses it when it was the current one', () => {
+      statewise.dispatch(
+        getAllProjectsActions.success([sampleProject({ id: 'p-1' })]),
+      );
+      statewise.dispatch(projectSelected('p-1'));
+
+      statewise.dispatch(deleteProjectActions.success('p-1'));
+
+      expect(state.selectedProjectId()).toBeNull();
+    });
+
+    it('leaves another choice alone', () => {
+      statewise.dispatch(
+        getAllProjectsActions.success([
+          sampleProject({ id: 'p-1' }),
+          sampleProject({ id: 'p-2' }),
+        ]),
+      );
+      statewise.dispatch(projectSelected('p-2'));
+
+      statewise.dispatch(deleteProjectActions.success('p-1'));
+
+      expect(state.selectedProjectId()).toBe('p-2');
+    });
+
+    it('keeps the reason a removal was refused', () => {
+      statewise.dispatch(deleteProjectActions.request('p-1'));
+      expect(state.isSaving()).toBe(true);
+
+      statewise.dispatch(
+        deleteProjectActions.failure('this project still holds 3 tasks'),
+      );
+
+      expect(state.saveError()).toBe('this project still holds 3 tasks');
+      expect(state.isSaving()).toBe(false);
     });
   });
 });

@@ -2,7 +2,7 @@
   The region exists before it has anything to say: one inserted along with its
   text is announced by no screen reader reliably.
 -->
-<p class="visually-hidden" role="status">{{ progress() }}</p>
+<output class="visually-hidden">{{ progress() }}</output>
 
 @if (loading()) {
   <mat-progress-bar
@@ -14,7 +14,7 @@
 
 @if (error()) {
   <!-- role="alert" so a screen reader is told without having to go looking. -->
-  <div class="data-state-error" role="alert">
+  <div class="data-state-error error-notice" role="alert">
     <mat-icon class="data-state-error-icon" aria-hidden="true"
       >error_outline</mat-icon
     >

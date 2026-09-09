@@ -2,13 +2,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  margin-right: 1rem;
+  font-size: var(--text-xl);
+  margin-right: var(--space-4);
 }
 
 .task-page-header {
-  font-size: 3rem;
-  margin-top: 1rem;
+  font-size: var(--text-2xl);
+  margin: var(--space-4) 0;
 }
 
 .board-header {
@@ -22,4 +22,28 @@
 .board-header-actions {
   display: flex;
   gap: 0.5rem;
+}
+
+/*
+ * The selector sits next to the title, and takes the slack the title leaves:
+ * `margin-right: auto` pushes the two buttons to the far side, so the choice
+ * reads as part of the heading rather than as a third action.
+ */
+.board-project {
+  min-width: 14rem;
+  margin-right: auto;
+}
+
+/*
+ * What a tab's body fills. It was `all-task-list`'s own container before that
+ * component turned out to be `app-task-table` and a height, and nothing else.
+ */
+.tab-body {
+  box-sizing: border-box;
+  padding-top: 1rem;
+  min-height: var(--page-body-height);
+}
+
+.board-search {
+  margin: 1rem 0 0.5rem;
 }

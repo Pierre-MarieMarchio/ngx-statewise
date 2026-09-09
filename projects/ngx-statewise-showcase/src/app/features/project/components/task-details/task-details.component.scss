@@ -1,86 +1,35 @@
 .task-header {
-  padding: 16px 20px;
   display: flex;
+  gap: var(--space-4);
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  padding: var(--space-2) var(--space-1) var(--space-4);
 
-  .header-content {
+  .task-header-actions {
     display: flex;
-    align-items: baseline;
-    gap: 12px;
-    .header-title {
-      font-size: 2.5rem;
-      margin: 0;
-    }
+    align-items: center;
+    flex: 0 0 auto;
+  }
+
+  /* The same weight the two forms lead with — one panel, one heading size. */
+  .header-title {
+    margin: 0;
+    font-size: var(--text-xl);
+    line-height: 1.3;
   }
 }
 
 .task-content {
   flex: 1;
-  padding: 1rem;
+  padding: 0 var(--space-1);
   overflow-y: auto;
 
-  .task-title-section {
-    margin-bottom: 1rem;
-
-    .task-title {
-      margin: 0;
-    }
-  }
-
+  /* Two marks in a row; what they look like is the badges' own business. */
   .task-meta {
-    margin-bottom: 20px;
-
-    mat-chip-set {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    mat-chip {
-      font-weight: 500;
-      border: none;
-
-      mat-icon {
-        font-size: 18px;
-      }
-
-      &.status-todo {
-        background-color: rgba(103, 104, 105, 0.062);
-      }
-
-      &.status-in-progress {
-        background-color: rgba(96, 165, 250, 0.25);
-      }
-
-      &.status-done {
-        background-color: rgba(52, 211, 153, 0.25);
-      }
-
-      &.priority-low {
-        background-color: color-mix(
-          in srgb,
-          var(--priority-low) 25%,
-          transparent
-        );
-      }
-
-      &.priority-medium {
-        background-color: color-mix(
-          in srgb,
-          var(--priority-medium) 25%,
-          transparent
-        );
-      }
-
-      &.priority-high {
-        background-color: color-mix(
-          in srgb,
-          var(--priority-high) 25%,
-          transparent
-        );
-      }
-    }
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-4);
   }
 
   .section-divider {
@@ -111,7 +60,7 @@
             color: var(--color-secondary);
 
             &.overdue {
-              color: #f44336;
+              color: var(--priority-overdue);
             }
           }
 
@@ -124,7 +73,7 @@
         .description-content {
           padding: 1rem;
           border-radius: 0.5rem;
-          border-left: 4px solid #667eea;
+          border-left: 4px solid var(--detail-accent);
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
           background-color: var(--mat-sys-surface);
 
@@ -146,27 +95,19 @@
           background-color: var(--mat-sys-surface);
 
           &.overdue {
-            color: #f44336;
-            border-left: 4px solid #f44336;
+            color: var(--priority-overdue);
+            border-left: 4px solid var(--priority-overdue);
 
             .warning-icon {
-              color: #f44336;
+              color: var(--priority-overdue);
             }
           }
         }
 
         .users-content {
-          mat-chip-set {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-          }
-
-          mat-chip {
-            mat-icon {
-              font-size: 1rem;
-            }
-          }
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-2);
         }
       }
 

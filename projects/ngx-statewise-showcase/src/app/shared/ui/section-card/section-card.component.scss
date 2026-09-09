@@ -1,0 +1,35 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.section-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 20rem;
+  padding: 1rem;
+  background-color: transparent;
+}
+
+/*
+ * A section heading, at the size a section heading is. The band behind it was
+ * painted in the blue that also meant "in progress", "medium priority" and
+ * "the blue project"; it takes the surface colour now, which is what a band
+ * around a heading is actually for.
+ */
+.section-card-title {
+  box-sizing: border-box;
+  margin: 0 0 var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  border-radius: 0.3rem;
+  font-size: var(--text-lg);
+  background-color: var(--section-band);
+}
+
+.section-card-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}

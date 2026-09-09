@@ -1,0 +1,38 @@
+<mat-card-header>
+  <mat-card-title>{{ task().title }}</mat-card-title>
+  @if (saving()) {
+    <!--
+      The library's voice, on the one card it is about: this row is showing a
+      version the server has not agreed to yet, and `pendingWrites` is holding
+      the one it replaced in case it never does.
+    -->
+    <span class="card-saving" title="Saving">
+      <span class="visually-hidden">Saving</span>
+    </span>
+  }
+</mat-card-header>
+
+<mat-card-content>
+  @if (task().description) {
+    <p>{{ task().description }}</p>
+  }
+
+  <!--
+    One line of meta, which is what a card was missing entirely: the only
+    thing it said about urgency was a 4 px stripe down its side that no
+    legend anywhere explained.
+  -->
+  <div class="card-meta">
+    <app-priority-badge [priority]="task().priority" />
+
+    @if (task().dueDate) {
+      <span class="card-due" [class.is-overdue]="overdue()">
+        {{ presentation.formatDate(task().dueDate!) }}
+      </span>
+    }
+
+    @for (userId of task().assignedUserIds ?? []; track userId) {
+      <app-user-chip [userId]="userId" />
+    }
+  </div>
+</mat-card-content>

@@ -2,7 +2,10 @@ import { Task } from '../../models';
 import { defineUpdater, requestStatus } from 'ngx-statewise';
 import {
   createTaskActions,
+  deleteTaskActions,
   getAllTaskActions,
+  searchCleared,
+  searchTaskActions,
   taskReset,
   updateTaskActions,
 } from './task.action';
@@ -34,9 +37,13 @@ const without =
 export const taskUpdater = defineUpdater(TaskState, (on) => {
   on(taskReset, (state) => {
     state.tasks.set([]);
+    state.matches.set(null);
+    state.isSearching.set(false);
+    state.searchFailed.set(false);
     state.pendingWrites.set(new Map());
     state.isLoading.set(false);
     state.isError.set(false);
+    state.saveError.set(null);
     state.isCreating.set(false);
     state.createError.set(null);
   });
@@ -61,7 +68,7 @@ export const taskUpdater = defineUpdater(TaskState, (on) => {
    * should restore.
    */
   on(updateTaskActions.request, (state, task) => {
-    state.isError.set(false);
+    state.saveError.set(null);
 
     const replaced = state.tasks().find((existing) => existing.id === task.id);
 
@@ -77,6 +84,28 @@ export const taskUpdater = defineUpdater(TaskState, (on) => {
   on(updateTaskActions.success, (state, updatedTask) => {
     state.pendingWrites.update(without(updatedTask.id));
     state.tasks.update(carrying(updatedTask));
+  });
+
+  /*
+   * The same helper the read flow uses, so `request` clearing the previous
+   * attempt's error is not something anyone has to remember here either.
+   */
+  requestStatus(on, searchTaskActions, {
+    loading: (state) => state.isSearching,
+    error: (state) => state.searchFailed,
+    onSuccess: (state, matches) => {
+      state.matches.set(matches);
+    },
+  });
+
+  /*
+   * An updater with no effect behind it: emptying the box is a decision, not a
+   * request. It also cancels a search in flight — see the effect's `cancelOn`.
+   */
+  on(searchCleared, (state) => {
+    state.matches.set(null);
+    state.isSearching.set(false);
+    state.searchFailed.set(false);
   });
 
   on(createTaskActions.request, (state) => {
@@ -95,8 +124,27 @@ export const taskUpdater = defineUpdater(TaskState, (on) => {
     state.createError.set(reason);
   });
 
-  on(updateTaskActions.failure, (state, taskId) => {
-    state.isError.set(true);
+  on(deleteTaskActions.request, (state) => {
+    state.saveError.set(null);
+  });
+
+  /**
+   * Out of both lists, or a search that matched it would go on showing a row
+   * the server no longer has.
+   */
+  on(deleteTaskActions.success, (state, taskId) => {
+    state.tasks.update((tasks) => tasks.filter((task) => task.id !== taskId));
+    state.matches.update((matches) =>
+      matches === null ? null : matches.filter((task) => task.id !== taskId),
+    );
+  });
+
+  on(deleteTaskActions.failure, (state, reason) => {
+    state.saveError.set(reason);
+  });
+
+  on(updateTaskActions.failure, (state, { taskId, reason }) => {
+    state.saveError.set(reason);
 
     const replaced = state.pendingWrites().get(taskId);
     state.pendingWrites.update(without(taskId));

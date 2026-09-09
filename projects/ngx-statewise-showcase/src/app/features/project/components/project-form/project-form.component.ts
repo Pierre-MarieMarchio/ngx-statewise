@@ -1,7 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
+  OnInit,
   output,
 } from '@angular/core';
 import {
@@ -10,12 +12,22 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { ProjectColor, ProjectDraft, PROJECT_COLORS } from '../../models';
+import { PanelFormComponent } from '@shared/ui/panel-form';
+import {
+  Project,
+  ProjectColor,
+  ProjectDraft,
+  PROJECT_COLORS,
+} from '../../models';
 
+/**
+ * The one form a project is written in, whether it is being created or
+ * renamed — the same arrangement as `app-task-form`, and for the same reason:
+ * two fields written twice is two places for them to drift.
+ */
 @Component({
   selector: 'app-project-form',
   imports: [
@@ -23,14 +35,20 @@ import { ProjectColor, ProjectDraft, PROJECT_COLORS } from '../../models';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatButtonModule,
+    PanelFormComponent,
   ],
   templateUrl: './project-form.component.html',
-  styleUrl: './project-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProjectFormComponent {
-  /** True while a creation is on its way, so a second submit is refused. */
+export class ProjectFormComponent implements OnInit {
+  /**
+   * The project being renamed, or `null` to write a new one. Read once, in
+   * `ngOnInit`, so a reload that changed it does not reach into a field
+   * somebody is typing in.
+   */
+  public readonly project = input<Project | null>(null);
+
+  /** True while a write is on its way, so a second submit is refused. */
   public readonly pending = input(false);
 
   /**
@@ -44,6 +62,8 @@ export class ProjectFormComponent {
 
   public readonly colors = PROJECT_COLORS;
 
+  public readonly editing = computed(() => this.project() !== null);
+
   public readonly form = new FormGroup({
     title: new FormControl<string>('', {
       nonNullable: true,
@@ -54,6 +74,14 @@ export class ProjectFormComponent {
       validators: [Validators.required],
     }),
   });
+
+  public ngOnInit(): void {
+    const project = this.project();
+
+    if (project) {
+      this.form.setValue({ title: project.title, color: project.color });
+    }
+  }
 
   public handleSubmit(): void {
     if (this.form.invalid) {

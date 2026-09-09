@@ -2,11 +2,15 @@ import { ErrorHandler } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { fakeProjectReload, fakeTaskReload } from '@testing/fake-managers';
+import {
+  fakeProjectReload,
+  fakeTaskReload,
+  sampleUser,
+} from '@testing/fake-managers';
 import { injectStatewise, type Statewise } from 'ngx-statewise';
 import { provideStatewiseTesting } from 'ngx-statewise/testing';
 import { Observable, Subject, throwError } from 'rxjs';
-import type { AuthenticateResponses, LoginResponses } from '../../models';
+import type { AuthenticateResponses, LoginResponses, User } from '../../models';
 import {
   AuthNotificationService,
   AuthRepositoryService,
@@ -82,6 +86,8 @@ describe('AuthEffect', () => {
   let resets: string[];
   let routerUrl: string;
 
+  let members: () => Observable<User[]>;
+
   let login: () => Observable<HttpResponse<LoginResponses>>;
   let authenticate: () => Observable<HttpResponse<AuthenticateResponses>>;
   let logout: () => Observable<HttpResponse<void>>;
@@ -121,6 +127,7 @@ describe('AuthEffect', () => {
             login: () => login(),
             authenticate: () => authenticate(),
             logout: () => logout(),
+            members: () => members(),
           },
         },
         {
@@ -171,6 +178,7 @@ describe('AuthEffect', () => {
 
   beforeEach(() => {
     localStorage.clear();
+    members = () => answering([sampleUser()]);
   });
 
   afterEach(() => {
@@ -224,6 +232,24 @@ describe('AuthEffect', () => {
       expect(taskReloads).toBe(1);
       expect(projectReloads).toBe(1);
       expect(navigations).toEqual([['/']]);
+    });
+
+    /**
+     * The directory is auth's own list, so the effect returns auth's own
+     * action and the cascade is one chain rather than an imperative call.
+     */
+    it('goes on to read who else is in the organisation', async () => {
+      login = () => answering(new HttpResponse({ body: LOGGED_IN }));
+      members = () =>
+        answering([sampleUser(), sampleUser({ userId: 'user-2' })]);
+      setUp();
+
+      await statewise.dispatchAsync(loginActions.request(CREDENTIALS));
+
+      expect(state.members().map((member) => member.userId)).toEqual([
+        'user-1',
+        'user-2',
+      ]);
     });
 
     it('lets the newest attempt supersede the one in flight', async () => {

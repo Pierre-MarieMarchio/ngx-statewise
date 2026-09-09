@@ -1,36 +1,33 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   computed,
   inject,
   input,
   output,
-  ChangeDetectionStrategy,
 } from '@angular/core';
-import { MatTableModule } from '@angular/material/table';
-import { TaskOpenColumnComponent } from '../task-open-column/task-open-column.component';
 import { Task } from '../../models';
-import { AssignedTasksService, TaskColumnsService } from '../../services';
+import { AssignedTasksService } from '../../services';
+import { TaskTableComponent } from '../task-table/task-table.component';
 
+/**
+ * The tasks assigned to whoever is signed in.
+ *
+ * What is left here after the table moved into `app-task-table` is the one
+ * thing this view actually decides: what "mine" means, which is a question
+ * about the session and lives in a service.
+ */
 @Component({
   selector: 'app-personal-task-list',
-  imports: [MatTableModule, TaskOpenColumnComponent],
+  imports: [TaskTableComponent],
   templateUrl: './personal-task-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './personal-task-list.component.scss',
 })
 export class PersonalTaskListComponent {
   public allTasks = input.required<Task[]>();
   public taskSelected = output<Task>();
 
   private readonly assigned = inject(AssignedTasksService);
-  private readonly taskColumns = inject(TaskColumnsService);
 
   public tasks = computed(() => this.assigned.ofCurrentUser(this.allTasks()));
-
-  public readonly columns = this.taskColumns.columns;
-  public readonly displayedColumns = this.taskColumns.displayedColumns;
-
-  selectTask(task: Task) {
-    this.taskSelected.emit(task);
-  }
 }

@@ -1,62 +1,86 @@
-<form class="task-form" [formGroup]="form" (ngSubmit)="handleSubmit()">
-  <h2 class="task-form-title">New task</h2>
-
-  <mat-form-field subscriptSizing="dynamic" appearance="outline">
-    <mat-label>Project</mat-label>
-    <mat-select formControlName="projectId" required>
-      @for (project of projects(); track project.id) {
-        <mat-option [value]="project.id">{{ project.title }}</mat-option>
+<form [formGroup]="form" (ngSubmit)="handleSubmit()">
+  <app-panel-form
+    [heading]="editing() ? 'Edit task' : 'New task'"
+    [submitLabel]="editing() ? 'Save changes' : 'Create task'"
+    [pendingLabel]="editing() ? 'Saving…' : 'Creating…'"
+    [pending]="pending()"
+    [refusal]="refusal()"
+    (cancelled)="cancelled.emit()"
+  >
+    <mat-form-field subscriptSizing="dynamic" appearance="outline">
+      <mat-label>Project</mat-label>
+      <mat-select formControlName="projectId" required>
+        @for (project of projects(); track project.id) {
+          <mat-option [value]="project.id">{{ project.title }}</mat-option>
+        }
+      </mat-select>
+      @if (form.controls.projectId.hasError('required')) {
+        <mat-error>A project is required.</mat-error>
       }
-    </mat-select>
-    @if (form.controls.projectId.hasError('required')) {
-      <mat-error>A project is required.</mat-error>
-    }
-  </mat-form-field>
+    </mat-form-field>
 
-  <mat-form-field subscriptSizing="dynamic" appearance="outline">
-    <mat-label>Title</mat-label>
-    <input formControlName="title" matInput required />
-    @if (form.controls.title.hasError('required')) {
-      <mat-error>A title is required.</mat-error>
-    }
-  </mat-form-field>
-
-  <mat-form-field subscriptSizing="dynamic" appearance="outline">
-    <mat-label>Description</mat-label>
-    <textarea formControlName="description" matInput rows="3"></textarea>
-  </mat-form-field>
-
-  <mat-form-field subscriptSizing="dynamic" appearance="outline">
-    <mat-label>Status</mat-label>
-    <mat-select formControlName="status">
-      @for (status of statuses; track status) {
-        <mat-option [value]="status">{{ status }}</mat-option>
+    <mat-form-field subscriptSizing="dynamic" appearance="outline">
+      <mat-label>Title</mat-label>
+      <input formControlName="title" matInput required />
+      @if (form.controls.title.hasError('required')) {
+        <mat-error>A title is required.</mat-error>
       }
-    </mat-select>
-  </mat-form-field>
+    </mat-form-field>
 
-  <mat-form-field subscriptSizing="dynamic" appearance="outline">
-    <mat-label>Priority</mat-label>
-    <mat-select formControlName="priority">
-      @for (priority of priorities; track priority) {
-        <mat-option [value]="priority">{{ priority }}</mat-option>
+    <mat-form-field subscriptSizing="dynamic" appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea formControlName="description" matInput rows="3"></textarea>
+    </mat-form-field>
+
+    <mat-form-field subscriptSizing="dynamic" appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select formControlName="status">
+        @for (status of statuses; track status) {
+          <mat-option [value]="status">{{ status }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field subscriptSizing="dynamic" appearance="outline">
+      <mat-label>Priority</mat-label>
+      <mat-select formControlName="priority">
+        @for (priority of priorities; track priority) {
+          <mat-option [value]="priority">{{ priority }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <!--
+      A native date field rather than the Material datepicker: it needs no date
+      adapter, it is already reachable by keyboard, and it speaks the same
+      `yyyy-mm-dd` the model stores.
+
+      `aria-label` for the same reason the search box carries one: the form
+      field pairs its `mat-label` with the input at runtime through a generated
+      id, and the analyser reading this file cannot see that. It flags the
+      inputs that name a `type` and leaves the others alone, which is why this
+      one and the search box need it and the four beside them do not.
+    -->
+    <mat-form-field subscriptSizing="dynamic" appearance="outline">
+      <mat-label>Due date</mat-label>
+      <input
+        formControlName="dueDate"
+        matInput
+        type="date"
+        aria-label="Due date"
+      />
+    </mat-form-field>
+
+    <mat-form-field subscriptSizing="dynamic" appearance="outline">
+      <mat-label>Assigned to</mat-label>
+      <mat-select formControlName="assignedUserIds" multiple>
+        @for (member of directory.members(); track member.id) {
+          <mat-option [value]="member.id">{{ member.name }}</mat-option>
+        }
+      </mat-select>
+      @if (!directory.members().length) {
+        <mat-hint>Nobody to assign yet.</mat-hint>
       }
-    </mat-select>
-  </mat-form-field>
-
-  @if (refusal()) {
-    <p class="task-form-refusal" role="alert">{{ refusal() }}</p>
-  }
-
-  <div class="task-form-actions">
-    <button mat-button type="button" (click)="cancelled.emit()">Cancel</button>
-    <button
-      class="primary-btn"
-      mat-flat-button
-      type="submit"
-      [disabled]="pending()"
-    >
-      {{ pending() ? 'Creating…' : 'Create task' }}
-    </button>
-  </div>
+    </mat-form-field>
+  </app-panel-form>
 </form>

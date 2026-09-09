@@ -45,10 +45,17 @@ export class FakeBackend {
       },
       GET: {
         'http://localhost/api/Task': () => this.handleGetAllTask(),
+        'http://localhost/api/Task/search': () => this.handleSearchTask(),
         'http://localhost/api/Project': () => this.handleGetAllProject(),
+        'http://localhost/api/User': () => this.handleGetAllUser(),
       },
       PATCH: {
         'http://localhost/api/Task': () => this.handleUpdateTask(),
+        'http://localhost/api/Project': () => this.handleUpdateProject(),
+      },
+      DELETE: {
+        'http://localhost/api/Task': () => this.handleDeleteTask(),
+        'http://localhost/api/Project': () => this.handleDeleteProject(),
       },
     };
 
@@ -127,6 +134,34 @@ export class FakeBackend {
     if ('error' in asking) return asking.error;
 
     return this.respondSuccess(this.taskDB.findByUserOrganization(asking.user));
+  }
+
+  /**
+   * A filtered search, answered by the server rather than the client.
+   *
+   * It exists so the showcase has one endpoint worth cancelling: two keystrokes
+   * put two of these in flight, and the interceptor's 200 ms of latency is
+   * enough for the first to still be running when the second starts.
+   */
+  private handleSearchTask(): HttpResponse<unknown> {
+    const asking = this.requestingUser();
+
+    if ('error' in asking) return asking.error;
+
+    const query = (this.request.params.get('q') ?? '').trim().toLowerCase();
+    const visible = this.taskDB.findByUserOrganization(asking.user);
+
+    // An empty query matches everything, which is what "no filter" looks like
+    // to a server. The client decides not to ask in that case.
+    if (query === '') return this.respondSuccess(visible);
+
+    return this.respondSuccess(
+      visible.filter(
+        (task) =>
+          task.title.toLowerCase().includes(query) ||
+          (task.description ?? '').toLowerCase().includes(query),
+      ),
+    );
   }
 
   private handleUpdateTask(): HttpResponse<unknown> {
@@ -269,6 +304,103 @@ export class FakeBackend {
     );
   }
 
+  private handleUpdateProject(): HttpResponse<unknown> {
+    const asking = this.requestingUser();
+
+    if ('error' in asking) return asking.error;
+
+    const projectId = this.request.params.get('projectId');
+
+    if (!projectId) return this.respond400Error('projectId is missing');
+
+    const { title, color } = (this.request.body ?? {}) as Record<
+      string,
+      unknown
+    >;
+    const refusal = this.refuseTitle(title);
+
+    if (refusal) return refusal;
+    if (typeof color !== 'string')
+      return this.respond400Error('a colour is required');
+
+    const trimmed = (title as string).trim();
+
+    // The same rule as creating one, and for the same reason: two projects
+    // with one name are two rows nobody can tell apart. Renaming a project to
+    // what it is already called is not a clash with itself.
+    if (
+      this.projectDB
+        .findByUserOrganization(asking.user)
+        .some(
+          (project) =>
+            project.id !== projectId &&
+            project.title.toLowerCase() === trimmed.toLowerCase(),
+        )
+    ) {
+      return this.respond400Error(`a project is already called "${trimmed}"`);
+    }
+
+    const updated = this.projectDB.update(
+      projectId,
+      { title: trimmed, color } as Partial<Project>,
+      asking.user,
+    );
+
+    if (!updated)
+      return this.respond400Error('no such project in your organisation');
+
+    return this.respondSuccess(updated);
+  }
+
+  /**
+   * A refusal with a way out, which is the point of it.
+   *
+   * Deleting the tasks along with the project would be one line here and no
+   * question anywhere — and it would also be the one destructive thing this
+   * demo does, done silently. Refusing says what stands in the way, and the
+   * task panel is where it is cleared.
+   */
+  private handleDeleteProject(): HttpResponse<unknown> {
+    const asking = this.requestingUser();
+
+    if ('error' in asking) return asking.error;
+
+    const projectId = this.request.params.get('projectId');
+
+    if (!projectId) return this.respond400Error('projectId is missing');
+    if (!this.projectDB.findByIdForUser(projectId, asking.user))
+      return this.respond400Error('no such project in your organisation');
+
+    const remaining = this.taskDB.findByProjectIdForUser(
+      projectId,
+      asking.user,
+    ).length;
+
+    if (remaining > 0) {
+      return this.respond400Error(
+        `this project still holds ${String(remaining)} task${remaining === 1 ? '' : 's'}`,
+      );
+    }
+
+    return this.projectDB.delete(projectId, asking.user)
+      ? this.respondSuccess({ id: projectId })
+      : this.respond400Error('no such project in your organisation');
+  }
+
+  private handleDeleteTask(): HttpResponse<unknown> {
+    const asking = this.requestingUser();
+
+    if ('error' in asking) return asking.error;
+
+    const taskId = this.request.params.get('taskId');
+
+    if (!taskId) return this.respond400Error('taskId is missing');
+
+    return this.taskDB.delete(taskId, asking.user)
+      ? this.respondSuccess({ id: taskId })
+      : this.respond400Error('no such task in your organisation');
+  }
+
   /** Blank counts as missing: a title of spaces names nothing. */
   private refuseTitle(title: unknown): HttpResponse<unknown> | null {
     if (typeof title !== 'string' || title.trim().length === 0) {
@@ -293,6 +425,32 @@ export class FakeBackend {
     if (!user) return { error: this.respond400Error('user does not exist') };
 
     return { user };
+  }
+
+  /**
+   * The organisation's members, so an assignee can be named rather than shown
+   * as a UUID. `UsersDB` already knew how to answer this; nothing asked.
+   *
+   * Mapped field by field, and that is the point: a row here carries a
+   * password and two tokens, and a spread would hand all three to the browser.
+   * What leaves is what a directory needs.
+   */
+  private handleGetAllUser(): HttpResponse<unknown> {
+    const asking = this.requestingUser();
+
+    if ('error' in asking) return asking.error;
+
+    return this.respondSuccess(
+      this.usersDB
+        .findByOrganizationId(asking.user, asking.user.organizationId)
+        .map((member) => ({
+          userId: member.id,
+          userName: member.username,
+          email: member.email,
+          role: member.role,
+          organizationId: member.organizationId,
+        })),
+    );
   }
 
   private handleGetAllProject(): HttpResponse<unknown> {
@@ -386,8 +544,19 @@ class UsersDB {
     return this.users.find((user) => user.refreshToken === refreshToken);
   }
 
+  /*
+   * `[...]`, and it is not a nicety.
+   *
+   * The admin branch used to hand back the storage array itself. So a `GET`
+   * answered with the very array the module keeps, `state.set(response)` gave
+   * the signal that array to hold, and the next `create()` pushed into it —
+   * putting a row into the application's state with no action dispatched.
+   * Then the success handler appended it again, and one creation showed up
+   * twice with one id. A filtered branch was never affected, because `filter`
+   * already copies; only the shortcut for the role that reads everything was.
+   */
   findByOrganizationId(user: User, organizationId: string): User[] {
-    if (user.role === 'admin') return this.users;
+    if (user.role === 'admin') return [...this.users];
     return this.users.filter((user) => user.organizationId === organizationId);
   }
 
@@ -419,8 +588,9 @@ export class TaskDB {
     return this.tasks.filter((task) => task.organizationId === organizationId);
   }
 
+  /** Copied for the same reason as `UsersDB.findByOrganizationId`. */
   findByUserOrganization(user: User): Task[] {
-    if (user.role === 'admin') return this.tasks;
+    if (user.role === 'admin') return [...this.tasks];
     return this.tasks.filter(
       (task) => task.organizationId === user.organizationId,
     );
@@ -478,6 +648,40 @@ export class ProjectDB {
     return project;
   }
 
+  update(
+    projectId: string,
+    data: Partial<Project>,
+    user: User,
+  ): Project | undefined {
+    const index = this.project.findIndex((row) => row.id === projectId);
+    const existing = this.project[index];
+
+    if (!existing) return undefined;
+    if (
+      user.role !== 'admin' &&
+      existing.organizationId !== user.organizationId
+    )
+      return undefined;
+
+    const updated: Project = { ...existing, ...data, id: existing.id };
+    this.project[index] = updated;
+
+    return updated;
+  }
+
+  delete(projectId: string, user: User): boolean {
+    const index = this.project.findIndex((row) => row.id === projectId);
+    const project = this.project[index];
+
+    if (!project) return false;
+    if (user.role !== 'admin' && project.organizationId !== user.organizationId)
+      return false;
+
+    this.project.splice(index, 1);
+
+    return true;
+  }
+
   findByIdForUser(ProjectId: string, user: User): Project | undefined {
     const task = this.project.find((t) => t.id === ProjectId);
     if (!task) return undefined;
@@ -492,8 +696,9 @@ export class ProjectDB {
     );
   }
 
+  /** Copied for the same reason as `UsersDB.findByOrganizationId`. */
   findByUserOrganization(user: User): Project[] {
-    if (user.role === 'admin') return this.project;
+    if (user.role === 'admin') return [...this.project];
     return this.project.filter(
       (project) => project.organizationId === user.organizationId,
     );

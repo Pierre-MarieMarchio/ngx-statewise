@@ -11,24 +11,30 @@ body {
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
+/*
+ * The auto margins went with the shell's centring: they were the other half of
+ * the same rule, and between them a page's heading sat wherever its own length
+ * decided.
+ */
 .page {
-  margin-top: auto;
-  margin-bottom: auto;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
 }
 
 :root {
   --nav-width: clamp(80px, 10vw, 110px);
 
   /*
-   * One hue per priority, and the only place they are written. The kanban card
-   * takes them solid for its border, the details panel derives a translucent
-   * fill from the same value — before this, the two were separate literals in
-   * two systems, so one task showed one colour on its card and another in the
-   * panel.
+   * What a page's body has left under the chrome above it — a page title, a
+   * search box, and on the board a tab header too. It was written as
+   * `calc(100vh - 187px)` in four sheets: four copies of a sum nobody would
+   * ever recalculate, and any change to the title's size falsified all four in
+   * silence.
+   *
+   * Which is precisely what happened: the title went from 3 rem to the type
+   * scale's 2 rem, and the old number left the board overflowing the viewport
+   * by twelve pixels. Re-measured in the browser at 200 px, and it is one line
+   * to re-measure again — that being the whole point of naming it once.
    */
-  --priority-low: rgb(52 211 153);
-  --priority-medium: rgb(96 165 250);
-  --priority-high: rgb(247 0 0);
+  --page-body-height: calc(100vh - 200px);
 }

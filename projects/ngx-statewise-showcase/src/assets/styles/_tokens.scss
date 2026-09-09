@@ -1,0 +1,104 @@
+/**
+ * Every colour this application means something by, named once.
+ *
+ * The point is not to remove duplication — it is to separate **meanings** that
+ * had collided into one literal. `rgba(96, 165, 250, 0.25)` was written in four
+ * sheets to say four different things: "in progress", "medium priority", "the
+ * blue project", and "a dashboard section's heading". One value, four meanings,
+ * so any visual change to one moved the other three.
+ *
+ * Several tokens below still hold the same value. That is deliberate and it is
+ * the whole gain: the intentions are apart now, so one can change without
+ * dragging the others along. Nothing here changes a pixel — the values are
+ * exactly the ones the literals held.
+ */
+:root {
+  /*
+   * ---- Type: six sizes, and no seventh. ----
+   *
+   * The application had twelve, in three units, with no progression between
+   * them — and the order was wrong where it mattered most: a kanban card's
+   * title was 20 px while the heading of the section holding it was 16, so a
+   * card shouted over the thing it was inside.
+   *
+   * A step of about 1.15 between neighbours, which is enough to tell two
+   * levels apart and small enough that six of them cover a page.
+   */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+
+  /*
+   * ---- Space: a four-point grid. ----
+   *
+   * Forty distinct values were in use, mixing px, rem, vh and vw. These are
+   * the six the redrawn surfaces use; the sheets nobody is redrawing keep
+   * their literals until they are, because replacing forty values across
+   * thirty-four sheets in one commit is a diff nobody can read.
+   */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /*
+   * ---- The library's voice. ----
+   *
+   * The magenta marks what the library just did, and nothing else: the
+   * destination one is on, an action recorded, a write in flight. It used to
+   * be the colour of every button as well, which left the page with no way to
+   * say "this is the library" that was not also saying "press me".
+   */
+  --library-voice: var(--mat-sys-primary);
+
+  /* ---- Status: how far along a task is. ---- */
+  --status-todo: rgba(103, 104, 105, 0.062);
+  --status-in-progress: rgba(96, 165, 250, 0.25);
+  --status-done: rgba(52, 211, 153, 0.25);
+
+  /*
+   * ---- Priority: how urgent it is. ----
+   *
+   * A warm scale, and that is the whole point of it. Status was cold and
+   * priority was cold too, sharing two of its three literals — so "in
+   * progress" and "medium priority" were the same blue, and a reader had no
+   * way to tell which of the two a colour was talking about. Sand, orange and
+   * red now, which no status can be mistaken for.
+   */
+  --priority-low: rgb(214 178 108);
+  --priority-medium: rgb(234 138 58);
+  --priority-high: rgb(224 62 62);
+
+  /*
+   * A task past its due date is at the top of the warm scale, not beside it.
+   * It was `#f44336`, a second red from Material 2 — the same urgency told in
+   * two hues, which is the other half of S.1.
+   */
+  --priority-overdue: var(--priority-high);
+
+  /* ---- Projects: the five colours a project may carry. ---- */
+  --project-orange: rgba(251, 146, 60, 0.25);
+  --project-green: rgba(52, 211, 153, 0.25);
+  --project-blue: rgba(96, 165, 250, 0.25);
+  --project-purple: rgba(167, 139, 250, 0.25);
+  --project-pink: rgba(244, 114, 182, 0.25);
+
+  /*
+   * ---- Chrome: what the application paints about itself. ----
+   *
+   * The band over a dashboard section was the same blue as "in progress", the
+   * blue project and medium priority — one literal saying four things. A
+   * section heading is not a status, so it stops borrowing a status colour and
+   * takes the surface it sits on.
+   *
+   * The rule down the left of the panel's description was `#667eea`, an indigo
+   * that appeared nowhere else in the application and meant nothing.
+   */
+  --section-band: var(--mat-sys-surface-variant);
+  --detail-accent: var(--mat-sys-outline-variant);
+}

@@ -1,7 +1,12 @@
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { LoginRequest, LoginResponses, AuthenticateResponses } from '../models';
+import {
+  LoginRequest,
+  LoginResponses,
+  AuthenticateResponses,
+  User,
+} from '../models';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({
@@ -29,6 +34,19 @@ export class AuthRepositoryService {
       { observe: 'response', withCredentials: true },
     );
     return response;
+  }
+
+  /**
+   * Everyone in the asking user's organisation.
+   *
+   * The one call here that answers with a list of people rather than with a
+   * session. It is auth's to make — a user's name is auth's to know — and what
+   * a task does with the answer is another feature's business entirely.
+   */
+  public members(userId: string): Observable<User[]> {
+    return this.http.get<User[]>(`${this.API_BASE_URL}/User`, {
+      params: new HttpParams().set('userId', userId),
+    });
   }
 
   public authenticate(): Observable<HttpResponse<AuthenticateResponses>> {

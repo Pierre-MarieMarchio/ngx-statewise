@@ -89,16 +89,17 @@ describe('KanbanComponent', () => {
 
   const liveRegion = (fixture: { nativeElement: unknown }): string =>
     (fixture.nativeElement as HTMLElement)
-      .querySelector('[role="status"]')
+      .querySelector('output')
       ?.textContent?.trim() ?? '';
 
   it('renders one named list per column', async () => {
     const fixture = await mount();
 
+    // A `<ul>` rather than a div wearing `role="list"`: the element says it.
     expect(
       Array.from(
         (fixture.nativeElement as HTMLElement).querySelectorAll(
-          '[role="list"]',
+          'ul.kanban-column',
         ),
       ).map((column) => column.getAttribute('aria-label')),
     ).toEqual(['Left items', 'Middle items', 'Right items']);
@@ -116,8 +117,9 @@ describe('KanbanComponent', () => {
 
   it('makes every card a named tab stop', async () => {
     const fixture = await mount();
+    // A real list item now, rather than a component element wearing a role.
     const cards = (fixture.nativeElement as HTMLElement).querySelectorAll(
-      'app-kanban-card',
+      '.kanban-column > li',
     );
 
     expect(cards.length).toBe(3);

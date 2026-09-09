@@ -20,7 +20,7 @@
                 target="_blank"
                 rel="noopener"
               >
-                <mat-icon class="nav-icon icon-outlined" aria-hidden="true">
+                <mat-icon class="nav-icon" aria-hidden="true">
                   {{ item.icon }}
                 </mat-icon>
                 <span>{{ item.label }}</span>
@@ -31,7 +31,7 @@
                 [routerLink]="item.route"
                 routerLinkActive="active-link"
               >
-                <mat-icon class="nav-icon icon-outlined" aria-hidden="true">
+                <mat-icon class="nav-icon" aria-hidden="true">
                   {{ item.icon }}
                 </mat-icon>
                 <span>{{ item.label }}</span>
@@ -54,13 +54,10 @@
         class="footer-groupe-button color-secondary"
         (click)="logout.emit()"
       >
-        <mat-icon
-          class="footer-icon color-secondary icon-outlined"
-          aria-hidden="true"
-        >
+        <mat-icon class="footer-icon color-secondary" aria-hidden="true">
           logout
         </mat-icon>
-        <span>logout</span>
+        <span>Log out</span>
       </button>
     }
     <app-theme-toggle />

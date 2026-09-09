@@ -4,10 +4,13 @@ import { ProjectState } from './project.state';
 import { projectUpdater } from './project.updater';
 import {
   createProjectActions,
+  deleteProjectActions,
   getAllProjectsActions,
+  projectSelected,
   projectReset,
+  updateProjectActions,
 } from './project.action';
-import { ProjectDraft } from '../../models';
+import { Project, ProjectDraft } from '../../models';
 import { IProjectReload } from '@app/features/common';
 
 @Injectable({
@@ -23,6 +26,26 @@ export class ProjectManager implements IProjectReload {
 
   public readonly projectCount = computed(() => this.projects().length);
 
+  public readonly selectedProjectId =
+    this.projectStates.selectedProjectId.asReadonly();
+
+  /**
+   * The project the screens are looking at, derived from the id and the list
+   * rather than stored beside them — so a reload that renamed it shows the new
+   * name, and one that dropped it answers null.
+   */
+  public readonly selectedProject = computed<Project | null>(
+    () =>
+      this.projects().find(
+        (project) => project.id === this.selectedProjectId(),
+      ) ?? null,
+  );
+
+  /** Choosing one, or `null` to go back to all of them. */
+  public selectProject(projectId: string | null): void {
+    this.statewise.dispatch(projectSelected(projectId));
+  }
+
   /**
    * Resolves once every effect this manager started has settled, whichever
    * action started it. The task manager waits on one action type instead —
@@ -35,6 +58,9 @@ export class ProjectManager implements IProjectReload {
   public readonly isCreating = this.projectStates.isCreating.asReadonly();
   public readonly createError = this.projectStates.createError.asReadonly();
 
+  public readonly isSaving = this.projectStates.isSaving.asReadonly();
+  public readonly saveError = this.projectStates.saveError.asReadonly();
+
   public getAll(): void {
     this.statewise.dispatch(getAllProjectsActions.request());
   }
@@ -46,6 +72,17 @@ export class ProjectManager implements IProjectReload {
    */
   public createProject(draft: ProjectDraft): Promise<void> {
     return this.statewise.dispatchAsync(createProjectActions.request(draft));
+  }
+
+  /** Awaited, like creating one, so a panel knows whether to close itself. */
+  public updateProject(project: Project): Promise<void> {
+    return this.statewise.dispatchAsync(updateProjectActions.request(project));
+  }
+
+  public deleteProject(projectId: string): Promise<void> {
+    return this.statewise.dispatchAsync(
+      deleteProjectActions.request(projectId),
+    );
   }
 
   public reset(): Promise<void> {

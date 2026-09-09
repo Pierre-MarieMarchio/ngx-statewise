@@ -107,7 +107,7 @@ describe('InspectionHistoryPageComponent', () => {
   });
 
   it('lists an action once the history is read', () => {
-    click('raise a notice');
+    click('Raise a notice');
 
     // The cascade column shows the path the engine walked. A dispatch from a
     // component is a cascade of one, so it reads as its own type.
@@ -119,7 +119,7 @@ describe('InspectionHistoryPageComponent', () => {
 
   it('records the actions of every handle, not only its own', () => {
     outside.dispatch(noticeActions.raised('from elsewhere'));
-    click('refresh');
+    click('Refresh');
 
     expect(rows().map((row) => row[TYPE])).toEqual(['NOTICE_RAISED']);
     expect(cell(0, PAYLOAD)).toBe('"from elsewhere"');
@@ -130,7 +130,7 @@ describe('InspectionHistoryPageComponent', () => {
    * read stays invisible until the next one.
    */
   it('keeps showing the last snapshot until it is read again', () => {
-    click('raise a notice');
+    click('Raise a notice');
     expect(readout('total')).toBe('1');
 
     outside.dispatch(noticeActions.raised('unseen'));
@@ -138,15 +138,15 @@ describe('InspectionHistoryPageComponent', () => {
 
     expect(readout('total')).toBe('1');
 
-    click('refresh');
+    click('Refresh');
 
     expect(readout('total')).toBe('2');
   });
 
   it('counts the actions of each tracked type', () => {
-    click('raise a notice');
-    click('increment the tally');
-    click('increment the tally');
+    click('Raise a notice');
+    click('Increment the tally');
+    click('Increment the tally');
 
     const counts = fixture.componentInstance.counts();
 
@@ -166,8 +166,8 @@ describe('InspectionHistoryPageComponent', () => {
    * cleared by keyboard but never set.
    */
   it('narrows the table to the type filtered on, and back again', () => {
-    click('raise a notice');
-    click('increment the tally');
+    click('Raise a notice');
+    click('Increment the tally');
 
     expect(rows().length).toBe(2);
 
@@ -183,9 +183,9 @@ describe('InspectionHistoryPageComponent', () => {
   });
 
   it('renumbers the rows it shows while a filter is on', () => {
-    click('increment the tally');
-    click('raise a notice');
-    click('increment the tally');
+    click('Increment the tally');
+    click('Raise a notice');
+    click('Increment the tally');
 
     fixture.componentInstance.filterBy('TALLY_INCREMENTED');
     fixture.detectChanges();
@@ -198,12 +198,12 @@ describe('InspectionHistoryPageComponent', () => {
    * `[selected]`, so clearing one left the other showing.
    */
   it('clears the filter, and the chip with it', () => {
-    click('raise a notice');
+    click('Raise a notice');
     pressEnter('NOTICE_RAISED');
 
     expect(selectedChips()).toEqual(['NOTICE_RAISED']);
 
-    click('clear filter');
+    click('Clear the filter');
 
     expect(fixture.componentInstance.selectedType()).toBeNull();
     expect(selectedChips()).toEqual([]);
@@ -211,14 +211,14 @@ describe('InspectionHistoryPageComponent', () => {
 
   it('leaves the payload column empty for an action carrying none', () => {
     outside.dispatch(noticeActions.cleared());
-    click('refresh');
+    click('Refresh');
 
     expect(rows()).toEqual([['1', 'NOTICE_CLEARED', 'NOTICE_CLEARED', '']]);
   });
 
   it('cuts a long payload short rather than flooding the row', () => {
     outside.dispatch(noticeActions.raised('x'.repeat(MAX_PAYLOAD_LENGTH * 2)));
-    click('refresh');
+    click('Refresh');
 
     const payload = cell(0, PAYLOAD);
 
@@ -228,7 +228,7 @@ describe('InspectionHistoryPageComponent', () => {
 
   it('leaves a short payload whole', () => {
     outside.dispatch(noticeActions.raised('short'));
-    click('refresh');
+    click('Refresh');
 
     expect(cell(0, PAYLOAD)).toBe('"short"');
   });

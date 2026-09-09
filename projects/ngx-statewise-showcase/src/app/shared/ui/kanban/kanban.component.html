@@ -1,22 +1,49 @@
-<mat-grid-list
-  class="kanban-headers"
-  [cols]="columns().length"
-  gutterSize="1rem"
-  rowHeight="2rem"
->
-  @for (column of columns(); track column.id) {
-    <mat-grid-tile class="kanban-column-header">
-      <h3>{{ column.label }}</h3>
-    </mat-grid-tile>
+<!--
+  One grid for the whole board: the headers fill its first row and the columns
+  its second, so a header cannot drift from the column it names. They used to
+  be a `mat-grid-list` of N tiles above a flex row of N columns — two layout
+  systems for one grid, lined up only because the widths came out equal.
+-->
+<!--
+  Only drawn on a narrow board — see the container query in the sheet. It is a
+  row of buttons rather than a `mat-tab-group`: the board is in `shared/ui` and
+  owes nothing to Material, and three buttons need no tab machinery.
+-->
+<fieldset class="kanban-switcher">
+  <legend class="visually-hidden">Show one column</legend>
+  @for (column of columns(); track column.id; let index = $index) {
+    <button
+      type="button"
+      class="kanban-switcher-tab"
+      [class.is-shown]="shownColumn() === index"
+      [attr.aria-pressed]="shownColumn() === index"
+      (click)="showColumn(index)"
+    >
+      {{ column.label }}
+      <span class="kanban-column-count">{{ column.items.length }}</span>
+    </button>
   }
-</mat-grid-list>
+</fieldset>
 
-<div class="kanban-body">
-  @for (column of columns(); track column.id) {
-    <div
+<div class="kanban" [style.--kanban-tracks]="columnTracks()">
+  @for (column of columns(); track column.id; let index = $index) {
+    <!--
+      The count belongs to the board, not to what the board holds: it is the
+      length of a column, and every caller wanted it. Reading a column's size
+      off the screen meant counting cards, and the third one was below the
+      fold.
+    -->
+    <h3 class="kanban-column-header" [class.is-shown]="shownColumn() === index">
+      {{ column.label }}
+      <span class="kanban-column-count">{{ column.items.length }}</span>
+    </h3>
+  }
+
+  @for (column of columns(); track column.id; let index = $index) {
+    <ul
       class="kanban-column"
+      [class.is-shown]="shownColumn() === index"
       cdkDropList
-      role="list"
       [attr.aria-label]="column.label + ' items'"
       [id]="dropListId(column.id)"
       [cdkDropListData]="column"
@@ -24,10 +51,18 @@
       (cdkDropListDropped)="onDrop($event)"
     >
       @for (item of column.items; track item.id) {
-        <app-kanban-card
-          [data]="item"
+        <!--
+          `cdkDrag` is on the host, not on the `<mat-card>` inside it. The host
+          is what the drop list holds and what carries the card's identity —
+          its role, its label, its `data-card-id` — so it has to be what moves.
+          On the inner card the CDK left the host in the flow and put its
+          placeholder inside it, which is half of why one task appeared twice.
+        -->
+        <li
+          appKanbanCard
+          cdkDrag
+          [cdkDragData]="item"
           [cardType]="cardTypeFor()(item)"
-          role="listitem"
           tabindex="0"
           [attr.data-card-id]="item.id"
           [attr.aria-label]="labelFor()(item)"
@@ -40,9 +75,9 @@
             [ngTemplateOutlet]="cardBody()"
             [ngTemplateOutletContext]="{ $implicit: item }"
           />
-        </app-kanban-card>
+        </li>
       }
-    </div>
+    </ul>
   }
 </div>
 
@@ -51,4 +86,4 @@
   on the spot, so the region exists before its text changes — a live region
   inserted along with its content is announced by no screen reader reliably.
 -->
-<p class="visually-hidden" role="status">{{ announcement() }}</p>
+<output class="visually-hidden">{{ announcement() }}</output>

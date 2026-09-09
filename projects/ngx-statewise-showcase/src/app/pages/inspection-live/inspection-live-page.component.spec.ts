@@ -66,7 +66,31 @@ describe('InspectionLivePageComponent', () => {
       Array.from(host().querySelectorAll('[data-card]')).map((card) =>
         card.getAttribute('data-card'),
       ),
-    ).toEqual(['auth', 'tasks', 'projects']);
+    ).toEqual(['auth', 'tasks', 'projects', 'current-project']);
+  });
+
+  /**
+   * The readout nothing stores: choose a project and every line of it moves,
+   * because all four are derived from the chosen id and the two lists.
+   */
+  it('follows the project that was chosen', () => {
+    expect(reading('current-project', 'currentProject')).toBe('All projects');
+    expect(reading('current-project', 'taskCount')).toBe('1');
+
+    projectManager.selectProject('project-nowhere');
+    fixture.detectChanges();
+
+    expect(reading('current-project', 'currentProject')).toBe('All projects');
+    expect(reading('current-project', 'taskCount')).toBe('0');
+
+    projectManager.selectProject(sampleProject().id);
+    fixture.detectChanges();
+
+    expect(reading('current-project', 'currentProject')).toBe(
+      sampleProject().title,
+    );
+    expect(reading('current-project', 'taskCount')).toBe('1');
+    expect(reading('current-project', 'todo')).toBe('1');
   });
 
   it('reads the auth state, derived values included', () => {
@@ -80,7 +104,7 @@ describe('InspectionLivePageComponent', () => {
       Array.from(host().querySelectorAll('button')).map((button) =>
         button.textContent?.trim(),
       ),
-    ).not.toContain('refresh');
+    ).not.toContain('Refresh');
   });
 
   /**
@@ -135,8 +159,8 @@ describe('InspectionLivePageComponent', () => {
     taskManager.getAll = () => (taskReloads += 1) && undefined;
     projectManager.getAll = () => (projectReloads += 1) && undefined;
 
-    click('reload the tasks');
-    click('reload the projects');
+    click('Reload the tasks');
+    click('Reload the projects');
 
     expect(taskReloads).toBe(1);
     expect(projectReloads).toBe(1);
@@ -153,7 +177,7 @@ describe('InspectionLivePageComponent', () => {
     it('refuses it and says which manager owns the action', () => {
       expect(taskUpdater.handlers.size).toBeGreaterThan(0);
 
-      click('dispatch a misrouted action');
+      click('Dispatch a misrouted action');
 
       const shown = host().querySelector('[data-card="errors"]')?.textContent;
 
@@ -162,7 +186,7 @@ describe('InspectionLivePageComponent', () => {
     });
 
     it('lets the reader clear what it collected', () => {
-      click('dispatch a misrouted action');
+      click('Dispatch a misrouted action');
       click('clear failures');
 
       expect(host().textContent).toContain('Nothing has failed yet.');

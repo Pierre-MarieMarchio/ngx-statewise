@@ -4,12 +4,16 @@ import { TaskState } from './task.state';
 import { taskUpdater } from './task.updater';
 import {
   createTaskActions,
+  deleteTaskActions,
   getAllTaskActions,
+  searchCleared,
+  searchTaskActions,
   taskReset,
   updateTaskActions,
 } from './task.action';
-import { STATUSES, Task, TaskDraft, TaskStatus } from '../../models';
+import { Task, TaskDraft } from '../../models';
 import { ITaskReload } from '@app/features/common';
+import { TaskSelectionService } from '../../services';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +21,7 @@ import { ITaskReload } from '@app/features/common';
 export class TaskManager implements ITaskReload {
   private readonly taskStates = inject(TaskState);
   private readonly statewise = injectStatewise(taskUpdater);
+  private readonly selection = inject(TaskSelectionService);
 
   public readonly tasks = this.taskStates.tasks.asReadonly();
   public readonly isError = this.taskStates.isError.asReadonly();
@@ -30,26 +35,51 @@ export class TaskManager implements ITaskReload {
     () => this.taskStates.pendingWrites().size > 0,
   );
 
+  /** Why the last write was refused, in the server's own words. */
+  public readonly saveError = this.taskStates.saveError.asReadonly();
+
+  /**
+   * The ids of the tasks whose write is still out.
+   *
+   * `isSaving` says only that something is in flight; a card wanting to show
+   * that *it* is the one being written needs to ask about itself. The set is
+   * derived from the same map the rollback reads.
+   */
+  public readonly writingIds = computed(
+    () => new Set(this.taskStates.pendingWrites().keys()),
+  );
+
   public readonly isCreating = this.taskStates.isCreating.asReadonly();
   public readonly createError = this.taskStates.createError.asReadonly();
+
+  public readonly isSearching = this.taskStates.isSearching.asReadonly();
+  public readonly searchFailed = this.taskStates.searchFailed.asReadonly();
+
+  /** Whether a search is on, which is not the same as whether it matched. */
+  public readonly isFiltered = computed(
+    () => this.taskStates.matches() !== null,
+  );
+
+  /**
+   * What the views show: the matches while a search is on, the whole list
+   * otherwise. Derived from two states rather than stored, so nothing has to
+   * remember to put the full list back when the box is emptied.
+   */
+  public readonly visibleTasks = computed(
+    () => this.taskStates.matches() ?? this.tasks(),
+  );
 
   public readonly taskCount = computed(() => this.tasks().length);
 
   /**
-   * Every status is present even at zero, so a view over it never has to
-   * guess which keys exist.
+   * The counts over every task. The same rule scoped to one project is
+   * `CurrentProjectService`'s, and both ask `TaskSelectionService` — a manager
+   * may inject a service of its own feature when the alternative is writing
+   * its rule twice.
    */
-  public readonly countByStatus = computed(() => {
-    const tasks = this.tasks();
-
-    return STATUSES.reduce(
-      (counts, status) => ({
-        ...counts,
-        [status]: tasks.filter((task) => task.status === status).length,
-      }),
-      {} as Record<TaskStatus, number>,
-    );
-  });
+  public readonly countByStatus = computed(() =>
+    this.selection.countByStatus(this.tasks()),
+  );
 
   /**
    * Resolves once the reload this manager started has settled.
@@ -71,6 +101,19 @@ export class TaskManager implements ITaskReload {
     return this.statewise.dispatchAsync(getAllTaskActions.request());
   }
 
+  /**
+   * Asks the server. The debounce is the caller's — how long to wait for a
+   * typist to stop is a question about a keyboard, not about state.
+   */
+  public search(query: string): void {
+    this.statewise.dispatch(searchTaskActions.request(query));
+  }
+
+  /** Drops the filter, and cancels a search still in flight. */
+  public clearSearch(): void {
+    this.statewise.dispatch(searchCleared());
+  }
+
   public update(task: Task): void {
     this.statewise.dispatch(updateTaskActions.request(task));
   }
@@ -78,6 +121,11 @@ export class TaskManager implements ITaskReload {
   /** Not on the shared kernel's port — see ProjectManager.createProject. */
   public createTask(draft: TaskDraft): Promise<void> {
     return this.statewise.dispatchAsync(createTaskActions.request(draft));
+  }
+
+  /** Awaited, so a panel knows whether it has anything left to show. */
+  public deleteTask(taskId: string): Promise<void> {
+    return this.statewise.dispatchAsync(deleteTaskActions.request(taskId));
   }
 
   public reset(): Promise<void> {
