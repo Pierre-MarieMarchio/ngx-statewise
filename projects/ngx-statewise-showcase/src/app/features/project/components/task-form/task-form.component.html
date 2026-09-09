@@ -54,10 +54,21 @@
       A native date field rather than the Material datepicker: it needs no date
       adapter, it is already reachable by keyboard, and it speaks the same
       `yyyy-mm-dd` the model stores.
+
+      `aria-label` for the same reason the search box carries one: the form
+      field pairs its `mat-label` with the input at runtime through a generated
+      id, and the analyser reading this file cannot see that. It flags the
+      inputs that name a `type` and leaves the others alone, which is why this
+      one and the search box need it and the four beside them do not.
     -->
     <mat-form-field subscriptSizing="dynamic" appearance="outline">
       <mat-label>Due date</mat-label>
-      <input formControlName="dueDate" matInput type="date" />
+      <input
+        formControlName="dueDate"
+        matInput
+        type="date"
+        aria-label="Due date"
+      />
     </mat-form-field>
 
     <mat-form-field subscriptSizing="dynamic" appearance="outline">
