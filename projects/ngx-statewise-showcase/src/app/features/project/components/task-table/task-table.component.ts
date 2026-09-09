@@ -9,7 +9,10 @@ import {
 import { MatTableModule } from '@angular/material/table';
 import { Task } from '../../models';
 import { TaskColumnsService } from '../../services';
+import { PriorityBadgeComponent } from '../priority-badge/priority-badge.component';
+import { StatusBadgeComponent } from '../status-badge/status-badge.component';
 import { TaskOpenColumnComponent } from '../task-open-column/task-open-column.component';
+import { UserChipComponent } from '../user-chip/user-chip.component';
 
 /**
  * A table of tasks — the one table of tasks in this application.
@@ -27,8 +30,15 @@ import { TaskOpenColumnComponent } from '../task-open-column/task-open-column.co
  */
 @Component({
   selector: 'app-task-table',
-  imports: [MatTableModule, TaskOpenColumnComponent],
+  imports: [
+    MatTableModule,
+    PriorityBadgeComponent,
+    StatusBadgeComponent,
+    TaskOpenColumnComponent,
+    UserChipComponent,
+  ],
   templateUrl: './task-table.component.html',
+  styleUrl: './task-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskTableComponent {
@@ -42,8 +52,12 @@ export class TaskTableComponent {
    */
   public readonly capped = input(false);
 
-  /** What stands in for the table when there is nothing to put in it. */
-  public readonly emptyMessage = input('No task to show.');
+  /**
+   * What stands in for the table when there is nothing to put in it. An
+   * invitation rather than a report: "no task to show" tells a reader what
+   * they can already see, and nothing about what to do next.
+   */
+  public readonly emptyMessage = input('No tasks yet. Create one to start.');
 
   public readonly taskSelected = output<Task>();
 

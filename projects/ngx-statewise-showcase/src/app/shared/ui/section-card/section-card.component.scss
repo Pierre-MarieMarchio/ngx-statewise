@@ -13,10 +13,18 @@
   background-color: transparent;
 }
 
+/*
+ * A section heading, at the size a section heading is. The band behind it was
+ * painted in the blue that also meant "in progress", "medium priority" and
+ * "the blue project"; it takes the surface colour now, which is what a band
+ * around a heading is actually for.
+ */
 .section-card-title {
   box-sizing: border-box;
-  margin: 0 0 1rem;
-  padding: 0.5rem;
+  margin: 0 0 var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  border-radius: 0.3rem;
+  font-size: var(--text-lg);
   background-color: var(--section-band);
 }
 

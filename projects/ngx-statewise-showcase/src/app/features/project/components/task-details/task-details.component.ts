@@ -6,10 +6,8 @@ import {
   input,
   output,
 } from '@angular/core';
-import { TitleCasePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -17,19 +15,23 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { Task } from '../../models';
 import { TEAM_DIRECTORY } from '../../ports';
 import { TaskPresentationService } from '../../services';
+import { PriorityBadgeComponent } from '../priority-badge/priority-badge.component';
+import { StatusBadgeComponent } from '../status-badge/status-badge.component';
+import { UserChipComponent } from '../user-chip/user-chip.component';
 import { ProjectManager } from '../../states/project/project.manager';
 
 @Component({
   selector: 'app-task-details',
   imports: [
-    TitleCasePipe,
     MatButtonModule,
     MatIconModule,
-    MatChipsModule,
     MatBadgeModule,
     MatDividerModule,
     MatTooltipModule,
     MatTabsModule,
+    PriorityBadgeComponent,
+    StatusBadgeComponent,
+    UserChipComponent,
   ],
   templateUrl: './task-details.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

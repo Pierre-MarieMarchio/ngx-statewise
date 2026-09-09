@@ -35,11 +35,13 @@ export class TaskColumnsService {
       columnDef: 'status',
       header: 'Status',
       cell: (task: Task) => `${task.status}`,
+      kind: 'status',
     },
     {
       columnDef: 'priority',
       header: 'Priority',
       cell: (task: Task) => `${task.priority}`,
+      kind: 'priority',
     },
     /*
      * Both read a field the tables never showed, although the panel did and
@@ -56,6 +58,7 @@ export class TaskColumnsService {
     {
       columnDef: 'assignee',
       header: 'Assigned to',
+      kind: 'people',
       cell: (task: Task) => {
         const names = (task.assignedUserIds ?? []).map((userId) =>
           this.directory.nameOf(userId),

@@ -70,7 +70,9 @@ describe('PersonalTaskListComponent', () => {
       (fixture.nativeElement as HTMLElement)
         .querySelector('.empty-state')
         ?.textContent?.trim(),
-    ).toBe('No task is assigned to you.');
+    ).toBe(
+      'Nothing is assigned to you yet. Open a task to put your name on it.',
+    );
   });
 
   it('opens a task from a named button, once', async () => {

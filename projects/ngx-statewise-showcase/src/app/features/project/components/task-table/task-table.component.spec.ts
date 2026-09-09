@@ -121,7 +121,7 @@ describe('TaskTableComponent', () => {
 
       expect(host.querySelector('table')).toBeNull();
       expect(host.querySelector('.empty-state')?.textContent?.trim()).toBe(
-        'No task to show.',
+        'No tasks yet. Create one to start.',
       );
     });
 

@@ -33,59 +33,12 @@
     }
   }
 
+  /* Two marks in a row; what they look like is the badges' own business. */
   .task-meta {
-    margin-bottom: 20px;
-
-    mat-chip-set {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    mat-chip {
-      font-weight: 500;
-      border: none;
-
-      mat-icon {
-        font-size: 18px;
-      }
-
-      &.status-todo {
-        background-color: var(--status-todo);
-      }
-
-      &.status-in-progress {
-        background-color: var(--status-in-progress);
-      }
-
-      &.status-done {
-        background-color: var(--status-done);
-      }
-
-      &.priority-low {
-        background-color: color-mix(
-          in srgb,
-          var(--priority-low) 25%,
-          transparent
-        );
-      }
-
-      &.priority-medium {
-        background-color: color-mix(
-          in srgb,
-          var(--priority-medium) 25%,
-          transparent
-        );
-      }
-
-      &.priority-high {
-        background-color: color-mix(
-          in srgb,
-          var(--priority-high) 25%,
-          transparent
-        );
-      }
-    }
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-4);
   }
 
   .section-divider {
@@ -161,17 +114,9 @@
         }
 
         .users-content {
-          mat-chip-set {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-          }
-
-          mat-chip {
-            mat-icon {
-              font-size: 1rem;
-            }
-          }
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-2);
         }
       }
 

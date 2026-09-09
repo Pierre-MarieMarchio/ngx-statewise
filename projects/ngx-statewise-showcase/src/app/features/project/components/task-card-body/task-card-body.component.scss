@@ -1,0 +1,24 @@
+/*
+ * Material's card title is 20 px, which made a card on the board heavier than
+ * the heading of the section it sat in — the hierarchy read upside down. A
+ * card is a line of a list; it takes the body size and gives the weight back.
+ */
+.mat-mdc-card-title {
+  font-size: var(--text-md);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+/*
+ * Two lines of description, then an ellipsis. A card used to carry the whole
+ * of it, so one long task pushed every other card below the fold.
+ */
+.mat-mdc-card-content p {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

@@ -47,17 +47,26 @@ describe('TaskDetailsComponent', () => {
   });
 
   /**
-   * `selected` is `MatChipOption`'s, and inert on a plain `MatChip`: the two
-   * chips looked ordinary however the task read.
+   * The same two marks the tables draw, from the same components — they were
+   * `mat-chip`s here and grey lowercase words there, one idea rendered twice.
+   * Each carries the tint of its own scale: cold for a status, warm for a
+   * priority, so neither can be read as the other.
    */
-  it('highlights the status and the priority', async () => {
-    const fixture = await mount();
+  it('draws the status and the priority as the tables do', async () => {
+    const fixture = await mount(
+      sampleTask({ status: 'todo', priority: 'high' }),
+    );
+    const host = fixture.nativeElement as HTMLElement;
 
-    expect(
-      (fixture.nativeElement as HTMLElement).querySelectorAll(
-        'mat-chip.mat-mdc-chip-highlighted',
-      ).length,
-    ).toBe(2);
+    expect(host.querySelector('app-status-badge')).not.toBeNull();
+    expect(host.querySelector('app-priority-badge')).not.toBeNull();
+
+    const tints = Array.from(host.querySelectorAll<HTMLElement>('.chip')).map(
+      (chip) => chip.style.backgroundColor,
+    );
+
+    expect(tints[0]).toContain('--status-todo');
+    expect(tints[1]).toContain('--priority-high');
   });
 
   /**

@@ -18,6 +18,7 @@ import { Task } from '../../models';
   selector: 'app-task-card-body',
   imports: [MatCardModule],
   templateUrl: './task-card-body.component.html',
+  styleUrl: './task-card-body.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskCardBodyComponent {
