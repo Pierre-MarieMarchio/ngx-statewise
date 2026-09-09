@@ -29,7 +29,6 @@
           required
         />
         <button
-          class="mr-2"
           type="button"
           mat-icon-button
           matSuffix
@@ -39,7 +38,7 @@
           [attr.aria-pressed]="!isPasswordHided()"
           (click)="hidePassword($event)"
         >
-          <mat-icon class="icon-outlined">{{
+          <mat-icon>{{
             isPasswordHided() ? 'visibility_off' : 'visibility'
           }}</mat-icon>
         </button>

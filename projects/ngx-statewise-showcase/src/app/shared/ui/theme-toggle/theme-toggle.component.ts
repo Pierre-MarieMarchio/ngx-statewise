@@ -19,14 +19,14 @@ import { ThemeService } from './theme.service';
     <button
       (click)="toggleTheme()"
       mat-icon-button
-      class="m-1 color-secondary"
+      class="color-secondary"
       [attr.aria-label]="
         themeService.themeSignal() === 'dark'
           ? 'Switch to the light theme'
           : 'Switch to the dark theme'
       "
     >
-      <mat-icon class="color-secondary icon-outlined">{{
+      <mat-icon class="color-secondary">{{
         themeService.themeSignal() === 'dark'
           ? 'dark_mode_outlined'
           : 'light_mode'
