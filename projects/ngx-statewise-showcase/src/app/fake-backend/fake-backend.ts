@@ -386,8 +386,19 @@ class UsersDB {
     return this.users.find((user) => user.refreshToken === refreshToken);
   }
 
+  /*
+   * `[...]`, and it is not a nicety.
+   *
+   * The admin branch used to hand back the storage array itself. So a `GET`
+   * answered with the very array the module keeps, `state.set(response)` gave
+   * the signal that array to hold, and the next `create()` pushed into it —
+   * putting a row into the application's state with no action dispatched.
+   * Then the success handler appended it again, and one creation showed up
+   * twice with one id. A filtered branch was never affected, because `filter`
+   * already copies; only the shortcut for the role that reads everything was.
+   */
   findByOrganizationId(user: User, organizationId: string): User[] {
-    if (user.role === 'admin') return this.users;
+    if (user.role === 'admin') return [...this.users];
     return this.users.filter((user) => user.organizationId === organizationId);
   }
 
@@ -419,8 +430,9 @@ export class TaskDB {
     return this.tasks.filter((task) => task.organizationId === organizationId);
   }
 
+  /** Copied for the same reason as `UsersDB.findByOrganizationId`. */
   findByUserOrganization(user: User): Task[] {
-    if (user.role === 'admin') return this.tasks;
+    if (user.role === 'admin') return [...this.tasks];
     return this.tasks.filter(
       (task) => task.organizationId === user.organizationId,
     );
@@ -492,8 +504,9 @@ export class ProjectDB {
     );
   }
 
+  /** Copied for the same reason as `UsersDB.findByOrganizationId`. */
   findByUserOrganization(user: User): Project[] {
-    if (user.role === 'admin') return this.project;
+    if (user.role === 'admin') return [...this.project];
     return this.project.filter(
       (project) => project.organizationId === user.organizationId,
     );

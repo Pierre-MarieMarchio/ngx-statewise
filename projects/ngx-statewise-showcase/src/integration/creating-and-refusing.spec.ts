@@ -46,13 +46,23 @@ describe('a server that refuses', () => {
   });
 
   describe('creating a project', () => {
-    it('accepts one and keeps it, without a reload', async () => {
+    /*
+     * The count is the assertion, and a unique title is what makes it possible.
+     *
+     * `toContain` was chosen because the stand-in server keeps its rows for the
+     * life of the module, so a test sees what the one before it created and a
+     * total is not stable. That reason still holds — but counting one title
+     * nobody else uses satisfies both, and it is the assertion this suite was
+     * missing: creating one project used to put two in the state, identical and
+     * sharing an id, and every assertion here passed.
+     */
+    it('accepts one and keeps it once, without a reload', async () => {
       await projects.createProject({ title: 'Analytics', color: 'orange' });
 
       expect(projects.createError()).toBeNull();
-      expect(projects.projects().map((project) => project.title)).toContain(
-        'Analytics',
-      );
+      expect(
+        projects.projects().filter((project) => project.title === 'Analytics'),
+      ).toHaveLength(1);
       expect(projects.isCreating()).toBe(false);
     });
 
@@ -85,7 +95,7 @@ describe('a server that refuses', () => {
   });
 
   describe('creating a task', () => {
-    it('accepts one into a project the user can see', async () => {
+    it('accepts one into a project the user can see, once', async () => {
       const project = at(projects.projects());
 
       await tasks.createTask({
@@ -96,10 +106,14 @@ describe('a server that refuses', () => {
       });
 
       expect(tasks.createError()).toBeNull();
-      expect(
-        tasks.tasks().find((task) => task.title === 'Wire the create form')
-          ?.projectId,
-      ).toBe(project.id);
+
+      // Counted, for the reason spelled out over the project case above.
+      const created = tasks
+        .tasks()
+        .filter((task) => task.title === 'Wire the create form');
+
+      expect(created).toHaveLength(1);
+      expect(at(created).projectId).toBe(project.id);
     });
 
     it('refuses a project it cannot find', async () => {
