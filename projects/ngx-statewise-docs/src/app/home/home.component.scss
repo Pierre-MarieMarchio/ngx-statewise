@@ -14,28 +14,52 @@
 }
 
 /* --- Hero ----------------------------------------------------------------
-   Identity, argument, and the way in, in that order and all above the fold on
-   a laptop. With the diagram between the argument and the buttons, "Get
-   started" fell below 768px and the pitch read as a caption for the drawing. */
+   Argument on the left, mark on the right. Stacked, the lockup pushed the
+   sentence down the page and left the other half of the row empty; side by
+   side, each holds up its own end. The heading comes first in the markup
+   whatever the columns do, so the page still announces its name first. */
+.hero {
+  display: grid;
+  gap: var(--space-6);
+  align-items: center;
+}
+
+@media (min-width: 60rem) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+  }
+
+  .hero__title {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+  }
+
+  .hero__lead {
+    grid-column: 1;
+    grid-row: 1;
+  }
+}
+
 .hero__title {
   margin: 0;
   line-height: 0;
 }
 
 .hero__logo {
-  width: clamp(8rem, 22vw, 10.5rem);
+  width: clamp(8rem, 26vw, 17rem);
   height: auto;
 }
 
 .hero__subtitle {
-  margin: var(--space-4) 0 0;
+  margin: 0;
   color: var(--text-muted);
   font-size: var(--text-md);
 }
 
 .hero__thesis {
   max-width: 22ch;
-  margin: var(--space-5) 0 0;
+  margin: var(--space-4) 0 0;
   color: var(--text-strong);
   font-size: clamp(1.875rem, 5vw, 3.5rem);
   font-weight: var(--weight-semibold);

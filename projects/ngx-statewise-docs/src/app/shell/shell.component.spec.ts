@@ -77,28 +77,34 @@ describe('ShellComponent', () => {
     );
   });
 
-  it('offers the three theme choices, and marks the current one', () => {
+  it('offers the three theme choices in the sidebar, and marks the current one', () => {
     const host = mount().nativeElement as HTMLElement;
-    const items = host.querySelectorAll('#theme-menu .menu__item');
+    const choices = host.querySelectorAll(
+      '.sidebar__footer button.setting__choice',
+    );
 
-    expect(items.length).toBe(3);
-    expect([...items].map((item) => item.textContent?.trim())).toEqual([
+    expect(choices.length).toBe(3);
+    expect([...choices].map((choice) => choice.getAttribute('title'))).toEqual([
       'Light',
       'Dark',
       'System',
     ]);
     // Nothing stored, so the default choice is system.
     expect(
-      host.querySelector('#theme-menu [aria-pressed="true"]')?.textContent,
-    ).toContain('System');
+      host
+        .querySelector('.sidebar__footer [aria-pressed="true"]')
+        ?.getAttribute('title'),
+    ).toBe('System');
   });
 
   it('writes the picked theme onto the document', async () => {
     const fixture = mount();
     const host = fixture.nativeElement as HTMLElement;
     const light = [
-      ...host.querySelectorAll<HTMLButtonElement>('#theme-menu .menu__item'),
-    ].find((item) => item.textContent?.includes('Light'));
+      ...host.querySelectorAll<HTMLButtonElement>(
+        '.sidebar__footer button.setting__choice',
+      ),
+    ].find((choice) => choice.getAttribute('title') === 'Light');
 
     light?.click();
     await drainEffects();
@@ -106,6 +112,16 @@ describe('ShellComponent', () => {
 
     expect(document.documentElement.classList.contains('light')).toBe(true);
     expect(document.documentElement.classList.contains('dark')).toBe(false);
+  });
+
+  it('leads back to the landing page from above the guide', () => {
+    const host = mount().nativeElement as HTMLElement;
+    const nav = host.querySelector('.sidebar__inner');
+
+    // The first thing in the navigation, before any section: the landing page
+    // is the way out of the guide, not a chapter of it.
+    expect(nav?.firstElementChild?.className).toContain('sidebar__home');
+    expect(nav?.firstElementChild?.textContent?.trim()).toBe('Home');
   });
 
   it('opens the navigation drawer from the header button', () => {
@@ -141,18 +157,20 @@ describe('ShellComponent', () => {
 
   it('offers every locale, and says which one is being read', () => {
     const host = mount('guide/effects').nativeElement as HTMLElement;
-    const options = host.querySelectorAll('#language-menu .menu__item');
+    const options = host.querySelectorAll('.sidebar__footer a.setting__choice');
 
     // Every locale, not only the alternates: hiding the current one leaves
     // nothing saying which language the page is in.
     expect(options.length).toBe(LOCALES.length);
 
-    const current = host.querySelector('#language-menu [aria-current="true"]');
+    const current = host.querySelector(
+      '.sidebar__footer [aria-current="true"]',
+    );
 
     expect(current?.textContent).toContain('English');
 
     const alternate = host.querySelector<HTMLAnchorElement>(
-      '#language-menu .menu__item[hreflang="fr"]',
+      '.sidebar__footer a.setting__choice[hreflang="fr"]',
     );
 
     expect(alternate?.getAttribute('href')).toBe('/fr/guide/effects');

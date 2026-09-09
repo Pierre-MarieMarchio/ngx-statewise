@@ -55,70 +55,6 @@
       <kbd class="header__search-keys">⌘K</kbd>
     </button>
 
-    <!-- Popovers rather than a hand-rolled dropdown: light dismiss, Escape and
-         the top layer come from the platform. -->
-    <div class="menu">
-      <button
-        class="header__icon-button menu__trigger menu__trigger--theme"
-        type="button"
-        popovertarget="theme-menu"
-        [attr.aria-label]="text().theme"
-        [title]="text().theme"
-      >
-        <docs-icon [name]="themeIcon()" />
-      </button>
-
-      <div class="menu__panel" id="theme-menu" popover>
-        <p class="menu__title">{{ text().theme }}</p>
-        @for (option of themeOptions(); track option.choice) {
-          <button
-            class="menu__item"
-            type="button"
-            popovertarget="theme-menu"
-            popovertargetaction="hide"
-            [attr.aria-pressed]="option.isCurrent"
-            (click)="chooseTheme(option.choice)"
-          >
-            <docs-icon class="menu__item-icon" [name]="option.icon" />
-            <span class="menu__item-label">{{ option.label }}</span>
-            @if (option.isCurrent) {
-              <docs-icon class="menu__item-check" name="check" />
-            }
-          </button>
-        }
-      </div>
-    </div>
-
-    <div class="menu">
-      <button
-        class="header__icon-button menu__trigger menu__trigger--language"
-        type="button"
-        popovertarget="language-menu"
-        [attr.aria-label]="text().language"
-        [title]="text().language"
-      >
-        <docs-icon name="translate" />
-      </button>
-
-      <div class="menu__panel" id="language-menu" popover>
-        <p class="menu__title">{{ text().language }}</p>
-        @for (option of localeOptions(); track option.locale.code) {
-          <a
-            class="menu__item"
-            [href]="option.href"
-            [attr.hreflang]="option.locale.htmlLang"
-            [attr.lang]="option.locale.htmlLang"
-            [attr.aria-current]="option.isCurrent ? 'true' : null"
-          >
-            <span class="menu__item-label">{{ option.locale.label }}</span>
-            @if (option.isCurrent) {
-              <docs-icon class="menu__item-check" name="check" />
-            }
-          </a>
-        }
-      </div>
-    </div>
-
     <a class="header__link" [href]="npmUrl" target="_blank" rel="noreferrer">
       npm
     </a>
@@ -143,27 +79,96 @@
   [class.layout--landing]="isLanding()"
 >
   <nav class="sidebar" id="sidebar" [attr.aria-label]="text().guideNavLabel">
-    <!-- The drawer animates its row height; the inner element is what keeps
-         the content from being squashed while it does. -->
-    <div class="sidebar__inner">
-      @for (section of sections; track section.title.en) {
-        <p class="sidebar__section">{{ section.title[locale.code] }}</p>
-        <ul class="sidebar__list" role="list">
-          @for (page of section.pages; track page.slug) {
-            <li>
-              <a
-                class="sidebar__link"
-                routerLinkActive="sidebar__link--active"
-                [routerLink]="pageLink(page.slug)"
-                [title]="page.summary[locale.code]"
-                (click)="closeNav()"
+    <!-- The drawer animates its row height; this element is what keeps the
+         content from being squashed while it does, and it holds both the
+         links and the settings so the drawer takes them together. -->
+    <div class="sidebar__panel">
+      <div class="sidebar__inner">
+        <!-- Above the sections, and outside them: the landing page is not a
+           chapter of the guide, it is the way back out of it. -->
+        <a
+          class="sidebar__home"
+          routerLinkActive="sidebar__home--active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          [routerLink]="homeLink()"
+          (click)="closeNav()"
+        >
+          <docs-icon class="sidebar__home-icon" name="home" />
+          {{ text().breadcrumbHome }}
+        </a>
+
+        @for (section of sections; track section.title.en) {
+          <p class="sidebar__section">{{ section.title[locale.code] }}</p>
+          <ul class="sidebar__list" role="list">
+            @for (page of section.pages; track page.slug) {
+              <li>
+                <a
+                  class="sidebar__link"
+                  routerLinkActive="sidebar__link--active"
+                  [routerLink]="pageLink(page.slug)"
+                  [title]="page.summary[locale.code]"
+                  (click)="closeNav()"
+                >
+                  {{ page.title[locale.code] }}
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <!--
+      Where the reader's own settings live, at the foot of the navigation
+      rather than in the header. Both are shown open instead of behind a
+      menu: three themes and two languages fit, and a control you can see is
+      one fewer click than a control you have to find.
+    -->
+      <div class="sidebar__footer">
+        <div class="setting">
+          <p class="setting__label" id="theme-label">{{ text().theme }}</p>
+          <div
+            class="setting__choices"
+            role="group"
+            aria-labelledby="theme-label"
+          >
+            @for (option of themeOptions(); track option.choice) {
+              <button
+                class="setting__choice"
+                type="button"
+                [attr.aria-pressed]="option.isCurrent"
+                [title]="option.label"
+                [attr.aria-label]="option.label"
+                (click)="chooseTheme(option.choice)"
               >
-                {{ page.title[locale.code] }}
+                <docs-icon [name]="option.icon" />
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="setting">
+          <p class="setting__label" id="language-label">
+            {{ text().language }}
+          </p>
+          <div
+            class="setting__choices"
+            role="group"
+            aria-labelledby="language-label"
+          >
+            @for (option of localeOptions(); track option.locale.code) {
+              <a
+                class="setting__choice setting__choice--text"
+                [href]="option.href"
+                [attr.hreflang]="option.locale.htmlLang"
+                [attr.lang]="option.locale.htmlLang"
+                [attr.aria-current]="option.isCurrent ? 'true' : null"
+              >
+                {{ option.locale.label }}
               </a>
-            </li>
-          }
-        </ul>
-      }
+            }
+          </div>
+        </div>
+      </div>
     </div>
   </nav>
 

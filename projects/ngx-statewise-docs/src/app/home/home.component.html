@@ -1,3 +1,9 @@
+<!--
+  The mark is the counterweight, not the opening: the header already carries
+  the name, and stacking the lockup above the argument pushed the argument
+  down while leaving half the row empty. Here it holds the right of the hero
+  and the sentence gets the left, which is the half a reader starts on.
+-->
 <section class="hero">
   <h1 class="hero__title">
     <img
@@ -8,26 +14,29 @@
       height="520"
     />
   </h1>
-  <p class="hero__subtitle">{{ text().homeSubtitle }}</p>
 
-  <p class="hero__thesis">{{ text().homeThesis }}</p>
+  <div class="hero__lead">
+    <p class="hero__subtitle">{{ text().homeSubtitle }}</p>
 
-  <p class="hero__tagline">{{ text().homeTagline }}</p>
+    <p class="hero__thesis">{{ text().homeThesis }}</p>
 
-  <div class="hero__actions">
-    <a
-      class="button button--primary"
-      [routerLink]="pageLink('getting-started')"
-    >
-      {{ text().homeGetStarted }}
-    </a>
-    <a class="button" [routerLink]="pageLink('introduction')">
-      {{ text().homeReadTheGuide }}
-    </a>
-    <code class="hero__install">npm install ngx-statewise</code>
+    <p class="hero__tagline">{{ text().homeTagline }}</p>
+
+    <div class="hero__actions">
+      <a
+        class="button button--primary"
+        [routerLink]="pageLink('getting-started')"
+      >
+        {{ text().homeGetStarted }}
+      </a>
+      <a class="button" [routerLink]="pageLink('introduction')">
+        {{ text().homeReadTheGuide }}
+      </a>
+      <code class="hero__install">npm install ngx-statewise</code>
+    </div>
+
+    <p class="hero__size">{{ sizeSentence() }}</p>
   </div>
-
-  <p class="hero__size">{{ sizeSentence() }}</p>
 </section>
 
 <docs-flow-demo class="landing__demo" />
