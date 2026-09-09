@@ -112,6 +112,31 @@ has to be settled before effects run.
 
 See [Updaters](/guide/updaters).
 
+### requestStatus
+
+```typescript
+function requestStatus<State, Actions>(
+  on: On<State>,
+  actions: Actions,
+  status: {
+    loading: (state: State) => WritableSignal<boolean>;
+    error: (state: State) => WritableSignal<boolean>;
+    onRequest?: (state: State, payload: …) => undefined;
+    onSuccess?: (state: State, payload: …) => undefined;
+    onFailure?: (state: State, payload: …) => undefined;
+  },
+): void;
+```
+
+Called inside `defineUpdater`, with its `on`. Writes the three handlers of a
+`request` / `success` / `failure` group onto two boolean signals: `request`
+raises `loading` and **clears `error`**, `success` drops `loading`, `failure`
+drops `loading` and raises `error`.
+
+The three handlers are optional, take the payload of their own action, and run
+after the flags are settled. See
+[Request status](/guide/updaters#request-status) for what it does not cover.
+
 ## Effects
 
 ### createEffect
@@ -121,6 +146,7 @@ See [Updaters](/guide/updaters).
 function createEffect<Creator>(
   action: Creator,
   handler: EffectHandler<Creator>,
+  options?: EffectOptions<Creator>,
 ): EffectRef;
 ```
 
@@ -129,8 +155,9 @@ declaring it. The registration lasts as long as that injector, so an effect
 class scoped to a component or a route is unregistered on destruction instead
 of piling up a duplicate on every instantiation.
 
-The handler receives the action payload when there is one. What it returns is
-executed in the same dispatch, and awaited by `dispatchAsync`:
+The handler receives the action payload when there is one, then the context of
+its own run. What it returns is executed in the same dispatch, and awaited by
+`dispatchAsync`:
 
 | Returned                       | Effect                                     |
 | ------------------------------ | ------------------------------------------ |
@@ -143,7 +170,33 @@ executed in the same dispatch, and awaited by `dispatchAsync`:
 > Never return the action that triggered the effect. It produces an infinite
 > cascade, and nothing stops it for you.
 
-See [Effects](/guide/effects).
+`options` governs the runs of the effect. Left out, every run goes on side by
+side, which is what the engine has always done.
+
+| Option        | Type                                | Default             |
+| ------------- | ----------------------------------- | ------------------- |
+| `concurrency` | `'parallel' \| 'latest' \| 'first'` | `'parallel'`        |
+| `key`         | `(payload) => string`               | every run one group |
+| `cancelOn`    | a creator, or an array of them      | none                |
+| `mustAnswer`  | `boolean`                           | `false`             |
+
+`key` reads the payload, so it is offered only for an action that carries one.
+
+See [Governing the runs](/guide/effects#governing-the-runs) for what each of
+them costs, and [Effects](/guide/effects) for the rest.
+
+### EffectContext
+
+```typescript
+interface EffectContext {
+  readonly abortSignal: AbortSignal;
+}
+```
+
+The handler's last parameter. `abortSignal` is aborted when the run is
+superseded under `'latest'` or abandoned through `cancelOn`, and hand it to
+whatever accepts one so the work stops rather than merely being ignored. An
+effect declaring neither is never abandoned, and its signal never fires.
 
 ### EffectRef
 
@@ -155,6 +208,46 @@ interface EffectRef {
 
 Unregisters the effect before its injector is destroyed. Ignoring the returned
 handle is fine — the injector cleans up on its own.
+
+## Interceptors
+
+### createInterceptor
+
+<!-- prettier-ignore -->
+```typescript
+function createInterceptor<Creator>(
+  action: Creator,
+  handler: InterceptorHandler<Creator>,
+): InterceptorRef;
+```
+
+Registers an interceptor for one action, in the injection context of the class
+declaring it. It is asked on every dispatch of that action, before the updater
+is applied, and the registration lasts as long as that injector, on the same
+rules as `createEffect`.
+
+The handler receives the action payload when there is one, and is synchronous:
+an `async` handler is a compile error, because the state has to be settled
+before effects run. Only `false` refuses, and returning nothing lets the action
+through.
+
+Refusing stops the action there: no state update, no effect, no history entry.
+`dispatchAsync` resolves rather than rejecting, because a refusal is an
+expected outcome and not a failure, and nothing reaches Angular's
+`ErrorHandler` either.
+
+See [Interceptors](/guide/interceptors).
+
+### InterceptorRef
+
+```typescript
+interface InterceptorRef {
+  destroy(): void;
+}
+```
+
+Unregisters the interceptor before its injector is destroyed. Ignoring the
+returned handle is fine — the injector cleans up on its own.
 
 ## Dispatching
 
@@ -187,31 +280,6 @@ action both work.
 
 The action history is deliberately not here: it is application-wide, and a
 scoped handle is the wrong place to read it from.
-
-### requestStatus
-
-```typescript
-function requestStatus<State, Actions>(
-  on: On<State>,
-  actions: Actions,
-  status: {
-    loading: (state: State) => WritableSignal<boolean>;
-    error: (state: State) => WritableSignal<boolean>;
-    onRequest?: (state: State, payload: …) => undefined;
-    onSuccess?: (state: State, payload: …) => undefined;
-    onFailure?: (state: State, payload: …) => undefined;
-  },
-): void;
-```
-
-Called inside `defineUpdater`, with its `on`. Writes the three handlers of a
-`request` / `success` / `failure` group onto two boolean signals: `request`
-raises `loading` and **clears `error`**, `success` drops `loading`, `failure`
-drops `loading` and raises `error`.
-
-The three handlers are optional, take the payload of their own action, and run
-after the flags are settled. See
-[Request status](/guide/updaters#request-status) for what it does not cover.
 
 ### ActionHistory
 
