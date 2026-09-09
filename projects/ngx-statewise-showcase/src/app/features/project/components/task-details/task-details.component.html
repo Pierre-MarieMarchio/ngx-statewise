@@ -20,13 +20,14 @@
 
     <div class="task-meta">
       <mat-chip-set>
-        <mat-chip [class]="'status-' + selectedTask()!.status" selected>
+        <!-- `selected` is MatChipOption's; on a plain MatChip it is inert. -->
+        <mat-chip [class]="'status-' + selectedTask()!.status" highlighted>
           <mat-icon matChipAvatar>{{
             presentation.statusIcon(selectedTask()!.status)
           }}</mat-icon>
           {{ selectedTask()!.status | titlecase }}
         </mat-chip>
-        <mat-chip [class]="'priority-' + selectedTask()!.priority" selected>
+        <mat-chip [class]="'priority-' + selectedTask()!.priority" highlighted>
           <mat-icon matChipAvatar>{{
             presentation.priorityIcon(selectedTask()!.priority)
           }}</mat-icon>
