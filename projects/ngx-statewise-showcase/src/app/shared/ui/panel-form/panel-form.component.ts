@@ -5,6 +5,7 @@ import {
   output,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 /**
  * The shell every form in the side panel wears: a heading, the fields, what
@@ -23,7 +24,7 @@ import { MatButtonModule } from '@angular/material/button';
  */
 @Component({
   selector: 'app-panel-form',
-  imports: [MatButtonModule],
+  imports: [MatButtonModule, MatIconModule],
   templateUrl: './panel-form.component.html',
   styleUrl: './panel-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,8 +1,12 @@
 @if (selectedTask()) {
+  <!--
+    The heading is the task. It used to be the word "Task details" at 2.5 rem
+    above the title at half that, so the largest text on the panel named the
+    container rather than what was in it — and the two forms that share this
+    panel led with a heading of their own, at a third size again.
+  -->
   <div class="task-header">
-    <div class="header-content">
-      <h2 class="header-title">Task details</h2>
-    </div>
+    <h2 class="header-title">{{ selectedTask()!.title }}</h2>
     <div class="task-header-actions">
       @if (editable()) {
         <button
@@ -34,10 +38,6 @@
   </div>
 
   <div class="task-content">
-    <div class="task-title-section">
-      <h2 class="task-title">{{ selectedTask()!.title }}</h2>
-    </div>
-
     <!--
       The same two marks the tables draw, from the same components. They were
       `mat-chip`s here and grey lowercase words there — one idea rendered twice

@@ -1,0 +1,19 @@
+/**
+ * What a refusal looks like, in the one place it is described.
+ *
+ * `app-data-state` framed its failures with an icon and a border while the
+ * forms in the panel showed theirs as bare red text — two treatments of the
+ * same event, and the quieter one was on the message a user has to act on.
+ */
+.error-notice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin: var(--space-3) 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--mat-sys-error);
+  border-radius: 0.2rem;
+  background-color: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}

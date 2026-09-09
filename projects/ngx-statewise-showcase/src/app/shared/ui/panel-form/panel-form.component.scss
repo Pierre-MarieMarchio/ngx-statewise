@@ -7,6 +7,7 @@
 
 .panel-form-title {
   margin: 0;
+  font-size: var(--text-xl);
 }
 
 .panel-form-fields {
@@ -15,8 +16,9 @@
   gap: 1rem;
 }
 
-.panel-form-refusal {
-  margin: 0;
+/* The frame is `.error-notice`; what is left is the icon beside the words. */
+.panel-form-refusal-icon {
+  flex: 0 0 auto;
   color: var(--mat-sys-error);
 }
 

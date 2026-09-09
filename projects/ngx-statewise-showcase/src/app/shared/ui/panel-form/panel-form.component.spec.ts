@@ -74,9 +74,10 @@ describe('PanelFormComponent', () => {
     fixture.componentInstance.refusal.set('a project is already called that');
     fixture.detectChanges();
 
+    // The words, past the icon that now frames them like every other failure.
     expect(
       (fixture.nativeElement as HTMLElement)
-        .querySelector('[role="alert"]')
+        .querySelector('[role="alert"] span')
         ?.textContent?.trim(),
     ).toBe('a project is already called that');
   });

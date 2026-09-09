@@ -1,37 +1,28 @@
 .task-header {
-  padding: 16px 20px;
   display: flex;
+  gap: var(--space-4);
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  padding: var(--space-2) var(--space-1) var(--space-4);
 
   .task-header-actions {
     display: flex;
     align-items: center;
+    flex: 0 0 auto;
   }
 
-  .header-content {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    .header-title {
-      font-size: 2.5rem;
-      margin: 0;
-    }
+  /* The same weight the two forms lead with — one panel, one heading size. */
+  .header-title {
+    margin: 0;
+    font-size: var(--text-xl);
+    line-height: 1.3;
   }
 }
 
 .task-content {
   flex: 1;
-  padding: 1rem;
+  padding: 0 var(--space-1);
   overflow-y: auto;
-
-  .task-title-section {
-    margin-bottom: 1rem;
-
-    .task-title {
-      margin: 0;
-    }
-  }
 
   /* Two marks in a row; what they look like is the badges' own business. */
   .task-meta {

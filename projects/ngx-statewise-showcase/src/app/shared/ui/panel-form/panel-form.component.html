@@ -6,7 +6,12 @@
 
 @if (refusal()) {
   <!-- role="alert" so a screen reader is told without having to go looking. -->
-  <p class="panel-form-refusal" role="alert">{{ refusal() }}</p>
+  <p class="panel-form-refusal error-notice" role="alert">
+    <mat-icon class="panel-form-refusal-icon" aria-hidden="true"
+      >error_outline</mat-icon
+    >
+    <span>{{ refusal() }}</span>
+  </p>
 }
 
 <div class="panel-form-actions">
