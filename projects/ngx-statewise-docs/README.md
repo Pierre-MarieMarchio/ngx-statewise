@@ -24,6 +24,9 @@ src/app/
     i18n/                             the five locales and the interface strings
     ui-state/                         the theme and the drawers
       states/docs-ui/                 action, effect, manager, state, updater
+      models/theme.model.ts           the theme's types and constants
+      utils/theme.utils.ts            resolving a choice against the system
+      services/                       reading the document, the media query, storage
     site.ts                           the repository, npm and version claims
   features/
     guide/                            content, metadata, rendering, search index
@@ -49,8 +52,15 @@ Two groupings, both the showcase's:
   five files for one concept, so they are the fastest way to make a folder
   unreadable when they are loose in it, and a second state would double that.
 
-Neither grouping is only tidiness: it is where a reader of the showcase already
-looks, and it means adding a component or a second state moves nothing.
+Everything else in a folder is sorted the same way as in the showcase:
+`models/<name>.model.ts` for types and the constants that belong with them,
+`utils/<name>.utils.ts` for pure functions, `services/<name>.service.ts` for
+what needs injecting. `utils/` carries no barrel, exactly as `core/utils/` in
+the showcase carries none.
+
+None of this is only tidiness: it is where a reader of the showcase already
+looks, and it means adding a component, a second state or a second service
+moves nothing.
 
 Same four layers as
 [the showcase](../ngx-statewise-showcase), because a reader who knows one

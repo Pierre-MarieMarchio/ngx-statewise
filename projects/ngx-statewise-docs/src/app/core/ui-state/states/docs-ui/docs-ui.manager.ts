@@ -3,9 +3,9 @@ import { injectStatewise } from 'ngx-statewise';
 import { navActions, themeActions } from './docs-ui.action';
 import { docsUiUpdater } from './docs-ui.updater';
 import { DocsUiState } from './docs-ui.state';
-import { resolveTheme } from '../../resolve-theme';
-import { ThemeEnvironment } from '../../theme-environment.service';
-import type { ThemeChoice } from '../../theme';
+import { resolveTheme } from '../../utils/theme.utils';
+import { ThemeEnvironment } from '../../services/theme-environment.service';
+import type { ThemeChoice } from '../../models/theme.model';
 
 @Injectable({ providedIn: 'root' })
 export class DocsUiManager {

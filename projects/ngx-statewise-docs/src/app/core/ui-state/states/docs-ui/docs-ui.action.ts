@@ -1,5 +1,5 @@
 import { defineActionsGroup, emptyPayload, payload } from 'ngx-statewise';
-import type { Theme, ThemeChoice } from '../../theme';
+import type { Theme, ThemeChoice } from '../../models/theme.model';
 
 export const themeActions = defineActionsGroup({
   source: 'THEME',
