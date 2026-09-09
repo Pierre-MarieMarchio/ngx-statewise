@@ -9,7 +9,7 @@
   >
     <mat-form-field subscriptSizing="dynamic" appearance="outline">
       <mat-label>Title</mat-label>
-      <input formControlName="title" matInput required />
+      <input formControlName="title" matInput required aria-label="Title" />
       @if (form.controls.title.hasError('required')) {
         <mat-error>A title is required.</mat-error>
       }

@@ -13,7 +13,13 @@
     <mat-card-content class="login-card-content">
       <mat-form-field subscriptSizing="dynamic" appearance="outline">
         <mat-label>E-mail</mat-label>
-        <input formControlName="email" matInput type="email" required />
+        <input
+          formControlName="email"
+          matInput
+          type="email"
+          required
+          aria-label="E-mail"
+        />
         <!-- Material wires mat-error to the input through aria-describedby. -->
         @if (loginForm.controls.email.hasError('required')) {
           <mat-error>An e-mail is required.</mat-error>
@@ -27,6 +33,7 @@
           [type]="isPasswordHided() ? 'password' : 'text'"
           matInput
           required
+          aria-label="Password"
         />
         <button
           type="button"

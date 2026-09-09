@@ -68,8 +68,14 @@
   color: var(--color-secondary);
 }
 
+/*
+ * The generic family at the end is what a machine falls back on when the icon
+ * font has not loaded — without one the browser picks whatever its default is,
+ * which for a ligature font is how a page ends up reading the word "delete"
+ * where an icon belongs.
+ */
 mat-icon {
-  font-family: 'Material Symbols Outlined';
+  font-family: 'Material Symbols Outlined', sans-serif;
   font-variation-settings:
     'FILL' 0,
     'wght' 200,
