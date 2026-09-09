@@ -20,7 +20,7 @@ import {
 // the action types it claims when its module loads, which is what lets the
 // engine recognise a misrouted dispatch of one of them.
 import { taskUpdater } from '@app/features/project/states/task/task.updater';
-import { noticeUpdater } from '@app/features/state-inspection/states';
+import { noticeUpdater } from '@app/features/inspection/states';
 import { LiveStatePageComponent } from './live-state-page.component';
 
 describe('LiveStatePageComponent', () => {

@@ -15,11 +15,8 @@ import {
   type Action,
 } from 'ngx-statewise';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
-import { noticeActions } from '@app/features/state-inspection/states';
-import {
-  tallyActions,
-  tallyUpdater,
-} from '@app/features/state-inspection/states';
+import { noticeActions } from '@app/features/inspection/states';
+import { tallyActions, tallyUpdater } from '@app/features/inspection/states';
 import { getAllTaskActions } from '@app/features/project/states/task/task.action';
 import { getAllProjectsActions } from '@app/features/project/states/project/project.action';
 

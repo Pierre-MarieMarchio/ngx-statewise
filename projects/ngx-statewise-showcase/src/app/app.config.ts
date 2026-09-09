@@ -23,7 +23,7 @@ import {
 } from './features/auth/states';
 import { TaskEffect, TaskManager } from './features/project/states';
 import { ProjectEffect, ProjectManager } from './features/project/states';
-import { noticeUpdater } from './features/state-inspection/states';
+import { noticeUpdater } from './features/inspection/states';
 import {
   AUTH_MANAGER,
   PROJECT_MANAGER,

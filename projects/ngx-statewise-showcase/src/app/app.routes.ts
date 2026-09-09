@@ -45,7 +45,7 @@ export const routes: Routes = [
   {
     path: 'state',
     loadComponent: () =>
-      import('./features/state-inspection/pages/live-state-page/live-state-page.component').then(
+      import('./features/inspection/pages/live-state-page/live-state-page.component').then(
         (m) => m.LiveStatePageComponent,
       ),
     title: 'Ngx-Statewise',
@@ -54,7 +54,7 @@ export const routes: Routes = [
   {
     path: 'history',
     loadComponent: () =>
-      import('./features/state-inspection/pages/history-page/history-page.component').then(
+      import('./features/inspection/pages/history-page/history-page.component').then(
         (m) => m.HistoryPageComponent,
       ),
     title: 'Ngx-Statewise',
