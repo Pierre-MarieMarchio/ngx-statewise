@@ -4,6 +4,7 @@ import { EMPTY, of } from 'rxjs';
 
 import {
   createEffect,
+  createInterceptor,
   defineActionsGroup,
   defineSingleAction,
   defineUpdater,
@@ -76,6 +77,11 @@ const orderedActions = defineActionsGroup({
   source: 'Ordered',
   events: { appended: payload<string>() },
 });
+/** Guarded by an interceptor refusing the payload `'refused'`. */
+const guardedActions = defineActionsGroup({
+  source: 'Guarded',
+  events: { requested: payload<string>() },
+});
 /** Two effects returning each other's action: the cascade never ends. */
 const cycleActions = defineActionsGroup({
   source: 'Cycle',
@@ -92,6 +98,7 @@ let cascadeFirstFinished: Deferred;
 let concurrentStarted: Map<string, Deferred>;
 let concurrentGates: Map<string, Deferred>;
 let scopedEffectRuns: string[];
+let guardedEffectRuns: string[];
 
 @Injectable()
 class ContractEffects {
@@ -147,6 +154,19 @@ class ContractEffects {
     return scopedActions.applied(value);
   });
 
+  private readonly guarded = createEffect(guardedActions.requested, (value) => {
+    guardedEffectRuns.push(value);
+  });
+
+  /**
+   * Declared beside the effects, in the same injection context: an
+   * interceptor needs one, and nothing more.
+   */
+  private readonly guard = createInterceptor(
+    guardedActions.requested,
+    (value) => value !== 'refused',
+  );
+
   private readonly cyclePing = createEffect(cycleActions.pinged, () =>
     cycleActions.ponged(),
   );
@@ -187,6 +207,12 @@ const failingUpdater = defineUpdater(FIRST_STATE, (on) => {
   });
 });
 
+const guardedUpdater = defineUpdater(FIRST_STATE, (on) => {
+  on(guardedActions.requested, (state, value) => {
+    state.completed.push(value);
+  });
+});
+
 const orderedUpdater = defineUpdater(FIRST_STATE, (on) => {
   on(orderedActions.appended, (state, value) => {
     state.completed.push(value);
@@ -214,6 +240,7 @@ describe('public execution contract', () => {
     concurrentStarted = new Map();
     concurrentGates = new Map();
     scopedEffectRuns = [];
+    guardedEffectRuns = [];
     firstState = { completed: [] };
     secondState = { completed: [] };
     handledErrors = [];
@@ -302,6 +329,49 @@ describe('public execution contract', () => {
     expect((handledErrors[0] as Error).message).toBe(
       'unexpected effect failure',
     );
+  });
+
+  describe('an interceptor refusing an action', () => {
+    /**
+     * The consequences of a refusal, asserted one at a time: asserting them
+     * together would not say which of them holds.
+     */
+    function refuse(): Promise<void> {
+      return manager(guardedUpdater).dispatchAsync(
+        guardedActions.requested('refused'),
+      );
+    }
+
+    it('resolves the dispatch rather than failing it', async () => {
+      await expect(refuse()).resolves.not.toThrow();
+    });
+
+    it('applies no updater', async () => {
+      await refuse();
+
+      expect(firstState.completed).toEqual([]);
+    });
+
+    it('starts no effect', async () => {
+      await refuse();
+
+      expect(guardedEffectRuns).toEqual([]);
+    });
+
+    it('reports nothing to the ErrorHandler', async () => {
+      await refuse();
+
+      expect(handledErrors).toEqual([]);
+    });
+
+    it('leaves the action it grants entirely untouched', async () => {
+      await manager(guardedUpdater).dispatchAsync(
+        guardedActions.requested('granted'),
+      );
+
+      expect(firstState.completed).toEqual(['granted']);
+      expect(guardedEffectRuns).toEqual(['granted']);
+    });
   });
 
   describe('a cascade that never ends', () => {

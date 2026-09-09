@@ -28,6 +28,7 @@ import {
 } from '../dispatch/misrouted-dispatch';
 import { EffectRegistry } from '../effect/effect-registry';
 import { PendingEffects } from '../effect/pending-effects';
+import { InterceptorRegistry } from '../interceptor/interceptor-registry';
 import { RunningEffects } from '../effect/running-effects';
 import { indexUpdaters, resolveUpdaters } from '../updater/resolve-updaters';
 import type { Updater } from '../updater/updater-definition';
@@ -84,6 +85,7 @@ export function provideStatewise(
 
   return makeEnvironmentProviders([
     EffectRegistry,
+    InterceptorRegistry,
     PendingEffects,
     RunningEffects,
     GlobalUpdaterRegistry,
