@@ -3,21 +3,21 @@
     <p class="empty-state">No project to group the tasks by.</p>
   } @else {
     <mat-accordion displayMode="flat" multi>
-      @for (project of projectManager.projects(); track project.id) {
+      @for (group of groups(); track group.project.id) {
         <mat-expansion-panel
           togglePosition="before"
           class="project-task-list-expansion-panel"
         >
           <mat-expansion-panel-header>
-            <mat-panel-title [class]="'tag-' + project.color">
-              {{ project.title }}</mat-panel-title
+            <mat-panel-title [class]="'tag-' + group.project.color">
+              {{ group.project.title }}</mat-panel-title
             >
           </mat-expansion-panel-header>
 
-          @if (!getFilteredTasks(project.id).length) {
+          @if (!group.tasks.length) {
             <p class="empty-state">No task in this project.</p>
           } @else {
-            <table mat-table [dataSource]="getFilteredTasks(project.id)">
+            <table mat-table [dataSource]="group.tasks">
               @for (column of columns(); track column) {
                 <ng-container [matColumnDef]="column.columnDef">
                   <th

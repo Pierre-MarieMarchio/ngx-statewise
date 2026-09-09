@@ -3,20 +3,20 @@
     <p class="empty-state">No project, so no board to draw.</p>
   } @else {
     <mat-accordion class="project-accordion" displayMode="flat" multi>
-      @for (project of projectManager.projects(); track project.id) {
+      @for (board of boards(); track board.project.id) {
         <mat-expansion-panel
           togglePosition="before"
           class="kanban-project-task-expansion-panel"
         >
           <mat-expansion-panel-header>
-            <mat-panel-title [class]="'tag-' + project.color">
-              {{ project.title }}</mat-panel-title
+            <mat-panel-title [class]="'tag-' + board.project.color">
+              {{ board.project.title }}</mat-panel-title
             >
           </mat-expansion-panel-header>
 
           <app-kanban
-            [columns]="columnsOf(project.id)"
-            [group]="project.id"
+            [columns]="board.columns"
+            [group]="board.project.id"
             [cardTypeFor]="cardTypeFor"
             [labelFor]="labelFor"
             (itemMoved)="onTaskMoved($event)"

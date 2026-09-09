@@ -58,15 +58,27 @@
       }
 
       &.priority-low {
-        background-color: rgba(52, 211, 153, 0.25);
+        background-color: color-mix(
+          in srgb,
+          var(--priority-low) 25%,
+          transparent
+        );
       }
 
       &.priority-medium {
-        background-color: rgba(96, 165, 250, 0.25);
+        background-color: color-mix(
+          in srgb,
+          var(--priority-medium) 25%,
+          transparent
+        );
       }
 
       &.priority-high {
-        background-color: rgba(247, 0, 0, 0.25);
+        background-color: color-mix(
+          in srgb,
+          var(--priority-high) 25%,
+          transparent
+        );
       }
     }
   }

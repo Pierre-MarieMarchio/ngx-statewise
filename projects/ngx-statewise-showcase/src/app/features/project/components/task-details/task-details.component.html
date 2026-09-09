@@ -22,13 +22,13 @@
       <mat-chip-set>
         <mat-chip [class]="'status-' + selectedTask()!.status" selected>
           <mat-icon matChipAvatar>{{
-            getStatusIcon(selectedTask()!.status)
+            presentation.statusIcon(selectedTask()!.status)
           }}</mat-icon>
           {{ selectedTask()!.status | titlecase }}
         </mat-chip>
         <mat-chip [class]="'priority-' + selectedTask()!.priority" selected>
           <mat-icon matChipAvatar>{{
-            getPriorityIcon(selectedTask()!.priority)
+            presentation.priorityIcon(selectedTask()!.priority)
           }}</mat-icon>
           {{ selectedTask()!.priority | titlecase }}
         </mat-chip>
@@ -61,7 +61,7 @@
               <div class="section-header">
                 <mat-icon
                   [class.overdue]="
-                    isDueDateOverdue(
+                    presentation.isOverdue(
                       selectedTask()!.dueDate,
                       selectedTask()?.status
                     )
@@ -75,15 +75,17 @@
                 <div
                   class="due-date-content"
                   [class.overdue]="
-                    isDueDateOverdue(
+                    presentation.isOverdue(
                       selectedTask()!.dueDate,
                       selectedTask()?.status
                     )
                   "
                 >
-                  <span>{{ formatDate(selectedTask()!.dueDate!) }}</span>
+                  <span>{{
+                    presentation.formatDate(selectedTask()!.dueDate!)
+                  }}</span>
                   @if (
-                    isDueDateOverdue(
+                    presentation.isOverdue(
                       selectedTask()!.dueDate,
                       selectedTask()?.status
                     )
@@ -163,7 +165,7 @@
                 <strong>Créé le</strong>
               </div>
               <span class="metadata-value">{{
-                formatDate(selectedTask()!.createdAt)
+                presentation.formatDate(selectedTask()!.createdAt)
               }}</span>
             </div>
 
@@ -173,7 +175,7 @@
                 <strong>Modifié le</strong>
               </div>
               <span class="metadata-value">{{
-                formatDate(selectedTask()!.updatedAt)
+                presentation.formatDate(selectedTask()!.updatedAt)
               }}</span>
             </div>
           </div>
