@@ -279,19 +279,14 @@
   }
 }
 
-.sidebar__home-icon {
-  width: 1.05rem;
-  height: 1.05rem;
+.sidebar__home-mark {
+  width: auto;
+  height: 1.1rem;
   flex: none;
-  color: var(--text-faint);
 }
 
 .sidebar__home--active {
   color: var(--mark);
-
-  .sidebar__home-icon {
-    color: var(--mark);
-  }
 }
 
 /* --- The reader's own settings ------------------------------------------
@@ -307,11 +302,12 @@
   border-top: 1px solid var(--border);
 }
 
+/* Label above rather than beside: five language names on one line were wider
+   than the navigation column and spilled over the page. Stacked, the group can
+   grow to whatever the site is translated into next. */
 .setting {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
+  display: grid;
+  gap: var(--space-1);
   padding-left: var(--space-3);
 }
 
@@ -323,6 +319,8 @@
 
 .setting__choices {
   display: flex;
+  flex-wrap: wrap;
+  justify-self: start;
   gap: 2px;
   padding: 2px;
   border: 1px solid var(--border);
@@ -468,6 +466,14 @@
 
 .footer__text {
   margin: 0;
+}
+
+/* Said once, quietly, beside the licence: a reader should know the words
+   around them were not written by someone who speaks their language. */
+.footer__note {
+  margin: 0 0 var(--space-2);
+  color: var(--text-faint);
+  font-size: var(--text-sm);
 }
 
 .footer__link {

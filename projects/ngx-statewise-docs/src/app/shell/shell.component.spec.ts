@@ -121,7 +121,7 @@ describe('ShellComponent', () => {
     // The first thing in the navigation, before any section: the landing page
     // is the way out of the guide, not a chapter of it.
     expect(nav?.firstElementChild?.className).toContain('sidebar__home');
-    expect(nav?.firstElementChild?.textContent?.trim()).toBe('Home');
+    expect(nav?.firstElementChild?.textContent?.trim()).toBe('ngx-statewise');
   });
 
   it('opens the navigation drawer from the header button', () => {
@@ -167,7 +167,10 @@ describe('ShellComponent', () => {
       '.sidebar__footer [aria-current="true"]',
     );
 
-    expect(current?.textContent).toContain('English');
+    // The button prints the code and is named by the language, so five of
+    // them fit in the navigation column.
+    expect(current?.textContent?.trim()).toBe('EN');
+    expect(current?.getAttribute('aria-label')).toBe('English');
 
     const alternate = host.querySelector<HTMLAnchorElement>(
       '.sidebar__footer a.setting__choice[hreflang="fr"]',

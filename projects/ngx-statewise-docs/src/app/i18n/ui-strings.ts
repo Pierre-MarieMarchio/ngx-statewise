@@ -1,5 +1,10 @@
 import type { CalloutKind, CalloutLabels } from '../guide/callout';
 import { DEFAULT_LOCALE, type LocaleCode } from './locale';
+import { DE } from './strings/de';
+import { EN } from './strings/en';
+import { ES } from './strings/es';
+import { FR } from './strings/fr';
+import { PT_BR } from './strings/pt-br';
 
 /**
  * Every string of the interface. The guide itself is markdown, so this covers
@@ -41,6 +46,8 @@ export interface UiStrings {
   readonly footerLicence: string;
   readonly changelog: string;
   readonly versionLabel: string;
+  /** Shown only where the interface was translated automatically. */
+  readonly machineTranslated: string;
   readonly homeSubtitle: string;
   readonly homeThesis: string;
   readonly homeTagline: string;
@@ -81,169 +88,13 @@ export interface UiStrings {
   readonly homeTitle: string;
 }
 
-const EN: UiStrings = {
-  skipToContent: 'Skip to content',
-  openNavigation: 'Open navigation',
-  closeNavigation: 'Close navigation',
-  language: 'Language',
-  guideNavLabel: 'Guide',
-  pagerNavLabel: 'Guide pages',
-  currentLanguage: 'Current language',
-  onThisPage: 'On this page',
-  previousPage: 'Previous',
-  nextPage: 'Next',
-  copyCode: 'Copy code',
-  codeRegion: 'Code sample',
-  tableRegion: 'Table',
-  codeCopied: 'Copied',
-  editThisPage: 'Edit this page on GitHub',
-  breadcrumbHome: 'Home',
-  theme: 'Theme',
-  themeLight: 'Light',
-  themeDark: 'Dark',
-  themeSystem: 'System',
-  search: 'Search',
-  searchLabel: 'Search the guide',
-  searchPlaceholder: 'Search the guide…',
-  searchPrompt: 'Type to search pages and sections.',
-  searchNoResults: 'Nothing matches that.',
-  calloutNote: 'Note',
-  calloutTip: 'Tip',
-  calloutImportant: 'Important',
-  calloutWarning: 'Warning',
-  calloutCaution: 'Careful',
-  untranslatedTitle: 'This page is not translated yet',
-  untranslatedBody: 'It is shown in English.',
-  footerLicence: 'ngx-statewise is released under the GPL-3.0 licence.',
-  changelog: 'Changelog',
-  versionLabel: 'Published version',
-  homeSubtitle: 'Angular state management',
-  homeThesis: 'The state is already written when your effects run.',
-  homeTagline:
-    'Signals for state, actions for intent, effects for everything else. Simpler than NgRx, more structured than doing it by hand.',
-  homeGetStarted: 'Get started',
-  homeReadTheGuide: 'Read the guide',
-  homeFlowTitle: 'The whole flow',
-  homeFlowAction: 'Action',
-  homeFlowActionText: 'carries the intent and its payload.',
-  homeFlowUpdater: 'Updater',
-  homeFlowUpdaterText: 'writes the state, synchronously.',
-  homeFlowEffect: 'Effect',
-  homeFlowEffectText: 'runs the side work, on state already up to date.',
-  homeFlowManager: 'Manager',
-  homeFlowManagerText: 'exposes the signals and dispatches, in its own scope.',
-  homeFlowReturn: 'may return an action',
-  homeFlowSynchronous: 'synchronous',
-  homeFlowAsynchronous: 'asynchronous',
-  homeShapeTitle: 'What you write',
-  homeShapeNote:
-    'That is the whole surface for one feature. The rest of the guide is what happens when a flow gets harder than a login.',
-  homeSize: 'The whole library is {size} kB minified and gzipped.',
-  demoRun: 'Dispatch loginRequest',
-  demoReset: 'Reset',
-  demoStateTitle: 'State',
-  demoJournalTitle: 'Dispatched',
-  demoReturned: 'returned by the effect',
-  demoEmpty: 'Nothing dispatched yet.',
-  demoStatusIdle: 'Idle. Press the button to send an action.',
-  demoStatusRunning:
-    'The updater has already written the state. The effect is working.',
-  demoStatusDone:
-    'The effect answered with an action, and its updater wrote the state again.',
-  demoNote:
-    'This runs on the real library. The action and the updater are one synchronous tick, so they finish before the effect starts — the wait you can see is the effect, and nothing else.',
-  homeCompareTitle: 'What it replaces',
-  homeCompareByHand: 'By hand',
-  homeCompareWith: 'With ngx-statewise',
-  homeNotForTitle: 'When not to use it',
-  homeNotForLead: 'Three cases where something else will serve you better.',
-  homeDoorsTitle: 'Where to start',
-  homeContentsTitle: 'Contents',
-  homeTitle: 'ngx-statewise — state management for Angular',
+const BY_LOCALE: Record<LocaleCode, UiStrings> = {
+  en: EN,
+  fr: FR,
+  es: ES,
+  de: DE,
+  'pt-BR': PT_BR,
 };
-
-const FR: UiStrings = {
-  skipToContent: 'Aller au contenu',
-  openNavigation: 'Ouvrir la navigation',
-  closeNavigation: 'Fermer la navigation',
-  language: 'Langue',
-  guideNavLabel: 'Guide',
-  pagerNavLabel: 'Pages du guide',
-  currentLanguage: 'Langue actuelle',
-  onThisPage: 'Sur cette page',
-  previousPage: 'Précédent',
-  nextPage: 'Suivant',
-  copyCode: 'Copier le code',
-  codeRegion: 'Extrait de code',
-  tableRegion: 'Tableau',
-  codeCopied: 'Copié',
-  editThisPage: 'Modifier cette page sur GitHub',
-  breadcrumbHome: 'Accueil',
-  theme: 'Thème',
-  themeLight: 'Clair',
-  themeDark: 'Sombre',
-  themeSystem: 'Système',
-  search: 'Rechercher',
-  searchLabel: 'Rechercher dans le guide',
-  searchPlaceholder: 'Rechercher dans le guide…',
-  searchPrompt: 'Tapez pour chercher une page ou une section.',
-  searchNoResults: 'Aucun résultat.',
-  calloutNote: 'Remarque',
-  calloutTip: 'Astuce',
-  calloutImportant: 'Important',
-  calloutWarning: 'Attention',
-  calloutCaution: 'Prudence',
-  untranslatedTitle: "Cette page n'est pas encore traduite",
-  untranslatedBody: 'Elle est affichée en anglais.',
-  footerLicence: 'ngx-statewise est publié sous licence GPL-3.0.',
-  changelog: 'Journal des versions',
-  versionLabel: 'Version publiée',
-  homeSubtitle: 'Gestion d’état pour Angular',
-  homeThesis: 'L’état est déjà écrit quand vos effects démarrent.',
-  homeTagline:
-    'Des signals pour l’état, des actions pour l’intention, des effects pour tout le reste. Plus simple que NgRx, plus structuré qu’à la main.',
-  homeGetStarted: 'Commencer',
-  homeReadTheGuide: 'Lire le guide',
-  homeFlowTitle: 'Tout le flux',
-  homeFlowAction: 'Action',
-  homeFlowActionText: 'porte l’intention et sa charge utile.',
-  homeFlowUpdater: 'Updater',
-  homeFlowUpdaterText: 'écrit l’état, de façon synchrone.',
-  homeFlowEffect: 'Effect',
-  homeFlowEffectText: 'exécute le travail annexe, sur un état déjà à jour.',
-  homeFlowManager: 'Manager',
-  homeFlowManagerText:
-    'expose les signals et dispatche, dans sa propre portée.',
-  homeFlowReturn: 'peut renvoyer une action',
-  homeFlowSynchronous: 'synchrone',
-  homeFlowAsynchronous: 'asynchrone',
-  homeShapeTitle: 'Ce que vous écrivez',
-  homeShapeNote:
-    'C’est toute la surface pour une fonctionnalité. Le reste du guide traite des flux plus retors qu’un login.',
-  homeSize: 'Toute la librairie pèse {size} ko, minifiée et gzippée.',
-  demoRun: 'Dispatcher loginRequest',
-  demoReset: 'Réinitialiser',
-  demoStateTitle: 'État',
-  demoJournalTitle: 'Dispatché',
-  demoReturned: 'renvoyée par l’effect',
-  demoEmpty: 'Rien n’a encore été dispatché.',
-  demoStatusIdle: 'En attente. Appuyez sur le bouton pour envoyer une action.',
-  demoStatusRunning: 'L’updater a déjà écrit l’état. L’effect travaille.',
-  demoStatusDone:
-    'L’effect a répondu par une action, et son updater a réécrit l’état.',
-  demoNote:
-    'Ceci tourne sur la vraie librairie. L’action et l’updater tiennent dans un seul tick synchrone, ils sont donc terminés avant que l’effect démarre — l’attente que vous voyez, c’est l’effect, et rien d’autre.',
-  homeCompareTitle: 'Ce que ça remplace',
-  homeCompareByHand: 'À la main',
-  homeCompareWith: 'Avec ngx-statewise',
-  homeNotForTitle: 'Quand ne pas l’utiliser',
-  homeNotForLead: 'Trois cas où autre chose vous servira mieux.',
-  homeDoorsTitle: 'Par où commencer',
-  homeContentsTitle: 'Sommaire',
-  homeTitle: 'ngx-statewise — gestion d’état pour Angular',
-};
-
-const BY_LOCALE: Record<LocaleCode, UiStrings> = { en: EN, fr: FR };
 
 export function uiStrings(code: LocaleCode): UiStrings {
   return BY_LOCALE[code] ?? BY_LOCALE[DEFAULT_LOCALE.code];

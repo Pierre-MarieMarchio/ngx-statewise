@@ -84,8 +84,9 @@
          links and the settings so the drawer takes them together. -->
     <div class="sidebar__panel">
       <div class="sidebar__inner">
-        <!-- Above the sections, and outside them: the landing page is not a
-           chapter of the guide, it is the way back out of it. -->
+        <!-- Above the sections and outside them. It carries the library's
+             name rather than "Home": at the top of a navigation column, what
+             a reader wants to know is whose documentation this is. -->
         <a
           class="sidebar__home"
           routerLinkActive="sidebar__home--active"
@@ -93,8 +94,14 @@
           [routerLink]="homeLink()"
           (click)="closeNav()"
         >
-          <docs-icon class="sidebar__home-icon" name="home" />
-          {{ text().breadcrumbHome }}
+          <img
+            class="sidebar__home-mark"
+            src="icon-logo.png"
+            alt=""
+            width="20"
+            height="22"
+          />
+          ngx-statewise
         </a>
 
         @for (section of sections; track section.title.en) {
@@ -162,8 +169,10 @@
                 [attr.hreflang]="option.locale.htmlLang"
                 [attr.lang]="option.locale.htmlLang"
                 [attr.aria-current]="option.isCurrent ? 'true' : null"
+                [title]="option.locale.label"
+                [attr.aria-label]="option.locale.label"
               >
-                {{ option.locale.label }}
+                {{ option.locale.short }}
               </a>
             }
           </div>
@@ -178,6 +187,10 @@
 </div>
 
 <footer class="footer">
+  @if (locale.machineAssisted) {
+    <p class="footer__note">{{ text().machineTranslated }}</p>
+  }
+
   <p class="footer__text text-muted">
     {{ text().footerLicence }}
     <a

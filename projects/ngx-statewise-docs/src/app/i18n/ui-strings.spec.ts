@@ -38,6 +38,6 @@ describe('the interface strings', () => {
   it('falls back to the default locale for a code it does not know', () => {
     // The route only ever provides a known locale; this guards the cast at
     // the edge, where a hand-typed URL could reach it.
-    expect(uiStrings('de' as 'en')).toEqual(english);
+    expect(uiStrings('zz' as 'en')).toEqual(english);
   });
 });
