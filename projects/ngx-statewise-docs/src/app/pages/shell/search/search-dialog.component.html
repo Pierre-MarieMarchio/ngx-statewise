@@ -1,0 +1,45 @@
+<dialog #dialog class="dialog" (click)="onDialogClick($event)">
+  <div class="palette">
+    <div class="palette__field">
+      <docs-icon class="palette__icon" name="search" />
+      <input
+        #field
+        class="palette__input"
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        [attr.aria-label]="text().searchLabel"
+        [placeholder]="text().searchPlaceholder"
+        [value]="query()"
+        (input)="onQuery($any($event.target).value)"
+        (keydown)="onKeydown($event)"
+      />
+      <kbd class="palette__hint">Esc</kbd>
+    </div>
+
+    @if (query().length > 0) {
+      @if (results().length > 0) {
+        <ul class="palette__results" role="list">
+          @for (entry of results(); track entry.slug + (entry.fragment ?? '')) {
+            <li>
+              <button
+                class="palette__result"
+                type="button"
+                [class.palette__result--active]="$index === activeIndex()"
+                (click)="go(entry)"
+                (mouseenter)="activeIndex.set($index)"
+              >
+                <span class="palette__result-title">{{ entry.title }}</span>
+                <span class="palette__result-context">{{ entry.context }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="palette__empty">{{ text().searchNoResults }}</p>
+      }
+    } @else {
+      <p class="palette__empty">{{ text().searchPrompt }}</p>
+    }
+  </div>
+</dialog>

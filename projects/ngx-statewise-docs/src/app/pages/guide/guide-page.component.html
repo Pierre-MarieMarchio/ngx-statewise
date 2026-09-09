@@ -1,0 +1,92 @@
+<div class="guide">
+  <nav class="breadcrumb text-muted" aria-label="Breadcrumb">
+    <a class="breadcrumb__link" [routerLink]="homeLink()">
+      {{ text().breadcrumbHome }}
+    </a>
+    @if (section(); as section) {
+      <docs-icon class="breadcrumb__separator" name="chevron-right" />
+      <span>{{ section.title[locale.code] }}</span>
+    }
+  </nav>
+
+  @if (content().isFallback) {
+    <aside class="notice" role="note">
+      <docs-icon class="notice__icon" name="info" />
+      <p class="notice__text">
+        <strong>{{ text().untranslatedTitle }}</strong>
+        {{ text().untranslatedBody }}
+      </p>
+    </aside>
+  }
+
+  <article
+    #body
+    class="guide__body"
+    [lang]="content().locale"
+    (click)="onContentClick($event)"
+    [innerHTML]="html()"
+  ></article>
+
+  <a
+    class="edit-link text-muted"
+    [href]="editUrl()"
+    target="_blank"
+    rel="noreferrer"
+  >
+    <docs-icon class="edit-link__icon" name="edit" />
+    {{ text().editThisPage }}
+  </a>
+
+  <nav class="pager" [attr.aria-label]="text().pagerNavLabel">
+    @if (previous(); as target) {
+      <a
+        class="pager__link pager__link--previous"
+        [routerLink]="pageLink(target.slug)"
+      >
+        <docs-icon class="pager__icon" name="chevron-left" />
+        <span class="pager__body">
+          <span class="pager__label text-muted">
+            {{ text().previousPage }}
+          </span>
+          <span class="pager__title">{{ target.title[locale.code] }}</span>
+        </span>
+      </a>
+    }
+    @if (next(); as target) {
+      <a
+        class="pager__link pager__link--next"
+        [routerLink]="pageLink(target.slug)"
+      >
+        <span class="pager__body">
+          <span class="pager__label text-muted">
+            {{ text().nextPage }}
+          </span>
+          <span class="pager__title">{{ target.title[locale.code] }}</span>
+        </span>
+        <docs-icon class="pager__icon" name="chevron-right" />
+      </a>
+    }
+  </nav>
+</div>
+
+<div class="visually-hidden" aria-live="polite">{{ announcement() }}</div>
+
+@if (headings().length > 0) {
+  <aside class="toc" [attr.aria-label]="text().onThisPage">
+    <p class="toc__title">{{ text().onThisPage }}</p>
+    <ul class="toc__list" role="list">
+      @for (heading of headings(); track heading.id) {
+        <li class="toc__item" [class.toc__item--nested]="heading.depth > 2">
+          <a
+            class="toc__link"
+            [class.toc__link--active]="activeHeading() === heading.id"
+            [routerLink]="pageLink(page().slug)"
+            [fragment]="heading.id"
+            [title]="heading.text"
+            ><span class="toc__text">{{ heading.text }}</span></a
+          >
+        </li>
+      }
+    </ul>
+  </aside>
+}

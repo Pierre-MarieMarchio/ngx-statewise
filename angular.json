@@ -131,6 +131,92 @@
           }
         }
       }
+    },
+    "ngx-statewise-docs": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/ngx-statewise-docs",
+      "sourceRoot": "projects/ngx-statewise-docs/src",
+      "prefix": "docs",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/ngx-statewise-docs",
+            "index": "projects/ngx-statewise-docs/src/index.html",
+            "browser": "projects/ngx-statewise-docs/src/main.ts",
+            "server": "projects/ngx-statewise-docs/src/main.server.ts",
+            "outputMode": "static",
+            "polyfills": [],
+            "tsConfig": "projects/ngx-statewise-docs/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "loader": {
+              ".md": "text"
+            },
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/ngx-statewise-docs/public"
+              }
+            ],
+            "styles": ["projects/ngx-statewise-docs/src/styles.scss"],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "baseHref": "/ngx-statewise/",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "700kB",
+                  "maximumError": "900kB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "8kB",
+                  "maximumError": "14kB"
+                }
+              ],
+              "outputHashing": "bundles"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            },
+            "testing": {
+              "aot": false,
+              "optimization": false,
+              "extractLicenses": false
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "ngx-statewise-docs:build:production"
+            },
+            "development": {
+              "buildTarget": "ngx-statewise-docs:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/ngx-statewise-docs/tsconfig.spec.json",
+            "buildTarget": ":build:testing",
+            "runner": "vitest"
+          }
+        }
+      }
     }
   },
   "schematics": {
