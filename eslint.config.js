@@ -4,6 +4,120 @@ import prettier from 'eslint-config-prettier';
 import angular from 'angular-eslint';
 import tseslint from 'typescript-eslint';
 
+const APP = 'projects/ngx-statewise-showcase/src/app';
+
+/**
+ * The four zones of the showcase and their two siblings, and what each one is
+ * forbidden to reach for. Read a row as "this zone may not import those".
+ *
+ * The order matters only for reading: `core` sits at the bottom and knows
+ * nothing, `pages` sits at the top and composes everything.
+ */
+const ZONES = [
+  {
+    zone: 'core',
+    why: 'infrastructure: it must not know a business concept exists',
+    denies: ['features', 'shared', 'pages', 'fakeBackend'],
+  },
+  {
+    zone: 'shared/ui',
+    why: 'reusable UI, almost extractable: it may use core and nothing above',
+    denies: ['features', 'pages', 'fakeBackend'],
+  },
+  {
+    zone: 'features/common',
+    why: 'the shared kernel: it imports nothing from this repository at all',
+    denies: ['core', 'shared', 'features', 'pages', 'fakeBackend', 'escapes'],
+  },
+  {
+    zone: 'features/auth',
+    why: 'no feature imports another feature; the need descends into features/common',
+    denies: ['project', 'inspection', 'pages', 'fakeBackend'],
+  },
+  {
+    zone: 'features/project',
+    why: 'no feature imports another feature; the need descends into features/common',
+    denies: ['auth', 'inspection', 'pages', 'fakeBackend'],
+  },
+  {
+    zone: 'features/inspection',
+    why: 'no feature imports another feature; the need descends into features/common',
+    denies: ['auth', 'project', 'pages', 'fakeBackend'],
+  },
+  {
+    zone: 'pages',
+    why: 'composition: it may reach for any feature and any shared component',
+    denies: ['fakeBackend'],
+  },
+  {
+    zone: 'fake-backend',
+    why: 'a stand-in for a server: self-contained, wired only by app.config.ts',
+    denies: ['core', 'shared', 'features', 'pages'],
+  },
+];
+
+/** What each denial name expands to, in every form an import can be written. */
+const GROUPS = {
+  core: ['@app/core', '@app/core/**', '**/core/**'],
+  shared: ['@shared/**', '@app/shared/**', '**/shared/**'],
+  features: ['@app/features/**', '**/features/**'],
+  pages: ['@app/pages/**', '**/pages/**'],
+  fakeBackend: [
+    '@app/fake-backend',
+    '@app/fake-backend/**',
+    '**/fake-backend',
+    '**/fake-backend/**',
+  ],
+  // A sibling feature is denied by its bare name as well as by its alias:
+  // `../../auth/services` climbs out of features/project without ever writing
+  // the word `features`, and a pattern matching the import string cannot see
+  // that. No legitimate path inside one feature carries another feature's name,
+  // so the bare form costs nothing and closes the climb.
+  auth: [
+    '@app/features/auth',
+    '@app/features/auth/**',
+    '**/features/auth/**',
+    '**/auth',
+    '**/auth/**',
+  ],
+  project: [
+    '@app/features/project',
+    '@app/features/project/**',
+    '**/features/project/**',
+    '**/project',
+    '**/project/**',
+  ],
+  inspection: [
+    '@app/features/inspection',
+    '@app/features/inspection/**',
+    '**/features/inspection/**',
+    '**/inspection',
+    '**/inspection/**',
+  ],
+  // Only features/common uses this: inside it, `../<sibling>` is legitimate and
+  // `../../anything` always leaves the folder.
+  escapes: ['../../*', '../../**', '@testing/**'],
+};
+
+function zoneLaws() {
+  return ZONES.map(({ zone, why, denies }) => ({
+    files: [`${APP}/${zone}/**/*.ts`],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: denies.flatMap((name) => GROUPS[name]),
+              message: `${zone}/ — ${why}. See doc/architecture.md, "la loi de dépendance".`,
+            },
+          ],
+        },
+      ],
+    },
+  }));
+}
+
 /**
  * The library carries a published contract, so it is linted with type-aware
  * strict rules. The showcase is application code and gets a lighter set: its
@@ -88,6 +202,18 @@ export default tseslint.config(
     files: ['projects/ngx-statewise-showcase/**/*.html'],
     extends: [...angular.configs.templateRecommended],
   },
+
+  // The showcase's dependency law, enforced rather than documented. Written
+  // before the extractions that follow, so no shortcut can reintroduce itself:
+  // the alternative is finding the breaches once they are already written.
+  //
+  // Each zone declares what it may NOT reach for. `no-restricted-imports`
+  // matches the import string, not a resolved path, so every zone forbids both
+  // the alias form and the relative forms that still carry the segment. The
+  // showcase writes every cross-zone import through an alias, which is what
+  // makes that enough here — and a deliberate breach in either form is what
+  // proves it.
+  ...zoneLaws(),
 
   // The compatibility fixture. Not type-aware on purpose: `ngx-statewise`
   // resolves there only through the root tsconfig's mapping to `dist/`, which

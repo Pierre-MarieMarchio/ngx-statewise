@@ -6,11 +6,11 @@ import {
 import { TestBed } from '@angular/core/testing';
 import { fakeBackendInterceptor } from '@app/fake-backend';
 import { USERS } from '@app/fake-backend/db.data';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../environments/environment';
 import { firstValueFrom } from 'rxjs';
-import { AuthTokenService } from '../services';
-import { AuthManager } from '../states/auth/auth.manager';
-import { accessTokenInterceptor } from './access-token.interceptor';
+import { AuthTokenService } from '@app/features/auth/services';
+import { AuthManager } from '@app/features/auth/states';
+import { accessTokenInterceptor } from '@app/features/auth/interceptors';
 
 const [ADMIN] = USERS;
 const TASKS_URL = `${environment.API_BASE_URL}/Task`;
@@ -22,6 +22,11 @@ const forAdmin = { params: { userId: ADMIN.id } };
  * The whole chain, in order: the access-token interceptor puts the bearer on
  * the request, the fake API answers it. Both used to be registered the other
  * way round, which meant the first one was never reached at all.
+ *
+ * It lives outside `app/` because that is what it tests. The subject is the
+ * application's wiring, not one feature's unit, so it composes across zones the
+ * way `pages/` does — and the dependency law that forbids a feature from
+ * reaching for the fake backend stays absolute for the code that ships.
  */
 describe('accessTokenInterceptor', () => {
   let http: HttpClient;
