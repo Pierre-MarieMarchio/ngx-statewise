@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -35,13 +36,25 @@ import { TaskManager } from '@app/features/project/states/task/task.manager';
 export class DashboardPageComponent {
   public readonly taskManager = inject(TaskManager);
 
-  public selectedTask = signal<Task | null>(null);
+  private readonly selectedTaskId = signal<string | null>(null);
+
+  /**
+   * Derived rather than stored, like the board's: a card dragged on the
+   * overview kanban used to leave the panel showing the version it had before.
+   */
+  public readonly selectedTask = computed<Task | null>(() => {
+    const taskId = this.selectedTaskId();
+
+    return taskId === null
+      ? null
+      : (this.taskManager.tasks().find((task) => task.id === taskId) ?? null);
+  });
 
   /** Whether the panel is open, which is the panel's own `model`. */
   public readonly panelOpen = signal(false);
 
   public selectTask(task: Task): void {
-    this.selectedTask.set(task);
+    this.selectedTaskId.set(task.id);
     this.panelOpen.set(true);
   }
 

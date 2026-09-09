@@ -110,9 +110,20 @@
           (cancelled)="closeSideNav()"
         />
       }
+      @case ('edit-task') {
+        <app-task-form
+          [task]="selectedTask()"
+          [projects]="projectManager.projects()"
+          [pending]="taskManager.isSaving()"
+          (submitted)="saveTask($event)"
+          (cancelled)="panel.set('task')"
+        />
+      }
       @default {
         <app-task-details
           [selectedTask]="selectedTask()"
+          [editable]="true"
+          (editRequested)="editTask()"
           (closed)="closeSideNav()"
         />
       }

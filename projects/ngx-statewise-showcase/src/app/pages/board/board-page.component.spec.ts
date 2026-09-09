@@ -95,16 +95,43 @@ describe('BoardPageComponent', () => {
     const fixture = await mount();
     const component = fixture.componentInstance;
 
-    component.selectTask(sampleTask({ id: 'picked' }));
+    component.selectTask(sampleTask());
     fixture.detectChanges();
 
-    expect(component.selectedTask()?.id).toBe('picked');
+    expect(component.selectedTask()?.id).toBe('task-1');
     expect(component.panelOpen()).toBe(true);
 
     component.closeSideNav();
     fixture.detectChanges();
 
     expect(component.panelOpen()).toBe(false);
+  });
+
+  /**
+   * The panel used to hold a snapshot, so a card that moved — or one the
+   * server refused and the rollback put back — went on being shown the way it
+   * had been when it was clicked.
+   */
+  describe('what the panel is looking at', () => {
+    it('follows the task as the state has it', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+
+      component.selectTask(sampleTask());
+      taskManager.tasks.set([sampleTask({ status: 'done' })]);
+
+      expect(component.selectedTask()?.status).toBe('done');
+    });
+
+    it('shows nothing once the task is gone', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+
+      component.selectTask(sampleTask());
+      taskManager.tasks.set([]);
+
+      expect(component.selectedTask()).toBeNull();
+    });
   });
 
   it('forwards a changed task to the manager', async () => {
@@ -117,7 +144,56 @@ describe('BoardPageComponent', () => {
   });
 
   /**
-   * One panel, three things to show. Opening a form has to displace the
+   * The one write in this application carrying more than one field: the draft
+   * is merged onto the version the state holds, so what `pendingWrites` keeps
+   * is the exact row a refusal has to put back.
+   */
+  describe('saving an edited task', () => {
+    it('merges the draft onto the task the state holds', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+
+      component.selectTask(sampleTask());
+      component.saveTask({
+        projectId: 'project-1',
+        title: 'Renamed',
+        description: '',
+        status: 'in-progress',
+        priority: 'low',
+        dueDate: '',
+        assignedUserIds: ['user-2'],
+      });
+
+      expect(taskManager.updates).toEqual([
+        {
+          ...sampleTask(),
+          title: 'Renamed',
+          description: '',
+          status: 'in-progress',
+          priority: 'low',
+          dueDate: '',
+          assignedUserIds: ['user-2'],
+        },
+      ]);
+      expect(component.panel()).toBe('task');
+    });
+
+    it('has nothing to save when nothing is selected', async () => {
+      const fixture = await mount();
+
+      fixture.componentInstance.saveTask({
+        projectId: 'project-1',
+        title: 'Renamed',
+        status: 'todo',
+        priority: 'low',
+      });
+
+      expect(taskManager.updates).toEqual([]);
+    });
+  });
+
+  /**
+   * One panel, four things to show. Opening a form has to displace the
    * details, and picking a task has to displace the form — otherwise a single
    * panel is only a single panel by accident.
    */
@@ -157,6 +233,23 @@ describe('BoardPageComponent', () => {
 
       expect(host.querySelector('app-task-form')).not.toBeNull();
       expect(host.querySelector('app-task-details')).toBeNull();
+    });
+
+    it('gives it over to the edit form, on the selected task', async () => {
+      const fixture = await mount();
+      const host = fixture.nativeElement as HTMLElement;
+
+      fixture.componentInstance.selectTask(sampleTask());
+      fixture.detectChanges();
+
+      host.querySelector<HTMLButtonElement>('.edit-btn')?.click();
+      fixture.detectChanges();
+
+      expect(host.querySelector('app-task-form')).not.toBeNull();
+      expect(host.querySelector('app-task-details')).toBeNull();
+      expect(host.querySelector('.panel-form-title')?.textContent?.trim()).toBe(
+        'Edit task',
+      );
     });
 
     it('holds the new-task button while there is no project to put one in', async () => {

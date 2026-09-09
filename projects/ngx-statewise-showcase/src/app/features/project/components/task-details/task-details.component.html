@@ -3,14 +3,26 @@
     <div class="header-content">
       <h2 class="header-title">TASK DETAILS</h2>
     </div>
-    <button
-      mat-icon-button
-      class="close-btn"
-      aria-label="Close the task details"
-      (click)="onCloseClick()"
-    >
-      <mat-icon>close</mat-icon>
-    </button>
+    <div class="task-header-actions">
+      @if (editable()) {
+        <button
+          mat-icon-button
+          class="edit-btn"
+          aria-label="Edit this task"
+          (click)="onEditClick()"
+        >
+          <mat-icon>edit</mat-icon>
+        </button>
+      }
+      <button
+        mat-icon-button
+        class="close-btn"
+        aria-label="Close the task details"
+        (click)="onCloseClick()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
   </div>
 
   <div class="task-content">

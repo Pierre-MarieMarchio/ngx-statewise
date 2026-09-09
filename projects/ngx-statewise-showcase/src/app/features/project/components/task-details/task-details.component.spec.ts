@@ -61,6 +61,37 @@ describe('TaskDetailsComponent', () => {
   });
 
   /**
+   * A button that emits into nothing is worse than no button: the dashboard's
+   * panel reads, and only the board's offers the edit.
+   */
+  describe('offering the edit', () => {
+    it('says nothing about editing unless the caller asked', async () => {
+      const fixture = await mount();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector('.edit-btn'),
+      ).toBeNull();
+    });
+
+    it('asks its caller for the edit it cannot do itself', async () => {
+      const fixture = await mount();
+      fixture.componentRef.setInput('editable', true);
+      fixture.detectChanges();
+
+      const asked: string[] = [];
+      fixture.componentInstance.editRequested.subscribe(() =>
+        asked.push('edit'),
+      );
+
+      (fixture.nativeElement as HTMLElement)
+        .querySelector<HTMLButtonElement>('.edit-btn')
+        ?.click();
+
+      expect(asked).toEqual(['edit']);
+    });
+  });
+
+  /**
    * The two fields that used to print a UUID at the reader. Both fall back to
    * the id, which is the honest answer while a directory is still on its way.
    */

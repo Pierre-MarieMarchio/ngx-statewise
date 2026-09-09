@@ -14,4 +14,5 @@ export interface TaskDraft {
   readonly status: TaskStatus;
   readonly priority: TaskPriority;
   readonly dueDate?: string;
+  readonly assignedUserIds?: string[];
 }

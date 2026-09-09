@@ -37,7 +37,16 @@ import { ProjectManager } from '../../states/project/project.manager';
 })
 export class TaskDetailsComponent {
   public readonly selectedTask = input<Task | null>();
+
+  /**
+   * Whether this caller offers editing. The dashboard's panel reads, the
+   * board's writes — and a button that emits into nothing is worse than no
+   * button at all.
+   */
+  public readonly editable = input(false);
+
   public readonly closed = output<void>();
+  public readonly editRequested = output<void>();
 
   public readonly presentation = inject(TaskPresentationService);
 
@@ -66,5 +75,9 @@ export class TaskDetailsComponent {
 
   public onCloseClick(): void {
     this.closed.emit();
+  }
+
+  public onEditClick(): void {
+    this.editRequested.emit();
   }
 }

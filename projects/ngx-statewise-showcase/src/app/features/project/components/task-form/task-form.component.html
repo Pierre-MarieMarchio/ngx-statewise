@@ -1,8 +1,8 @@
 <form [formGroup]="form" (ngSubmit)="handleSubmit()">
   <app-panel-form
-    heading="New task"
-    submitLabel="Create task"
-    pendingLabel="Creating…"
+    [heading]="editing() ? 'Edit task' : 'New task'"
+    [submitLabel]="editing() ? 'Save changes' : 'Create task'"
+    [pendingLabel]="editing() ? 'Saving…' : 'Creating…'"
     [pending]="pending()"
     [refusal]="refusal()"
     (cancelled)="cancelled.emit()"
@@ -48,6 +48,28 @@
           <mat-option [value]="priority">{{ priority }}</mat-option>
         }
       </mat-select>
+    </mat-form-field>
+
+    <!--
+      A native date field rather than the Material datepicker: it needs no date
+      adapter, it is already reachable by keyboard, and it speaks the same
+      `yyyy-mm-dd` the model stores.
+    -->
+    <mat-form-field subscriptSizing="dynamic" appearance="outline">
+      <mat-label>Due date</mat-label>
+      <input formControlName="dueDate" matInput type="date" />
+    </mat-form-field>
+
+    <mat-form-field subscriptSizing="dynamic" appearance="outline">
+      <mat-label>Assigned to</mat-label>
+      <mat-select formControlName="assignedUserIds" multiple>
+        @for (member of directory.members(); track member.id) {
+          <mat-option [value]="member.id">{{ member.name }}</mat-option>
+        }
+      </mat-select>
+      @if (!directory.members().length) {
+        <mat-hint>Nobody to assign yet.</mat-hint>
+      }
     </mat-form-field>
   </app-panel-form>
 </form>

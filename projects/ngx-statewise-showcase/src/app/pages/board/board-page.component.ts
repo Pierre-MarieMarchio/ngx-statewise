@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -55,14 +56,31 @@ export class BoardPageComponent {
    */
   public readonly projectManager = inject(ProjectManager);
 
-  public selectedTask = signal<Task | null>(null);
+  private readonly selectedTaskId = signal<string | null>(null);
 
   /**
-   * What the one side panel is showing. Details and the two forms share it
+   * The selected task as the state has it, not as it was when it was clicked.
+   *
+   * It used to be a snapshot, so a card the user dragged — or one the server
+   * refused and the rollback put back — went on being shown in the panel the
+   * way it had been. An id and a derivation cost the same and cannot go stale.
+   */
+  public readonly selectedTask = computed<Task | null>(() => {
+    const taskId = this.selectedTaskId();
+
+    return taskId === null
+      ? null
+      : (this.taskManager.tasks().find((task) => task.id === taskId) ?? null);
+  });
+
+  /**
+   * What the one side panel is showing. Details and the three forms share it
    * rather than each bringing a panel of its own, so opening one closes
    * whatever was there — which is what a single panel means.
    */
-  public readonly panel = signal<'task' | 'new-project' | 'new-task'>('task');
+  public readonly panel = signal<
+    'task' | 'new-project' | 'new-task' | 'edit-task'
+  >('task');
 
   /** Whether the panel is open, which is the panel's own `model`. */
   public readonly panelOpen = signal(false);
@@ -100,9 +118,32 @@ export class BoardPageComponent {
   }
 
   public selectTask(task: Task): void {
-    this.selectedTask.set(task);
+    this.selectedTaskId.set(task.id);
     this.panel.set('task');
     this.panelOpen.set(true);
+  }
+
+  public editTask(): void {
+    this.panel.set('edit-task');
+  }
+
+  /**
+   * The one write in this application that carries more than one field.
+   *
+   * The draft is merged onto the task the state holds, so `pendingWrites` puts
+   * that exact version back if the server refuses — which it does when a task
+   * is marked done with nobody on it. The panel goes back to reading, and the
+   * card reverts underneath it without the panel having to be told.
+   */
+  public saveTask(draft: TaskDraft): void {
+    const task = this.selectedTask();
+
+    if (!task) {
+      return;
+    }
+
+    this.taskManager.update({ ...task, ...draft });
+    this.panel.set('task');
   }
 
   public onTaskChanged(updatedTask: Task): void {

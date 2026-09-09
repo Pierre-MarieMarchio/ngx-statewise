@@ -5,6 +5,7 @@ import {
   fakeProjectReload,
   fakeProjectManager,
   fakeTaskManager,
+  FakeTaskManager,
   fakeTaskReload,
   fakeTeamDirectory,
   sampleTask,
@@ -21,7 +22,11 @@ import { ProjectManager } from '@app/features/project/states/project/project.man
 import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 describe('DashboardPageComponent', () => {
+  let taskManager: FakeTaskManager;
+
   const mount = async () => {
+    taskManager = fakeTaskManager([sampleTask()]);
+
     await TestBed.configureTestingModule({
       imports: [DashboardPageComponent],
       providers: [
@@ -33,7 +38,7 @@ describe('DashboardPageComponent', () => {
         // waits on both reload ports.
         { provide: TASK_RELOAD, useValue: fakeTaskReload() },
         { provide: PROJECT_RELOAD, useValue: fakeProjectReload() },
-        { provide: TaskManager, useValue: fakeTaskManager([sampleTask()]) },
+        { provide: TaskManager, useValue: taskManager },
         { provide: ProjectManager, useValue: fakeProjectManager() },
         // The details panel names its assignees through the port
         // `features/project` declares and the composition answers.
@@ -61,15 +66,25 @@ describe('DashboardPageComponent', () => {
 
     expect(component.selectedTask()).toBeNull();
 
-    component.selectTask(sampleTask({ id: 'picked' }));
+    component.selectTask(sampleTask());
     fixture.detectChanges();
 
-    expect(component.selectedTask()?.id).toBe('picked');
+    expect(component.selectedTask()?.id).toBe('task-1');
     expect(component.panelOpen()).toBe(true);
 
     component.closeSideNav();
     fixture.detectChanges();
 
     expect(component.panelOpen()).toBe(false);
+  });
+
+  /** Derived, like the board's: a card dragged here changed under the panel. */
+  it('follows the selected task as the state has it', async () => {
+    const fixture = await mount();
+
+    fixture.componentInstance.selectTask(sampleTask());
+    taskManager.tasks.set([sampleTask({ status: 'done' })]);
+
+    expect(fixture.componentInstance.selectedTask()?.status).toBe('done');
   });
 });
