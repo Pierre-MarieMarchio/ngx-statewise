@@ -58,6 +58,16 @@ export interface StatewiseConfig {
   /** Effect classes, instantiated at startup so their effects register. */
   readonly effects?: readonly Type<unknown>[];
   /**
+   * Interceptor classes, instantiated at startup so their interceptors
+   * register.
+   *
+   * Mechanically the same as `effects` — a class the application instantiates
+   * eagerly — and separate for one reason: a class declaring nothing but
+   * interceptors had to be listed under `effects`, which named it wrong at
+   * every call site. `effects` still accepts one, so nothing has to move.
+   */
+  readonly interceptors?: readonly Type<unknown>[];
+  /**
    * Updaters reachable from whichever manager dispatches, `injectStatewise()`
    * with no updater at all included. They answer the action types no manager
    * claims: a scoped updater always wins over a global one, so a type already
@@ -96,6 +106,7 @@ export function provideStatewise(
   const historyLimit = resolveHistoryLimit(config.history);
   const maxCascadeDepth = resolveMaxCascadeDepth(config.maxCascadeDepth);
   const effects = config.effects ?? [];
+  const interceptors = config.interceptors ?? [];
   const updaters = config.updaters ?? [];
 
   return makeEnvironmentProviders([
@@ -125,6 +136,7 @@ export function provideStatewise(
         defaultDuplicateProviderReaction(isDevMode()),
     },
     ...effects,
+    ...interceptors,
     provideEnvironmentInitializer(() => {
       // Asked before anything is wired, so a call that is not going to be
       // reachable does not first instantiate the effect classes of a registry
@@ -139,7 +151,11 @@ export function provideStatewise(
       const globalUpdaters = inject(GlobalUpdaterRegistry);
 
       globalUpdaters.set(indexUpdaters(resolveUpdaters(injector, updaters)));
+
+      // Both lists are instantiated the same way, and for the same reason: a
+      // declaration only registers when the class holding it is constructed.
       effects.forEach((effect) => injector.get(effect));
+      interceptors.forEach((interceptor) => injector.get(interceptor));
     }),
   ]);
 }

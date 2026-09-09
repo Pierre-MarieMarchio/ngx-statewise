@@ -238,6 +238,7 @@ option is optional.
 | Option              | Type                              | Default       |
 | ------------------- | --------------------------------- | ------------- |
 | `effects`           | `readonly Type<unknown>[]`        | none          |
+| `interceptors`      | `readonly Type<unknown>[]`        | none          |
 | `updaters`          | `readonly Updater<unknown>[]`     | none          |
 | `history`           | `{ limit, redact? }`              | disabled      |
 | `misroutedDispatch` | `'throw' \| 'report' \| 'ignore'` | by build mode |
