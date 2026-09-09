@@ -157,6 +157,13 @@ public readonly loginSuccessEffect = createEffect(loginActions.success, () => {
 });
 ```
 
+That call leaves this scope's tree of promises, so it used to leave the cascade
+with it: `await login()` settled while both reloads were still in flight.
+It no longer does — a dispatch a **synchronous** handler emits is adopted back
+into the cascade of that handler, whichever manager it went through. Past an
+`await` it is not, and the manager's promise is what covers it there. The rule
+and both forms are in [Managers](/guide/managers).
+
 The check costs a set lookup, and only runs when no updater matched. An action
 that no updater claims stays valid: it is an effect-only action.
 

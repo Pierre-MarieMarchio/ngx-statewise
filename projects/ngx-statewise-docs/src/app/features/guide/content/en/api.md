@@ -175,12 +175,12 @@ See [Managers](/guide/managers).
 The handle `injectStatewise` returns. Everything on it is scoped to that
 handle: what it dispatches, and the effects it waits for.
 
-| Member                  | Returns         | What it does                                                        |
-| ----------------------- | --------------- | ------------------------------------------------------------------- |
-| `dispatch(action)`      | `void`          | Runs the updater, then starts the effects without waiting for them. |
-| `dispatchAsync(action)` | `Promise<void>` | The same, and resolves once the whole cascade has settled.          |
-| `waitForEffect(action)` | `Promise<void>` | Resolves when the effect for that action type has settled.          |
-| `waitForAllEffects()`   | `Promise<void>` | Resolves when every effect this handle started has settled.         |
+| Member                  | Returns         | What it does                                                                                                                                  |
+| ----------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dispatch(action)`      | `void`          | Runs the updater, then starts the effects without waiting for them.                                                                           |
+| `dispatchAsync(action)` | `Promise<void>` | The same, and resolves once the whole cascade has settled — manager boundaries included, for a dispatch a synchronous effect handler emitted. |
+| `waitForEffect(action)` | `Promise<void>` | Resolves when the effect for that action type has settled.                                                                                    |
+| `waitForAllEffects()`   | `Promise<void>` | Resolves when every effect this handle started has settled.                                                                                   |
 
 `waitForEffect` takes anything carrying a `type`, so an action creator and an
 action both work.
