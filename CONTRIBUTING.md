@@ -242,16 +242,24 @@ Merging into `next` or `main` runs `.github/workflows/release.yml`, which:
 
 1. runs `npm run check` and stops there if it fails — nothing is tagged or published;
 2. refuses to continue if the branch moved since the run started;
-3. computes the version, writes `projects/ngx-statewise/CHANGELOG.md`, commits and tags;
-4. rebuilds the library so the published bundle carries the new version, and
+3. cuts a `release/…` branch. A required status check applies to a direct push
+   as much as to a merge, and the workflow's token has write access rather than
+   admin, so the version commit cannot reach `main` or `next` any other way;
+4. computes the version, writes `projects/ngx-statewise/CHANGELOG.md`, commits and tags;
+5. rebuilds the library so the published bundle carries the new version, and
    writes the same version into the site's `LIBRARY_VERSION` so both travel in
    the release commit — without that step `verify:claims` fails on the very
    next run, on `main` and on the back-merge pull request;
-5. publishes to npm with [provenance](https://docs.npmjs.com/generating-provenance-statements), under the `beta` or `latest` dist-tag;
-6. creates the GitHub release;
-7. on `main`, deploys the documentation site — after the publish, never before,
+6. publishes to npm with [provenance](https://docs.npmjs.com/generating-provenance-statements), under the `beta` or `latest` dist-tag;
+7. creates the GitHub release;
+8. opens a pull request for the version commit and merges it once the checks
+   that branch requires have passed. The tag and the package exist by then, so
+   a pull request that will not merge is a conflict to land by hand rather than
+   a release to redo — and the step says so and fails, instead of leaving the
+   run green with the commit still floating;
+9. on `main`, deploys the documentation site — after the publish, never before,
    so the site cannot state a version npm does not have;
-8. on `main`, opens the back-merge pull requests.
+10. on `main`, opens the back-merge pull requests.
 
 ### Why `next` exists
 
@@ -281,14 +289,23 @@ gh api -X PATCH repos/:owner/:repo \
   -F allow_squash_merge=false -F allow_rebase_merge=false \
   -F allow_merge_commit=true -F delete_branch_on_merge=true
 
-# A pull request, a green CI run and a passing quality gate, for main, next
-# and dev. `main` matters most of the three: it is the branch that publishes.
-for branch in main next dev; do
+# A green CI run and a passing quality gate on main, next and dev. `main`
+# matters most of the three: it is the branch that publishes.
+#
+# `strict` — "the branch must be up to date with the base" — is true only on
+# main, where the two pull requests that arrive (next, and the release
+# workflow's own) are up to date by construction. It has to be false on next
+# and dev, because the back-merge pull request runs the other way: its head is
+# main, and every commit that lands on dev meanwhile leaves it BEHIND. The
+# button GitHub then offers would merge dev into main, which protection
+# refuses — so the back-merge would sit there, and the branches would drift
+# apart exactly as this workflow exists to prevent.
+for branch in next dev; do
   gh api -X PUT "repos/:owner/:repo/branches/$branch/protection" \
     --input - <<JSON
   {
     "required_status_checks": {
-      "strict": true,
+      "strict": false,
       "contexts": ["Validate workspace", "SonarCloud Code Analysis"]
     },
     "enforce_admins": false,
@@ -300,11 +317,32 @@ for branch in main next dev; do
   }
 JSON
 done
+
+gh api -X PUT "repos/:owner/:repo/branches/main/protection" --input - <<JSON
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ["Validate workspace", "SonarCloud Code Analysis"]
+  },
+  "enforce_admins": false,
+  "required_pull_request_reviews": null,
+  "restrictions": null,
+  "allow_force_pushes": false,
+  "allow_deletions": false,
+  "required_conversation_resolution": true
+}
+JSON
 ```
 
 Without the first command, a squash merge is one click away and it breaks
 versioning without any error. Without the second, a direct push to `main`
 publishes to npm.
+
+The second command is also why the release workflow builds its version commit
+on a `release/…` branch: those checks bind the release automation exactly as
+they bind you, and GitHub's own Actions app cannot be given a bypass on a
+personal repository — that is an organization-only setting. Nothing is exempt,
+which is the point.
 
 ### The four things `gh` cannot set
 

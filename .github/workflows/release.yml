@@ -12,9 +12,10 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
+# Read-only by default, so a job that needs to write says which write it needs
+# and nothing inherits one it never uses. Only `release` publishes.
 permissions:
-  contents: write # version commit, tag, GitHub release
-  id-token: write # npm provenance
+  contents: read
 
 jobs:
   # The published peer range promises three Angular majors, and this workspace
@@ -37,6 +38,11 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.release.outputs.version }}
+
+    permissions:
+      contents: write # the version commit, the tag and the GitHub release
+      id-token: write # npm provenance
+      pull-requests: write # how that commit reaches a protected branch
 
     steps:
       - name: Checkout code
@@ -72,6 +78,20 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+      # A required status check applies to a direct push as much as to a merge,
+      # and the token this run holds has write access, not admin — so it cannot
+      # push the version commit to a protected branch at all. The commit takes
+      # the road every other change takes instead: a branch, a pull request,
+      # and the same green run. `release/*` is in `requireBranch`, so release-it
+      # still refuses to run from anywhere else.
+      - name: Cut a branch for the version commit
+        run: git switch -c "$RELEASE_BRANCH"
+        env:
+          RELEASE_BRANCH: release/${{ github.ref_name }}-${{ github.run_id }}
+
+      # Pushes the branch and the tag, publishes to npm, creates the GitHub
+      # release. Only the version commit's arrival on ${{ github.ref_name }} is
+      # left, and the step below does that.
       - name: Version, tag, publish and release
         id: release
         run: npm run ${{ github.ref_name == 'main' && 'release:stable' || 'release:beta' }}
@@ -80,6 +100,63 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           # The provenance attestation the id-token permission above pays for.
           NPM_CONFIG_PROVENANCE: true
+
+      # The tag and the package are already published at this point, which is
+      # the one thing this ordering costs: a pull request that cannot merge
+      # leaves a version npm has and the branch does not. That is a conflict to
+      # resolve, not a release to redo — the commit exists and is tagged — and
+      # it is why this step fails loudly rather than leaving the run green.
+      - name: Merge the version commit into ${{ github.ref_name }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_BRANCH: release/${{ github.ref_name }}-${{ github.run_id }}
+          BASE: ${{ github.ref_name }}
+        run: |
+          version=$(node -p "require('./projects/ngx-statewise/package.json').version")
+
+          {
+            printf 'Published as `ngx-statewise@%s`. The tag and the npm package\n' "$version"
+            printf 'already exist; this is the commit that made them, arriving on `%s`\n' "$BASE"
+            printf 'through the checks that branch requires.\n\n'
+            printf '**Merge with a merge commit, never a squash.** Opened and merged by the\n'
+            printf 'release workflow — if it is still open, that run failed at this step.\n'
+          } > "$RUNNER_TEMP/release-pr.md"
+
+          url=$(gh pr create --base "$BASE" --head "$RELEASE_BRANCH" \
+            --title "chore(release): ngx-statewise@$version" \
+            --body-file "$RUNNER_TEMP/release-pr.md")
+          echo "Opened $url" >> "$GITHUB_STEP_SUMMARY"
+
+          # `mergeStateStatus` cannot tell a check that is still running from
+          # one that failed — both read BLOCKED — so the wait is on the checks
+          # themselves. `gh pr checks` exits 8 while any is pending, 0 when all
+          # have passed, and non-zero otherwise. Fifteen minutes is several
+          # times the longest run this workspace has had.
+          for _ in $(seq 1 60); do
+            if [ "$(gh pr view "$url" --json state --jq .state)" = "MERGED" ]; then
+              echo "Merged $url" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+
+            if [ "$(gh pr view "$url" --json mergeStateStatus --jq .mergeStateStatus)" = "DIRTY" ]; then
+              echo "::error::$url conflicts with $BASE. ngx-statewise@$version is on npm; land that commit by hand."
+              exit 1
+            fi
+
+            gh pr checks "$url" > /dev/null 2>&1 && checks=0 || checks=$?
+
+            if [ "$checks" = "0" ]; then
+              gh pr merge "$url" --merge --delete-branch || true
+            elif [ "$checks" != "8" ]; then
+              echo "::error::$url has a failing check. ngx-statewise@$version is on npm; fix it and merge by hand."
+              exit 1
+            fi
+
+            sleep 15
+          done
+
+          echo "::error::$url did not merge within fifteen minutes. ngx-statewise@$version is on npm; land that commit on $BASE by hand."
+          exit 1
 
       - name: Summarise the run
         if: always()

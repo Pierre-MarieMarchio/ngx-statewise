@@ -4,7 +4,7 @@
     "tagName": "ngx-statewise@${version}",
     "tagAnnotation": "ngx-statewise@${version}",
     "commitMessage": "chore(release): ngx-statewise@${version}",
-    "requireBranch": ["main", "next"],
+    "requireBranch": ["main", "next", "release/*"],
     "requireCleanWorkingDir": true,
     "push": true
   },
