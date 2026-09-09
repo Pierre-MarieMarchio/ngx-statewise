@@ -194,8 +194,9 @@ const readme = readFileSync(
   'utf8',
 );
 const claimedNames = /it is (\w+) names/.exec(readme);
+const claimedNamesWord = claimedNames?.[1];
 
-if (claimedNames === null) {
+if (claimedNamesWord === undefined) {
   fail(`no exported-type count found in the library README`);
 }
 
@@ -207,18 +208,18 @@ const AS_WORDS = {
   'twenty-one': 21,
   'twenty-two': 22,
 };
-const claimedTypeCount = AS_WORDS[claimedNames[1]];
+const claimedTypeCount = AS_WORDS[claimedNamesWord];
 
 if (claimedTypeCount === undefined) {
   fail(
-    `the README says "it is ${claimedNames[1]} names", which this script cannot ` +
-      `read as a number. Add it to AS_WORDS, or write a digit.`,
+    `the README says "it is ${claimedNamesWord} names", which this script ` +
+      `cannot read as a number. Add it to AS_WORDS, or write a digit.`,
   );
 }
 
 if (claimedTypeCount !== committedTypes.length) {
   fail(
-    `the README commits to ${claimedNames[1]} exported types, the build ships ` +
+    `the README commits to ${claimedNamesWord} exported types, the build ships ` +
       `${String(committedTypes.length)}: ${committedTypes.join(', ')}.\n` +
       `Update the README and the API page's table together.`,
   );
@@ -244,21 +245,32 @@ function weightFigures(text, where) {
     );
   }
 
-  return Object.fromEntries(rows.map((row) => [row[1], Number(row[2])]));
+  return rows.map((row) => ({ what: row[1] ?? '', kb: Number(row[2]) }));
 }
 
 const inGuide = weightFigures(why, 'the "Why" page');
 const inReadme = weightFigures(readme, 'the library README');
 
-for (const what of Object.keys(inGuide)) {
-  if (inGuide[what] !== inReadme[what]) {
+// Paired by position rather than looked up by name: both lists come from the
+// same two-row pattern, in the same order, and a lookup would report a
+// renamed row as a missing number instead of as a renamed row.
+inGuide.forEach((guide, index) => {
+  const readmeRow = inReadme[index];
+
+  if (readmeRow === undefined || guide.what !== readmeRow.what) {
     fail(
-      `"${what}" weighs ${String(inGuide[what])} kB on the "Why" page and ` +
-        `${String(inReadme[what])} kB in the README. One of them was updated ` +
+      `the weight rows do not line up: the "Why" page has "${guide.what}" ` +
+        `where the README has "${readmeRow?.what ?? 'nothing'}". Rename it in ` +
+        `both, or this check stops meaning anything.`,
+    );
+  } else if (guide.kb !== readmeRow.kb) {
+    fail(
+      `"${guide.what}" weighs ${String(guide.kb)} kB on the "Why" page and ` +
+        `${String(readmeRow.kb)} kB in the README. One of them was updated ` +
         `alone — re-run \`npm run measure:size\` and write the same number twice.`,
     );
   }
-}
+});
 
 const [claimedFiles, claimedLines] = claimedIn(
   /\|\s*the complete `task` flow\s*\|\s*(\d+) files, (\d+) lines\s*\|/,

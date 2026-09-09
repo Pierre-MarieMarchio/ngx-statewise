@@ -61,7 +61,17 @@ const TYPESCRIPT = '~6.0.0';
  */
 const CEILING_KB = { helpers: 5, full: 6 };
 
-const ORDER = ['baseline', 'helpers', 'full'];
+/** The ceiling of one variant, refusing a name nobody set one for. */
+function ceilingOf(variant) {
+  const ceiling = CEILING_KB[variant];
+
+  if (ceiling === undefined) {
+    console.error(`bundle-size — no ceiling declared for "${variant}".`);
+    process.exit(1);
+  }
+
+  return ceiling;
+}
 
 function run(command, args, cwd) {
   execFileSync(command, args, { cwd, stdio: 'inherit' });
@@ -111,7 +121,14 @@ function main() {
         join(REPO, 'dist', 'ngx-statewise'),
       ),
     );
-    const tarball = join(work, packed[0].filename);
+    const [tar] = packed;
+
+    if (tar === undefined) {
+      console.error('bundle-size — `npm pack` produced no tarball.');
+      process.exit(1);
+    }
+
+    const tarball = join(work, tar.filename);
 
     const app = join(work, 'sizing');
     cpSync(FIXTURE, app, { recursive: true });
@@ -130,54 +147,56 @@ function main() {
     run('npm', ['install', '--no-audit', '--no-fund'], app);
 
     const ng = join(app, 'node_modules', '.bin', 'ng');
-    const weighed = {};
 
-    for (const variant of ORDER) {
+    /** Builds one variant and weighs what it emitted. */
+    function build(variant) {
       cpSync(join(VARIANTS, `${variant}.ts`), join(app, 'src/app/subject.ts'));
       rmSync(join(app, 'dist'), { recursive: true, force: true });
       run(ng, ['build', '--configuration', 'production'], app);
-      weighed[variant] = weigh(app);
+
+      return weigh(app);
     }
 
-    const deltas = {
-      helpers: weighed.helpers - weighed.baseline,
-      full: weighed.full - weighed.baseline,
-    };
+    const baseline = build('baseline');
+    // Named rather than keyed: what the report and the ceilings need is these
+    // two deltas, and a lookup by string leaves room for a typo to read as a
+    // measurement of zero.
+    const measurements = [
+      { variant: 'helpers', delta: build('helpers') - baseline },
+      { variant: 'full', delta: build('full') - baseline },
+    ];
+
+    const reported = measurements.map(({ variant, delta }) => ({
+      variant,
+      addedKb: kb(delta),
+      ceilingKb: ceilingOf(variant),
+    }));
 
     if (asJson) {
       console.log(
-        JSON.stringify(
-          {
-            bytes: weighed,
-            deltaBytes: deltas,
-            deltaKb: { helpers: kb(deltas.helpers), full: kb(deltas.full) },
-            ceilingKb: CEILING_KB,
-          },
-          null,
-          2,
-        ),
+        JSON.stringify({ baselineKb: kb(baseline), added: reported }, null, 2),
       );
     } else {
       console.log('\n--- What ngx-statewise adds, gzipped\n');
-      console.log(`  baseline (no import)  ${String(kb(weighed.baseline))} kB`);
+      console.log(`  baseline (no import)  ${String(kb(baseline))} kB`);
 
-      for (const variant of ['helpers', 'full']) {
+      for (const { variant, addedKb, ceilingKb } of reported) {
         console.log(
-          `  ${variant.padEnd(21)} +${String(kb(deltas[variant]))} kB` +
-            ` (ceiling ${String(CEILING_KB[variant])} kB)`,
+          `  ${variant.padEnd(21)} +${String(addedKb)} kB` +
+            ` (ceiling ${String(ceilingKb)} kB)`,
         );
       }
     }
 
-    const over = ['helpers', 'full'].filter(
-      (variant) => kb(deltas[variant]) > CEILING_KB[variant],
+    const over = reported.filter(
+      ({ addedKb, ceilingKb }) => addedKb > ceilingKb,
     );
 
     if (over.length > 0) {
-      for (const variant of over) {
+      for (const { variant, addedKb, ceilingKb } of over) {
         console.error(
-          `\nbundle-size — ${variant} adds ${String(kb(deltas[variant]))} kB, ` +
-            `over its ${String(CEILING_KB[variant])} kB ceiling.`,
+          `\nbundle-size — ${variant} adds ${String(addedKb)} kB, ` +
+            `over its ${String(ceilingKb)} kB ceiling.`,
         );
       }
       console.error(
