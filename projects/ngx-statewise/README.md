@@ -137,6 +137,65 @@ wiring are not. Four behaviours changed beyond the renames:
 → [Migrating from 0.6.x](https://pierre-mariemarchio.github.io/ngx-statewise/guide/migration)
 has the full rename table and before/after examples.
 
+## Zoneless, and SSR
+
+Both are supported, and both answers are measured rather than assumed.
+
+**Zoneless is the only mode in which the published package is exercised.** The
+compatibility fixture bootstraps with `provideZonelessChangeDetection()`, and it
+builds and passes its specs on all three supported majors.
+
+The library has no coupling to Zone.js. Its single mention anywhere is a comment
+explaining why a promise is duck-typed rather than checked with `instanceof`, so
+that Zone.js's `ZoneAwarePromise` still works — and that compatibility is held by
+a test rather than by intent: `effect-outcome.spec.ts` > _awaits a promise that
+is not an instance of the global Promise_, which builds a promise its own global
+constructor disowns.
+
+**SSR is safe, with one caveat worth stating.** The engine's seven classes are
+provided without `providedIn`, so there is one set per environment injector —
+one per request on a server. No browser API is touched anywhere: no `window`, no
+`document`, no `localStorage`, no `navigator`, no `location`. The only global is
+`AbortController`.
+
+The caveat: the one piece of module-level mutable state in the whole library is
+the `Set` of action types that updaters have declared, used to detect a dispatch
+that reached the wrong manager. **That `Set` is shared by the process**, so two
+distinct applications served by one server share the list of declared types. The
+consequence is bounded — a false "misrouted" positive if the two share an action
+type name — and it is never a data leak: it holds names, never payloads and
+never state.
+
+## What 1.0 promises
+
+A version number stops being internal information at 1.0. So, plainly:
+
+**Semantic versioning, on the exported surface.** A major for a removal or a
+change in shape, a minor for an addition, a patch for a fix. What follows is
+what "the exported surface" means.
+
+**`ɵ`-prefixed names are outside the contract.** They exist for the
+`ngx-statewise/testing` entry point and can change in any release, patches
+included. If your code names one, it is depending on an internal.
+
+**Exported types are committed exactly as much as the functions.** A type is
+exported when a consumer has to write it to annotate a declaration they cannot
+leave inferred, and it is nineteen names — the rule and the list are on the
+[API page](https://pierre-mariemarchio.github.io/ngx-statewise/guide/api).
+Everything else is inferred and is not yours to name.
+
+**A deprecated symbol lives for two minor releases at least, and never less
+than three months.** It keeps working, it warns, and the release notes say what
+replaces it. "Until the next major" is not a commitment, because nothing says
+when that is.
+
+**The Angular peer range covers three majors.** The oldest is dropped when a new
+one enters, in a **minor** release of this library, not a major: a peer range is
+a statement about what is verified, and the verification is a weekly job plus a
+gate on every publish — three real installs against three real majors. Dropping
+a major you no longer use costs you nothing, and holding the range hostage to
+this library's own major would mean either verifying nothing or never moving.
+
 ## Contributing
 
 Contributions are welcome. Issues and pull requests go through
