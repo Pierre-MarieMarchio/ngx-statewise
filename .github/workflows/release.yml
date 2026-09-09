@@ -12,10 +12,10 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
+# Read-only by default, so a job that needs to write says which write it needs
+# and nothing inherits one it never uses. Only `release` publishes.
 permissions:
-  contents: write # version commit, tag, GitHub release
-  id-token: write # npm provenance
-  pull-requests: write # the version commit reaches a protected branch as one
+  contents: read
 
 jobs:
   # The published peer range promises three Angular majors, and this workspace
@@ -38,6 +38,11 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.release.outputs.version }}
+
+    permissions:
+      contents: write # the version commit, the tag and the GitHub release
+      id-token: write # npm provenance
+      pull-requests: write # how that commit reaches a protected branch
 
     steps:
       - name: Checkout code

@@ -289,14 +289,23 @@ gh api -X PATCH repos/:owner/:repo \
   -F allow_squash_merge=false -F allow_rebase_merge=false \
   -F allow_merge_commit=true -F delete_branch_on_merge=true
 
-# A pull request, a green CI run and a passing quality gate, for main, next
-# and dev. `main` matters most of the three: it is the branch that publishes.
-for branch in main next dev; do
+# A green CI run and a passing quality gate on main, next and dev. `main`
+# matters most of the three: it is the branch that publishes.
+#
+# `strict` — "the branch must be up to date with the base" — is true only on
+# main, where the two pull requests that arrive (next, and the release
+# workflow's own) are up to date by construction. It has to be false on next
+# and dev, because the back-merge pull request runs the other way: its head is
+# main, and every commit that lands on dev meanwhile leaves it BEHIND. The
+# button GitHub then offers would merge dev into main, which protection
+# refuses — so the back-merge would sit there, and the branches would drift
+# apart exactly as this workflow exists to prevent.
+for branch in next dev; do
   gh api -X PUT "repos/:owner/:repo/branches/$branch/protection" \
     --input - <<JSON
   {
     "required_status_checks": {
-      "strict": true,
+      "strict": false,
       "contexts": ["Validate workspace", "SonarCloud Code Analysis"]
     },
     "enforce_admins": false,
@@ -308,6 +317,21 @@ for branch in main next dev; do
   }
 JSON
 done
+
+gh api -X PUT "repos/:owner/:repo/branches/main/protection" --input - <<JSON
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ["Validate workspace", "SonarCloud Code Analysis"]
+  },
+  "enforce_admins": false,
+  "required_pull_request_reviews": null,
+  "restrictions": null,
+  "allow_force_pushes": false,
+  "allow_deletions": false,
+  "required_conversation_resolution": true
+}
+JSON
 ```
 
 Without the first command, a squash merge is one click away and it breaks
