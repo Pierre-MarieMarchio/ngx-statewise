@@ -50,6 +50,7 @@ export interface FakeAuthManager extends IAuthManager {
   user: WritableSignal<User | null>;
   isLoggedIn: WritableSignal<boolean>;
   isLoading: WritableSignal<boolean>;
+  isError: WritableSignal<boolean>;
   readonly logins: LoginSubmit[];
   readonly logouts: string[];
 }
@@ -66,6 +67,7 @@ export const fakeAuthManager = (
     user: userSignal,
     isLoggedIn: signal(user !== null),
     isLoading: signal(false),
+    isError: signal(false),
     isAdmin: computed(() => userSignal()?.role === 'admin'),
     logins,
     logouts,
@@ -84,6 +86,7 @@ export interface FakeTaskManager extends ITaskManager {
   tasks: WritableSignal<Task[] | null>;
   isError: WritableSignal<boolean>;
   isLoading: WritableSignal<boolean>;
+  isSaving: WritableSignal<boolean>;
   readonly updates: Task[];
 }
 
@@ -98,6 +101,7 @@ export const fakeTaskManager = (
     tasks: tasksSignal,
     isError: signal(false),
     isLoading: signal(false),
+    isSaving: signal(false),
     taskCount: computed(() => tasksSignal()?.length ?? 0),
     countByStatus: computed(() =>
       STATUSES.reduce(
@@ -113,6 +117,7 @@ export const fakeTaskManager = (
     updates,
     getAll: () => undefined,
     getAllAsync: () => Promise.resolve(),
+    reloaded: () => Promise.resolve(),
     update: (task: Task) => {
       updates.push(task);
     },
@@ -137,7 +142,7 @@ export const fakeProjectManager = (
     isLoading: signal(false),
     projectCount: computed(() => projectsSignal()?.length ?? 0),
     getAll: () => undefined,
-    getAllAsync: () => Promise.resolve(),
+    settled: () => Promise.resolve(),
     reset: () => Promise.resolve(),
   };
 };

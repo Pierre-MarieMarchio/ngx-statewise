@@ -101,7 +101,8 @@
               "aot": false,
               "optimization": false,
               "extractLicenses": false,
-              "polyfills": ["zone.js", "zone.js/testing"]
+              "polyfills": ["zone.js", "zone.js/testing"],
+              "styles": []
             }
           },
           "defaultConfiguration": "production"

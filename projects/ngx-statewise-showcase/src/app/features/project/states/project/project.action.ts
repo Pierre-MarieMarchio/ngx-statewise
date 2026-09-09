@@ -7,7 +7,7 @@ import {
 import { Project } from '../../models';
 
 export const getAllProjectsActions = defineActionsGroup({
-  source: 'Project',
+  source: 'PROJECT',
   events: {
     request: emptyPayload,
     success: payload<Project[]>(),

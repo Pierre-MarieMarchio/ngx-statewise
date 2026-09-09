@@ -10,6 +10,7 @@ export interface IProjectManager {
   projectCount: Signal<number>;
 
   getAll(): void;
-  getAllAsync(): Promise<void>;
+  /** Settles once every effect this manager started is over. */
+  settled(): Promise<void>;
   reset(): Promise<void>;
 }

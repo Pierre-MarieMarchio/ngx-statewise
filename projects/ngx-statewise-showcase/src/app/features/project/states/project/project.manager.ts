@@ -18,12 +18,17 @@ export class ProjectManager implements IProjectManager {
 
   public readonly projectCount = computed(() => this.projects()?.length ?? 0);
 
-  public getAll(): void {
-    this.statewise.dispatch(getAllProjectsActions.request());
+  /**
+   * Resolves once every effect this manager started has settled, whichever
+   * action started it. The task manager waits on one action type instead —
+   * both are scoped to the handle, so neither hears the other.
+   */
+  public settled(): Promise<void> {
+    return this.statewise.waitForAllEffects();
   }
 
-  public getAllAsync(): Promise<void> {
-    return this.statewise.dispatchAsync(getAllProjectsActions.request());
+  public getAll(): void {
+    this.statewise.dispatch(getAllProjectsActions.request());
   }
 
   public reset(): Promise<void> {

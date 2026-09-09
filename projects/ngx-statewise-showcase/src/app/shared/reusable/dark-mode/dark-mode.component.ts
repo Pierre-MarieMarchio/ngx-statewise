@@ -16,7 +16,16 @@ import { ThemeService } from './theme.service';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <button (click)="togleTheme()" mat-icon-button class="m-1 color-secondary">
+    <button
+      (click)="togleTheme()"
+      mat-icon-button
+      class="m-1 color-secondary"
+      [attr.aria-label]="
+        themeService.themeSignal() === 'dark'
+          ? 'Switch to the light theme'
+          : 'Switch to the dark theme'
+      "
+    >
       <mat-icon class="color-secondary icon-outlined">{{
         themeService.themeSignal() === 'dark'
           ? 'dark_mode_outlined'

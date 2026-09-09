@@ -36,7 +36,7 @@ export const routes: Routes = [
   {
     path: 'task',
     loadComponent: () =>
-      import('./features/task/pages/task-page/task-page.component').then(
+      import('./features/project/pages/task-page/task-page.component').then(
         (m) => m.TaskPageComponent,
       ),
     title: 'Ngx-Statewise',
@@ -45,7 +45,7 @@ export const routes: Routes = [
   {
     path: 'state',
     loadComponent: () =>
-      import('./features/live-state/pages/live-state-page/live-state-page.component').then(
+      import('./features/state-inspection/pages/live-state-page/live-state-page.component').then(
         (m) => m.LiveStatePageComponent,
       ),
     title: 'Ngx-Statewise',
@@ -54,26 +54,8 @@ export const routes: Routes = [
   {
     path: 'history',
     loadComponent: () =>
-      import('./features/history/pages/history-page/history-page.component').then(
+      import('./features/state-inspection/pages/history-page/history-page.component').then(
         (m) => m.HistoryPageComponent,
-      ),
-    title: 'Ngx-Statewise',
-    canActivate: [loggedOutGuard],
-  },
-  {
-    path: 'docs',
-    loadComponent: () =>
-      import('./features/docs/pages/docs-page/docs-page.component').then(
-        (m) => m.DocsPageComponent,
-      ),
-    title: 'Ngx-Statewise',
-    canActivate: [loggedOutGuard],
-  },
-  {
-    path: 'project',
-    loadComponent: () =>
-      import('./features/project/pages/project-page/projects-page.component').then(
-        (m) => m.ProjectsPageComponent,
       ),
     title: 'Ngx-Statewise',
     canActivate: [loggedOutGuard],

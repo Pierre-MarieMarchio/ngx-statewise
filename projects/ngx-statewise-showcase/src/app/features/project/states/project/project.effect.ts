@@ -1,8 +1,8 @@
-import { inject, Injectable } from '@angular/core';
+import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { AUTH_MANAGER } from '@shared/app-common/tokens';
 import { createEffect } from 'ngx-statewise';
 import { catchError, map, of } from 'rxjs';
-import { getAllProjectsActions } from './project.action';
+import { getAllProjectsActions, projectReset } from './project.action';
 import { ProjectRepositoryService } from '../../services';
 
 @Injectable({
@@ -11,6 +11,7 @@ import { ProjectRepositoryService } from '../../services';
 export class ProjectEffect {
   private readonly projectRepository = inject(ProjectRepositoryService);
   private readonly authManager = inject(AUTH_MANAGER);
+  private readonly errorHandler = inject(ErrorHandler);
 
   /**
    * Handed over as an Observable rather than awaited through
@@ -30,11 +31,21 @@ export class ProjectEffect {
       return this.projectRepository.getAll(user).pipe(
         map((projects) => getAllProjectsActions.success(projects)),
         catchError((error: unknown) => {
-          console.error(error);
+          this.errorHandler.handleError(error);
 
           return of(getAllProjectsActions.failure());
         }),
       );
     },
+    /**
+     * Two reloads racing each other have one useful answer between them. And
+     * since this effect hands over an Observable, abandoning it unsubscribes
+     * the request rather than merely ignoring its answer.
+     *
+     * `mustAnswer` covers the other end of the same pipeline: every branch
+     * above produces an action, so a run answering nothing means the source
+     * ran dry, and that would leave `isLoading` set with nothing to clear it.
+     */
+    { concurrency: 'latest', cancelOn: projectReset, mustAnswer: true },
   );
 }

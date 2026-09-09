@@ -1,8 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AUTH_MANAGER } from '@shared/app-common/tokens';
+import {
+  AUTH_MANAGER,
+  PROJECT_MANAGER,
+  TASK_MANAGER,
+} from '@shared/app-common/tokens';
 import {
   fakeAuthManager,
   FakeAuthManager,
+  fakeProjectManager,
+  fakeTaskManager,
   sampleUser,
 } from '@testing/fake-managers';
 import { DashboardUserPickerComponent } from './dashboard-user-picker.component';
@@ -32,7 +38,13 @@ describe('DashboardUserPickerComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [DashboardUserPickerComponent],
-      providers: [{ provide: AUTH_MANAGER, useValue: authManager }],
+      providers: [
+        { provide: AUTH_MANAGER, useValue: authManager },
+        // Switching user waits on both features before it lets go, so the
+        // picker reaches them through the service that does the waiting.
+        { provide: TASK_MANAGER, useValue: fakeTaskManager() },
+        { provide: PROJECT_MANAGER, useValue: fakeProjectManager() },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DashboardUserPickerComponent);

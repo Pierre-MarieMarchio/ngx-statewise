@@ -1,0 +1,26 @@
+.data-state-progress {
+  display: block;
+}
+
+.data-state-error {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--mat-sys-error);
+  border-radius: 0.2rem;
+  background-color: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+.data-state-error-icon {
+  flex: 0 0 auto;
+  color: var(--mat-sys-error);
+}
+
+.data-state-error-message {
+  flex: 1 1 auto;
+  min-width: 12rem;
+}

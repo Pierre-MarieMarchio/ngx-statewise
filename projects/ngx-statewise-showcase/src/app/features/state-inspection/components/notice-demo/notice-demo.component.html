@@ -1,0 +1,38 @@
+<div class="notice-demo">
+  <div class="notice-demo-actions">
+    <button
+      class="primary-btn"
+      mat-stroked-button
+      (click)="raiseFromBareHandle()"
+    >
+      injectStatewise()
+    </button>
+    <button
+      class="primary-btn"
+      mat-stroked-button
+      (click)="raiseFromUnrelatedHandle()"
+    >
+      injectStatewise(projectUpdater)
+    </button>
+    <button mat-button (click)="clear()">clear</button>
+    @if (listener.isListening()) {
+      <button mat-button (click)="listener.stopListening()">
+        stop listening
+      </button>
+    }
+  </div>
+
+  <dl class="notice-demo-readout">
+    <dt>message</dt>
+    <dd data-readout="message">{{ noticeState.message() ?? '(none)' }}</dd>
+    <dt>raised</dt>
+    <dd data-readout="count">{{ noticeState.raisedCount() }}</dd>
+    <dt>heard by this component</dt>
+    <dd data-readout="heard">
+      {{ listener.heardCount() }}
+      @if (!listener.isListening()) {
+        <span class="color-secondary">(stopped)</span>
+      }
+    </dd>
+  </dl>
+</div>

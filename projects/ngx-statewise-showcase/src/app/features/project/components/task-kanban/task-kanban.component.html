@@ -1,0 +1,38 @@
+<div class="kanban-task-container">
+  @if (!projectManager.projects()?.length) {
+    <p class="empty-state">No project, so no board to draw.</p>
+  } @else {
+    <mat-accordion class="project-accordion" displayMode="flat" multi>
+      @for (project of projectManager.projects(); track project.id) {
+        <mat-expansion-panel
+          togglePosition="before"
+          class="kanban-project-task-expansion-panel"
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title [class]="'tag-' + project.color">
+              {{ project.title }}</mat-panel-title
+            >
+          </mat-expansion-panel-header>
+
+          <app-kanban
+            [columns]="columnsOf(project.id)"
+            [group]="project.id"
+            [cardTypeFor]="cardTypeFor"
+            [labelFor]="labelFor"
+            (itemMoved)="onTaskMoved($event)"
+            (columnReordered)="onColumnReordered($event)"
+          >
+            <ng-template #kanbanCard let-task>
+              <mat-card-header>
+                <mat-card-title>{{ task.title }}</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <p>{{ task.description }}</p>
+              </mat-card-content>
+            </ng-template>
+          </app-kanban>
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  }
+</div>

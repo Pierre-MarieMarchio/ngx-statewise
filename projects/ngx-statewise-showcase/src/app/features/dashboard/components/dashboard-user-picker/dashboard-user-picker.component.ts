@@ -1,6 +1,6 @@
 import {
-  Component,
   ChangeDetectionStrategy,
+  Component,
   computed,
   inject,
 } from '@angular/core';
@@ -8,6 +8,7 @@ import {
   MatButtonToggleChange,
   MatButtonToggleModule,
 } from '@angular/material/button-toggle';
+import { UserSwitchService } from '@app/features/auth/services';
 import { AUTH_MANAGER } from '@shared/app-common/tokens';
 
 /**
@@ -24,22 +25,25 @@ const DEMO_CREDENTIALS = {
   selector: 'app-dashboard-user-picker',
   imports: [MatButtonToggleModule],
   templateUrl: './dashboard-user-picker.component.html',
-  styleUrl: './dashboard-user-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardUserPickerComponent {
   private readonly authManager = inject(AUTH_MANAGER);
+  private readonly userSwitch = inject(UserSwitchService);
 
   public readonly currentUserName = computed(
     () => this.authManager.user()?.userName ?? '',
   );
+
+  /** Disables the group while the new user's data is still on its way. */
+  public readonly isSwitching = this.userSwitch.isSwitching;
 
   public onSelectionChange(event: MatButtonToggleChange): void {
     const credentials =
       DEMO_CREDENTIALS[event.value as keyof typeof DEMO_CREDENTIALS];
 
     if (credentials) {
-      this.authManager.login(credentials);
+      void this.userSwitch.switchTo(credentials);
     }
   }
 }

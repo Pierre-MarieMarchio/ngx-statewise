@@ -37,21 +37,18 @@ export class FakeApi {
     };
 
     const { method, url } = this.request;
+
+    const unauthorized = this.rejectUnauthenticated();
+    if (unauthorized)
+      return throwError(() => this.asErrorResponse(unauthorized));
+
     const handler = requestsMapHandlers[method][url];
 
     if (handler) {
       const response = handler();
       if (response.status < 400) return of(response);
 
-      return throwError(
-        () =>
-          new HttpErrorResponse({
-            status: response.status,
-            statusText: response.statusText ?? 'Bad Request',
-            error: response.body,
-            url: this.request.url,
-          }),
-      );
+      return throwError(() => this.asErrorResponse(response));
     }
     return throwError(() => this.respond400Error(`Cannot ${method} ${url}`));
   }
@@ -154,6 +151,48 @@ export class FakeApi {
     return new HttpResponse({
       status: 400,
       body: { message },
+    });
+  }
+
+  private respond401Error(message = 'Unauthorized'): HttpResponse<unknown> {
+    return new HttpResponse({
+      status: 401,
+      body: { message },
+    });
+  }
+
+  /**
+   * Everything but the auth endpoints needs a bearer token this backend knows.
+   *
+   * This is what makes the access-token interceptor's 401 branch a real path:
+   * clear the stored token, ask for the tasks again, and the interceptor
+   * renews it from the refresh cookie and replays the request.
+   */
+  private rejectUnauthenticated(): HttpResponse<unknown> | null {
+    if (this.request.url.includes('/Auth/')) {
+      return null;
+    }
+
+    const authorization = this.request.headers.get('Authorization');
+    const accessToken = authorization?.startsWith('Bearer ')
+      ? authorization.slice('Bearer '.length)
+      : null;
+
+    if (!accessToken) {
+      return this.respond401Error('Authorization header is missing');
+    }
+
+    return this.usersDB.findByAccessToken(accessToken)
+      ? null
+      : this.respond401Error('access token is unknown');
+  }
+
+  private asErrorResponse(response: HttpResponse<unknown>): HttpErrorResponse {
+    return new HttpErrorResponse({
+      status: response.status,
+      statusText: response.statusText ?? 'Bad Request',
+      error: response.body,
+      url: this.request.url,
     });
   }
 

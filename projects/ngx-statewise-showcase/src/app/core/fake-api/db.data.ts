@@ -48,6 +48,15 @@ export const USERS: User[] = [
   },
 ];
 
+/**
+ * The shape this fake backend stores and answers, not the application's model.
+ *
+ * They happen to match today, and TypeScript's structural typing would let
+ * either stand in for the other — which is exactly why the two are kept apart:
+ * the state, the actions and the managers speak `@shared/app-common/models`,
+ * and the repository is the one place that crosses over. A real backend would
+ * drift from the model within a release, and nothing here would notice.
+ */
 export interface Task {
   id: string;
   projectId: string;
