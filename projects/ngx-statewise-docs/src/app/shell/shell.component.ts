@@ -18,7 +18,7 @@ import {
   uiStrings,
   type Locale,
 } from '../i18n';
-import { NPM_URL, REPOSITORY_URL, SITE_URL } from '../site';
+import { CHANGELOG_URL, NPM_URL, REPOSITORY_URL, SITE_URL } from '../site';
 import { DocsUiManager, THEME_CHOICES, type ThemeChoice } from '../ui-state';
 import { SearchDialogComponent } from '../search/search-dialog.component';
 import { IconComponent } from './icon.component';
@@ -55,6 +55,7 @@ export class ShellComponent {
   protected readonly sections = GUIDE_SECTIONS;
   protected readonly repositoryUrl = REPOSITORY_URL;
   protected readonly npmUrl = NPM_URL;
+  protected readonly changelogUrl = CHANGELOG_URL;
 
   protected readonly text = computed(() => uiStrings(this.locale.code));
 

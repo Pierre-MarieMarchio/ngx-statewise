@@ -1,5 +1,6 @@
 import { DEFAULT_LOCALE, type LocaleCode } from '../i18n';
 import actionsEn from './content/en/actions.md';
+import apiEn from './content/en/api.md';
 import effectsEn from './content/en/effects.md';
 import gettingStartedEn from './content/en/getting-started.md';
 import introductionEn from './content/en/introduction.md';
@@ -143,6 +144,20 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = [
           fr: 'Ce que la réécriture a renommé, et les quatre comportements changés.',
         },
         content: { en: migrationEn },
+      },
+    ],
+  },
+  {
+    title: { en: 'Reference', fr: 'Référence' },
+    pages: [
+      {
+        slug: 'api',
+        title: { en: 'API reference', fr: 'Référence d’API' },
+        summary: {
+          en: 'Every export, with the signature the compiler sees.',
+          fr: 'Chaque export, avec la signature que voit le compilateur.',
+        },
+        content: { en: apiEn },
       },
     ],
   },

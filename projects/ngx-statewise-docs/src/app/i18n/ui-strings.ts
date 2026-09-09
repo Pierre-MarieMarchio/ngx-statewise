@@ -39,6 +39,7 @@ export interface UiStrings {
   readonly untranslatedTitle: string;
   readonly untranslatedBody: string;
   readonly footerLicence: string;
+  readonly changelog: string;
   readonly homeSubtitle: string;
   readonly homeThesis: string;
   readonly homeTagline: string;
@@ -58,6 +59,7 @@ export interface UiStrings {
   readonly homeFlowAsynchronous: string;
   readonly homeShapeTitle: string;
   readonly homeShapeNote: string;
+  readonly homeSize: string;
   readonly homeContentsTitle: string;
   readonly homeTitle: string;
 }
@@ -96,6 +98,7 @@ const EN: UiStrings = {
   untranslatedTitle: 'This page is not translated yet',
   untranslatedBody: 'It is shown in English.',
   footerLicence: 'ngx-statewise is released under the GPL-3.0 licence.',
+  changelog: 'Changelog',
   homeSubtitle: 'Angular state management',
   homeThesis: 'The state is already written when your effects run.',
   homeTagline:
@@ -117,6 +120,7 @@ const EN: UiStrings = {
   homeShapeTitle: 'What you write',
   homeShapeNote:
     'That is the whole surface for one feature. The rest of the guide is what happens when a flow gets harder than a login.',
+  homeSize: 'The whole library is {size} kB minified and gzipped.',
   homeContentsTitle: 'Contents',
   homeTitle: 'ngx-statewise — state management for Angular',
 };
@@ -155,6 +159,7 @@ const FR: UiStrings = {
   untranslatedTitle: "Cette page n'est pas encore traduite",
   untranslatedBody: 'Elle est affichée en anglais.',
   footerLicence: 'ngx-statewise est publié sous licence GPL-3.0.',
+  changelog: 'Journal des versions',
   homeSubtitle: 'Gestion d’état pour Angular',
   homeThesis: 'L’état est déjà écrit quand vos effects démarrent.',
   homeTagline:
@@ -177,6 +182,7 @@ const FR: UiStrings = {
   homeShapeTitle: 'Ce que vous écrivez',
   homeShapeNote:
     'C’est toute la surface pour une fonctionnalité. Le reste du guide traite des flux plus retors qu’un login.',
+  homeSize: 'Toute la librairie pèse {size} ko, minifiée et gzippée.',
   homeContentsTitle: 'Sommaire',
   homeTitle: 'ngx-statewise — gestion d’état pour Angular',
 };

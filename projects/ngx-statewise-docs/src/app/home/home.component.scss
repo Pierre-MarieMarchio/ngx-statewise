@@ -68,6 +68,15 @@
   font-size: var(--text-sm);
 }
 
+/* A measured number rather than an adjective, and the only claim on the page
+   that could rot: `npm run verify:size` rebuilds it from the package on every
+   check. Set quietly — it is a fact, not a badge. */
+.hero__size {
+  margin: var(--space-3) 0 0;
+  color: var(--text-faint);
+  font-size: var(--text-base);
+}
+
 .button {
   display: inline-flex;
   align-items: center;

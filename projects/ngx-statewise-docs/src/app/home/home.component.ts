@@ -9,7 +9,7 @@ import { Meta, Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { GUIDE_SECTIONS } from '../guide/guide-pages';
 import { CurrentPagePath, LOCALE, uiStrings } from '../i18n';
-import { REPOSITORY_URL } from '../site';
+import { LIBRARY_GZIP_KB, REPOSITORY_URL } from '../site';
 
 @Component({
   selector: 'docs-home',
@@ -24,6 +24,18 @@ export class HomeComponent {
   protected readonly repositoryUrl = REPOSITORY_URL;
 
   protected readonly text = computed(() => uiStrings(this.locale.code));
+
+  /**
+   * The one measurable promise the library can make, in the reader's own
+   * notation: 2.7 in English, 2,7 in French. The number lives in site.ts and
+   * `npm run verify:size` fails the build if it stops being true.
+   */
+  protected readonly sizeSentence = computed(() =>
+    this.text().homeSize.replace(
+      '{size}',
+      new Intl.NumberFormat(this.locale.htmlLang).format(LIBRARY_GZIP_KB),
+    ),
+  );
 
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
