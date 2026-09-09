@@ -1,9 +1,8 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   inject,
   signal,
-  ViewChild,
-  ChangeDetectionStrategy,
 } from '@angular/core';
 import { SidePanelComponent } from '@shared/ui/side-panel';
 import { Task } from '@app/features/project/models';
@@ -34,17 +33,19 @@ import { TaskManager } from '@app/features/project/states/task/task.manager';
   },
 })
 export class DashboardPageComponent {
-  @ViewChild('dashboardPanel') dashboardPanel!: SidePanelComponent;
-
   public readonly taskManager = inject(TaskManager);
 
   public selectedTask = signal<Task | null>(null);
 
+  /** Whether the panel is open, which is the panel's own `model`. */
+  public readonly panelOpen = signal(false);
+
   public selectTask(task: Task): void {
     this.selectedTask.set(task);
-    this.dashboardPanel.open();
+    this.panelOpen.set(true);
   }
+
   public closeSideNav(): void {
-    this.dashboardPanel.close();
+    this.panelOpen.set(false);
   }
 }

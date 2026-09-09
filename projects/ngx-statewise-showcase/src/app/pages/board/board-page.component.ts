@@ -1,9 +1,8 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   inject,
   signal,
-  ViewChild,
-  ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
@@ -46,8 +45,6 @@ import { ProjectManager } from '@app/features/project/states/project/project.man
   },
 })
 export class BoardPageComponent {
-  @ViewChild('taskPanel') taskPanel!: SidePanelComponent;
-
   public readonly taskManager = inject(TaskManager);
   /**
    * Two of the four tabs group by project, so a project load that failed is
@@ -65,18 +62,21 @@ export class BoardPageComponent {
    */
   public readonly panel = signal<'task' | 'new-project' | 'new-task'>('task');
 
+  /** Whether the panel is open, which is the panel's own `model`. */
+  public readonly panelOpen = signal(false);
+
   public closeSideNav(): void {
-    this.taskPanel.close();
+    this.panelOpen.set(false);
   }
 
   public openNewProject(): void {
     this.panel.set('new-project');
-    this.taskPanel.open();
+    this.panelOpen.set(true);
   }
 
   public openNewTask(): void {
     this.panel.set('new-task');
-    this.taskPanel.open();
+    this.panelOpen.set(true);
   }
 
   public async createProject(draft: ProjectDraft): Promise<void> {
@@ -97,14 +97,10 @@ export class BoardPageComponent {
     }
   }
 
-  public toggleSideNav(): void {
-    this.taskPanel.toggle();
-  }
-
   public selectTask(task: Task): void {
     this.selectedTask.set(task);
     this.panel.set('task');
-    this.taskPanel.open();
+    this.panelOpen.set(true);
   }
 
   public onTaskChanged(updatedTask: Task): void {

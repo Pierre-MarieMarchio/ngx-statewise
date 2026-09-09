@@ -94,12 +94,12 @@ describe('BoardPageComponent', () => {
     fixture.detectChanges();
 
     expect(component.selectedTask()?.id).toBe('picked');
-    expect(component.taskPanel.sidenav.opened).toBe(true);
+    expect(component.panelOpen()).toBe(true);
 
     component.closeSideNav();
     fixture.detectChanges();
 
-    expect(component.taskPanel.sidenav.opened).toBe(false);
+    expect(component.panelOpen()).toBe(false);
   });
 
   it('forwards a changed task to the manager', async () => {
