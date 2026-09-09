@@ -130,7 +130,9 @@ wiring are not. Four behaviours changed beyond the renames:
 - **`waitForEffect` and `waitForAllEffects` are scoped to the manager** that
   owns them, and `waitForEffect` no longer takes a raw action-type string.
 - **The action history left the dispatch handle.** `statewise.recordedActions()`
-  is gone; inject `ActionHistory` and call `snapshot()`.
+  is gone; inject `ActionHistory` and call `snapshot()`, which answers
+  `readonly HistoryEntry[]` — the action, the cascade path that led to it, and
+  when it was recorded.
 
 → [Migrating from 0.6.x](https://pierre-mariemarchio.github.io/ngx-statewise/guide/migration)
 has the full rename table and before/after examples.

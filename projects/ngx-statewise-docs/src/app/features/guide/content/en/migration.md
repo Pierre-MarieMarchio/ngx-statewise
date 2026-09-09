@@ -128,10 +128,14 @@ Actions no updater claims keep running their effects everywhere. See
 and a typo becomes a compile error.
 
 **The action history left the dispatch handle.** `recordedActions()` is gone
-from `Statewise`; inject `ActionHistory` and call `snapshot()`, which returns
-the same plain array. The history was always application-wide while the handle
-scopes everything else, and reading it used to force an `injectStatewise()`
-call with no updater at all.
+from `Statewise`; inject `ActionHistory` and call `snapshot()`. The history was
+always application-wide while the handle scopes everything else, and reading it
+used to force an `injectStatewise()` call with no updater at all.
+
+`snapshot()` now answers `readonly HistoryEntry[]` rather than
+`readonly Action[]`: each entry wraps the action alongside the cascade path
+that led to it and the moment it was recorded. Read `entry.action.type` where
+you read `action.type`. See [`HistoryEntry`](/guide/api#actionhistory).
 
 ## What it buys you
 

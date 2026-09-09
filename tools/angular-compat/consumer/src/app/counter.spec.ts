@@ -70,7 +70,7 @@ describe('ngx-statewise, installed from the packed package', () => {
     expect(
       TestBed.inject(ActionHistory)
         .snapshot()
-        .map((action) => action.type),
+        .map((entry) => entry.action.type),
     ).toEqual([counterActions.incremented.type]);
   });
 

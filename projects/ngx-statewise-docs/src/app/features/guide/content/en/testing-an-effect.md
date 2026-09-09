@@ -88,7 +88,7 @@ it('confirms rather than reverting', async () => {
 
   const dispatched = TestBed.inject(ActionHistory)
     .snapshot()
-    .map((action) => action.type);
+    .map((entry) => entry.action.type);
 
   expect(dispatched).toEqual(['TASK_TOGGLE_DONE', 'TASK_TOGGLE_CONFIRMED']);
 });

@@ -39,6 +39,14 @@ describe('InspectionHistoryPageComponent', () => {
   const readout = (name: string): string =>
     host().querySelector(`[data-readout="${name}"]`)?.textContent?.trim() ?? '';
 
+  /** The columns, named: reading a row by a bare index rots on every change. */
+  const POSITION = 0;
+  const TYPE = 1;
+  const PAYLOAD = 3;
+
+  const cell = (row: number, column: number): string =>
+    at(at(rows(), row), column);
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [InspectionHistoryPageComponent],
@@ -81,8 +89,10 @@ describe('InspectionHistoryPageComponent', () => {
   it('lists an action once the history is read', () => {
     click('raise a notice');
 
+    // The cascade column shows the path the engine walked. A dispatch from a
+    // component is a cascade of one, so it reads as its own type.
     expect(rows()).toEqual([
-      ['1', 'NOTICE_RAISED', '"raised from the history"'],
+      ['1', 'NOTICE_RAISED', 'NOTICE_RAISED', '"raised from the history"'],
     ]);
     expect(readout('total')).toBe('1');
   });
@@ -91,8 +101,8 @@ describe('InspectionHistoryPageComponent', () => {
     outside.dispatch(noticeActions.raised('from elsewhere'));
     click('refresh');
 
-    expect(rows().map((row) => row[1])).toEqual(['NOTICE_RAISED']);
-    expect(at(at(rows(), 0), 2)).toBe('"from elsewhere"');
+    expect(rows().map((row) => row[TYPE])).toEqual(['NOTICE_RAISED']);
+    expect(cell(0, PAYLOAD)).toBe('"from elsewhere"');
   });
 
   /**
@@ -139,7 +149,7 @@ describe('InspectionHistoryPageComponent', () => {
     fixture.componentInstance.filterBy('TALLY_INCREMENTED');
     fixture.detectChanges();
 
-    expect(rows().map((row) => row[1])).toEqual(['TALLY_INCREMENTED']);
+    expect(rows().map((row) => row[TYPE])).toEqual(['TALLY_INCREMENTED']);
     expect(readout('filter')).toBe('TALLY_INCREMENTED');
 
     fixture.componentInstance.filterBy('TALLY_INCREMENTED');
@@ -156,7 +166,7 @@ describe('InspectionHistoryPageComponent', () => {
     fixture.componentInstance.filterBy('TALLY_INCREMENTED');
     fixture.detectChanges();
 
-    expect(rows().map((row) => row[0])).toEqual(['1', '2']);
+    expect(rows().map((row) => row[POSITION])).toEqual(['1', '2']);
   });
 
   it('clears the filter', () => {
@@ -173,14 +183,14 @@ describe('InspectionHistoryPageComponent', () => {
     outside.dispatch(noticeActions.cleared());
     click('refresh');
 
-    expect(rows()).toEqual([['1', 'NOTICE_CLEARED', '']]);
+    expect(rows()).toEqual([['1', 'NOTICE_CLEARED', 'NOTICE_CLEARED', '']]);
   });
 
   it('cuts a long payload short rather than flooding the row', () => {
     outside.dispatch(noticeActions.raised('x'.repeat(MAX_PAYLOAD_LENGTH * 2)));
     click('refresh');
 
-    const payload = at(at(rows(), 0), 2);
+    const payload = cell(0, PAYLOAD);
 
     expect(payload.length).toBe(MAX_PAYLOAD_LENGTH + 1);
     expect(payload.endsWith('…')).toBe(true);
@@ -190,6 +200,6 @@ describe('InspectionHistoryPageComponent', () => {
     outside.dispatch(noticeActions.raised('short'));
     click('refresh');
 
-    expect(at(at(rows(), 0), 2)).toBe('"short"');
+    expect(cell(0, PAYLOAD)).toBe('"short"');
   });
 });

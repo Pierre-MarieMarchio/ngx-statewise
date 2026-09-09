@@ -12,7 +12,7 @@ import {
   ActionHistory,
   injectStatewise,
   ofType,
-  type Action,
+  type HistoryEntry,
 } from 'ngx-statewise';
 import { noticeActions } from '@app/features/inspection/states';
 import { tallyActions, tallyUpdater } from '@app/features/inspection/states';
@@ -63,36 +63,41 @@ export class InspectionHistoryPageComponent {
   private readonly taskManager = inject(TaskManager);
 
   public readonly trackedTypes = TRACKED_ACTION_TYPES;
-  public readonly displayedColumns = ['position', 'type', 'payload'];
+  public readonly displayedColumns = ['position', 'type', 'cascade', 'payload'];
 
   /**
    * `snapshot()` hands back a plain array rather than a signal, so the table
    * holds what the last read saw and refreshes when asked.
    */
-  private readonly recorded = signal<readonly Action[]>([]);
+  private readonly recorded = signal<readonly HistoryEntry[]>([]);
   public readonly selectedType = signal<string | null>(null);
 
   public readonly rows = computed(() => {
     const selected = this.selectedType();
-    const actions = selected
-      ? this.recorded().filter((action) => action.type === selected)
+    const entries = selected
+      ? this.recorded().filter((entry) => entry.action.type === selected)
       : this.recorded();
 
-    return actions.map((action, index) => ({
+    return entries.map((entry, index) => ({
       position: index + 1,
-      type: action.type,
-      payload: abbreviate(action.payload),
+      type: entry.action.type,
+      // The path the engine walked to get here, read the way the cascade-bound
+      // error reads it. A single dispatch shows one type; a cascade of three
+      // shows three rows whose paths extend each other.
+      cascade: entry.cascade.join(' \u2192 '),
+      payload: abbreviate(entry.action.payload),
     }));
   });
 
   public readonly total = computed(() => this.recorded().length);
 
   public readonly counts = computed(() => {
-    const actions = this.recorded();
+    const entries = this.recorded();
 
     return this.trackedTypes.map((tracked) => ({
       ...tracked,
-      count: actions.filter((action) => action.type === tracked.type).length,
+      count: entries.filter((entry) => entry.action.type === tracked.type)
+        .length,
     }));
   });
 

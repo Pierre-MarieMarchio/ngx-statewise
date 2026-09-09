@@ -192,13 +192,37 @@ scoped handle is the wrong place to read it from.
 
 ```typescript
 class ActionHistory {
-  record(action: Action): void;
-  snapshot(): readonly Action[];
+  record(action: Action, cascade: readonly string[]): void;
+  snapshot(): readonly HistoryEntry[];
+}
+
+interface HistoryEntry {
+  readonly action: Action;
+  readonly cascade: readonly string[];
+  readonly recordedAt: number;
 }
 ```
 
 The last dispatched actions, oldest first. Injectable, application-wide, and
 empty unless `provideStatewise` was given a `history` option.
+
+An entry is an envelope, not an enriched `Action`: reading the history and
+dispatching are two different things, and an `Action` that carried a cascade
+would make every action look like it does.
+
+`cascade` is the chain of action types that led to the entry, this action last
+— the same path the cascade-bound error prints. A single dispatch reads as one
+entry; a cascade of three reads as three whose paths extend each other, which
+is what relates them. `recordedAt` is `Date.now()` at the moment of recording,
+and is what tells two concurrent dispatches of one action type apart.
+
+`redact` still receives the action alone. What an application strips is a
+payload, never a path.
+
+> [!NOTE]
+> Both are frozen, the path included: an entry already handed out cannot be
+> rewritten through the array `snapshot` returns. The payload keeps its
+> identity — see the note on `redact` below.
 
 ## Setting up
 
