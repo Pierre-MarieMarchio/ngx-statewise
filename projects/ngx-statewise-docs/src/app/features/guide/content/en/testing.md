@@ -110,6 +110,41 @@ it('runs on state the updater has already written', async () => {
 });
 ```
 
+## Exercising an interceptor
+
+`StatewiseTestingConfig` extends `StatewiseConfig`, so `interceptors` is
+already here. An interceptor class is listed the way an effect class is, and
+for the same reason: nothing else instantiates it, so its declarations never
+register.
+
+<!-- prettier-ignore -->
+```typescript title="tally.guard.spec.ts"
+let statewise: Statewise;
+
+beforeEach(() => {
+  TestBed.configureTestingModule({
+    providers: [provideStatewiseTesting({ interceptors: [TallyGuard] })],
+  });
+
+  statewise = TestBed.runInInjectionContext(() =>
+    injectStatewise(tallyUpdater),
+  );
+});
+
+it('refuses the step that would carry the tally past the ceiling', async () => {
+  await statewise.dispatchAsync(tallyActions.incremented(TALLY_CEILING));
+
+  await statewise.dispatchAsync(tallyActions.incremented(1));
+
+  expect(TestBed.inject(TallyState).total).toBe(TALLY_CEILING);
+});
+```
+
+A refusal resolves the dispatch, so there is nothing to catch and nothing to
+drain: assert on the state that did not move. The history is on by default
+here, so a suite can also assert that the refused action recorded no entry. See
+[Interceptors](/guide/interceptors).
+
 ## Dispatching without attaching an updater
 
 A test that only exercises effects can dispatch an action whose updater it
@@ -151,8 +186,8 @@ Prefer `strict: false` when you only want the check off. It is scoped to one
 ## Key notes
 
 - `provideStatewiseTesting` instead of `provideStatewise`, and list the effect
-  classes the test needs — an effect class nobody instantiates registers
-  nothing.
+  and interceptor classes the test needs — a class nobody instantiates
+  registers nothing.
 - `await drainEffects()` after a `dispatch`, `await` the promise after a
   `dispatchAsync`.
 - Assert on the state the manager exposes, not on the actions, unless the

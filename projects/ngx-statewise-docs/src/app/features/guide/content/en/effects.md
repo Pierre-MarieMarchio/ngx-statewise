@@ -182,4 +182,4 @@ the effect.
 - An effect belongs to the scope owning its action's updater, and is
   unregistered with the injector that created it.
 
-Next: [Managers](/guide/managers).
+Next: [Interceptors](/guide/interceptors).
