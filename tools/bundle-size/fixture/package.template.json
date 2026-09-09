@@ -1,0 +1,22 @@
+{
+  "name": "ngx-statewise-sizing",
+  "version": "0.0.0",
+  "description": "Throwaway application built three times, to weigh what ngx-statewise adds through Angular's own production pipeline.",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@angular/common": "{{ANGULAR}}",
+    "@angular/compiler": "{{ANGULAR}}",
+    "@angular/core": "{{ANGULAR}}",
+    "@angular/platform-browser": "{{ANGULAR}}",
+    "ngx-statewise": "{{PACKAGE}}",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "{{ANGULAR}}",
+    "@angular/cli": "{{ANGULAR}}",
+    "@angular/compiler-cli": "{{ANGULAR}}",
+    "typescript": "{{TYPESCRIPT}}"
+  }
+}
