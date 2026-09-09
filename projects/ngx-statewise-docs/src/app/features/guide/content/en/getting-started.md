@@ -65,6 +65,7 @@ and is the right starting point.
 | Option              | Type                              | Default       |
 | ------------------- | --------------------------------- | ------------- |
 | `effects`           | `readonly Type<unknown>[]`        | none          |
+| `interceptors`      | `readonly Type<unknown>[]`        | none          |
 | `updaters`          | `readonly Updater<unknown>[]`     | none          |
 | `history`           | `{ limit, redact? }`              | disabled      |
 | `misroutedDispatch` | `'throw' \| 'report' \| 'ignore'` | by build mode |
@@ -78,6 +79,12 @@ run — that is the most common reason a first effect appears dead.
 `injectStatewise()` with no updater at all. A scoped updater always wins over a
 global one, so a type a manager already owns never reaches these. See
 [attaching updaters](/guide/updaters#attaching-updaters).
+
+`interceptors` does for interceptor classes what `effects` does for effect
+classes: instantiate them at startup, so their declarations register. The two
+are mechanically identical, and separate only because a class holding nothing
+but interceptors used to have to travel under `effects`, which named it wrong at
+every call site. `effects` still accepts one, so nothing has to move.
 
 `history` records the last `limit` actions, for reading back through
 `ActionHistory`. It is off unless you ask for it, and `redact` rewrites an

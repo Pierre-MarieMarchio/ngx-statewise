@@ -12,6 +12,7 @@ import { ActionHistory } from '../dispatch/action-history';
 import type { DispatchScope } from '../dispatch/dispatch-scope';
 import { StatewiseEngine } from '../dispatch/statewise-engine';
 import { createEffect } from '../effect';
+import { createInterceptor } from '../interceptor';
 import { EffectRegistry } from '../effect/effect-registry';
 import { PendingEffects } from '../effect/pending-effects';
 import { defineUpdater } from '../updater';
@@ -79,6 +80,22 @@ class CycleEffect {
   );
 }
 
+let interceptorAsks: number[];
+
+/**
+ * A class declaring nothing but interceptors — the shape that had to travel in
+ * `effects`, which named it wrong at every call site.
+ */
+@Injectable()
+class PingGuard {
+  private readonly onPing = createInterceptor(
+    provideActions.pinged,
+    (amount) => {
+      interceptorAsks.push(amount);
+    },
+  );
+}
+
 /**
  * The class a lazy route would provide alongside a second `provideStatewise()`
  * — the shape the guide used to recommend without saying what the second call
@@ -116,6 +133,7 @@ describe('provideStatewise', () => {
     state = { count: 0 };
     ordered = { log: [] };
     effectRuns = [];
+    interceptorAsks = [];
     handledErrors = [];
   });
 
@@ -140,6 +158,34 @@ describe('provideStatewise', () => {
     );
 
     expect(effectRuns).toEqual([4]);
+  });
+
+  /**
+   * The two lists do the same thing — instantiate a class eagerly — and both
+   * have to keep working, or the option is breaking for nothing.
+   */
+  describe('interceptor classes', () => {
+    it('instantiates the ones declared under interceptors', async () => {
+      configure(provideStatewise({ interceptors: [PingGuard] }));
+
+      await TestBed.inject(StatewiseEngine).execute(
+        provideActions.pinged(7),
+        NO_SCOPE,
+      );
+
+      expect(interceptorAsks).toEqual([7]);
+    });
+
+    it('still instantiates the ones declared under effects', async () => {
+      configure(provideStatewise({ effects: [PingGuard] }));
+
+      await TestBed.inject(StatewiseEngine).execute(
+        provideActions.pinged(7),
+        NO_SCOPE,
+      );
+
+      expect(interceptorAsks).toEqual([7]);
+    });
   });
 
   it('applies the updaters declared globally, without a dispatch scope', async () => {

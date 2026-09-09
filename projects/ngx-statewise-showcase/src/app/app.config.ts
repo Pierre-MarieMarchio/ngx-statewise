@@ -23,7 +23,7 @@ import {
 } from './features/auth/states';
 import { TaskEffect, TaskManager } from './features/project/states';
 import { ProjectEffect, ProjectManager } from './features/project/states';
-import { noticeUpdater } from './features/inspection/states';
+import { noticeUpdater, TallyGuard } from './features/inspection/states';
 import { AUTH_SESSION, PROJECT_RELOAD, TASK_RELOAD } from './features/common';
 
 export const appConfig: ApplicationConfig = {
@@ -43,6 +43,9 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideStatewise({
       effects: [AuthEffect, TaskEffect, ProjectEffect],
+      // A class holding nothing but interceptors, which is what this option
+      // is for: listing it under `effects` would name it wrong.
+      interceptors: [TallyGuard],
       updaters: [noticeUpdater],
       history: { limit: 50, redact: withoutCredentials },
     }),
