@@ -503,6 +503,45 @@ main:focus {
   display: none;
 }
 
+/* --- A block that takes a side -------------------------------------------
+   An opinionated library teaches a rule most cheaply by showing the two
+   versions of it. The edge carries the verdict so the pair reads at a glance,
+   and the word carries it for anyone the colour does not reach. */
+.code-block--prefer {
+  border-left: 3px solid var(--success);
+}
+
+.code-block--avoid {
+  border-left: 3px solid var(--danger);
+}
+
+.code-block__stance {
+  flex: none;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+
+.code-block--prefer .code-block__stance {
+  color: var(--success);
+}
+
+.code-block--avoid .code-block__stance {
+  color: var(--danger);
+}
+
+/* With a stance and a filename both, the bar has three things on it. */
+.code-block--prefer .code-block__bar,
+.code-block--avoid .code-block__bar {
+  gap: var(--space-3);
+  justify-content: flex-start;
+}
+
+.code-block--prefer .code-block__copy,
+.code-block--avoid .code-block__copy {
+  margin-left: auto;
+}
+
 .code-block__copy {
   display: inline-flex;
   align-items: center;

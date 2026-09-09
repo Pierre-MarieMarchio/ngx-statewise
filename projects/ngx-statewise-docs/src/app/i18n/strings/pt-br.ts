@@ -31,6 +31,8 @@ export const PT_BR: UiStrings = {
   searchPlaceholder: 'Buscar no guia…',
   searchPrompt: 'Digite para procurar páginas e seções.',
   searchNoResults: 'Nada corresponde a isso.',
+  preferLabel: 'Prefira',
+  avoidLabel: 'Evite',
   calloutNote: 'Observação',
   calloutTip: 'Dica',
   calloutImportant: 'Importante',

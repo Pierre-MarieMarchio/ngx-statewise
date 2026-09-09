@@ -66,6 +66,8 @@ export class GuidePageComponent {
       headingLinkLabel: text.onThisPage,
       calloutLabels: calloutLabels(this.locale.code),
       codeRegionLabel: text.codeRegion,
+      preferLabel: text.preferLabel,
+      avoidLabel: text.avoidLabel,
       tableRegionLabel: text.tableRegion,
     });
   });

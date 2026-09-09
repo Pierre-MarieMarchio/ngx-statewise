@@ -26,7 +26,17 @@ export interface RenderGuideOptions {
   /** Names the scrollable regions a keyboard user has to be able to reach. */
   readonly codeRegionLabel: string;
   readonly tableRegionLabel: string;
+  /** Names a block the guide is holding up as the way to do it, or not. */
+  readonly preferLabel: string;
+  readonly avoidLabel: string;
 }
+
+/**
+ * A fenced block can take a side. `prefer` and `avoid` turn an example into a
+ * rule, which is the cheapest way an opinionated library can teach one without
+ * spending a paragraph on it.
+ */
+export type FenceStance = 'prefer' | 'avoid';
 
 /** Depths kept in the on-page table of contents. `h1` is the page title. */
 const TOC_DEPTHS = [2, 3];
@@ -82,7 +92,7 @@ export function renderGuide(
     },
 
     code(token: Tokens.Code) {
-      const { language, title } = parseFenceInfo(token.lang ?? '');
+      const { language, title, stance } = parseFenceInfo(token.lang ?? '');
 
       codeRegions += 1;
       const body = token.escaped ? token.text : escapeHtml(token.text);
@@ -92,17 +102,30 @@ export function renderGuide(
       const label = escapeAttribute(options.copyCodeLabel);
 
       // A title beats a bare language: on a docs site, knowing which file a
-      // snippet belongs in is most of the answer.
+      // snippet belongs in is most of the answer. A stance beats both: the
+      // block is not an example, it is a rule.
+      const stanceLabel =
+        stance === 'prefer'
+          ? options.preferLabel
+          : stance === 'avoid'
+            ? options.avoidLabel
+            : undefined;
       const caption =
-        title !== undefined
-          ? `<span class="code-block__title">${escapeHtml(title)}</span>`
-          : `<span class="code-block__language">${escapeHtml(language)}</span>`;
+        stanceLabel !== undefined
+          ? `<span class="code-block__stance">${escapeHtml(stanceLabel)}</span>${
+              title === undefined
+                ? ''
+                : `<span class="code-block__title">${escapeHtml(title)}</span>`
+            }`
+          : title !== undefined
+            ? `<span class="code-block__title">${escapeHtml(title)}</span>`
+            : `<span class="code-block__language">${escapeHtml(language)}</span>`;
 
       // The copy button is plain markup: this HTML is injected with innerHTML,
       // so an Angular component could not live inside it. The page listens for
       // the click instead.
       return [
-        `<div class="code-block"${title !== undefined ? ' data-titled' : ''}>`,
+        `<div class="code-block${stance === undefined ? '' : ` code-block--${stance}`}"${title !== undefined ? ' data-titled' : ''}>`,
         '<div class="code-block__bar">',
         caption,
         `<button class="code-block__copy" type="button" data-copy-code title="${label}" aria-label="${label}">`,
@@ -187,14 +210,25 @@ const COPY_ICON =
 export function parseFenceInfo(info: string): {
   language: string;
   title?: string;
+  stance?: FenceStance;
 } {
   const title = /title="([^"]*)"/.exec(info);
-  const language = info
+  const words = info
     .replace(/title="[^"]*"/, '')
     .trim()
-    .split(/\s+/)[0];
+    .split(/\s+/)
+    .filter((word) => word.length > 0);
 
-  return title === null ? { language } : { language, title: title[1] };
+  const language = words[0] ?? '';
+  const stance = words
+    .slice(1)
+    .find((word): word is FenceStance => word === 'prefer' || word === 'avoid');
+
+  return {
+    language,
+    ...(title === null ? {} : { title: title[1] }),
+    ...(stance === undefined ? {} : { stance }),
+  };
 }
 
 function escapeHtml(value: string): string {

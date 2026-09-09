@@ -20,6 +20,8 @@ export function renderOptions(
     calloutLabels: TEST_CALLOUT_LABELS,
     codeRegionLabel: 'Code sample',
     tableRegionLabel: 'Table',
+    preferLabel: 'Prefer',
+    avoidLabel: 'Avoid',
     ...overrides,
   };
 }

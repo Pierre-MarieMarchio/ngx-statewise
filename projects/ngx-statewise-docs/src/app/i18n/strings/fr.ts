@@ -27,6 +27,8 @@ export const FR: UiStrings = {
   searchPlaceholder: 'Rechercher dans le guide…',
   searchPrompt: 'Tapez pour chercher une page ou une section.',
   searchNoResults: 'Aucun résultat.',
+  preferLabel: 'À préférer',
+  avoidLabel: 'À éviter',
   calloutNote: 'Remarque',
   calloutTip: 'Astuce',
   calloutImportant: 'Important',

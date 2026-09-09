@@ -31,6 +31,8 @@ export const DE: UiStrings = {
   searchPlaceholder: 'Im Handbuch suchen…',
   searchPrompt: 'Tippen, um Seiten und Abschnitte zu finden.',
   searchNoResults: 'Dazu gibt es nichts.',
+  preferLabel: 'Besser so',
+  avoidLabel: 'Nicht so',
   calloutNote: 'Hinweis',
   calloutTip: 'Tipp',
   calloutImportant: 'Wichtig',

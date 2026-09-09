@@ -36,6 +36,9 @@ export interface UiStrings {
   readonly searchPlaceholder: string;
   readonly searchPrompt: string;
   readonly searchNoResults: string;
+  /** Marks a fenced block the guide is holding up, or holding away. */
+  readonly preferLabel: string;
+  readonly avoidLabel: string;
   readonly calloutNote: string;
   readonly calloutTip: string;
   readonly calloutImportant: string;
