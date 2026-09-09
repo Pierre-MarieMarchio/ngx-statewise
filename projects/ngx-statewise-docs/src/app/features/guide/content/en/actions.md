@@ -17,67 +17,75 @@ summary:
 # Actions
 
 An action states an intent: something happened, and this is what came with it.
-It carries a type, a string identifying the event, and an optional payload.
+You never write its type string by hand.
 
-You never write that string by hand. Declare actions in a group when they belong
-to one flow, or on their own when they stand alone, and ngx-statewise generates
-the types for you.
+An action carries a type — a string identifying the event — and an optional
+payload. Declare them in a group when they belong to one flow, or on their own
+when they stand alone, and the library generates the types.
 
 ## Action groups
 
-`defineActionsGroup` builds each action type from the source, a base name, and the name of the event. Use it for a set of related actions, such as a loading flow or error handling, gathered under a common source.
+`defineActionsGroup` builds each type from a source and an event name. Use it
+for a set of related actions: a loading flow, an error path, anything gathered
+under one subject.
 
-With a source of `'LOGIN'`, the event `request` becomes `LOGIN_REQUEST`, `success` becomes `LOGIN_SUCCESS`, and so on.
-
-The following example declares a group of related actions:
-
-```typescript
+```typescript title="auth.actions.ts"
 import { defineActionsGroup, payload, emptyPayload } from 'ngx-statewise';
 
 export const loginActions = defineActionsGroup({
   source: 'LOGIN',
   events: {
-    request: payload<LoginSubmit>(), // Becomes LOGIN_REQUEST
-    success: payload<LoginResponse>(), // Becomes LOGIN_SUCCESS
-    failure: emptyPayload, // Becomes LOGIN_FAILURE
-    cancel: emptyPayload, // Becomes LOGIN_CANCEL
-    retry: payload<number>(), // Becomes LOGIN_RETRY
+    request: payload<LoginSubmit>(), // LOGIN_REQUEST
+    success: payload<LoginResponse>(), // LOGIN_SUCCESS
+    failure: emptyPayload, // LOGIN_FAILURE
+    cancel: emptyPayload, // LOGIN_CANCEL
+    retry: payload<number>(), // LOGIN_RETRY
   },
 });
 ```
 
-In that group:
+Each value in `events` says what the action carries. `payload<T>()` declares a
+`T`; `emptyPayload` declares nothing, and its creator takes no argument.
 
-- `LOGIN_REQUEST` carries a `LoginSubmit` payload, and you dispatch it when a login request is made.
-- `LOGIN_SUCCESS` carries a `LoginResponse` payload, and you dispatch it when the login succeeds.
-- `LOGIN_FAILURE` and `LOGIN_CANCEL` need no payload, so they use `emptyPayload`.
+```typescript
+statewise.dispatch(loginActions.request({ email, password }));
+statewise.dispatch(loginActions.failure());
+```
+
+An event name in `camelCase` becomes `SCREAMING_SNAKE_CASE`, so
+`refreshToken` under the source `AUTH` is `AUTH_REFRESH_TOKEN`.
 
 ## Single actions
 
-Use `defineSingleAction` for an action that belongs to no group. It suffixes the type with `_ACTION`, which keeps it unique.
+`defineSingleAction` is for an action that belongs to no group. It suffixes the
+type with `_ACTION`, which keeps it from colliding.
 
-`'LOGOUT'` becomes `'LOGOUT_ACTION'`, and `'SELECT_ITEM'` becomes `'SELECT_ITEM_ACTION'`. Declare them like this:
-
-```typescript
+```typescript title="auth.actions.ts"
 import { defineSingleAction, emptyPayload, payload } from 'ngx-statewise';
 
-export const logoutAction = defineSingleAction('LOGOUT', emptyPayload); // Becomes LOGOUT_ACTION
-export const selectItemAction = defineSingleAction('SELECT_ITEM', payload<number>()); // Becomes SELECT_ITEM_ACTION
+export const logoutAction = defineSingleAction('LOGOUT', emptyPayload);
+export const selectItemAction = defineSingleAction('SELECT_ITEM', payload<number>());
 ```
 
+`LOGOUT` becomes `LOGOUT_ACTION`, and `SELECT_ITEM` becomes
+`SELECT_ITEM_ACTION`.
+
 > [!WARNING]
-> `defineActionsGroup` upper-cases its source; `defineSingleAction` does not.
-> `defineActionsGroup({ source: 'login', … })` gives you `LOGIN_REQUEST`, but
-> `defineSingleAction('logout', emptyPayload)` gives you `logout_ACTION`, not
-> `LOGOUT_ACTION`. Pass the source already upper-cased to a single action, as
-> the examples above do, or the two conventions will not match.
+> The two are not symmetrical about case. `defineActionsGroup` upper-cases its
+> source; `defineSingleAction` does not.
 
-In that example:
+```typescript avoid title="auth.actions.ts"
+export const logoutAction = defineSingleAction('logout', emptyPayload);
+// The type is `logout_ACTION`.
+```
 
-- `LOGOUT_ACTION` carries no payload, as `emptyPayload` declares. Dispatch it when the user logs out.
-- `SELECT_ITEM_ACTION` carries a number, the id of the selected item.
+```typescript prefer title="auth.actions.ts"
+export const logoutAction = defineSingleAction('LOGOUT', emptyPayload);
+// The type is `LOGOUT_ACTION`.
+```
 
-`defineSingleAction` returns the creator itself, so you use it exactly like a creator coming from an action group:
+`defineSingleAction` returns the creator itself, so it is used exactly like one
+from a group:
 
 ```typescript
 statewise.dispatch(logoutAction());
@@ -87,18 +95,28 @@ on(logoutAction, (state) => { ... });
 createEffect(selectItemAction, (id) => { ... });
 ```
 
-## Action types
+## Reading a type
 
-Every action has its own type, whether it belongs to a group or stands alone. ngx-statewise generates that type from the name of the action and from the way it was declared:
+Updaters and effects match on the generated string, so it has to agree exactly.
+`ofType` gives it to you, as a literal type rather than a widened `string`:
 
-- `loginActions.request` has the type `LOGIN_REQUEST`.
-- `logoutAction` has the type `LOGOUT_ACTION`.
+```typescript
+ofType(loginActions.request); // 'LOGIN_REQUEST'
+ofType(logoutAction); // 'LOGOUT_ACTION'
+ofType({ type: 'MY_ACTION' }); // 'MY_ACTION'
+```
+
+You rarely need it in application code — an updater and an effect both take the
+creator, not its string. It earns its place in tests and in logging.
 
 ## Key notes
 
 - `defineActionsGroup` for a flow, `defineSingleAction` for a standalone
   operation. Both produce creators used the same way.
-- Updaters and effects match on the generated string, so it has to agree
-  exactly. `ofType(creator)` returns it, typed.
-- Grouping `request / success / failure` under one source keeps a flow readable,
-  and keeps its types from colliding with another feature's.
+- Grouping `request` / `success` / `failure` under one source keeps a flow
+  readable, and keeps its types from colliding with another feature's.
+- An action nothing handles is still valid. It exists to trigger effects, and
+  nothing warns you about it — see
+  [what the check cannot see](/guide/updaters#what-the-check-cannot-see).
+
+Next: [Updaters](/guide/updaters).

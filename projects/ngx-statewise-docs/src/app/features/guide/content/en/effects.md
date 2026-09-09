@@ -16,21 +16,16 @@ summary:
 
 # Effects
 
-An effect is the asynchronous half of a feature: API calls, navigation, storage,
-logging, everything that is not a state change. You declare one with
-`createEffect`, bound to a single action.
+The asynchronous half of a feature: API calls, navigation, storage, logging —
+everything that is not a state change.
 
 Effects always run **after** the updater, so they never read stale state. The
-library enforces the sequence **action → updater → effect**.
+library enforces the sequence action → updater → effect.
 
 An effect may return another action, and that action goes through the same
 cycle: its updater, then its own effects. A flow like "log in, load the
 workspace, then navigate" is a chain of those actions rather than a tree of
 callbacks.
-
-A handler may return an action, a promise, an observable, or nothing.
-ngx-statewise reads an observable once: it takes the first emission and stops
-listening. Put a long-lived stream in an application-level subscription instead.
 
 > [!WARNING]
 > Never return the action that triggered the effect. It produces an infinite
@@ -38,111 +33,123 @@ listening. Put a long-lived stream in an application-level subscription instead.
 
 ## Defining an effect
 
-`createEffect` links an effect to one action. It expects a promise by default, and it also accepts an observable.
+`createEffect` links an effect to one action. It expects a promise by default,
+and also accepts an observable.
 
-The following effect returns a promise:
-
-```typescript
-@Injectable({
-  providedIn: 'root',
-})
+```typescript title="auth.effect.ts"
+@Injectable({ providedIn: 'root' })
 export class AuthEffects {
   private readonly authRepository = inject(AuthRepositoryService);
   private readonly authTokenService = inject(AuthTokenService);
   private readonly router = inject(Router);
 
-  /**
-   * This effect listens to the LOGIN_REQUEST action and performs an asynchronous login operation.
-   * It returns a Promise with either a success or failure action.
-   */
-  public readonly loginEffect = createEffect(
-    loginActions.request, // Triggered by the LOGIN_REQUEST action
-    async (payload) => {
-      try {
-        const res = await this.authRepository.login(payload);
-        this.authTokenService.setAccessToken(res.body?.accessToken!);
-        return loginActions.success(res.body!); // Success action
-      } catch (error) {
-        return loginActions.failure(); // Failure action on error
-      }
-    },
-  );
+  public readonly loginEffect = createEffect(loginActions.request, async (credentials) => {
+    try {
+      const response = await this.authRepository.login(credentials);
+      this.authTokenService.setAccessToken(response.accessToken);
+      return loginActions.success(response);
+    } catch {
+      return loginActions.failure();
+    }
+  });
 
-  /**
-   * This effect listens to the LOGOUT action and performs a simple navigation without returning any new actions.
-   * It is an example of an effect returning an empty observable.
-   */
   public readonly logoutEffect = createEffect(logoutAction, () => {
     this.router.navigate(['/']);
-    return EMPTY; // No additional action needed after logout
   });
 }
 ```
 
+The handler receives the action's payload when there is one. What it returns
+decides what happens next:
+
+| Returned                       | Effect                                     |
+| ------------------------------ | ------------------------------------------ |
+| nothing                        | The dispatch ends here.                    |
+| an action, or an array of them | They are dispatched in turn.               |
+| a `Promise` of either          | Awaited, then dispatched.                  |
+| an `Observable` of either      | Its **first** emission only, then dropped. |
+
 ## Returning an observable
 
-Return an observable for a one-shot asynchronous operation. ngx-statewise processes its first emission only. An observable that completes without emitting, such as `EMPTY`, counts as an effect returning `void`.
+Return an observable for a one-shot asynchronous operation. The library reads
+its first emission and stops listening. An observable that completes without
+emitting — `EMPTY`, for instance — counts as returning nothing.
 
-The following effect fetches a user and maps the response to an action:
-
-```typescript
-@Injectable({
-  providedIn: 'root',
-})
+```typescript title="user.effect.ts"
+@Injectable({ providedIn: 'root' })
 export class UserEffects {
   private readonly userService = inject(UserService);
 
-  /**
-   * This effect listens to the GET_USER action and returns an Observable that emits either a success or failure action.
-   */
-  public readonly getUserEffect = createEffect(
-    userActions.getUserRequest, // Triggered by the GET_USER_REQUEST action
-    (payload) => {
-      return this.userService.fetchUser(payload.userId).pipe(
-        map((user) => userActions.getUserSuccess(user)), // Success action
-        catchError(() => of(userActions.getUserFailure())), // Failure action on error
-      );
-    },
+  public readonly getUserEffect = createEffect(userActions.getUserRequest, ({ userId }) =>
+    this.userService.fetchUser(userId).pipe(
+      map((user) => userActions.getUserSuccess(user)),
+      catchError(() => of(userActions.getUserFailure())),
+    ),
   );
 }
 ```
 
-## Registering effects
+Because only the first emission is read, a long-lived stream does not belong
+here:
 
-Declare every effect class in `provideStatewise`, so Angular instantiates it at startup. `createEffect` registers itself in the injection context of the class declaring it, so that class has to be instantiated for its effects to exist. Without the declaration, dispatching the action does nothing.
-
-```typescript
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideStatewise({
-      effects: [AuthEffects, UserEffects],
-    }),
-    // other providers
-  ],
-};
+<!-- prettier-ignore -->
+```typescript avoid title="notifications.effect.ts"
+createEffect(socketActions.connect, () =>
+  this.socket.messages$.pipe(
+    map((message) => socketActions.received(message)),
+  ),
+);
 ```
 
-Call `createEffect` in an injection context: as a field initializer, or in the constructor of an injectable class. Calling it elsewhere throws immediately rather than registering an effect that would never run.
+Only the first message would ever reach the state. Put a long-lived stream in
+an application-level subscription that dispatches, and keep the effect for the
+one-shot work.
+
+## Registering effects
+
+Declare every effect class in `provideStatewise`, so Angular instantiates it at
+startup. `createEffect` registers itself in the injection context of the class
+declaring it, so that class has to exist for its effects to exist.
+
+```typescript title="app.config.ts"
+provideStatewise({
+  effects: [AuthEffects, UserEffects],
+});
+```
+
+Without the declaration, dispatching the action does nothing at all — and
+nothing warns you. It is the first thing to check when an effect looks dead.
+
+Call `createEffect` in an injection context: a field initialiser, or the
+constructor of an injectable class. Calling it anywhere else throws
+immediately, rather than registering an effect that would never run.
 
 ### Scope
 
-An effect runs for the dispatches of the manager owning its action's updater, and only those. Registration is application-wide, and visibility follows the updater: whoever owns it owns the effects too.
+An effect runs for the dispatches of the manager owning its action's updater,
+and only those. Registration is application-wide; visibility follows the
+updater.
 
 ```typescript
 // AUTH_LOADED is handled by authUpdater, attached to AuthManager.
 createEffect(authActions.loaded, () => { ... });
 
-authManager.dispatch(authActions.loaded());   // ✅ the effect runs
-taskManager.dispatch(authActions.loaded());   // ❌ misrouted: nothing runs
+authManager.dispatch(authActions.loaded()); // the effect runs
+taskManager.dispatch(authActions.loaded()); // misrouted: nothing runs
 ```
 
-An action type that no updater claims has no owner, so its effects run for every manager. That is an effect-only action, and it stays valid everywhere. An updater declared globally through `provideStatewise({ updaters: [...] })` belongs to every scope, so its effects run everywhere too.
+An action type that no updater claims has no owner, so its effects run for
+every manager — that is an effect-only action, valid everywhere. An updater
+declared globally belongs to every scope, so its effects run everywhere too.
 
 ### Lifecycle
 
-A registration lives as long as the injector that created it. An effect class scoped to a component or to a lazy route is unregistered when that injector is destroyed, so instantiating it again never piles up a second copy of its effects.
+A registration lives as long as the injector that created it. An effect class
+scoped to a component or to a lazy route is unregistered when that injector is
+destroyed, so instantiating it again never piles up a second copy.
 
-`createEffect` returns an `EffectRef` for the rarer case where you need to stop an effect earlier:
+`createEffect` returns an `EffectRef` for the rarer case where you need to stop
+earlier:
 
 ```typescript
 @Injectable()
@@ -155,17 +162,18 @@ export class AuthEffects {
 }
 ```
 
-You can ignore the returned handle. Destroying the owning injector already unregisters the effect.
+Ignoring the handle is fine. Destroying the owning injector already unregisters
+the effect.
 
 ## Key notes
 
-- Return a promise, an observable, an action, or nothing at all. An observable
-  is read once: its first emission becomes the action, and completing without
-  emitting produces none.
-- Never return the action that triggered the effect. It produces an infinite
-  cascade, and nothing stops it for you.
+- Return a promise, an observable, an action, or nothing. An observable is read
+  once.
+- Never return the action that triggered the effect.
 - Effects do not touch state. That is the updater's job, and it has already run.
 - Declare every effect class in `provideStatewise({ effects: [...] })`, or it is
   never instantiated and its effects never exist.
 - An effect belongs to the scope owning its action's updater, and is
   unregistered with the injector that created it.
+
+Next: [Managers](/guide/managers).

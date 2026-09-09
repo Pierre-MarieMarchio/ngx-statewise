@@ -16,17 +16,15 @@ summary:
 
 # Managers
 
-A manager is the only part of a feature your components should know about. It
-exposes the state as read-only signals and offers named methods instead of
-dispatches, so a component calls `login(credentials)` rather than assembling an
-action.
+The only part of a feature your components should know about, and the unit of
+scope for everything the library does.
 
-It is also the unit of scope: a manager applies the updaters it declared, and
-observes only the effects it started.
+A manager exposes the state as read-only signals and offers named methods
+instead of dispatches, so a component calls `login(credentials)` rather than
+assembling an action. It applies the updaters it declared, and observes only
+the effects it started.
 
-A manager gets its dispatch handle from `injectStatewise`, passing the updaters it owns.
-
-```typescript
+```typescript title="auth.manager.ts"
 import { injectStatewise } from 'ngx-statewise';
 
 @Injectable({ providedIn: 'root' })
@@ -36,94 +34,126 @@ export class AuthManager {
 }
 ```
 
-Call `injectStatewise` in an injection context, like `inject`. It resolves each updater's state through the injector of the caller, once and for all.
+Call `injectStatewise` in an injection context, like `inject`. It resolves each
+updater's state through the injector of the caller, once and for all.
 
 ## Exposing state
 
-A manager exposes state as read-only signals, so the components depending on it bind to those signals instead of handling state logic themselves.
+Read-only signals out, so components bind to values instead of holding state
+logic:
 
-```typescript
-@Injectable({ providedIn: 'root' })
-export class AuthManager {
-  private readonly authStates = inject(AuthStates);
-  private readonly statewise = injectStatewise(authUpdater);
-
-  // State exposure: read-only signals
-  public readonly user = this.authStates.user.asReadonly();
-  public readonly isLoggedIn = this.authStates.isLoggedIn.asReadonly();
-  public readonly isLoading = this.authStates.isLoading.asReadonly();
-}
+```typescript title="auth.manager.ts"
+public readonly user = this.authStates.user.asReadonly();
+public readonly isLoggedIn = this.authStates.isLoggedIn.asReadonly();
+public readonly isLoading = this.authStates.isLoading.asReadonly();
 ```
 
-## Dispatching actions
+The writable signal never leaves the state class. A component that can call
+`set` on it is a second writer, and the guarantee that one place changed a
+value is gone.
 
-The handle returned by `injectStatewise` exposes the whole dispatch API:
+```typescript avoid title="auth.manager.ts"
+public readonly user = this.authStates.user;
+```
 
-| Member                  | Returns         | Description                                                          |
+```typescript prefer title="auth.manager.ts"
+public readonly user = this.authStates.user.asReadonly();
+```
+
+## Dispatching
+
+The handle returned by `injectStatewise` is the whole dispatch API.
+
+| Member                  | Returns         | What it does                                                         |
 | ----------------------- | --------------- | -------------------------------------------------------------------- |
 | `dispatch(action)`      | `void`          | Starts the action without waiting for it.                            |
 | `dispatchAsync(action)` | `Promise<void>` | Resolves once the whole cascade started by the action is over.       |
 | `waitForEffect(action)` | `Promise<void>` | Waits for the effects **this manager** started for that action type. |
 | `waitForAllEffects()`   | `Promise<void>` | Waits for every effect **this manager** started.                     |
 
-`waitForEffect` takes an action creator or an action, never a raw string, so a typo in an action type is a compile error:
+`waitForEffect` takes an action creator or an action, never a raw string, so a
+typo in a type is a compile error:
 
 ```typescript
 await this.statewise.waitForEffect(loginActions.request);
 ```
 
-Observation is scoped like dispatch: two managers awaiting the same action type never wait for each other. The action history is application-wide, so you inject it rather than read it from the handle: `inject(ActionHistory).snapshot()`.
+Observation is scoped like dispatch: two managers awaiting the same action type
+never wait for each other. The action history is application-wide, so it is
+injected rather than read from the handle — `inject(ActionHistory).snapshot()`.
 
-### Synchronous dispatch
+### Which dispatch to use
+
+`dispatch` applies the updater immediately, then starts the effects without
+waiting. Use it when nothing depends on the outcome:
 
 ```typescript
 this.statewise.dispatch(logoutAction());
 ```
 
-`dispatch` applies the updater immediately, then starts the effects without waiting for them. Use it when you don't need to know when the side effects are done.
-
-### Asynchronous dispatch
+`dispatchAsync` resolves once every effect triggered by the action, and every
+action those effects returned, has completed — recursively. Use it when the
+next thing has to wait:
 
 ```typescript
 await this.statewise.dispatchAsync(loginActions.request(credentials));
 ```
 
-`dispatchAsync` returns a `Promise<void>` that resolves once every effect triggered by the action, and every action those effects returned, have completed recursively. Use it for flows like authentication, where navigation must wait for the outcome.
+### Errors
 
-### Error handling
-
-The two dispatches report failures differently:
+The two report failures differently, on purpose.
 
 | Failure           | `dispatch`                            | `dispatchAsync`     |
 | ----------------- | ------------------------------------- | ------------------- |
 | An updater throws | Throws synchronously at the call site | Rejects the promise |
 | An effect fails   | Reported to Angular's `ErrorHandler`  | Rejects the promise |
 
-An updater failure is a programming error, so it surfaces where it happened instead of being buried in a promise nobody awaits. An effect failure is an execution error: with `dispatch` nobody is there to receive it, so it goes to the `ErrorHandler`, and with `dispatchAsync` the caller gets it.
+An updater failure is a programming error, so it surfaces where it happened
+instead of being buried in a promise nobody awaits. An effect failure is an
+execution error: with `dispatch` nobody is there to receive it, so it goes to
+the `ErrorHandler`; with `dispatchAsync` the caller gets it.
 
-When several effects run for the same action, ngx-statewise waits for all of them before reporting the first failure.
+When several effects run for one action, the library waits for all of them
+before reporting the first failure.
 
-## Example: `AuthManager`
+## A manager, in full
 
-```typescript
+```typescript title="auth.manager.ts"
 @Injectable({ providedIn: 'root' })
 export class AuthManager {
   private readonly authStates = inject(AuthStates);
   private readonly statewise = injectStatewise(authUpdater);
 
-  // State exposure: read-only signals
   public readonly user = this.authStates.user.asReadonly();
   public readonly isLoggedIn = this.authStates.isLoggedIn.asReadonly();
   public readonly isLoading = this.authStates.isLoading.asReadonly();
 
-  // Awaits the whole login cascade
+  /** Awaits the whole login cascade, so the caller can navigate after it. */
   public login(credentials: LoginSubmit): Promise<void> {
     return this.statewise.dispatchAsync(loginActions.request(credentials));
   }
 
-  // Fire and forget
+  /** Fire and forget: nothing waits on logging out. */
   public logout(): void {
     this.statewise.dispatch(logoutAction());
   }
 }
 ```
+
+A component injects that and never sees an action:
+
+```typescript title="login-page.component.ts"
+protected async submit(): Promise<void> {
+  await this.auth.login(this.form.getRawValue());
+  await this.router.navigate(['/dashboard']);
+}
+```
+
+## Key notes
+
+- One manager per feature. It owns the updaters, and therefore the effects.
+- Expose `asReadonly()` signals and named methods. Never the writable signal,
+  never the raw handle.
+- `dispatchAsync` when something waits on the outcome, `dispatch` otherwise.
+
+Next: [Testing](/guide/testing).

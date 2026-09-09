@@ -1,12 +1,16 @@
 import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from '../../core/i18n';
 import actionsEn from './content/en/actions.md';
 import apiEn from './content/en/api.md';
+import cancellingRequestsEn from './content/en/cancelling-requests.md';
 import effectsEn from './content/en/effects.md';
 import gettingStartedEn from './content/en/getting-started.md';
 import introductionEn from './content/en/introduction.md';
 import managersEn from './content/en/managers.md';
 import migrationEn from './content/en/migration.md';
+import optimisticUpdatesEn from './content/en/optimistic-updates.md';
+import persistingStateEn from './content/en/persisting-state.md';
 import statesEn from './content/en/states.md';
+import testingAnEffectEn from './content/en/testing-an-effect.md';
 import testingEn from './content/en/testing.md';
 import updatersEn from './content/en/updaters.md';
 import whyEn from './content/en/why.md';
@@ -111,6 +115,21 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = defineGuideSections([
       'pt-BR': 'Guias',
     },
     pages: [testingEn, migrationEn],
+  },
+  {
+    title: {
+      en: 'Recipes',
+      fr: 'Recettes',
+      es: 'Recetas',
+      de: 'Rezepte',
+      'pt-BR': 'Receitas',
+    },
+    pages: [
+      cancellingRequestsEn,
+      persistingStateEn,
+      optimisticUpdatesEn,
+      testingAnEffectEn,
+    ],
   },
   {
     title: {
