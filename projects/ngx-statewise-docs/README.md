@@ -19,25 +19,38 @@ is about how the application is arranged.
 
 ```
 src/app/
-  app.routes.ts                     the only file that reaches into pages/
-  core/                             i18n, the site's own UI state, its constants
+  app.routes.ts                       the only file that reaches into pages/
+  core/
+    i18n/                             the five locales and the interface strings
+    ui-state/                         the theme and the drawers
+      states/docs-ui/                 action, effect, manager, state, updater
+    site.ts                           the repository, npm and version claims
   features/
-    guide/                          content, metadata, rendering, search index
-    flow-demo/                      the live flow on the landing page
+    guide/                            content, metadata, rendering, search index
+    flow-demo/                        the live flow on the landing page
       components/flow-demo/
+      states/flow-demo/               action, effect, manager, state, updater
   shared/ui/
     icon/
   pages/
-    shell/                          the layout every route renders inside
+    shell/                            the layout every route renders inside
       components/search-dialog/
-    home/                           the landing page
-    guide/                          every /guide/<slug> route
+    home/                             the landing page
+    guide/                            every /guide/<slug> route
 ```
 
-A component lives in a folder carrying its name, and a feature groups its
-components under `components/` — the same shape as the showcase, and the reason
-adding a second component to a feature moves nothing. A page component sits
-directly in its page's folder, because there is only ever one of it.
+Two groupings, both the showcase's:
+
+- **a component lives in a folder carrying its name**, and a folder that holds
+  more than components groups them under `components/`. A page component sits
+  directly in its page's folder, because there is only ever one of it.
+- **the library's own files live under `states/<name>/`** — the action, the
+  updater, the effect, the manager and the state of one thing, together. It is
+  five files for one concept, so they are the fastest way to make a folder
+  unreadable when they are loose in it, and a second state would double that.
+
+Neither grouping is only tidiness: it is where a reader of the showcase already
+looks, and it means adding a component or a second state moves nothing.
 
 Same four layers as
 [the showcase](../ngx-statewise-showcase), because a reader who knows one
