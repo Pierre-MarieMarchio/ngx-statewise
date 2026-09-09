@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { Task } from '@shared/app-common/models';
-import { AUTH_MANAGER } from '@shared/app-common/tokens';
+import { Task } from '../models';
+import { AUTH_SESSION } from '@app/features/common';
 
 /**
  * What "my tasks" means. Separate from the other criteria because it is the
@@ -9,7 +9,7 @@ import { AUTH_MANAGER } from '@shared/app-common/tokens';
  */
 @Injectable({ providedIn: 'root' })
 export class AssignedTasksService {
-  private readonly authManager = inject(AUTH_MANAGER);
+  private readonly authManager = inject(AUTH_SESSION);
 
   /** The tasks assigned to whoever is signed in, none when nobody is. */
   public ofCurrentUser(tasks: readonly Task[] | null | undefined): Task[] {

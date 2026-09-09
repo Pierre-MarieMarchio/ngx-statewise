@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Task, TaskStatus } from '@shared/app-common/models';
+import { Task, TaskStatus } from '../models';
 
 /**
  * Which tasks a view is looking at. Pure criteria, so nothing here depends on

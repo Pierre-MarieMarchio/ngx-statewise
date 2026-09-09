@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { Task } from '@shared/app-common/models';
-import { PROJECT_MANAGER } from '@shared/app-common/tokens';
+import { Task } from '../../models';
 import {
   fakeProjectManager,
   sampleProject,
   sampleTask,
 } from '@testing/fake-managers';
 import { TaskKanbanComponent } from './task-kanban.component';
+import { ProjectManager } from '@app/features/project/states/project/project.manager';
 
 const PROJECTS = [
   sampleProject(),
@@ -40,7 +40,7 @@ describe('TaskKanbanComponent', () => {
     await TestBed.configureTestingModule({
       imports: [TaskKanbanComponent],
       providers: [
-        { provide: PROJECT_MANAGER, useValue: fakeProjectManager(PROJECTS) },
+        { provide: ProjectManager, useValue: fakeProjectManager(PROJECTS) },
       ],
     }).compileComponents();
 
@@ -78,7 +78,7 @@ describe('TaskKanbanComponent', () => {
     await TestBed.configureTestingModule({
       imports: [TaskKanbanComponent],
       providers: [
-        { provide: PROJECT_MANAGER, useValue: fakeProjectManager([]) },
+        { provide: ProjectManager, useValue: fakeProjectManager([]) },
       ],
     }).compileComponents();
 

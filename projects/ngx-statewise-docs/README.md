@@ -65,11 +65,20 @@ obvious alternative:
   is what opens it.
 
 The law is not a convention here. It is
-[`no-restricted-imports`](../../eslint.config.js) with one zone per layer, so
-breaking it fails `npm run lint`. The cross-feature rule has to name each
-feature one by one — `no-restricted-imports` does not read extglob, so the
-pattern that would say it in a line silently guards nothing — and
-`npm run verify:docs` fails when that list and `app/features/` stop agreeing.
+[`no-restricted-imports`](../../eslint.config.js), generated from a table of
+zones where each row says what that zone may not reach for, so breaking it
+fails `npm run lint`. The showcase has the same four layers and the same
+mechanism — `zoneLaws()` serves both, and the two applications differ only in
+their table, because a second scheme beside it would be a second thing to keep
+true.
+
+A pattern there matches the import string, not a resolved path. That is why
+the cross-feature rule names each feature one by one: `../flow-demo/index`
+climbs out of `features/guide/` without ever writing the word `features`, and
+the shape that would catch it generically — `../!(..)/**` — matches nothing,
+because `no-restricted-imports` does not read extglob. A pattern that guards
+no import is worse than no pattern, so `npm run verify:docs` fails when that
+list and `app/features/` stop agreeing.
 
 ## Constraints that shape the code
 

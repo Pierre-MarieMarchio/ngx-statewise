@@ -3,13 +3,13 @@ import { injectStatewise } from 'ngx-statewise';
 import { TaskState } from './task.state';
 import { taskUpdater } from './task.updater';
 import { getAllTaskActions, taskReset, updateTaskActions } from './task.action';
-import { ITaskManager } from '@shared/app-common/tokens/task-manager/task-manager.interface';
-import { STATUSES, Task, TaskStatus } from '@shared/app-common/models';
+import { STATUSES, Task, TaskStatus } from '../../models';
+import { ITaskReload } from '@app/features/common';
 
 @Injectable({
   providedIn: 'root',
 })
-export class TaskManager implements ITaskManager {
+export class TaskManager implements ITaskReload {
   private readonly taskStates = inject(TaskState);
   private readonly statewise = injectStatewise(taskUpdater);
 

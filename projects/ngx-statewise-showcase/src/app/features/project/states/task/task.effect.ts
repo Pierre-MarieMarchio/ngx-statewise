@@ -1,16 +1,16 @@
 import { ErrorHandler, inject, Injectable } from '@angular/core';
-import { AUTH_MANAGER } from '@shared/app-common/tokens';
 import { createEffect } from 'ngx-statewise';
 import { firstValueFrom } from 'rxjs';
 import { TaskRepositoryService } from '../../services';
 import { getAllTaskActions, taskReset, updateTaskActions } from './task.action';
+import { AUTH_SESSION } from '@app/features/common';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskEffect {
   private readonly taskRepository = inject(TaskRepositoryService);
-  private readonly authManager = inject(AUTH_MANAGER);
+  private readonly authManager = inject(AUTH_SESSION);
   /**
    * The failure action tells the state what happened; this tells whatever the
    * application plugged into `ErrorHandler` why. A `console.error` told only
@@ -30,7 +30,7 @@ export class TaskEffect {
         const user = this.authManager.user();
         if (user) {
           const response = await firstValueFrom(
-            this.taskRepository.getAll(user),
+            this.taskRepository.getAll(user.userId),
           );
           return getAllTaskActions.success(response);
         }
@@ -56,7 +56,7 @@ export class TaskEffect {
         const user = this.authManager.user();
         if (user) {
           const response = await firstValueFrom(
-            this.taskRepository.update(task.id, task, user),
+            this.taskRepository.update(task.id, task, user.userId),
           );
           return updateTaskActions.success(response);
         }
