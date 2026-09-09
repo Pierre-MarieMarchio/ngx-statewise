@@ -7,13 +7,13 @@ import {
   logoutActions,
 } from './auth.action';
 import { authUpdater } from './auth.updater';
-import { IAuthManager } from '@shared/app-common/tokens';
 import { LoginSubmit } from '../../models';
+import { IAuthSession } from '@app/features/common';
 
 @Injectable({
   providedIn: 'root',
 })
-export class AuthManager implements IAuthManager {
+export class AuthManager implements IAuthSession {
   private readonly authStates = inject(AuthState);
   private readonly statewise = injectStatewise(authUpdater);
 

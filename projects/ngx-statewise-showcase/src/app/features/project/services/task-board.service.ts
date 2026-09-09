@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { STATUSES, Task, TaskStatus } from '@shared/app-common/models';
+import { STATUSES, Task, TaskStatus } from '../models';
 
 /**
  * What a column of the task board means.

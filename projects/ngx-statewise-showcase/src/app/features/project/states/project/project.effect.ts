@@ -1,16 +1,16 @@
 import { ErrorHandler, inject, Injectable } from '@angular/core';
-import { AUTH_MANAGER } from '@shared/app-common/tokens';
 import { createEffect } from 'ngx-statewise';
 import { catchError, map, of } from 'rxjs';
 import { getAllProjectsActions, projectReset } from './project.action';
 import { ProjectRepositoryService } from '../../services';
+import { AUTH_SESSION } from '@app/features/common';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProjectEffect {
   private readonly projectRepository = inject(ProjectRepositoryService);
-  private readonly authManager = inject(AUTH_MANAGER);
+  private readonly authManager = inject(AUTH_SESSION);
   private readonly errorHandler = inject(ErrorHandler);
 
   /**
@@ -28,7 +28,7 @@ export class ProjectEffect {
         return getAllProjectsActions.failure();
       }
 
-      return this.projectRepository.getAll(user).pipe(
+      return this.projectRepository.getAll(user.userId).pipe(
         map((projects) => getAllProjectsActions.success(projects)),
         catchError((error: unknown) => {
           this.errorHandler.handleError(error);

@@ -14,7 +14,7 @@ import {
 import { routes } from './app.routes';
 import { accessTokenInterceptor } from './features/auth/interceptors';
 import { provideStatewise } from 'ngx-statewise';
-import { fakeApiInterceptor } from './core/fake-api';
+import { fakeBackendInterceptor } from './fake-backend';
 import { ShowcaseErrorHandler } from './core/error-handling';
 import {
   AuthEffect,
@@ -23,12 +23,8 @@ import {
 } from './features/auth/states';
 import { TaskEffect, TaskManager } from './features/project/states';
 import { ProjectEffect, ProjectManager } from './features/project/states';
-import { noticeUpdater } from './features/state-inspection/states';
-import {
-  AUTH_MANAGER,
-  PROJECT_MANAGER,
-  TASK_MANAGER,
-} from '@shared/app-common/tokens';
+import { noticeUpdater } from './features/inspection/states';
+import { AUTH_SESSION, PROJECT_RELOAD, TASK_RELOAD } from './features/common';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -37,7 +33,7 @@ export const appConfig: ApplicationConfig = {
       // The fake API answers without calling `next`, so it terminates the
       // chain and has to come last. The other way round, the access-token
       // interceptor was never reached at all.
-      withInterceptors([accessTokenInterceptor, fakeApiInterceptor]),
+      withInterceptors([accessTokenInterceptor, fakeBackendInterceptor]),
     ),
     provideZoneChangeDetection({ eventCoalescing: true }),
     // Everything the library reports — a misrouted dispatch, an effect that
@@ -51,12 +47,15 @@ export const appConfig: ApplicationConfig = {
       history: { limit: 50, redact: withoutCredentials },
     }),
 
-    { provide: AUTH_MANAGER, useExisting: AuthManager },
-    { provide: TASK_MANAGER, useExisting: TaskManager },
-    { provide: PROJECT_MANAGER, useExisting: ProjectManager },
+    // The shared kernel's three ports, each answered by the manager that owns
+    // the state behind it. `useExisting` so a feature reading a port and the
+    // feature owning it are looking at one instance.
+    { provide: AUTH_SESSION, useExisting: AuthManager },
+    { provide: TASK_RELOAD, useExisting: TaskManager },
+    { provide: PROJECT_RELOAD, useExisting: ProjectManager },
 
     provideAppInitializer(async () => {
-      const authManager = inject(AUTH_MANAGER);
+      const authManager = inject(AuthManager);
       await authManager.authenticate();
     }),
   ],

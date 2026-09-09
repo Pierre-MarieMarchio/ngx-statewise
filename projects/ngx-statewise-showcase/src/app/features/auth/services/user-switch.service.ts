@@ -1,10 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
-import {
-  AUTH_MANAGER,
-  PROJECT_MANAGER,
-  TASK_MANAGER,
-} from '@shared/app-common/tokens';
 import type { LoginSubmit } from '../models';
+import { PROJECT_RELOAD, TASK_RELOAD } from '@app/features/common';
+import { AuthManager } from '@app/features/auth/states';
 
 /**
  * Signing in as somebody else, which is more than signing in.
@@ -20,9 +17,9 @@ import type { LoginSubmit } from '../models';
  */
 @Injectable({ providedIn: 'root' })
 export class UserSwitchService {
-  private readonly authManager = inject(AUTH_MANAGER);
-  private readonly taskManager = inject(TASK_MANAGER);
-  private readonly projectManager = inject(PROJECT_MANAGER);
+  private readonly authManager = inject(AuthManager);
+  private readonly taskManager = inject(TASK_RELOAD);
+  private readonly projectManager = inject(PROJECT_RELOAD);
 
   private readonly switching = signal(false);
 

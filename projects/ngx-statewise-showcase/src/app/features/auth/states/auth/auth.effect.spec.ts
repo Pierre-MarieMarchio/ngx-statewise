@@ -2,8 +2,7 @@ import { ErrorHandler } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { PROJECT_MANAGER, TASK_MANAGER } from '@shared/app-common/tokens';
-import { fakeProjectManager, fakeTaskManager } from '@testing/fake-managers';
+import { fakeProjectReload, fakeTaskReload } from '@testing/fake-managers';
 import { injectStatewise, type Statewise } from 'ngx-statewise';
 import { provideStatewiseTesting } from 'ngx-statewise/testing';
 import { Observable, Subject, throwError } from 'rxjs';
@@ -21,6 +20,7 @@ import {
 import { AuthEffect } from './auth.effect';
 import { AuthState } from './auth.state';
 import { authUpdater } from './auth.updater';
+import { PROJECT_RELOAD, TASK_RELOAD } from '@app/features/common';
 
 const CLAIMS = {
   nameidentifier:
@@ -131,9 +131,9 @@ describe('AuthEffect', () => {
           },
         },
         {
-          provide: TASK_MANAGER,
+          provide: TASK_RELOAD,
           useValue: {
-            ...fakeTaskManager(),
+            ...fakeTaskReload(),
             getAll: () => {
               taskReloads += 1;
             },
@@ -145,9 +145,9 @@ describe('AuthEffect', () => {
           },
         },
         {
-          provide: PROJECT_MANAGER,
+          provide: PROJECT_RELOAD,
           useValue: {
-            ...fakeProjectManager(),
+            ...fakeProjectReload(),
             getAll: () => {
               projectReloads += 1;
             },

@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { AUTH_MANAGER } from '@shared/app-common/tokens';
 import {
-  fakeAuthManager,
-  FakeAuthManager,
+  fakeAuthSession,
+  FakeAuthSession,
   sampleTask,
 } from '@testing/fake-managers';
 import { PersonalTaskListComponent } from './personal-task-list.component';
+import { AUTH_SESSION } from '@app/features/common';
 
 const TASKS = [
   sampleTask({ id: 'mine', assignedUserIds: ['user-1'] }),
@@ -14,14 +14,14 @@ const TASKS = [
 ];
 
 describe('PersonalTaskListComponent', () => {
-  let authManager: FakeAuthManager;
+  let authManager: FakeAuthSession;
 
   const mount = async () => {
-    authManager = fakeAuthManager();
+    authManager = fakeAuthSession();
 
     await TestBed.configureTestingModule({
       imports: [PersonalTaskListComponent],
-      providers: [{ provide: AUTH_MANAGER, useValue: authManager }],
+      providers: [{ provide: AUTH_SESSION, useValue: authManager }],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(PersonalTaskListComponent);

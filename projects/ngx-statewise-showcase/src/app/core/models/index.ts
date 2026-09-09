@@ -1,1 +1,0 @@
-export type { NavigationItem } from './navigation-item.model';

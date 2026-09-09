@@ -13,15 +13,14 @@ import {
   AuthTokenHelperService,
   AuthNotificationService,
 } from '../../services';
-import { TASK_MANAGER } from '@shared/app-common/tokens/task-manager/task-manager.token';
-import { PROJECT_MANAGER } from '@shared/app-common/tokens';
+import { PROJECT_RELOAD, TASK_RELOAD } from '@app/features/common';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthEffect {
-  private readonly projectManager = inject(PROJECT_MANAGER);
-  private readonly taskManager = inject(TASK_MANAGER);
+  private readonly projectManager = inject(PROJECT_RELOAD);
+  private readonly taskManager = inject(TASK_RELOAD);
   private readonly authRepository = inject(AuthRepositoryService);
   private readonly authToken = inject(AuthTokenService);
   private readonly authTokenHelper = inject(AuthTokenHelperService);

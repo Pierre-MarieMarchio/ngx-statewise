@@ -6,14 +6,15 @@ import {
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-import { ThemeService } from './shared/reusable/dark-mode/theme.service';
+import { ThemeService } from './shared/ui/theme-toggle';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { NavigationComponent } from './core/layouts';
-import { navigationItems } from './config/navigation.configuration';
+import { NavShellComponent } from './shared/ui/nav-shell';
+import { navigationItems } from './app.navigation';
+import { AuthManager } from './features/auth/states/auth/auth.manager';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavigationComponent, MatProgressBarModule],
+  imports: [RouterOutlet, NavShellComponent, MatProgressBarModule],
   templateUrl: './app.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './app.component.scss',
@@ -22,6 +23,12 @@ export class AppComponent {
   public readonly title = 'Ngx-statewise';
   private readonly themeService = inject(ThemeService);
   public readonly navigationItems = navigationItems;
+
+  /**
+   * The shell composes the navigation rail with the session, which is why the
+   * auth wiring lives here rather than inside a shared component.
+   */
+  public readonly auth = inject(AuthManager);
 
   constructor() {
     effect(() => {
