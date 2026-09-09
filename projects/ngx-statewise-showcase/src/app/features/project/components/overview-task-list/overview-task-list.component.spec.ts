@@ -40,20 +40,6 @@ describe('OverviewTaskListComponent', () => {
     ).toBe(TASKS.length);
   });
 
-  it('emits the task of the clicked row', async () => {
-    const fixture = await mount();
-    const selected: string[] = [];
-    fixture.componentInstance.taskSelected.subscribe((task) =>
-      selected.push(task.id),
-    );
-
-    (fixture.nativeElement as HTMLElement)
-      .querySelector<HTMLElement>('tr[mat-row]')
-      ?.click();
-
-    expect(selected).toEqual(['task-1']);
-  });
-
   /** The table's action button has to reach this panel's own output. */
   it('opens a task from a named button, once', async () => {
     expect(openFirstRow(await mount())).toEqual(openedSampleTask());

@@ -15,11 +15,11 @@ import { TaskOpenColumnComponent } from '../task-open-column/task-open-column.co
  * A table of tasks — the one table of tasks in this application.
  *
  * Four templates used to write the same twenty-two lines: the loop over the
- * columns, the two `matColumnDef` cells, the action column, the two row
- * definitions and the clickable row. `TaskColumnsService` had already factored
- * out *which* columns a role may see; nothing had factored out the markup that
- * renders them, and copying a table into sibling components is what put the
- * duplication ratio at 19.6% once before.
+ * columns, the two `matColumnDef` cells, the action column and the two row
+ * definitions. `TaskColumnsService` had already factored out *which* columns a
+ * role may see; nothing had factored out the markup that renders them, and
+ * copying a table into sibling components is what put the duplication ratio at
+ * 19.6% once before.
  *
  * What differs between the four callers is an input now: the tasks, whether
  * the columns are capped for an accordion, and what to say when there are

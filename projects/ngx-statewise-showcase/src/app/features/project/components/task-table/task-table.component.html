@@ -21,11 +21,12 @@
     <app-task-open-column (opened)="taskSelected.emit($event)" />
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
-    <tr
-      mat-row
-      class="clickable-row"
-      (click)="taskSelected.emit(item)"
-      *matRowDef="let item; columns: displayedColumns()"
-    ></tr>
+    <!--
+      Opening a task is the button in `app-task-open-column` and nothing else.
+      The row itself used to carry a `(click)` as a mouse shortcut; a `<tr>` is
+      not focusable, so that shortcut had no keyboard equivalent it could ever
+      grow, and one interactive path is worth more than two unequal ones.
+    -->
+    <tr mat-row *matRowDef="let item; columns: displayedColumns()"></tr>
   </table>
 }

@@ -89,7 +89,16 @@ describe('TaskTableComponent', () => {
     ]);
   });
 
-  it('emits the task of the clicked row', async () => {
+  /**
+   * The one way to open a task, mouse and keyboard alike. The shared column's
+   * spec holds the rest of the button's behaviour.
+   */
+  it('opens a task from a named button, once', async () => {
+    expect(openFirstRow(await mount())).toEqual(openedSampleTask());
+  });
+
+  /** A press anywhere else on a row selects nothing at all. */
+  it('says nothing when the row itself is pressed', async () => {
     const fixture = await mount();
     const selected: string[] = [];
     fixture.componentInstance.taskSelected.subscribe((task) =>
@@ -100,15 +109,7 @@ describe('TaskTableComponent', () => {
       .querySelector<HTMLElement>('tr[mat-row]')
       ?.click();
 
-    expect(selected).toEqual(['task-1']);
-  });
-
-  /**
-   * The row click is a mouse shortcut. This button is the path a keyboard has,
-   * and the shared column's spec holds the rest of its behaviour.
-   */
-  it('opens a task from a named button, once', async () => {
-    expect(openFirstRow(await mount())).toEqual(openedSampleTask());
+    expect(selected).toEqual([]);
   });
 
   describe('what it says with nothing in it', () => {
