@@ -1,4 +1,10 @@
-import { ErrorHandler, Injectable, InjectionToken } from '@angular/core';
+import {
+  createEnvironmentInjector,
+  EnvironmentInjector,
+  ErrorHandler,
+  Injectable,
+  InjectionToken,
+} from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { defineActionsGroup, emptyPayload, payload } from '../action';
@@ -9,6 +15,7 @@ import { createEffect } from '../effect';
 import { EffectRegistry } from '../effect/effect-registry';
 import { PendingEffects } from '../effect/pending-effects';
 import { defineUpdater } from '../updater';
+import { DUPLICATE_PROVIDER_REACTION } from './duplicate-provider';
 import { provideStatewise } from './provide-statewise';
 
 interface CounterState {
@@ -69,6 +76,18 @@ class CycleEffect {
   private readonly onBounce = createEffect(provideActions.bounced, () =>
     provideActions.looped(),
   );
+}
+
+/**
+ * The class a lazy route would provide alongside a second `provideStatewise()`
+ * — the shape the guide used to recommend without saying what the second call
+ * costs.
+ */
+@Injectable()
+class LazyRouteEffect {
+  private readonly onPing = createEffect(provideActions.pinged, (amount) => {
+    effectRuns.push(amount);
+  });
 }
 
 describe('provideStatewise', () => {
@@ -271,6 +290,61 @@ describe('provideStatewise', () => {
 
     it('accepts a valid bound', () => {
       expect(() => provideStatewise({ maxCascadeDepth: 10 })).not.toThrow();
+    });
+  });
+
+  /**
+   * The quietest trap the library had. A second call builds a second effect
+   * registry, invisible to the root engine, so the effects declared with it
+   * never run — while their updaters still apply, which makes the action look
+   * like it worked.
+   */
+  describe('a second provideStatewise', () => {
+    /** What the providers of a lazy route amount to: a child environment. */
+    function inLazyRoute(reaction?: 'report'): () => EnvironmentInjector {
+      const providers =
+        reaction === undefined
+          ? [provideStatewise({ effects: [LazyRouteEffect] })]
+          : [
+              provideStatewise({ effects: [LazyRouteEffect] }),
+              // Provided after provideStatewise, so this value wins — the
+              // same trick provideStatewiseTesting uses for the misrouted
+              // reaction. A TestBed always runs in dev mode, so this is the
+              // only way to reach the production arm.
+              { provide: DUPLICATE_PROVIDER_REACTION, useValue: reaction },
+            ];
+
+      return () =>
+        createEnvironmentInjector(
+          providers,
+          TestBed.inject(EnvironmentInjector),
+        );
+    }
+
+    it('says nothing about a single call', () => {
+      configure(provideStatewise({ effects: [CounterEffect] }));
+
+      expect(() => TestBed.inject(StatewiseEngine)).not.toThrow();
+      expect(handledErrors).toEqual([]);
+    });
+
+    it('throws in dev mode, which is the default reaction', () => {
+      configure(provideStatewise());
+
+      expect(inLazyRoute()).toThrow(
+        /provideStatewise\(\) has already been called by a parent injector/,
+      );
+    });
+
+    it('reports to the ErrorHandler in production', () => {
+      configure(provideStatewise());
+
+      expect(inLazyRoute('report')).not.toThrow();
+
+      expect(handledErrors.length).toBe(1);
+      expect((handledErrors[0] as Error).message).toMatch(
+        /provideStatewise\(\) has already been called by a parent injector/,
+      );
     });
   });
 });

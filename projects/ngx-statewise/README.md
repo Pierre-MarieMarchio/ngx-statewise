@@ -17,8 +17,9 @@ npm install ngx-statewise
 
 ## Setup
 
-`provideStatewise()` is the single entry point. It wires the execution engine
-and registers your effects and your global updaters.
+`provideStatewise()` is the single entry point, and is called **once**, at the
+application root. It wires the execution engine and registers your effects and
+your global updaters.
 
 ```typescript
 import { provideStatewise } from 'ngx-statewise';
