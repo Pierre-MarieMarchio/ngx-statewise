@@ -1,5 +1,5 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component, signal } from '@angular/core';
+import { ApplicationRef, Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { KanbanComponent } from './kanban.component';
 import type {
@@ -8,6 +8,7 @@ import type {
   KanbanReorder,
 } from './kanban-column.model';
 import { at } from '@testing/at';
+import { pressKey } from '@testing/keyboard';
 
 interface Card {
   readonly id: string;
@@ -29,6 +30,7 @@ const COLUMNS: KanbanColumn<Card>[] = [
       [columns]="columns()"
       [group]="group()"
       [labelFor]="labelFor"
+      [reorderable]="reorderable()"
       (itemMoved)="moves.push($event)"
       (columnReordered)="reorders.push($event)"
     >
@@ -39,8 +41,9 @@ const COLUMNS: KanbanColumn<Card>[] = [
   `,
 })
 class HostComponent {
-  public readonly columns = signal(COLUMNS);
+  public readonly columns = signal<readonly KanbanColumn<Card>[]>(COLUMNS);
   public readonly group = signal('');
+  public readonly reorderable = signal(false);
   public readonly moves: KanbanMove<Card>[] = [];
   public readonly reorders: KanbanReorder<Card>[] = [];
 
@@ -83,6 +86,11 @@ describe('KanbanComponent', () => {
         }
       ).debugElement.children,
     ).componentInstance;
+
+  const liveRegion = (fixture: { nativeElement: unknown }): string =>
+    (fixture.nativeElement as HTMLElement)
+      .querySelector('[role="status"]')
+      ?.textContent?.trim() ?? '';
 
   it('renders one named list per column', async () => {
     const fixture = await mount();
@@ -208,6 +216,122 @@ describe('KanbanComponent', () => {
       board(fixture).moveByKeyboard(card('c'), at(COLUMNS, 2), 1);
 
       expect(fixture.componentInstance.moves).toEqual([]);
+    });
+
+    /** It used to return in silence, so a bound was indistinguishable. */
+    it('says so at a bound instead of going quiet', async () => {
+      const fixture = await mount();
+
+      board(fixture).moveByKeyboard(card('a'), at(COLUMNS, 0), -1);
+      fixture.detectChanges();
+
+      expect(liveRegion(fixture)).toBe('Already in the first column.');
+
+      board(fixture).moveByKeyboard(card('c'), at(COLUMNS, 2), 1);
+      fixture.detectChanges();
+
+      expect(liveRegion(fixture)).toBe('Already in the last column.');
+    });
+
+    it('reads out where a card landed', async () => {
+      const fixture = await mount();
+
+      board(fixture).moveByKeyboard(card('a'), at(COLUMNS, 0), 1);
+      fixture.detectChanges();
+
+      expect(liveRegion(fixture)).toBe('Moved to Middle.');
+    });
+
+    /**
+     * The card is destroyed by one `@for` and rebuilt by another, so without
+     * this the focus falls to the document and a second press goes nowhere.
+     */
+    it('puts the focus back on the card that moved', async () => {
+      const fixture = await mount();
+      const host = fixture.nativeElement as HTMLElement;
+
+      host.querySelector<HTMLElement>('[data-card-id="a"]')?.focus();
+
+      pressKey(
+        at(Array.from(host.querySelectorAll('[data-card-id="a"]'))),
+        'ArrowRight',
+      );
+
+      // What the caller does with the move it was handed.
+      fixture.componentInstance.columns.set([
+        { id: 'left', label: 'Left', items: [card('b')] },
+        { id: 'middle', label: 'Middle', items: [card('c'), card('a')] },
+        { id: 'right', label: 'Right', items: [] },
+      ]);
+      fixture.detectChanges();
+      TestBed.inject(ApplicationRef).tick();
+
+      expect(document.activeElement?.getAttribute('data-card-id')).toBe('a');
+    });
+  });
+
+  describe('reordering inside a column', () => {
+    const reorderable = async () => {
+      const fixture = await mount();
+      fixture.componentInstance.reorderable.set(true);
+      fixture.detectChanges();
+
+      return fixture;
+    };
+
+    it('reports the column in its new order', async () => {
+      const fixture = await reorderable();
+
+      board(fixture).reorderByKeyboard(card('a'), at(COLUMNS, 0), 1);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.reorders).toEqual([
+        { columnId: 'left', items: [card('b'), card('a')] },
+      ]);
+      expect(liveRegion(fixture)).toBe('Moved to position 2 of 2 in Left.');
+    });
+
+    it('says so at a bound instead of going quiet', async () => {
+      const fixture = await reorderable();
+
+      board(fixture).reorderByKeyboard(card('a'), at(COLUMNS, 0), -1);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.reorders).toEqual([]);
+      expect(liveRegion(fixture)).toBe('Already first in Left.');
+
+      board(fixture).reorderByKeyboard(card('b'), at(COLUMNS, 0), 1);
+      fixture.detectChanges();
+
+      expect(liveRegion(fixture)).toBe('Already last in Left.');
+    });
+
+    /**
+     * The board reports a reorder, it never applies one. A caller keeping no
+     * order would drop it, so announcing the move would be a lie.
+     */
+    it('does nothing while the caller keeps no order', async () => {
+      const fixture = await mount();
+
+      board(fixture).reorderByKeyboard(card('a'), at(COLUMNS, 0), 1);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.reorders).toEqual([]);
+      expect(liveRegion(fixture)).toBe('');
+    });
+
+    it('is driven by the up and down arrows', async () => {
+      const fixture = await reorderable();
+      const host = fixture.nativeElement as HTMLElement;
+
+      pressKey(
+        at(Array.from(host.querySelectorAll('[data-card-id="b"]'))),
+        'ArrowUp',
+      );
+
+      expect(fixture.componentInstance.reorders).toEqual([
+        { columnId: 'left', items: [card('b'), card('a')] },
+      ]);
     });
   });
 });

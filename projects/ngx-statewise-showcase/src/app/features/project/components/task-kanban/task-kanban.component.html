@@ -19,6 +19,7 @@
             [group]="board.project.id"
             [cardTypeFor]="cardTypeFor"
             [labelFor]="labelFor"
+            [reorderable]="true"
             (itemMoved)="onTaskMoved($event)"
             (columnReordered)="onColumnReordered($event)"
           >
