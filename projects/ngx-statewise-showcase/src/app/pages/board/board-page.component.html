@@ -46,6 +46,33 @@
           <mat-icon>add</mat-icon>
           New task
         </button>
+
+        <!--
+          Both act on the project the selector names, so both are held while it
+          names all of them: there is no "all projects" to rename. They come
+          after the two that make something, which is the order they are
+          reached for in.
+        -->
+        <button
+          class="primary-btn"
+          mat-stroked-button
+          type="button"
+          [disabled]="projectManager.selectedProject() === null"
+          (click)="openEditProject()"
+        >
+          <mat-icon>edit</mat-icon>
+          Edit project
+        </button>
+        <button
+          class="primary-btn"
+          mat-stroked-button
+          type="button"
+          [disabled]="projectManager.selectedProject() === null"
+          (click)="openDeleteProject()"
+        >
+          <mat-icon>delete</mat-icon>
+          Delete project
+        </button>
       </div>
     </div>
 
@@ -164,11 +191,53 @@
           (cancelled)="panel.set('task')"
         />
       }
+      @case ('edit-project') {
+        <app-project-form
+          [project]="projectManager.selectedProject()"
+          [pending]="projectManager.isSaving()"
+          [refusal]="projectManager.saveError()"
+          (submitted)="saveProject($event)"
+          (cancelled)="closeSideNav()"
+        />
+      }
+      @case ('delete-project') {
+        <app-confirm-panel
+          heading="Delete project"
+          [question]="
+            'Delete ' +
+            (projectManager.selectedProject()?.title ?? '') +
+            '? A project that still holds tasks cannot be deleted.'
+          "
+          confirmLabel="Delete project"
+          pendingLabel="Deleting…"
+          [pending]="projectManager.isSaving()"
+          [refusal]="projectManager.saveError()"
+          (confirmed)="confirmDeleteProject()"
+          (cancelled)="closeSideNav()"
+        />
+      }
+      @case ('delete-task') {
+        <app-confirm-panel
+          heading="Delete task"
+          [question]="
+            'Delete ' +
+            (selectedTask()?.title ?? '') +
+            '? This cannot be undone.'
+          "
+          confirmLabel="Delete task"
+          pendingLabel="Deleting…"
+          [pending]="taskManager.isSaving()"
+          [refusal]="taskManager.saveError()"
+          (confirmed)="confirmDeleteTask()"
+          (cancelled)="panel.set('task')"
+        />
+      }
       @default {
         <app-task-details
           [selectedTask]="selectedTask()"
           [editable]="true"
           (editRequested)="editTask()"
+          (deleteRequested)="openDeleteTask()"
           (closed)="closeSideNav()"
         />
       }

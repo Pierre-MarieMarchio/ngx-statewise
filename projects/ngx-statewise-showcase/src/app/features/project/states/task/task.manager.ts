@@ -4,6 +4,7 @@ import { TaskState } from './task.state';
 import { taskUpdater } from './task.updater';
 import {
   createTaskActions,
+  deleteTaskActions,
   getAllTaskActions,
   searchCleared,
   searchTaskActions,
@@ -109,6 +110,11 @@ export class TaskManager implements ITaskReload {
   /** Not on the shared kernel's port — see ProjectManager.createProject. */
   public createTask(draft: TaskDraft): Promise<void> {
     return this.statewise.dispatchAsync(createTaskActions.request(draft));
+  }
+
+  /** Awaited, so a panel knows whether it has anything left to show. */
+  public deleteTask(taskId: string): Promise<void> {
+    return this.statewise.dispatchAsync(deleteTaskActions.request(taskId));
   }
 
   public reset(): Promise<void> {

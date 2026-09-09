@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { TaskRepositoryService } from '../../services';
 import {
   createTaskActions,
+  deleteTaskActions,
   getAllTaskActions,
   searchCleared,
   searchTaskActions,
@@ -165,5 +166,36 @@ export class TaskEffect {
       }
     },
     { concurrency: 'first', cancelOn: taskReset, mustAnswer: true },
+  );
+
+  /**
+   * Keyed by the task, like the update beside it: deleting two tasks is two
+   * independent errands, and neither should abandon the other.
+   */
+  public readonly deleteTaskRequestEffect = createEffect(
+    deleteTaskActions.request,
+    async (taskId) => {
+      const user = this.authManager.user();
+
+      if (!user) {
+        return deleteTaskActions.failure('No session, so nothing to delete.');
+      }
+
+      try {
+        await firstValueFrom(this.taskRepository.delete(user.userId, taskId));
+
+        return deleteTaskActions.success(taskId);
+      } catch (error) {
+        this.errorHandler.handleError(error);
+
+        return deleteTaskActions.failure(refusalReason(error));
+      }
+    },
+    {
+      concurrency: 'first',
+      key: (taskId) => taskId,
+      cancelOn: taskReset,
+      mustAnswer: true,
+    },
   );
 }

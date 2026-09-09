@@ -58,8 +58,8 @@ and re-measured by `npm run check`, so these numbers cannot rot:
 
 | What                                                      | Measured           |
 | --------------------------------------------------------- | ------------------ |
-| the complete `task` flow                                  | 5 files, 532 lines |
-| `asReadonly()` lines re-exposing state, across 3 managers | 19                 |
+| the complete `task` flow                                  | 5 files, 607 lines |
+| `asReadonly()` lines re-exposing state, across 3 managers | 21                 |
 | `isLoading.set` / `isError.set` lines, across 3 updaters  | 17                 |
 
 A library that declares state, derived values and methods in one block will be

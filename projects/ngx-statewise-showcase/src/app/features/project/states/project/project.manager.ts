@@ -4,9 +4,11 @@ import { ProjectState } from './project.state';
 import { projectUpdater } from './project.updater';
 import {
   createProjectActions,
+  deleteProjectActions,
   getAllProjectsActions,
   projectSelected,
   projectReset,
+  updateProjectActions,
 } from './project.action';
 import { Project, ProjectDraft } from '../../models';
 import { IProjectReload } from '@app/features/common';
@@ -56,6 +58,9 @@ export class ProjectManager implements IProjectReload {
   public readonly isCreating = this.projectStates.isCreating.asReadonly();
   public readonly createError = this.projectStates.createError.asReadonly();
 
+  public readonly isSaving = this.projectStates.isSaving.asReadonly();
+  public readonly saveError = this.projectStates.saveError.asReadonly();
+
   public getAll(): void {
     this.statewise.dispatch(getAllProjectsActions.request());
   }
@@ -67,6 +72,17 @@ export class ProjectManager implements IProjectReload {
    */
   public createProject(draft: ProjectDraft): Promise<void> {
     return this.statewise.dispatchAsync(createProjectActions.request(draft));
+  }
+
+  /** Awaited, like creating one, so a panel knows whether to close itself. */
+  public updateProject(project: Project): Promise<void> {
+    return this.statewise.dispatchAsync(updateProjectActions.request(project));
+  }
+
+  public deleteProject(projectId: string): Promise<void> {
+    return this.statewise.dispatchAsync(
+      deleteProjectActions.request(projectId),
+    );
   }
 
   public reset(): Promise<void> {

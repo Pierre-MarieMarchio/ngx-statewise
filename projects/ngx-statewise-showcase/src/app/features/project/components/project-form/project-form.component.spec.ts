@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { sampleProject } from '@testing/fake-managers';
 import { ProjectFormComponent } from './project-form.component';
 
 describe('ProjectFormComponent', () => {
@@ -87,5 +88,54 @@ describe('ProjectFormComponent', () => {
 
     expect(submit?.disabled).toBe(true);
     expect(submit?.textContent).toContain('Creating');
+  });
+
+  describe('renaming one that exists', () => {
+    const mountEditing = async () => {
+      await TestBed.configureTestingModule({
+        imports: [ProjectFormComponent],
+      }).compileComponents();
+
+      const fixture = TestBed.createComponent(ProjectFormComponent);
+      fixture.componentRef.setInput(
+        'project',
+        sampleProject({ id: 'p-1', title: 'Analytics', color: 'green' }),
+      );
+      fixture.detectChanges();
+
+      return fixture;
+    };
+
+    it('says so, and opens on the project it was given', async () => {
+      const fixture = await mountEditing();
+      const host = fixture.nativeElement as HTMLElement;
+
+      expect(host.querySelector('.panel-form-title')?.textContent?.trim()).toBe(
+        'Edit project',
+      );
+      expect(
+        host.querySelector('button[type="submit"]')?.textContent?.trim(),
+      ).toBe('Save changes');
+      expect(fixture.componentInstance.form.getRawValue()).toEqual({
+        title: 'Analytics',
+        color: 'green',
+      });
+    });
+
+    it('hands over what it was changed to', async () => {
+      const fixture = await mountEditing();
+      const drafts: unknown[] = [];
+      fixture.componentInstance.submitted.subscribe((draft) =>
+        drafts.push(draft),
+      );
+
+      fixture.componentInstance.form.setValue({
+        title: 'Renamed',
+        color: 'pink',
+      });
+      fixture.componentInstance.handleSubmit();
+
+      expect(drafts).toEqual([{ title: 'Renamed', color: 'pink' }]);
+    });
   });
 });

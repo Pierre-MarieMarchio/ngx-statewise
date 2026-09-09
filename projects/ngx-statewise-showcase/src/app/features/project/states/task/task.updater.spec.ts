@@ -5,7 +5,9 @@ import { injectStatewise, type Statewise } from 'ngx-statewise';
 import { provideStatewiseTesting } from 'ngx-statewise/testing';
 import {
   createTaskActions,
+  deleteTaskActions,
   getAllTaskActions,
+  searchTaskActions,
   taskReset,
   updateTaskActions,
 } from './task.action';
@@ -217,6 +219,39 @@ describe('taskUpdater', () => {
 
       expect(state.isCreating()).toBe(false);
       expect(state.createError()).toBeNull();
+    });
+  });
+
+  describe('removing one', () => {
+    it('takes it out of the list', () => {
+      statewise.dispatch(deleteTaskActions.success('a'));
+
+      expect(state.tasks().map((task) => task.id)).toEqual(['b']);
+    });
+
+    /**
+     * And out of the matches too: a search that found it would go on showing a
+     * row the server no longer has.
+     */
+    it('takes it out of what a search matched', () => {
+      statewise.dispatch(searchTaskActions.success([TODO, OTHER]));
+
+      statewise.dispatch(deleteTaskActions.success('a'));
+
+      expect(state.matches()?.map((task) => task.id)).toEqual(['b']);
+    });
+
+    it('leaves the matches alone while there is no search', () => {
+      statewise.dispatch(deleteTaskActions.success('a'));
+
+      expect(state.matches()).toBeNull();
+    });
+
+    it('keeps the reason it was refused, and the row', () => {
+      statewise.dispatch(deleteTaskActions.failure('no such task'));
+
+      expect(state.saveError()).toBe('no such task');
+      expect(state.tasks().map((task) => task.id)).toEqual(['a', 'b']);
     });
   });
 });

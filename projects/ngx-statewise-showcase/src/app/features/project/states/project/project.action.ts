@@ -31,6 +31,33 @@ export const createProjectActions = defineActionsGroup({
 });
 
 /**
+ * Renaming or recolouring one. Pessimistic, like creating one: there is
+ * nothing to show optimistically that a refusal would not have to take back,
+ * and the server is the only one that knows whether the new name is free.
+ */
+export const updateProjectActions = defineActionsGroup({
+  source: 'UPDATE_PROJECT',
+  events: {
+    request: payload<Project>(),
+    success: payload<Project>(),
+    failure: payload<string>(),
+  },
+});
+
+/**
+ * Removing one, by id — and the id again on the way back, since the row it
+ * names is gone by then and there is nothing else to say which it was.
+ */
+export const deleteProjectActions = defineActionsGroup({
+  source: 'DELETE_PROJECT',
+  events: {
+    request: payload<string>(),
+    success: payload<string>(),
+    failure: payload<string>(),
+  },
+});
+
+/**
  * Which project the screens are looking at, and `null` for all of them.
  *
  * The one action in this application with no effect behind it — choosing is a

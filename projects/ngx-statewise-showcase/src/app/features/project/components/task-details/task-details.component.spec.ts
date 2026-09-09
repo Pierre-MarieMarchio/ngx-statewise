@@ -73,6 +73,31 @@ describe('TaskDetailsComponent', () => {
       ).toBeNull();
     });
 
+    it('says nothing about removing one either', async () => {
+      const fixture = await mount();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector('.delete-btn'),
+      ).toBeNull();
+    });
+
+    it('asks its caller to remove the task, rather than removing it', async () => {
+      const fixture = await mount();
+      fixture.componentRef.setInput('editable', true);
+      fixture.detectChanges();
+
+      const asked: string[] = [];
+      fixture.componentInstance.deleteRequested.subscribe(() =>
+        asked.push('delete'),
+      );
+
+      (fixture.nativeElement as HTMLElement)
+        .querySelector<HTMLButtonElement>('.delete-btn')
+        ?.click();
+
+      expect(asked).toEqual(['delete']);
+    });
+
     it('asks its caller for the edit it cannot do itself', async () => {
       const fixture = await mount();
       fixture.componentRef.setInput('editable', true);

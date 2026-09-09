@@ -51,6 +51,11 @@ export class FakeBackend {
       },
       PATCH: {
         'http://localhost/api/Task': () => this.handleUpdateTask(),
+        'http://localhost/api/Project': () => this.handleUpdateProject(),
+      },
+      DELETE: {
+        'http://localhost/api/Task': () => this.handleDeleteTask(),
+        'http://localhost/api/Project': () => this.handleDeleteProject(),
       },
     };
 
@@ -299,6 +304,103 @@ export class FakeBackend {
     );
   }
 
+  private handleUpdateProject(): HttpResponse<unknown> {
+    const asking = this.requestingUser();
+
+    if ('error' in asking) return asking.error;
+
+    const projectId = this.request.params.get('projectId');
+
+    if (!projectId) return this.respond400Error('projectId is missing');
+
+    const { title, color } = (this.request.body ?? {}) as Record<
+      string,
+      unknown
+    >;
+    const refusal = this.refuseTitle(title);
+
+    if (refusal) return refusal;
+    if (typeof color !== 'string')
+      return this.respond400Error('a colour is required');
+
+    const trimmed = (title as string).trim();
+
+    // The same rule as creating one, and for the same reason: two projects
+    // with one name are two rows nobody can tell apart. Renaming a project to
+    // what it is already called is not a clash with itself.
+    if (
+      this.projectDB
+        .findByUserOrganization(asking.user)
+        .some(
+          (project) =>
+            project.id !== projectId &&
+            project.title.toLowerCase() === trimmed.toLowerCase(),
+        )
+    ) {
+      return this.respond400Error(`a project is already called "${trimmed}"`);
+    }
+
+    const updated = this.projectDB.update(
+      projectId,
+      { title: trimmed, color } as Partial<Project>,
+      asking.user,
+    );
+
+    if (!updated)
+      return this.respond400Error('no such project in your organisation');
+
+    return this.respondSuccess(updated);
+  }
+
+  /**
+   * A refusal with a way out, which is the point of it.
+   *
+   * Deleting the tasks along with the project would be one line here and no
+   * question anywhere — and it would also be the one destructive thing this
+   * demo does, done silently. Refusing says what stands in the way, and the
+   * task panel is where it is cleared.
+   */
+  private handleDeleteProject(): HttpResponse<unknown> {
+    const asking = this.requestingUser();
+
+    if ('error' in asking) return asking.error;
+
+    const projectId = this.request.params.get('projectId');
+
+    if (!projectId) return this.respond400Error('projectId is missing');
+    if (!this.projectDB.findByIdForUser(projectId, asking.user))
+      return this.respond400Error('no such project in your organisation');
+
+    const remaining = this.taskDB.findByProjectIdForUser(
+      projectId,
+      asking.user,
+    ).length;
+
+    if (remaining > 0) {
+      return this.respond400Error(
+        `this project still holds ${String(remaining)} task${remaining === 1 ? '' : 's'}`,
+      );
+    }
+
+    return this.projectDB.delete(projectId, asking.user)
+      ? this.respondSuccess({ id: projectId })
+      : this.respond400Error('no such project in your organisation');
+  }
+
+  private handleDeleteTask(): HttpResponse<unknown> {
+    const asking = this.requestingUser();
+
+    if ('error' in asking) return asking.error;
+
+    const taskId = this.request.params.get('taskId');
+
+    if (!taskId) return this.respond400Error('taskId is missing');
+
+    return this.taskDB.delete(taskId, asking.user)
+      ? this.respondSuccess({ id: taskId })
+      : this.respond400Error('no such task in your organisation');
+  }
+
   /** Blank counts as missing: a title of spaces names nothing. */
   private refuseTitle(title: unknown): HttpResponse<unknown> | null {
     if (typeof title !== 'string' || title.trim().length === 0) {
@@ -544,6 +646,40 @@ export class ProjectDB {
       return undefined;
     this.project.push(project);
     return project;
+  }
+
+  update(
+    projectId: string,
+    data: Partial<Project>,
+    user: User,
+  ): Project | undefined {
+    const index = this.project.findIndex((row) => row.id === projectId);
+    const existing = this.project[index];
+
+    if (!existing) return undefined;
+    if (
+      user.role !== 'admin' &&
+      existing.organizationId !== user.organizationId
+    )
+      return undefined;
+
+    const updated: Project = { ...existing, ...data, id: existing.id };
+    this.project[index] = updated;
+
+    return updated;
+  }
+
+  delete(projectId: string, user: User): boolean {
+    const index = this.project.findIndex((row) => row.id === projectId);
+    const project = this.project[index];
+
+    if (!project) return false;
+    if (user.role !== 'admin' && project.organizationId !== user.organizationId)
+      return false;
+
+    this.project.splice(index, 1);
+
+    return true;
   }
 
   findByIdForUser(ProjectId: string, user: User): Project | undefined {

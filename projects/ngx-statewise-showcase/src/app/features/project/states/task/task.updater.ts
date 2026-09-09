@@ -2,6 +2,7 @@ import { Task } from '../../models';
 import { defineUpdater, requestStatus } from 'ngx-statewise';
 import {
   createTaskActions,
+  deleteTaskActions,
   getAllTaskActions,
   searchCleared,
   searchTaskActions,
@@ -121,6 +122,25 @@ export const taskUpdater = defineUpdater(TaskState, (on) => {
   on(createTaskActions.failure, (state, reason) => {
     state.isCreating.set(false);
     state.createError.set(reason);
+  });
+
+  on(deleteTaskActions.request, (state) => {
+    state.saveError.set(null);
+  });
+
+  /**
+   * Out of both lists, or a search that matched it would go on showing a row
+   * the server no longer has.
+   */
+  on(deleteTaskActions.success, (state, taskId) => {
+    state.tasks.update((tasks) => tasks.filter((task) => task.id !== taskId));
+    state.matches.update((matches) =>
+      matches === null ? null : matches.filter((task) => task.id !== taskId),
+    );
+  });
+
+  on(deleteTaskActions.failure, (state, reason) => {
+    state.saveError.set(reason);
   });
 
   on(updateTaskActions.failure, (state, { taskId, reason }) => {

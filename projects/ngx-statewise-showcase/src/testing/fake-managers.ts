@@ -201,8 +201,10 @@ export interface FakeTaskManager extends ITaskReload {
   readonly visibleTasks: ReturnType<typeof computed<Task[]>>;
   readonly queries: string[];
   readonly searchClears: number[];
+  readonly deleted: string[];
   getAllAsync(): Promise<void>;
   update(task: Task): void;
+  deleteTask(taskId: string): Promise<void>;
   createTask(draft: TaskDraft): Promise<void>;
   search(query: string): void;
   clearSearch(): void;
@@ -213,6 +215,7 @@ export const fakeTaskManager = (
 ): FakeTaskManager => {
   const updates: Task[] = [];
   const created: TaskDraft[] = [];
+  const deleted: string[] = [];
   const queries: string[] = [];
   const searchClears: number[] = [];
 
@@ -238,6 +241,7 @@ export const fakeTaskManager = (
     ),
     updates,
     created,
+    deleted,
     queries,
     searchClears,
     matches,
@@ -264,6 +268,11 @@ export const fakeTaskManager = (
     update: (task: Task) => {
       updates.push(task);
     },
+    deleteTask: (taskId: string) => {
+      deleted.push(taskId);
+
+      return Promise.resolve();
+    },
     reset: () => Promise.resolve(),
   };
 };
@@ -279,8 +288,14 @@ export interface FakeProjectManager extends IProjectReload {
   readonly calls: string[];
   isCreating: WritableSignal<boolean>;
   createError: WritableSignal<string | null>;
+  isSaving: WritableSignal<boolean>;
+  saveError: WritableSignal<string | null>;
   readonly created: ProjectDraft[];
+  readonly updated: Project[];
+  readonly deleted: string[];
   createProject(draft: ProjectDraft): Promise<void>;
+  updateProject(project: Project): Promise<void>;
+  deleteProject(projectId: string): Promise<void>;
 }
 
 export const fakeProjectManager = (
@@ -290,6 +305,8 @@ export const fakeProjectManager = (
   const selectedProjectId = signal<string | null>(null);
   const calls: string[] = [];
   const created: ProjectDraft[] = [];
+  const updated: Project[] = [];
+  const deleted: string[] = [];
 
   return {
     projects: projectsSignal,
@@ -308,10 +325,24 @@ export const fakeProjectManager = (
     projectCount: computed(() => projectsSignal().length),
     calls,
     created,
+    updated,
+    deleted,
     isCreating: signal(false),
     createError: signal<string | null>(null),
+    isSaving: signal(false),
+    saveError: signal<string | null>(null),
     createProject: (draft: ProjectDraft) => {
       created.push(draft);
+
+      return Promise.resolve();
+    },
+    updateProject: (project: Project) => {
+      updated.push(project);
+
+      return Promise.resolve();
+    },
+    deleteProject: (projectId: string) => {
+      deleted.push(projectId);
 
       return Promise.resolve();
     },

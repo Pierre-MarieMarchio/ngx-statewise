@@ -238,6 +238,114 @@ describe('BoardPageComponent', () => {
     });
   });
 
+  describe('renaming and removing the current project', () => {
+    it('merges the draft onto the project the state holds, and shuts', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+      projectManager.selectProject('project-1');
+
+      await component.saveProject({ title: 'Renamed', color: 'pink' });
+
+      expect(projectManager.updated).toEqual([
+        { ...sampleProject(), title: 'Renamed', color: 'pink' },
+      ]);
+      expect(component.panelOpen()).toBe(false);
+    });
+
+    /** Kept open on a refusal, so the reason stays beside the field. */
+    it('stays open when the rename is refused', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+      projectManager.selectProject('project-1');
+      projectManager.saveError.set('a project is already called "x"');
+
+      component.openEditProject();
+      await component.saveProject({ title: 'Taken', color: 'pink' });
+
+      expect(component.panelOpen()).toBe(true);
+      expect(component.panel()).toBe('edit-project');
+    });
+
+    it('has nothing to rename or remove while none is chosen', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+
+      await component.saveProject({ title: 'Renamed', color: 'pink' });
+      await component.confirmDeleteProject();
+
+      expect(projectManager.updated).toEqual([]);
+      expect(projectManager.deleted).toEqual([]);
+    });
+
+    it('removes the chosen one and shuts the panel', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+      projectManager.selectProject('project-1');
+
+      component.openDeleteProject();
+      await component.confirmDeleteProject();
+
+      expect(projectManager.deleted).toEqual(['project-1']);
+      expect(component.panelOpen()).toBe(false);
+    });
+
+    /**
+     * The refusal with a way out: the server will not remove a project that
+     * still holds tasks, so the panel stays open saying so.
+     */
+    it('stays open on the refusal, with the project still there', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+      projectManager.selectProject('project-1');
+      projectManager.saveError.set('this project still holds 3 tasks');
+
+      component.openDeleteProject();
+      await component.confirmDeleteProject();
+
+      expect(component.panel()).toBe('delete-project');
+      expect(component.panelOpen()).toBe(true);
+    });
+  });
+
+  describe('removing a task', () => {
+    it('removes the selected one, and shuts a panel with nothing left in it', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+
+      component.selectTask(sampleTask());
+      component.openDeleteTask();
+      expect(component.panel()).toBe('delete-task');
+
+      await component.confirmDeleteTask();
+
+      expect(taskManager.deleted).toEqual(['task-1']);
+      expect(component.selectedTask()).toBeNull();
+      expect(component.panelOpen()).toBe(false);
+      expect(component.panel()).toBe('task');
+    });
+
+    it('stays open when the removal is refused', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+      taskManager.saveError.set('no such task in your organisation');
+
+      component.selectTask(sampleTask());
+      component.openDeleteTask();
+      await component.confirmDeleteTask();
+
+      expect(component.panel()).toBe('delete-task');
+      expect(component.selectedTask()?.id).toBe('task-1');
+    });
+
+    it('has nothing to remove while nothing is selected', async () => {
+      const fixture = await mount();
+
+      await fixture.componentInstance.confirmDeleteTask();
+
+      expect(taskManager.deleted).toEqual([]);
+    });
+  });
+
   /**
    * One panel, four things to show. Opening a form has to displace the
    * details, and picking a task has to displace the form — otherwise a single
@@ -298,18 +406,45 @@ describe('BoardPageComponent', () => {
       );
     });
 
-    it('holds the new-task button while there is no project to put one in', async () => {
+    /**
+     * Two of the four act on the project the selector names, and one needs a
+     * project to put a task in. Only "New project" is always available.
+     */
+    it('holds every button that has nothing to act on', async () => {
       const fixture = await mount();
+      const disabled = () =>
+        Array.from(
+          (
+            fixture.nativeElement as HTMLElement
+          ).querySelectorAll<HTMLButtonElement>('.board-header-actions button'),
+        ).map((button) => [button.textContent?.trim(), button.disabled]);
+
+      expect(disabled()).toEqual([
+        ['add New project', false],
+        ['add New task', false],
+        ['edit Edit project', true],
+        ['delete Delete project', true],
+      ]);
+
+      projectManager.selectProject('project-1');
+      fixture.detectChanges();
+
+      expect(disabled()).toEqual([
+        ['add New project', false],
+        ['add New task', false],
+        ['edit Edit project', false],
+        ['delete Delete project', false],
+      ]);
+
       projectManager.projects.set([]);
       fixture.detectChanges();
 
-      const buttons = Array.from(
-        (
-          fixture.nativeElement as HTMLElement
-        ).querySelectorAll<HTMLButtonElement>('.board-header-actions button'),
-      );
-
-      expect(buttons.map((button) => button.disabled)).toEqual([false, true]);
+      expect(disabled()).toEqual([
+        ['add New project', false],
+        ['add New task', true],
+        ['edit Edit project', true],
+        ['delete Delete project', true],
+      ]);
     });
   });
 });

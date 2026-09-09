@@ -3,8 +3,10 @@ import { createEffect } from 'ngx-statewise';
 import { catchError, map, of } from 'rxjs';
 import {
   createProjectActions,
+  deleteProjectActions,
   getAllProjectsActions,
   projectReset,
+  updateProjectActions,
 } from './project.action';
 import { ProjectRepositoryService } from '../../services';
 import { AUTH_SESSION } from '@app/features/common';
@@ -77,6 +79,56 @@ export class ProjectEffect {
           this.errorHandler.handleError(error);
 
           return of(createProjectActions.failure(refusalReason(error)));
+        }),
+      );
+    },
+    { concurrency: 'first', cancelOn: projectReset, mustAnswer: true },
+  );
+
+  public readonly updateProjectRequestEffect = createEffect(
+    updateProjectActions.request,
+    (project) => {
+      const user = this.authManager.user();
+
+      if (!user) {
+        return updateProjectActions.failure('No session, so nothing to save.');
+      }
+
+      return this.projectRepository.update(project, user.userId).pipe(
+        map((saved) => updateProjectActions.success(saved)),
+        catchError((error: unknown) => {
+          this.errorHandler.handleError(error);
+
+          return of(updateProjectActions.failure(refusalReason(error)));
+        }),
+      );
+    },
+    { concurrency: 'first', cancelOn: projectReset, mustAnswer: true },
+  );
+
+  /**
+   * The server refuses while the project still holds tasks, and says how many.
+   * That sentence is the whole reason this is not a cascade: a deletion that
+   * quietly takes nine rows with it is the one destructive thing this demo
+   * would do, and it would do it without asking.
+   */
+  public readonly deleteProjectRequestEffect = createEffect(
+    deleteProjectActions.request,
+    (projectId) => {
+      const user = this.authManager.user();
+
+      if (!user) {
+        return deleteProjectActions.failure(
+          'No session, so nothing to delete.',
+        );
+      }
+
+      return this.projectRepository.delete(projectId, user.userId).pipe(
+        map(() => deleteProjectActions.success(projectId)),
+        catchError((error: unknown) => {
+          this.errorHandler.handleError(error);
+
+          return of(deleteProjectActions.failure(refusalReason(error)));
         }),
       );
     },

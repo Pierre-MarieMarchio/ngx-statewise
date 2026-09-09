@@ -47,6 +47,7 @@ export class TaskDetailsComponent {
 
   public readonly closed = output<void>();
   public readonly editRequested = output<void>();
+  public readonly deleteRequested = output<void>();
 
   public readonly presentation = inject(TaskPresentationService);
 
@@ -79,5 +80,9 @@ export class TaskDetailsComponent {
 
   public onEditClick(): void {
     this.editRequested.emit();
+  }
+
+  public onDeleteClick(): void {
+    this.deleteRequested.emit();
   }
 }

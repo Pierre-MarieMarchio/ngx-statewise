@@ -59,6 +59,23 @@ export const searchTaskActions = defineActionsGroup({
   },
 });
 
+/**
+ * Removing one. Pessimistic: a row taken off the screen before the server has
+ * agreed is a row that has to reappear if it refuses, and reappear in its
+ * place — which is more machinery than a delete is worth.
+ *
+ * It exists because deleting a project is refused while it still holds tasks.
+ * A refusal with no way out is a dead end, and this is the way out.
+ */
+export const deleteTaskActions = defineActionsGroup({
+  source: 'DELETE_TASK',
+  events: {
+    request: payload<string>(),
+    success: payload<string>(),
+    failure: payload<string>(),
+  },
+});
+
 /** Emptying the box: there is no search any more, so no answer is wanted. */
 export const searchCleared = defineSingleAction('SEARCH_CLEARED', emptyPayload);
 

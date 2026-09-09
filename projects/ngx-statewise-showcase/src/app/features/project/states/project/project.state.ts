@@ -26,4 +26,14 @@ export class ProjectState {
    * boolean would only be able to say that something went wrong.
    */
   public createError = signal<string | null>(null);
+
+  /** One rename or one removal at a time, for the same reason as creating. */
+  public isSaving = signal(false);
+
+  /**
+   * Why the last rename or removal was refused. Apart from `createError`
+   * because they are shown in different places, and a refusal that outlives
+   * the panel it belongs to is a sentence about nothing.
+   */
+  public saveError = signal<string | null>(null);
 }

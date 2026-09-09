@@ -24,6 +24,7 @@ import {
 } from '@app/features/project/components';
 import { CurrentProjectService } from '@app/features/project/services';
 import { ProjectDraft, TaskDraft } from '@app/features/project/models';
+import { ConfirmPanelComponent } from '@shared/ui/confirm-panel';
 import { TaskManager } from '@app/features/project/states/task/task.manager';
 import { ProjectManager } from '@app/features/project/states/project/project.manager';
 
@@ -31,6 +32,7 @@ import { ProjectManager } from '@app/features/project/states/project/project.man
   selector: 'app-board-page',
   imports: [
     SidePanelComponent,
+    ConfirmPanelComponent,
     DataStateComponent,
     TaskDetailsComponent,
     MatIconModule,
@@ -113,7 +115,13 @@ export class BoardPageComponent {
    * whatever was there — which is what a single panel means.
    */
   public readonly panel = signal<
-    'task' | 'new-project' | 'new-task' | 'edit-task'
+    | 'task'
+    | 'new-project'
+    | 'new-task'
+    | 'edit-task'
+    | 'edit-project'
+    | 'delete-project'
+    | 'delete-task'
   >('task');
 
   /** Whether the panel is open, which is the panel's own `model`. */
@@ -191,5 +199,72 @@ export class BoardPageComponent {
 
   public onTaskChanged(updatedTask: Task): void {
     this.taskManager.update(updatedTask);
+  }
+
+  public openEditProject(): void {
+    this.panel.set('edit-project');
+    this.panelOpen.set(true);
+  }
+
+  public openDeleteProject(): void {
+    this.panel.set('delete-project');
+    this.panelOpen.set(true);
+  }
+
+  public async saveProject(draft: ProjectDraft): Promise<void> {
+    const project = this.projectManager.selectedProject();
+
+    if (!project) {
+      return;
+    }
+
+    await this.projectManager.updateProject({ ...project, ...draft });
+
+    // Kept open on a refusal, so the reason stays beside the field that
+    // caused it — the same rule the creation forms follow.
+    if (this.projectManager.saveError() === null) {
+      this.closeSideNav();
+    }
+  }
+
+  /**
+   * The refusal that has a way out: the server will not remove a project that
+   * still holds tasks, and says how many. So the panel stays open on it, and
+   * what to do about it is one tab away.
+   */
+  public async confirmDeleteProject(): Promise<void> {
+    const project = this.projectManager.selectedProject();
+
+    if (!project) {
+      return;
+    }
+
+    await this.projectManager.deleteProject(project.id);
+
+    if (this.projectManager.saveError() === null) {
+      this.closeSideNav();
+    }
+  }
+
+  public openDeleteTask(): void {
+    this.panel.set('delete-task');
+  }
+
+  public async confirmDeleteTask(): Promise<void> {
+    const task = this.selectedTask();
+
+    if (!task) {
+      return;
+    }
+
+    await this.taskManager.deleteTask(task.id);
+
+    // The panel has nothing left to show once the row is gone, so it shuts —
+    // and the details behind it would be looking at a task that no longer is.
+    if (this.taskManager.saveError() === null) {
+      this.selectedTaskId.set(null);
+      this.closeSideNav();
+      this.panel.set('task');
+    }
   }
 }

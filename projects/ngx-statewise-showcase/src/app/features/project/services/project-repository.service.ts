@@ -21,6 +21,18 @@ export class ProjectRepositoryService {
     return this.http.post<Project>(this.API_BASE_URL, draft, { params });
   }
 
+  update(project: Project, userId: string): Observable<Project> {
+    const params = this.buildAccessParams(userId).set('projectId', project.id);
+
+    return this.http.patch<Project>(this.API_BASE_URL, project, { params });
+  }
+
+  delete(projectId: string, userId: string): Observable<unknown> {
+    const params = this.buildAccessParams(userId).set('projectId', projectId);
+
+    return this.http.delete(this.API_BASE_URL, { params });
+  }
+
   private buildAccessParams(userId: string): HttpParams {
     let params = new HttpParams();
     params = params.set('userId', userId);

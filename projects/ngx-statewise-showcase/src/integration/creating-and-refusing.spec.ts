@@ -178,4 +178,137 @@ describe('a server that refuses', () => {
       expect(tasks.isError()).toBe(false);
     });
   });
+
+  /**
+   * The lot's own question, answered by the server rather than by a dialog:
+   * removing a project that still holds tasks is refused, and the refusal says
+   * how many stand in the way. A cascade would have been one line in the
+   * handler and the one destructive thing this demo does, done in silence.
+   */
+  describe('renaming and removing a project', () => {
+    const uniquely = (name: string): string => `${name}-${String(Date.now())}`;
+
+    it('renames one, and the list holds the new name', async () => {
+      const title = uniquely('Renameable');
+      await projects.createProject({ title, color: 'blue' });
+      const created = projects
+        .projects()
+        .find((project) => project.title === title);
+
+      expect(created).toBeDefined();
+      if (!created) return;
+
+      await projects.updateProject({ ...created, title: `${title}-renamed` });
+
+      expect(projects.saveError()).toBeNull();
+      expect(
+        projects.projects().find((project) => project.id === created.id)?.title,
+      ).toBe(`${title}-renamed`);
+    });
+
+    it('refuses a rename onto a name already taken', async () => {
+      const taken = uniquely('Taken');
+      const other = uniquely('Other');
+      await projects.createProject({ title: taken, color: 'blue' });
+      await projects.createProject({ title: other, color: 'green' });
+
+      const toRename = projects
+        .projects()
+        .find((project) => project.title === other);
+
+      expect(toRename).toBeDefined();
+      if (!toRename) return;
+
+      await projects.updateProject({ ...toRename, title: taken });
+
+      expect(projects.saveError()).toBe(
+        `a project is already called "${taken}"`,
+      );
+      expect(
+        projects.projects().find((project) => project.id === toRename.id)
+          ?.title,
+      ).toBe(other);
+    });
+
+    it('removes an empty one', async () => {
+      const title = uniquely('Empty');
+      await projects.createProject({ title, color: 'pink' });
+      const created = projects
+        .projects()
+        .find((project) => project.title === title);
+
+      expect(created).toBeDefined();
+      if (!created) return;
+
+      projects.selectProject(created.id);
+      await projects.deleteProject(created.id);
+
+      expect(projects.saveError()).toBeNull();
+      expect(
+        projects.projects().find((project) => project.id === created.id),
+      ).toBeUndefined();
+      // What no longer exists cannot go on being the current project.
+      expect(projects.selectedProjectId()).toBeNull();
+    });
+
+    it('refuses to remove one that still holds a task, and says how many', async () => {
+      const title = uniquely('Occupied');
+      await projects.createProject({ title, color: 'purple' });
+      const created = projects
+        .projects()
+        .find((project) => project.title === title);
+
+      expect(created).toBeDefined();
+      if (!created) return;
+
+      await tasks.createTask({
+        projectId: created.id,
+        title: uniquely('In the way'),
+        status: 'todo',
+        priority: 'low',
+      });
+
+      await projects.deleteProject(created.id);
+
+      expect(projects.saveError()).toBe('this project still holds 1 task');
+      expect(
+        projects.projects().find((project) => project.id === created.id),
+      ).toBeDefined();
+    });
+
+    it('takes it once the task standing in the way is gone', async () => {
+      const title = uniquely('Clearable');
+      await projects.createProject({ title, color: 'green' });
+      const created = projects
+        .projects()
+        .find((project) => project.title === title);
+
+      expect(created).toBeDefined();
+      if (!created) return;
+
+      const taskTitle = uniquely('To remove');
+      await tasks.createTask({
+        projectId: created.id,
+        title: taskTitle,
+        status: 'todo',
+        priority: 'low',
+      });
+      const task = tasks.tasks().find((row) => row.title === taskTitle);
+
+      expect(task).toBeDefined();
+      if (!task) return;
+
+      await tasks.deleteTask(task.id);
+
+      expect(tasks.saveError()).toBeNull();
+      expect(tasks.tasks().find((row) => row.id === task.id)).toBeUndefined();
+
+      await projects.deleteProject(created.id);
+
+      expect(projects.saveError()).toBeNull();
+      expect(
+        projects.projects().find((project) => project.id === created.id),
+      ).toBeUndefined();
+    });
+  });
 });

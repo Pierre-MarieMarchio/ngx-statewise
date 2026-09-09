@@ -1,8 +1,8 @@
 <form [formGroup]="form" (ngSubmit)="handleSubmit()">
   <app-panel-form
-    heading="New project"
-    submitLabel="Create project"
-    pendingLabel="Creating…"
+    [heading]="editing() ? 'Edit project' : 'New project'"
+    [submitLabel]="editing() ? 'Save changes' : 'Create project'"
+    [pendingLabel]="editing() ? 'Saving…' : 'Creating…'"
     [pending]="pending()"
     [refusal]="refusal()"
     (cancelled)="cancelled.emit()"
