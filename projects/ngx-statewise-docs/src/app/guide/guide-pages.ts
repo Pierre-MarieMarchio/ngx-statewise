@@ -1,13 +1,17 @@
 import { DEFAULT_LOCALE, type LocaleCode } from '../i18n';
 import actionsEn from './content/en/actions.md';
 import apiEn from './content/en/api.md';
+import cancellingRequestsEn from './content/en/cancelling-requests.md';
 import effectsEn from './content/en/effects.md';
 import gettingStartedEn from './content/en/getting-started.md';
 import introductionEn from './content/en/introduction.md';
 import managersEn from './content/en/managers.md';
 import migrationEn from './content/en/migration.md';
+import optimisticUpdatesEn from './content/en/optimistic-updates.md';
+import persistingStateEn from './content/en/persisting-state.md';
 import statesEn from './content/en/states.md';
 import testingEn from './content/en/testing.md';
+import testingAnEffectEn from './content/en/testing-an-effect.md';
 import updatersEn from './content/en/updaters.md';
 import whyEn from './content/en/why.md';
 
@@ -251,6 +255,90 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = [
             'O que a reescrita renomeou, e os quatro comportamentos que mudou.',
         },
         content: { en: migrationEn },
+      },
+    ],
+  },
+  {
+    title: {
+      en: 'Recipes',
+      fr: 'Recettes',
+      es: 'Recetas',
+      de: 'Rezepte',
+      'pt-BR': 'Receitas',
+    },
+    pages: [
+      {
+        slug: 'cancelling-requests',
+        title: {
+          en: 'Cancelling a request',
+          fr: 'Annuler une requête',
+          es: 'Cancelar una petición',
+          de: 'Eine Anfrage abbrechen',
+          'pt-BR': 'Cancelar uma requisição',
+        },
+        summary: {
+          en: 'Letting the last request win when two are in flight.',
+          fr: 'Laisser gagner la dernière requête quand deux sont en vol.',
+          es: 'Dejar ganar a la última petición cuando hay dos en vuelo.',
+          de: 'Die letzte Anfrage gewinnen lassen, wenn zwei unterwegs sind.',
+          'pt-BR': 'Deixar a última requisição vencer quando há duas em voo.',
+        },
+        content: { en: cancellingRequestsEn },
+      },
+      {
+        slug: 'persisting-state',
+        title: {
+          en: 'Persisting state',
+          fr: 'Persister l’état',
+          es: 'Persistir el estado',
+          de: 'State speichern',
+          'pt-BR': 'Persistir o estado',
+        },
+        summary: {
+          en: 'Storage in an effect, restoring through an action.',
+          fr: 'Le stockage dans un effect, la restauration par une action.',
+          es: 'El almacenamiento en un effect, la restauración por una action.',
+          de: 'Speichern in einem Effect, Wiederherstellen über eine Action.',
+          'pt-BR':
+            'O armazenamento em um effect, a restauração por uma action.',
+        },
+        content: { en: persistingStateEn },
+      },
+      {
+        slug: 'optimistic-updates',
+        title: {
+          en: 'Optimistic updates',
+          fr: 'Mise à jour optimiste',
+          es: 'Actualización optimista',
+          de: 'Optimistische Aktualisierung',
+          'pt-BR': 'Atualização otimista',
+        },
+        summary: {
+          en: 'Writing before the server agrees, and putting it back if it does not.',
+          fr: 'Écrire avant l’accord du serveur, et revenir en arrière sinon.',
+          es: 'Escribir antes de que el servidor acepte, y deshacerlo si no.',
+          de: 'Schreiben, bevor der Server zustimmt, und zurücknehmen, wenn nicht.',
+          'pt-BR': 'Escrever antes de o servidor concordar, e desfazer se não.',
+        },
+        content: { en: optimisticUpdatesEn },
+      },
+      {
+        slug: 'testing-an-effect',
+        title: {
+          en: 'Testing an effect',
+          fr: 'Tester un effect',
+          es: 'Probar un effect',
+          de: 'Einen Effect testen',
+          'pt-BR': 'Testar um effect',
+        },
+        summary: {
+          en: 'A worked suite: what it returns, the cascade, and the failure.',
+          fr: 'Une suite complète : ce qu’il renvoie, la cascade, et l’échec.',
+          es: 'Una suite completa: lo que devuelve, la cascada y el fallo.',
+          de: 'Eine ausgearbeitete Suite: Rückgabe, Kaskade und Fehlerfall.',
+          'pt-BR': 'Uma suíte completa: o que devolve, a cascata e a falha.',
+        },
+        content: { en: testingAnEffectEn },
       },
     ],
   },

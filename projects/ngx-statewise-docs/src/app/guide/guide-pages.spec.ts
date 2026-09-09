@@ -20,9 +20,9 @@ function anchorsOf(page: GuidePage, code: LocaleCode): Set<string> {
 }
 
 describe('the guide registry', () => {
-  it('holds eleven pages across four sections', () => {
-    expect(GUIDE_SECTIONS.length).toBe(4);
-    expect(GUIDE_PAGES.length).toBe(11);
+  it('holds fifteen pages across five sections', () => {
+    expect(GUIDE_SECTIONS.length).toBe(5);
+    expect(GUIDE_PAGES.length).toBe(15);
   });
 
   it('flattens the sections in reading order, losing none of them', () => {

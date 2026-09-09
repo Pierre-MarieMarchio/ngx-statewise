@@ -1,16 +1,22 @@
 # Testing
 
-The `ngx-statewise/testing` entry point wires the library into a `TestBed`. It gives a test the two things it usually needs: a way to let effects settle, and a way to relax the misrouted-dispatch check.
+The `ngx-statewise/testing` entry point wires the library into a `TestBed`, and
+gives a test the two things it usually needs.
 
+<!-- prettier-ignore -->
 ```typescript
-import { captureStatewiseDeclarations, drainEffects, provideStatewiseTesting } from 'ngx-statewise/testing';
+import {
+  captureStatewiseDeclarations,
+  drainEffects,
+  provideStatewiseTesting,
+} from 'ngx-statewise/testing';
 ```
 
-| Export                             | Description                                                                                                                                                                                                                                                                                           |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `provideStatewiseTesting(config?)` | Same options as `provideStatewise`, plus `strict`. `strict: false` silences the misrouted-dispatch check, report included, so a suite asserting an empty `ErrorHandler` stays green. The action history is enabled by default, so a test can assert what was dispatched without configuring anything. |
-| `drainEffects()`                   | Resolves once every effect in flight in the current `TestBed` is over, whichever manager started it.                                                                                                                                                                                                  |
-| `captureStatewiseDeclarations()`   | Records the updater declarations known right now and returns the function restoring them.                                                                                                                                                                                                             |
+| Export                             | What it is for                                                                                                    |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `provideStatewiseTesting(config?)` | The same options as `provideStatewise`, plus `strict`. History on by default, so a test can assert what was sent. |
+| `drainEffects()`                   | Resolves once every effect in flight in the current `TestBed` is over, whichever manager started it.              |
+| `captureStatewiseDeclarations()`   | Records the updater declarations known right now, and returns the function restoring them.                        |
 
 > [!NOTE]
 > `provideStatewiseTesting` enables the history with `{ limit: 100 }`. A
@@ -20,19 +26,44 @@ import { captureStatewiseDeclarations, drainEffects, provideStatewiseTesting } f
 > Passing `misroutedDispatch` to it has no effect: `strict` decides, and it is
 > applied after. Use `strict: false` to silence the check.
 
+## A first test
+
+Provide the effects the feature needs, dispatch through the manager, and assert
+on the state it exposes:
+
+```typescript title="task.manager.spec.ts"
+function manager(): TaskManager {
+  TestBed.configureTestingModule({
+    providers: [
+      provideStatewiseTesting({
+        effects: [TaskEffect],
+        updaters: [taskUpdater],
+      }),
+    ],
+  });
+
+  return TestBed.inject(TaskManager);
+}
+
+it('loads the tasks', async () => {
+  const tasks = manager();
+
+  await tasks.refreshAndSettle();
+
+  expect(tasks.items()).toHaveSize(3);
+});
+```
+
 ## Letting a fire-and-forget dispatch settle
 
-`dispatch` does not return a promise, so a test asserting on its side effects needs to wait for them:
+`dispatch` returns nothing, so a test asserting on its side effects has to wait
+for them:
 
-```typescript
-TestBed.configureTestingModule({
-  providers: [provideStatewiseTesting({ effects: [TaskEffect] })],
-});
-
+```typescript title="task.manager.spec.ts"
 manager.refresh(); // calls statewise.dispatch(...)
 await drainEffects();
 
-expect(manager.tasks()).toHaveSize(3);
+expect(manager.items()).toHaveSize(3);
 ```
 
 > [!TIP]
@@ -41,25 +72,75 @@ expect(manager.tasks()).toHaveSize(3);
 > to an unrelated observer. Assert on the state, or await `dispatchAsync` when
 > you want the failure.
 
+## Asserting the order, not the result
+
+The library's one guarantee is that the state is written before the effect
+runs. That is worth a test of its own, and it is written by reading the state
+from inside the effect rather than by watching the clock:
+
+```typescript title="auth.effect.spec.ts"
+it('runs on state the updater has already written', async () => {
+  const auth = manager();
+
+  auth.login(credentials); // synchronous dispatch
+
+  // The updater has been through before this line.
+  expect(auth.isLoading()).toBe(true);
+
+  await drainEffects();
+
+  expect(auth.isLoading()).toBe(false);
+  expect(auth.user()).not.toBeNull();
+});
+```
+
 ## Dispatching without attaching an updater
 
-A test that only exercises effects can dispatch an action whose updater it never attached. The misrouted-dispatch check forbids exactly that, so turn it off for the suite:
+A test that only exercises effects can dispatch an action whose updater it
+never attached. The misrouted-dispatch check forbids exactly that, so turn it
+off for the suite:
 
-```typescript
+<!-- prettier-ignore -->
+```typescript title="auth.effect.spec.ts"
 TestBed.configureTestingModule({
-  providers: [provideStatewiseTesting({ strict: false, effects: [AuthEffect] })],
+  providers: [
+    provideStatewiseTesting({ strict: false, effects: [AuthEffect] }),
+  ],
 });
 ```
 
 ## Declaring updaters inside tests
 
-`defineUpdater` records its action types when the module is loaded, and a suite calling it inside its tests would leak those declarations into the following ones. Capture and restore around it:
+`defineUpdater` records its action types when the module is loaded, so a suite
+calling it inside its own tests leaks those declarations into the ones after
+it. Capture and restore around them:
 
-```typescript
+```typescript title="updater.spec.ts"
 let restoreDeclarations: () => void;
 
 beforeEach(() => (restoreDeclarations = captureStatewiseDeclarations()));
 afterEach(() => restoreDeclarations());
 ```
 
-Prefer `strict: false` when you only want the check off. It is scoped to one `TestBed`, while the declarations are module-level.
+```typescript avoid title="updater.spec.ts"
+// Declarations from this suite stay visible to every suite that follows.
+beforeEach(() => {
+  defineUpdater(SomeStates, (on) => { ... });
+});
+```
+
+Prefer `strict: false` when you only want the check off. It is scoped to one
+`TestBed`, while declarations are module-level.
+
+## Key notes
+
+- `provideStatewiseTesting` instead of `provideStatewise`, and list the effect
+  classes the test needs — an effect class nobody instantiates registers
+  nothing.
+- `await drainEffects()` after a `dispatch`, `await` the promise after a
+  `dispatchAsync`.
+- Assert on the state the manager exposes, not on the actions, unless the
+  actions are what you are testing.
+
+Next: [Migrating from 0.6.x](/guide/migration), or the
+[API reference](/guide/api).
