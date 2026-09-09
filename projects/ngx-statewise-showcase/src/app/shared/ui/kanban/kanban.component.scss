@@ -19,10 +19,13 @@
 }
 
 /* Shown only where the board shows one column at a time. */
+/* A fieldset, so the grouping is the element's rather than a role's. */
 .kanban-switcher {
   display: none;
   gap: var(--space-2);
-  margin-bottom: var(--space-2);
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  border: 0;
 }
 
 .kanban-switcher-tab {
@@ -75,6 +78,8 @@
 .kanban-column {
   display: flex;
   flex-direction: column;
+  margin: 0;
+  list-style: none;
   gap: 0.75rem;
   box-sizing: border-box;
   min-width: 0;

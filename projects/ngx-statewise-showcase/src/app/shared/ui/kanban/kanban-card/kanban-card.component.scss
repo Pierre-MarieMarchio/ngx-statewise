@@ -1,6 +1,7 @@
 /* The host is the drag handle and the list item, so it has to be a box. */
 :host {
   display: block;
+  list-style: none;
 }
 
 .kanban-card {

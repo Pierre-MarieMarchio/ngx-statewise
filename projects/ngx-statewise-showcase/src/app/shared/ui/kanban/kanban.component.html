@@ -9,7 +9,8 @@
   row of buttons rather than a `mat-tab-group`: the board is in `shared/ui` and
   owes nothing to Material, and three buttons need no tab machinery.
 -->
-<div class="kanban-switcher" role="group" aria-label="Show one column">
+<fieldset class="kanban-switcher">
+  <legend class="visually-hidden">Show one column</legend>
   @for (column of columns(); track column.id; let index = $index) {
     <button
       type="button"
@@ -22,7 +23,7 @@
       <span class="kanban-column-count">{{ column.items.length }}</span>
     </button>
   }
-</div>
+</fieldset>
 
 <div class="kanban" [style.--kanban-tracks]="columnTracks()">
   @for (column of columns(); track column.id; let index = $index) {
@@ -39,11 +40,10 @@
   }
 
   @for (column of columns(); track column.id; let index = $index) {
-    <div
+    <ul
       class="kanban-column"
       [class.is-shown]="shownColumn() === index"
       cdkDropList
-      role="list"
       [attr.aria-label]="column.label + ' items'"
       [id]="dropListId(column.id)"
       [cdkDropListData]="column"
@@ -58,11 +58,11 @@
           On the inner card the CDK left the host in the flow and put its
           placeholder inside it, which is half of why one task appeared twice.
         -->
-        <app-kanban-card
+        <li
+          appKanbanCard
           cdkDrag
           [cdkDragData]="item"
           [cardType]="cardTypeFor()(item)"
-          role="listitem"
           tabindex="0"
           [attr.data-card-id]="item.id"
           [attr.aria-label]="labelFor()(item)"
@@ -75,9 +75,9 @@
             [ngTemplateOutlet]="cardBody()"
             [ngTemplateOutletContext]="{ $implicit: item }"
           />
-        </app-kanban-card>
+        </li>
       }
-    </div>
+    </ul>
   }
 </div>
 
