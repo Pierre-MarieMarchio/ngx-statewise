@@ -7,6 +7,8 @@ import {
 } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { Task } from '@app/features/project/models';
 import { SidePanelComponent } from '@shared/ui/side-panel';
 import { DataStateComponent } from '@shared/ui/data-state';
@@ -14,12 +16,13 @@ import { TaskDetailsComponent } from '@app/features/project/components';
 import {
   PersonalTaskListComponent,
   ProjectFormComponent,
-  ProjectTaskListComponent,
+  ProjectPickerComponent,
   TaskFormComponent,
   TaskKanbanComponent,
   TaskSearchComponent,
   TaskTableComponent,
 } from '@app/features/project/components';
+import { CurrentProjectService } from '@app/features/project/services';
 import { ProjectDraft, TaskDraft } from '@app/features/project/models';
 import { TaskManager } from '@app/features/project/states/task/task.manager';
 import { ProjectManager } from '@app/features/project/states/project/project.manager';
@@ -32,9 +35,11 @@ import { ProjectManager } from '@app/features/project/states/project/project.man
     TaskDetailsComponent,
     MatIconModule,
     MatTabsModule,
+    MatFormFieldModule,
+    MatSelectModule,
     PersonalTaskListComponent,
     ProjectFormComponent,
-    ProjectTaskListComponent,
+    ProjectPickerComponent,
     TaskFormComponent,
     TaskKanbanComponent,
     TaskSearchComponent,
@@ -55,6 +60,20 @@ export class BoardPageComponent {
    * permanent.
    */
   public readonly projectManager = inject(ProjectManager);
+
+  /**
+   * What every tab on this page is looking at. With no project chosen it
+   * answers for all of them, so choosing narrows the page rather than being
+   * something it cannot work without.
+   */
+  public readonly currentProject = inject(CurrentProjectService);
+
+  /**
+   * Which tab is showing, held here because choosing a project on the last one
+   * has to bring the board it chose into view — a choice whose result is three
+   * tabs away is a choice nobody sees the effect of.
+   */
+  public readonly selectedTab = signal(0);
 
   private readonly selectedTaskId = signal<string | null>(null);
 
@@ -121,6 +140,15 @@ export class BoardPageComponent {
     this.selectedTaskId.set(task.id);
     this.panel.set('task');
     this.panelOpen.set(true);
+  }
+
+  /**
+   * A project was chosen on the last tab, so the board it chose comes into
+   * view. A choice whose result is three tabs away is a choice nobody sees the
+   * effect of.
+   */
+  public onProjectChosen(): void {
+    this.selectedTab.set(0);
   }
 
   public editTask(): void {

@@ -7,6 +7,7 @@ import {
   fakeTaskManager,
   FakeTaskManager,
   fakeTeamDirectory,
+  sampleProject,
   sampleTask,
 } from '@testing/fake-managers';
 import { BoardPageComponent } from './board-page.component';
@@ -21,8 +22,14 @@ describe('BoardPageComponent', () => {
   let projectManager: FakeProjectManager;
 
   const mount = async () => {
-    taskManager = fakeTaskManager([sampleTask()]);
-    projectManager = fakeProjectManager();
+    taskManager = fakeTaskManager([
+      sampleTask(),
+      sampleTask({ id: 'elsewhere', projectId: 'project-2' }),
+    ]);
+    projectManager = fakeProjectManager([
+      sampleProject(),
+      sampleProject({ id: 'project-2', title: 'Customer Portal' }),
+    ]);
 
     await TestBed.configureTestingModule({
       imports: [BoardPageComponent],
@@ -43,6 +50,45 @@ describe('BoardPageComponent', () => {
     fixture.detectChanges();
     return fixture;
   };
+
+  /**
+   * The page narrows to one project, and every tab narrows with it — a lens,
+   * not a fourth list. With none chosen it goes on showing all of them.
+   */
+  describe('the project the page is looking at', () => {
+    it('shows every task until one is chosen', async () => {
+      const fixture = await mount();
+
+      expect(fixture.componentInstance.currentProject.taskCount()).toBe(2);
+    });
+
+    it('narrows to the project the selector names', async () => {
+      const fixture = await mount();
+
+      projectManager.selectProject('project-2');
+      fixture.detectChanges();
+
+      expect(
+        fixture.componentInstance.currentProject.tasks().map((task) => task.id),
+      ).toEqual(['elsewhere']);
+    });
+
+    /*
+     * The choosing itself is the picker's, and its own spec presses the row.
+     * What belongs here is what the page does about it — asserted through the
+     * method the template binds, because a tab body Material has not attached
+     * yet holds no row to press.
+     */
+    it('brings the board into view once a project is chosen', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+
+      component.selectedTab.set(3);
+      component.onProjectChosen();
+
+      expect(component.selectedTab()).toBe(0);
+    });
+  });
 
   it('offers one tab per task view', async () => {
     const fixture = await mount();

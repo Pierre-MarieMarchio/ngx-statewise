@@ -1,80 +1,50 @@
 import { TestBed } from '@angular/core/testing';
 import { Task } from '../../models';
-import {
-  fakeProjectManager,
-  sampleProject,
-  sampleTask,
-} from '@testing/fake-managers';
+import { sampleTask } from '@testing/fake-managers';
 import { TaskKanbanComponent } from './task-kanban.component';
-import { ProjectManager } from '@app/features/project/states/project/project.manager';
 import { at } from '@testing/at';
 
-const PROJECTS = [
-  sampleProject(),
-  sampleProject({ id: 'project-2', title: 'Customer Portal', color: 'green' }),
-];
-
 const TASKS = [
-  sampleTask({
-    id: 'a',
-    projectId: 'project-1',
-    status: 'todo',
-    title: 'First',
-  }),
-  sampleTask({
-    id: 'a2',
-    projectId: 'project-1',
-    status: 'todo',
-    title: 'Second',
-  }),
-  sampleTask({ id: 'b', projectId: 'project-1', status: 'done' }),
-  sampleTask({ id: 'c', projectId: 'project-2', status: 'todo' }),
+  sampleTask({ id: 'a', status: 'todo', title: 'First' }),
+  sampleTask({ id: 'a2', status: 'todo', title: 'Second' }),
+  sampleTask({ id: 'b', status: 'done' }),
 ];
 
 /**
  * The board itself is covered by `KanbanComponent`'s own specs. What is left
- * here is the adapting: one board per project, and what a move means for the
- * page above.
+ * here is the adapting: statuses into columns, and what a move means for the
+ * page above. Which tasks reach it is the page's decision now, so this one
+ * only ever sees the list it is handed.
  */
-/** The boards are keyed by project now, so a spec picks the one it means. */
-const columnsOf = (
-  fixture: { componentInstance: TaskKanbanComponent },
-  projectId: string,
-) =>
-  fixture.componentInstance
-    .boards()
-    .find((board) => board.project.id === projectId)?.columns ?? [];
-
 describe('TaskKanbanComponent', () => {
-  const mount = async () => {
+  const mount = async (tasks: Task[] = TASKS) => {
     await TestBed.configureTestingModule({
       imports: [TaskKanbanComponent],
-      providers: [
-        { provide: ProjectManager, useValue: fakeProjectManager(PROJECTS) },
-      ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(TaskKanbanComponent);
-    fixture.componentRef.setInput('tasks', TASKS);
+    fixture.componentRef.setInput('tasks', tasks);
     fixture.detectChanges();
-
     return fixture;
   };
 
-  it('renders one board per project', async () => {
+  const columnsOf = (fixture: { componentInstance: TaskKanbanComponent }) =>
+    fixture.componentInstance.columns();
+
+  it('draws one board, whatever the tasks belong to', async () => {
     const fixture = await mount();
 
     expect(
       (fixture.nativeElement as HTMLElement).querySelectorAll('app-kanban')
         .length,
-    ).toBe(PROJECTS.length);
+    ).toBe(1);
   });
 
-  it('builds the columns of one project only', async () => {
+  it('lays the tasks out by status', async () => {
     const fixture = await mount();
 
     expect(
-      columnsOf(fixture, 'project-1').map((column) => [
+      columnsOf(fixture).map((column) => [
         column.id,
         column.items.map((task) => task.id),
       ]),
@@ -85,20 +55,17 @@ describe('TaskKanbanComponent', () => {
     ]);
   });
 
-  it('says so when there is no project to draw a board for', async () => {
-    await TestBed.configureTestingModule({
-      imports: [TaskKanbanComponent],
-      providers: [
-        { provide: ProjectManager, useValue: fakeProjectManager([]) },
-      ],
-    }).compileComponents();
+  /** Three empty columns say "nothing here yet" better than a sentence. */
+  it('draws its columns even with nothing to put in them', async () => {
+    const fixture = await mount([]);
 
-    const fixture = TestBed.createComponent(TaskKanbanComponent);
-    fixture.detectChanges();
-
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
-      'No project, so no board to draw.',
-    );
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('app-kanban')
+        .length,
+    ).toBe(1);
+    expect(columnsOf(fixture).map((column) => column.items.length)).toEqual([
+      0, 0, 0,
+    ]);
   });
 
   it('reports a move to the page above, in its new column', async () => {
@@ -134,18 +101,17 @@ describe('TaskKanbanComponent', () => {
   });
 
   describe('reordering inside one column', () => {
-    const todoOf = (
-      fixture: { componentInstance: TaskKanbanComponent },
-      projectId: string,
-    ): string[] =>
-      columnsOf(fixture, projectId)
+    const todoOf = (fixture: {
+      componentInstance: TaskKanbanComponent;
+    }): string[] =>
+      columnsOf(fixture)
         .find((column) => column.id === 'todo')
         ?.items.map((task) => task.id) ?? [];
 
     it('keeps the new order', async () => {
       const fixture = await mount();
 
-      expect(todoOf(fixture, 'project-1')).toEqual(['a', 'a2']);
+      expect(todoOf(fixture)).toEqual(['a', 'a2']);
 
       fixture.componentInstance.onColumnReordered({
         columnId: 'todo',
@@ -153,10 +119,11 @@ describe('TaskKanbanComponent', () => {
       });
       fixture.detectChanges();
 
-      expect(todoOf(fixture, 'project-1')).toEqual(['a2', 'a']);
+      expect(todoOf(fixture)).toEqual(['a2', 'a']);
     });
 
-    it('leaves the other projects where they were', async () => {
+    /** A new list of tasks drops an order that was about the old one. */
+    it('forgets the order when the tasks themselves change', async () => {
       const fixture = await mount();
 
       fixture.componentInstance.onColumnReordered({
@@ -164,8 +131,12 @@ describe('TaskKanbanComponent', () => {
         items: [at(TASKS, 1), at(TASKS, 0)],
       });
       fixture.detectChanges();
+      expect(todoOf(fixture)).toEqual(['a2', 'a']);
 
-      expect(todoOf(fixture, 'project-2')).toEqual(['c']);
+      fixture.componentRef.setInput('tasks', [...TASKS]);
+      fixture.detectChanges();
+
+      expect(todoOf(fixture)).toEqual(['a', 'a2']);
     });
   });
 });

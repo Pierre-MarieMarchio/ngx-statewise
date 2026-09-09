@@ -1,5 +1,5 @@
 export { PersonalTaskListComponent } from './personal-task-list/personal-task-list.component';
-export { ProjectTaskListComponent } from './project-task-list/project-task-list.component';
+export { ProjectPickerComponent } from './project-picker/project-picker.component';
 export { TaskKanbanComponent } from './task-kanban/task-kanban.component';
 export { OverviewKanbanComponent } from './overview-kanban/overview-kanban.component';
 export { OverviewTaskListComponent } from './overview-task-list/overview-task-list.component';

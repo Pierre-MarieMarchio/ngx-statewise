@@ -2,6 +2,30 @@
   <div slot="view-content">
     <div class="board-header">
       <h1 class="task-page-header">TASK</h1>
+
+      <!--
+        The current project, in the title rather than in the rail: the rail
+        names the five places this application has, and which project one is
+        looking at is not a sixth place — it is what this page is about.
+      -->
+      <mat-form-field
+        class="board-project"
+        subscriptSizing="dynamic"
+        appearance="outline"
+      >
+        <mat-label>Project</mat-label>
+        <mat-select
+          aria-label="The project every tab of this page is showing"
+          [value]="projectManager.selectedProjectId()"
+          (valueChange)="projectManager.selectProject($event)"
+        >
+          <mat-option [value]="null">All projects</mat-option>
+          @for (project of projectManager.projects(); track project.id) {
+            <mat-option [value]="project.id">{{ project.title }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
       <div class="board-header-actions">
         <button
           class="primary-btn"
@@ -57,14 +81,18 @@
       (cleared)="taskManager.clearSearch()"
     />
 
-    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+    <mat-tab-group
+      mat-stretch-tabs="false"
+      mat-align-tabs="start"
+      [(selectedIndex)]="selectedTab"
+    >
       <mat-tab>
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">view_kanban</mat-icon>
           Kanban
         </ng-template>
         <app-task-kanban
-          [tasks]="taskManager.visibleTasks()"
+          [tasks]="currentProject.tasks()"
           (taskChanged)="onTaskChanged($event)"
       /></mat-tab>
       <mat-tab>
@@ -74,7 +102,7 @@
         </ng-template>
         <div class="tab-body">
           <app-task-table
-            [tasks]="taskManager.visibleTasks()"
+            [tasks]="currentProject.tasks()"
             (taskSelected)="selectTask($event)"
           />
         </div>
@@ -86,7 +114,7 @@
         </ng-template>
         <app-personal-task-list
           (taskSelected)="selectTask($event)"
-          [allTasks]="taskManager.visibleTasks()"
+          [allTasks]="currentProject.tasks()"
         />
       </mat-tab>
       <mat-tab>
@@ -94,9 +122,13 @@
           <mat-icon class="tab-icon">construction</mat-icon>
           Projects
         </ng-template>
-        <app-project-task-list
-          (taskSelected)="selectTask($event)"
+        <!--
+          The whole list, not the current project's: the counts have to go on
+          saying what is in the projects nobody chose.
+        -->
+        <app-project-picker
           [tasks]="taskManager.visibleTasks()"
+          (chosen)="onProjectChosen()"
         />
       </mat-tab>
     </mat-tab-group>
