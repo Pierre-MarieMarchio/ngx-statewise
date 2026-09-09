@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { LOCALE, findLocale } from '../../../../core/i18n';
 import { SearchDialogComponent } from './search-dialog.component';
+import { at } from '../../../../../testing/at';
 
 function mount() {
   TestBed.resetTestingModule();
@@ -47,10 +48,10 @@ describe('SearchDialogComponent', () => {
     type(fixture, 'effects');
 
     const host = fixture.nativeElement as HTMLElement;
-    const results = host.querySelectorAll('.palette__result');
+    const results = Array.from(host.querySelectorAll('.palette__result'));
 
     expect(results.length).toBeGreaterThan(0);
-    expect(results[0].textContent).toContain('Effects');
+    expect(at(results, 0).textContent).toContain('Effects');
   });
 
   it('says so when nothing matches', () => {
