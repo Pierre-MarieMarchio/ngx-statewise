@@ -81,13 +81,33 @@ export class KanbanComponent<Item extends KanbanCardData> {
   public readonly announcement = signal('');
 
   /**
-   * The grid's tracks, one per column. Written here rather than as a custom
-   * property because `repeat()` reading a `var()` count is not something every
-   * engine agrees on.
+   * The grid's tracks, one per column, as a custom property the sheet reads.
+   *
+   * It used to be bound straight to `grid-template-columns`, which put it in
+   * an inline style — and an inline style cannot be overridden by the rule
+   * that lays this board out one column at a time on a narrow screen.
    */
   public readonly columnTracks = computed(
     () => `repeat(${String(this.columns().length)}, minmax(0, 1fr))`,
   );
+
+  /**
+   * Which column a narrow board is showing.
+   *
+   * Under about 900 px three columns are 110 px each: a card's title breaks
+   * one word to a line and the columns' own labels overlap. So one column
+   * takes the whole width and a strip of buttons changes which — and the
+   * keyboard path that already moves a card between columns becomes the way
+   * everyone moves one, rather than a second way nobody could find.
+   *
+   * The class is set at every width; the rule that acts on it exists only in
+   * the narrow container query, so a wide board goes on showing all three.
+   */
+  public readonly shownColumn = signal(0);
+
+  public showColumn(index: number): void {
+    this.shownColumn.set(index);
+  }
 
   /** Every list of this board, which is what connects them to each other. */
   public readonly dropListIds = computed(() =>

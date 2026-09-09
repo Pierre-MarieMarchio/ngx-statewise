@@ -14,13 +14,52 @@
  */
 .kanban {
   display: grid;
-  gap: 0.5rem 1rem;
+  grid-template-columns: var(--kanban-tracks);
+  gap: var(--space-2) var(--space-4);
+}
+
+/* Shown only where the board shows one column at a time. */
+.kanban-switcher {
+  display: none;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.kanban-switcher-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 1rem;
+  background: none;
+  color: var(--color-secondary);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+
+  &.is-shown {
+    border-color: var(--mat-sys-primary);
+    color: var(--mat-sys-on-background);
+  }
 }
 
 .kanban-column-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   margin: 0;
-  padding: 0 0.25rem;
+  padding: 0 var(--space-1);
   font-size: var(--text-md);
+}
+
+.kanban-column-count {
+  padding: 0 0.4rem;
+  border-radius: 1rem;
+  background-color: var(--mat-sys-surface-variant);
+  color: var(--color-secondary);
+  font-size: var(--text-xs);
+  font-weight: 500;
 }
 
 /*
@@ -55,4 +94,37 @@
  */
 .kanban-column.cdk-drop-list-receiving {
   border-color: var(--mat-sys-primary);
+}
+
+/*
+ * One column at a time, under the width where three stop being readable —
+ * measured at 390 px: three columns of about 110, a card title one word to a
+ * line, and the column labels overlapping each other.
+ *
+ * The query asks the container, not the window: this board is laid out in the
+ * page area, which the rail has already taken its share of.
+ */
+@container page (max-width: 900px) {
+  .kanban-switcher {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .kanban {
+    grid-template-columns: 1fr;
+  }
+
+  /*
+   * The headers go entirely: the switcher above already names every column
+   * and marks the one being shown, and a heading repeating it is one label
+   * too many on the screen that has the least room for one.
+   */
+  .kanban-column-header,
+  .kanban-column {
+    display: none;
+  }
+
+  .kanban-column.is-shown {
+    display: flex;
+  }
 }

@@ -38,6 +38,17 @@ export class TaskManager implements ITaskReload {
   /** Why the last write was refused, in the server's own words. */
   public readonly saveError = this.taskStates.saveError.asReadonly();
 
+  /**
+   * The ids of the tasks whose write is still out.
+   *
+   * `isSaving` says only that something is in flight; a card wanting to show
+   * that *it* is the one being written needs to ask about itself. The set is
+   * derived from the same map the rollback reads.
+   */
+  public readonly writingIds = computed(
+    () => new Set(this.taskStates.pendingWrites().keys()),
+  );
+
   public readonly isCreating = this.taskStates.isCreating.asReadonly();
   public readonly createError = this.taskStates.createError.asReadonly();
 

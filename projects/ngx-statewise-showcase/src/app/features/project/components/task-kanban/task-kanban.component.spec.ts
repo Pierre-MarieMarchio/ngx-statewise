@@ -1,6 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { Task } from '../../models';
-import { sampleTask } from '@testing/fake-managers';
+import {
+  fakeTaskManager,
+  fakeTeamDirectory,
+  sampleTask,
+} from '@testing/fake-managers';
+import { TEAM_DIRECTORY } from '@app/features/project/ports';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
 import { TaskKanbanComponent } from './task-kanban.component';
 import { at } from '@testing/at';
 
@@ -20,6 +26,12 @@ describe('TaskKanbanComponent', () => {
   const mount = async (tasks: Task[] = TASKS) => {
     await TestBed.configureTestingModule({
       imports: [TaskKanbanComponent],
+      providers: [
+        // The card body inside it names an assignee and asks whether its own
+        // write is still out.
+        { provide: TEAM_DIRECTORY, useValue: fakeTeamDirectory() },
+        { provide: TaskManager, useValue: fakeTaskManager(tasks) },
+      ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(TaskKanbanComponent);

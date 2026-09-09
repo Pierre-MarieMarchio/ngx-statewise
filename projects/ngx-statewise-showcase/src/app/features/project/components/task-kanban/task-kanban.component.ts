@@ -15,7 +15,11 @@ import {
   type KanbanMove,
   type KanbanReorder,
 } from '@shared/ui/kanban';
-import { TaskBoardService, TaskSelectionService } from '../../services';
+import {
+  TaskBoardService,
+  TaskPresentationService,
+  TaskSelectionService,
+} from '../../services';
 
 /**
  * The board of whatever tasks it is handed.
@@ -38,6 +42,7 @@ export class TaskKanbanComponent {
 
   private readonly board = inject(TaskBoardService);
   private readonly selection = inject(TaskSelectionService);
+  private readonly presentation = inject(TaskPresentationService);
 
   /**
    * The order the board shows. Reordering inside one column is presentation
@@ -62,7 +67,8 @@ export class TaskKanbanComponent {
   public readonly columns = computed<readonly KanbanColumn<Task>[]>(() =>
     this.board.columns.map((status) => ({
       id: status,
-      label: status,
+      // Spelled for a reader rather than shown as the key it is stored under.
+      label: this.presentation.statusLabel(status),
       items: this.selection.inStatus(this.orderedTasks(), status),
     })),
   );

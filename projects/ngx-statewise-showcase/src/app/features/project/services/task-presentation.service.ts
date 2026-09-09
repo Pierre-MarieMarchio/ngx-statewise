@@ -7,6 +7,20 @@ const STATUS_ICONS: Record<TaskStatus, string> = {
   done: 'check_circle',
 };
 
+/**
+ * How a status is spelled for a reader.
+ *
+ * `titlecase` over the stored value gives "In-progress", and a column header
+ * gave "in-progress" — the hyphen is an artefact of the value being a key.
+ * Written out once here, and read by the badge, the board and anything else
+ * that shows one.
+ */
+const STATUS_LABELS: Record<TaskStatus, string> = {
+  todo: 'Todo',
+  'in-progress': 'In progress',
+  done: 'Done',
+};
+
 const PRIORITY_ICONS: Record<TaskPriority, string> = {
   low: 'keyboard_arrow_down',
   medium: 'remove',
@@ -34,6 +48,10 @@ const PRIORITY_ICONS: Record<TaskPriority, string> = {
 export class TaskPresentationService {
   public statusIcon(status: TaskStatus): string {
     return STATUS_ICONS[status];
+  }
+
+  public statusLabel(status: TaskStatus): string {
+    return STATUS_LABELS[status];
   }
 
   public priorityIcon(priority: TaskPriority): string {

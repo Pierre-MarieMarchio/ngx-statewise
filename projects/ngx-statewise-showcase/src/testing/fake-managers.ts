@@ -199,9 +199,11 @@ export interface FakeTaskManager extends ITaskReload {
   matches: WritableSignal<Task[] | null>;
   readonly isFiltered: ReturnType<typeof computed<boolean>>;
   readonly visibleTasks: ReturnType<typeof computed<Task[]>>;
+  readonly writingIds: ReturnType<typeof computed<ReadonlySet<string>>>;
   readonly queries: string[];
   readonly searchClears: number[];
   readonly deleted: string[];
+  writing: WritableSignal<ReadonlySet<string>>;
   getAllAsync(): Promise<void>;
   update(task: Task): void;
   deleteTask(taskId: string): Promise<void>;
@@ -221,6 +223,8 @@ export const fakeTaskManager = (
 
   const tasksSignal = signal(tasks);
   const matches = signal<Task[] | null>(null);
+  // Which cards are showing a version the server has not answered for yet.
+  const writing = signal<ReadonlySet<string>>(new Set<string>());
 
   return {
     tasks: tasksSignal,
@@ -249,6 +253,8 @@ export const fakeTaskManager = (
     searchFailed: signal(false),
     isFiltered: computed(() => matches() !== null),
     visibleTasks: computed(() => matches() ?? tasksSignal()),
+    writing,
+    writingIds: computed(() => writing()),
     search: (query: string) => {
       queries.push(query);
     },

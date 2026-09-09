@@ -4,14 +4,44 @@
   be a `mat-grid-list` of N tiles above a flex row of N columns — two layout
   systems for one grid, lined up only because the widths came out equal.
 -->
-<div class="kanban" [style.gridTemplateColumns]="columnTracks()">
-  @for (column of columns(); track column.id) {
-    <h3 class="kanban-column-header">{{ column.label }}</h3>
+<!--
+  Only drawn on a narrow board — see the container query in the sheet. It is a
+  row of buttons rather than a `mat-tab-group`: the board is in `shared/ui` and
+  owes nothing to Material, and three buttons need no tab machinery.
+-->
+<div class="kanban-switcher" role="group" aria-label="Show one column">
+  @for (column of columns(); track column.id; let index = $index) {
+    <button
+      type="button"
+      class="kanban-switcher-tab"
+      [class.is-shown]="shownColumn() === index"
+      [attr.aria-pressed]="shownColumn() === index"
+      (click)="showColumn(index)"
+    >
+      {{ column.label }}
+      <span class="kanban-column-count">{{ column.items.length }}</span>
+    </button>
+  }
+</div>
+
+<div class="kanban" [style.--kanban-tracks]="columnTracks()">
+  @for (column of columns(); track column.id; let index = $index) {
+    <!--
+      The count belongs to the board, not to what the board holds: it is the
+      length of a column, and every caller wanted it. Reading a column's size
+      off the screen meant counting cards, and the third one was below the
+      fold.
+    -->
+    <h3 class="kanban-column-header" [class.is-shown]="shownColumn() === index">
+      {{ column.label }}
+      <span class="kanban-column-count">{{ column.items.length }}</span>
+    </h3>
   }
 
-  @for (column of columns(); track column.id) {
+  @for (column of columns(); track column.id; let index = $index) {
     <div
       class="kanban-column"
+      [class.is-shown]="shownColumn() === index"
       cdkDropList
       role="list"
       [attr.aria-label]="column.label + ' items'"

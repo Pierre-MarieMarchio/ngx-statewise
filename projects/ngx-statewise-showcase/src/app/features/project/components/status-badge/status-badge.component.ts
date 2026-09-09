@@ -4,7 +4,6 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { TitleCasePipe } from '@angular/common';
 import { ChipComponent } from '@shared/ui/chip';
 import { TaskStatus } from '../../models';
 import { TaskPresentationService } from '../../services';
@@ -18,11 +17,11 @@ import { TaskPresentationService } from '../../services';
  */
 @Component({
   selector: 'app-status-badge',
-  imports: [ChipComponent, TitleCasePipe],
+  imports: [ChipComponent],
   template: `
     <app-chip
       [icon]="presentation.statusIcon(status())"
-      [label]="status() | titlecase"
+      [label]="presentation.statusLabel(status())"
       [tint]="'var(--status-' + status() + ')'"
     />
   `,
