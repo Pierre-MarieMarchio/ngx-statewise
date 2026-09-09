@@ -188,6 +188,31 @@ action both work.
 The action history is deliberately not here: it is application-wide, and a
 scoped handle is the wrong place to read it from.
 
+### requestStatus
+
+```typescript
+function requestStatus<State, Actions>(
+  on: On<State>,
+  actions: Actions,
+  status: {
+    loading: (state: State) => WritableSignal<boolean>;
+    error: (state: State) => WritableSignal<boolean>;
+    onRequest?: (state: State, payload: …) => undefined;
+    onSuccess?: (state: State, payload: …) => undefined;
+    onFailure?: (state: State, payload: …) => undefined;
+  },
+): void;
+```
+
+Called inside `defineUpdater`, with its `on`. Writes the three handlers of a
+`request` / `success` / `failure` group onto two boolean signals: `request`
+raises `loading` and **clears `error`**, `success` drops `loading`, `failure`
+drops `loading` and raises `error`.
+
+The three handlers are optional, take the payload of their own action, and run
+after the flags are settled. See
+[Request status](/guide/updaters#request-status) for what it does not cover.
+
 ### ActionHistory
 
 ```typescript

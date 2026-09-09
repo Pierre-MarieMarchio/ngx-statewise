@@ -58,13 +58,18 @@ and re-measured by `npm run check`, so these numbers cannot rot:
 
 | What                                                      | Measured           |
 | --------------------------------------------------------- | ------------------ |
-| the complete `task` flow                                  | 5 files, 380 lines |
+| the complete `task` flow                                  | 5 files, 375 lines |
 | `asReadonly()` lines re-exposing state, across 3 managers | 14                 |
-| `isLoading.set` / `isError.set` lines, across 3 updaters  | 29                 |
+| `isLoading.set` / `isError.set` lines, across 3 updaters  | 19                 |
 
 A library that declares state, derived values and methods in one block will be
 shorter than that. What you get for the length is that every one of those lines
 says what it does, and that no two of them are the same kind of thing.
+
+The last row was 29 before [`requestStatus`](/guide/updaters#request-status)
+took the two flags of a read flow off your hands in two of the three. The rest
+are the ones that should stay written out: an optimistic write with a
+per-entity rollback point is not boilerplate, it is the logic.
 
 ## When it fits
 
@@ -99,7 +104,7 @@ that is a deliberate limit, not an oversight.
 **You want only the action helpers.** `defineActionsGroup` and `payload` are
 pleasant on their own, and you cannot have them on their own: the package is
 one graph, so importing any of it brings the engine. There is no tree-shaken
-subset — the whole 4.7 kB gzipped comes along. Copy the twenty lines instead.
+subset — the whole 4.8 kB gzipped comes along. Copy the twenty lines instead.
 
 **Your features call each other past an `await`.** A dispatch a _synchronous_
 effect handler emits joins the cascade, whichever manager it went through.

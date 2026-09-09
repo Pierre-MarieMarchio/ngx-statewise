@@ -1,5 +1,5 @@
 import { Task } from '../../models';
-import { defineUpdater } from 'ngx-statewise';
+import { defineUpdater, requestStatus } from 'ngx-statewise';
 import {
   createTaskActions,
   getAllTaskActions,
@@ -41,19 +41,14 @@ export const taskUpdater = defineUpdater(TaskState, (on) => {
     state.createError.set(null);
   });
 
-  on(getAllTaskActions.request, (state) => {
-    state.isLoading.set(true);
-    state.isError.set(false);
-  });
-
-  on(getAllTaskActions.success, (state, tasks) => {
-    state.tasks.set(tasks);
-    state.isLoading.set(false);
-  });
-
-  on(getAllTaskActions.failure, (state) => {
-    state.isError.set(true);
-    state.isLoading.set(false);
+  // The two flags of the read flow, wired once. `request` clearing the error
+  // of the previous attempt is the part this stops anyone from forgetting.
+  requestStatus(on, getAllTaskActions, {
+    loading: (state) => state.isLoading,
+    error: (state) => state.isError,
+    onSuccess: (state, tasks) => {
+      state.tasks.set(tasks);
+    },
   });
 
   /**

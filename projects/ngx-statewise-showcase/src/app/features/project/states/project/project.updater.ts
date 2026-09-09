@@ -1,4 +1,4 @@
-import { defineUpdater } from 'ngx-statewise';
+import { defineUpdater, requestStatus } from 'ngx-statewise';
 import { ProjectState } from './project.state';
 import {
   createProjectActions,
@@ -15,19 +15,15 @@ export const projectUpdater = defineUpdater(ProjectState, (on) => {
     state.createError.set(null);
   });
 
-  on(getAllProjectsActions.request, (state) => {
-    state.isLoading.set(true);
-    state.isError.set(false);
-  });
-
-  on(getAllProjectsActions.success, (state, projects) => {
-    state.projects.set(projects);
-    state.isLoading.set(false);
-  });
-
-  on(getAllProjectsActions.failure, (state) => {
-    state.isError.set(true);
-    state.isLoading.set(false);
+  // Where the bug was: `request` did not clear `isError`, so a reload that
+  // succeeded left a stale failure up until the next logout. The helper writes
+  // that line, so it cannot go missing again.
+  requestStatus(on, getAllProjectsActions, {
+    loading: (state) => state.isLoading,
+    error: (state) => state.isError,
+    onSuccess: (state, projects) => {
+      state.projects.set(projects);
+    },
   });
 
   on(createProjectActions.request, (state) => {
