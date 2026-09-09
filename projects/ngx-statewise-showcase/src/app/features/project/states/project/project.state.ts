@@ -9,6 +9,15 @@ export class ProjectState {
   public isLoading = signal(false);
   public isError = signal(false);
 
+  /**
+   * The project the screens are looking at, and `null` for all of them.
+   *
+   * An id rather than the project: the row itself is in `projects`, and two
+   * copies of it would be one to keep in step. Everything on screen derives
+   * from this one field and that list.
+   */
+  public selectedProjectId = signal<string | null>(null);
+
   /** One creation at a time, so a flag rather than a set of pending writes. */
   public isCreating = signal(false);
 

@@ -5,6 +5,7 @@ import { sampleProject } from '@testing/fake-managers';
 import {
   createProjectActions,
   getAllProjectsActions,
+  projectSelected,
   projectReset,
 } from './project.action';
 import { ProjectState } from './project.state';
@@ -146,6 +147,53 @@ describe('projectUpdater', () => {
 
       expect(state.isCreating()).toBe(false);
       expect(state.createError()).toBeNull();
+    });
+  });
+
+  /**
+   * Choosing is a decision, not a request: there is no effect behind this
+   * action, and the state is right the moment it is dispatched.
+   */
+  describe('choosing a project', () => {
+    it('keeps what was chosen, and lets it be unchosen', () => {
+      statewise.dispatch(projectSelected('project-1'));
+      expect(state.selectedProjectId()).toBe('project-1');
+
+      statewise.dispatch(projectSelected(null));
+      expect(state.selectedProjectId()).toBeNull();
+    });
+
+    /**
+     * Leaving a dangling id would not show the wrong project — the derivation
+     * finds nothing — but every list scoped by it filters down to nothing, so
+     * the screens would go empty rather than back to showing everything.
+     */
+    it('drops a choice the next read no longer holds', () => {
+      statewise.dispatch(projectSelected('project-1'));
+
+      statewise.dispatch(
+        getAllProjectsActions.success([sampleProject({ id: 'project-2' })]),
+      );
+
+      expect(state.selectedProjectId()).toBeNull();
+    });
+
+    it('keeps a choice the next read still holds', () => {
+      statewise.dispatch(projectSelected('project-1'));
+
+      statewise.dispatch(
+        getAllProjectsActions.success([sampleProject({ id: 'project-1' })]),
+      );
+
+      expect(state.selectedProjectId()).toBe('project-1');
+    });
+
+    it('is forgotten along with the projects on a reset', () => {
+      statewise.dispatch(projectSelected('project-1'));
+
+      statewise.dispatch(projectReset());
+
+      expect(state.selectedProjectId()).toBeNull();
     });
   });
 });

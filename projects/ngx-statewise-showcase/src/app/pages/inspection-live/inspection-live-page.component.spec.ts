@@ -66,7 +66,31 @@ describe('InspectionLivePageComponent', () => {
       Array.from(host().querySelectorAll('[data-card]')).map((card) =>
         card.getAttribute('data-card'),
       ),
-    ).toEqual(['auth', 'tasks', 'projects']);
+    ).toEqual(['auth', 'tasks', 'projects', 'current-project']);
+  });
+
+  /**
+   * The readout nothing stores: choose a project and every line of it moves,
+   * because all four are derived from the chosen id and the two lists.
+   */
+  it('follows the project that was chosen', () => {
+    expect(reading('current-project', 'currentProject')).toBe('All projects');
+    expect(reading('current-project', 'taskCount')).toBe('1');
+
+    projectManager.selectProject('project-nowhere');
+    fixture.detectChanges();
+
+    expect(reading('current-project', 'currentProject')).toBe('All projects');
+    expect(reading('current-project', 'taskCount')).toBe('0');
+
+    projectManager.selectProject(sampleProject().id);
+    fixture.detectChanges();
+
+    expect(reading('current-project', 'currentProject')).toBe(
+      sampleProject().title,
+    );
+    expect(reading('current-project', 'taskCount')).toBe('1');
+    expect(reading('current-project', 'todo')).toBe('1');
   });
 
   it('reads the auth state, derived values included', () => {

@@ -272,7 +272,10 @@ export interface FakeProjectManager extends IProjectReload {
   projects: WritableSignal<Project[]>;
   isError: WritableSignal<boolean>;
   isLoading: WritableSignal<boolean>;
+  selectedProjectId: WritableSignal<string | null>;
+  readonly selectedProject: ReturnType<typeof computed<Project | null>>;
   readonly projectCount: ReturnType<typeof computed<number>>;
+  selectProject(projectId: string | null): void;
   readonly calls: string[];
   isCreating: WritableSignal<boolean>;
   createError: WritableSignal<string | null>;
@@ -284,6 +287,7 @@ export const fakeProjectManager = (
   projects: Project[] = [sampleProject()],
 ): FakeProjectManager => {
   const projectsSignal = signal(projects);
+  const selectedProjectId = signal<string | null>(null);
   const calls: string[] = [];
   const created: ProjectDraft[] = [];
 
@@ -291,6 +295,16 @@ export const fakeProjectManager = (
     projects: projectsSignal,
     isError: signal(false),
     isLoading: signal(false),
+    selectedProjectId,
+    selectedProject: computed(
+      () =>
+        projectsSignal().find(
+          (project) => project.id === selectedProjectId(),
+        ) ?? null,
+    ),
+    selectProject: (projectId: string | null) => {
+      selectedProjectId.set(projectId);
+    },
     projectCount: computed(() => projectsSignal().length),
     calls,
     created,

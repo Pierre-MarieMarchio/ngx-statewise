@@ -17,6 +17,7 @@ import { NoticeState } from '@app/features/inspection/states';
 import { AuthManager } from '@app/features/auth/states';
 import { ProjectManager } from '@app/features/project/states/project/project.manager';
 import { TaskManager } from '@app/features/project/states/task/task.manager';
+import { CurrentProjectService } from '@app/features/project/services';
 
 /** One line of a readout: a label and the value read at render time. */
 export interface StateReading {
@@ -48,6 +49,7 @@ export class InspectionLivePageComponent {
   private readonly authManager = inject(AuthManager);
   private readonly taskManager = inject(TaskManager);
   private readonly projectManager = inject(ProjectManager);
+  private readonly currentProject = inject(CurrentProjectService);
   private readonly noticeState = inject(NoticeState);
   private readonly reportedErrors = inject(ReportedErrors);
 
@@ -79,13 +81,31 @@ export class InspectionLivePageComponent {
       { label: 'isLoading', value: String(this.taskManager.isLoading()) },
       { label: 'isSaving', value: String(this.taskManager.isSaving()) },
       { label: 'isError', value: String(this.taskManager.isError()) },
+      { label: 'saveError', value: this.taskManager.saveError() ?? '(none)' },
     ];
   });
+
+  /**
+   * The same counts, narrowed to the chosen project. Nothing stores them: they
+   * are a derivation over the task state and the project state, and choosing a
+   * project moves every line at once.
+   */
+  public readonly currentProjectReadings = computed<StateReading[]>(() => [
+    { label: 'currentProject', value: this.currentProject.title() },
+    { label: 'taskCount', value: String(this.currentProject.taskCount()) },
+    ...Object.entries(this.currentProject.countByStatus()).map(
+      ([status, count]) => ({ label: status, value: String(count) }),
+    ),
+  ]);
 
   public readonly projectReadings = computed<StateReading[]>(() => [
     {
       label: 'projectCount',
       value: String(this.projectManager.projectCount()),
+    },
+    {
+      label: 'selectedProjectId',
+      value: this.projectManager.selectedProjectId() ?? '(none)',
     },
     { label: 'isLoading', value: String(this.projectManager.isLoading()) },
     { label: 'isError', value: String(this.projectManager.isError()) },

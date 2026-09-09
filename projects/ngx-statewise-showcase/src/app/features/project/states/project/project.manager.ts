@@ -5,9 +5,10 @@ import { projectUpdater } from './project.updater';
 import {
   createProjectActions,
   getAllProjectsActions,
+  projectSelected,
   projectReset,
 } from './project.action';
-import { ProjectDraft } from '../../models';
+import { Project, ProjectDraft } from '../../models';
 import { IProjectReload } from '@app/features/common';
 
 @Injectable({
@@ -22,6 +23,26 @@ export class ProjectManager implements IProjectReload {
   public readonly isLoading = this.projectStates.isLoading.asReadonly();
 
   public readonly projectCount = computed(() => this.projects().length);
+
+  public readonly selectedProjectId =
+    this.projectStates.selectedProjectId.asReadonly();
+
+  /**
+   * The project the screens are looking at, derived from the id and the list
+   * rather than stored beside them — so a reload that renamed it shows the new
+   * name, and one that dropped it answers null.
+   */
+  public readonly selectedProject = computed<Project | null>(
+    () =>
+      this.projects().find(
+        (project) => project.id === this.selectedProjectId(),
+      ) ?? null,
+  );
+
+  /** Choosing one, or `null` to go back to all of them. */
+  public selectProject(projectId: string | null): void {
+    this.statewise.dispatch(projectSelected(projectId));
+  }
 
   /**
    * Resolves once every effect this manager started has settled, whichever

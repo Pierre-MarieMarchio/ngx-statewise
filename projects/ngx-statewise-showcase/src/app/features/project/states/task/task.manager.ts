@@ -10,8 +10,9 @@ import {
   taskReset,
   updateTaskActions,
 } from './task.action';
-import { STATUSES, Task, TaskDraft, TaskStatus } from '../../models';
+import { Task, TaskDraft } from '../../models';
 import { ITaskReload } from '@app/features/common';
+import { TaskSelectionService } from '../../services';
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +20,7 @@ import { ITaskReload } from '@app/features/common';
 export class TaskManager implements ITaskReload {
   private readonly taskStates = inject(TaskState);
   private readonly statewise = injectStatewise(taskUpdater);
+  private readonly selection = inject(TaskSelectionService);
 
   public readonly tasks = this.taskStates.tasks.asReadonly();
   public readonly isError = this.taskStates.isError.asReadonly();
@@ -58,20 +60,14 @@ export class TaskManager implements ITaskReload {
   public readonly taskCount = computed(() => this.tasks().length);
 
   /**
-   * Every status is present even at zero, so a view over it never has to
-   * guess which keys exist.
+   * The counts over every task. The same rule scoped to one project is
+   * `CurrentProjectService`'s, and both ask `TaskSelectionService` — a manager
+   * may inject a service of its own feature when the alternative is writing
+   * its rule twice.
    */
-  public readonly countByStatus = computed(() => {
-    const tasks = this.tasks();
-
-    return STATUSES.reduce(
-      (counts, status) => ({
-        ...counts,
-        [status]: tasks.filter((task) => task.status === status).length,
-      }),
-      {} as Record<TaskStatus, number>,
-    );
-  });
+  public readonly countByStatus = computed(() =>
+    this.selection.countByStatus(this.tasks()),
+  );
 
   /**
    * Resolves once the reload this manager started has settled.

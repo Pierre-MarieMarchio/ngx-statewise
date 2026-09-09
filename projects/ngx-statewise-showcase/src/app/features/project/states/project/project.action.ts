@@ -30,4 +30,17 @@ export const createProjectActions = defineActionsGroup({
   },
 });
 
+/**
+ * Which project the screens are looking at, and `null` for all of them.
+ *
+ * The one action in this application with no effect behind it — choosing is a
+ * decision, not a request, and nothing has to be asked of the server to make
+ * it true. It travels as an action all the same, so it shows up in the history
+ * beside the reads it changes the meaning of.
+ */
+export const projectSelected = defineSingleAction(
+  'PROJECT_SELECTED',
+  payload<string | null>(),
+);
+
 export const projectReset = defineSingleAction('PROJECT_RESET', emptyPayload);

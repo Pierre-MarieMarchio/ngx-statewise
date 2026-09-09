@@ -39,4 +39,30 @@ describe('ProjectManager', () => {
     state.projects.set([]);
     expect(manager.projectCount()).toBe(0);
   });
+
+  describe('the project the screens are looking at', () => {
+    it('is none of them until one is chosen', () => {
+      expect(manager.selectedProject()).toBeNull();
+    });
+
+    /** Derived from the id and the list, so a rename shows through it. */
+    it('follows the list rather than keeping a copy', () => {
+      state.projects.set([sampleProject({ id: 'p-1', title: 'Before' })]);
+      manager.selectProject('p-1');
+
+      expect(manager.selectedProject()?.title).toBe('Before');
+
+      state.projects.set([sampleProject({ id: 'p-1', title: 'After' })]);
+
+      expect(manager.selectedProject()?.title).toBe('After');
+    });
+
+    it('answers nothing for an id the list does not hold', () => {
+      state.projects.set([sampleProject({ id: 'p-1' })]);
+      manager.selectProject('p-2');
+
+      expect(manager.selectedProjectId()).toBe('p-2');
+      expect(manager.selectedProject()).toBeNull();
+    });
+  });
 });

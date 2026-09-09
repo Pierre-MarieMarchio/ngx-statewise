@@ -3,12 +3,14 @@ import { ProjectState } from './project.state';
 import {
   createProjectActions,
   getAllProjectsActions,
+  projectSelected,
   projectReset,
 } from './project.action';
 
 export const projectUpdater = defineUpdater(ProjectState, (on) => {
   on(projectReset, (state) => {
     state.projects.set([]);
+    state.selectedProjectId.set(null);
     state.isLoading.set(false);
     state.isError.set(false);
     state.isCreating.set(false);
@@ -23,7 +25,28 @@ export const projectUpdater = defineUpdater(ProjectState, (on) => {
     error: (state) => state.isError,
     onSuccess: (state, projects) => {
       state.projects.set(projects);
+
+      /*
+       * A selection the reload no longer holds is no selection.
+       *
+       * Leaving the id would not show the wrong project — the derivation finds
+       * nothing and answers null — but every list scoped by that id would
+       * filter down to nothing, so the screens would go empty rather than back
+       * to showing everything.
+       */
+      const selected = state.selectedProjectId();
+
+      if (
+        selected !== null &&
+        !projects.some((project) => project.id === selected)
+      ) {
+        state.selectedProjectId.set(null);
+      }
     },
+  });
+
+  on(projectSelected, (state, projectId) => {
+    state.selectedProjectId.set(projectId);
   });
 
   on(createProjectActions.request, (state) => {

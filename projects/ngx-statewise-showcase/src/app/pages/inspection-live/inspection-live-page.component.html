@@ -54,6 +54,24 @@
     </mat-card>
 
     <mat-card class="live-state-card" appearance="outlined">
+      <h2 class="live-state-card-title">Current project</h2>
+      <p class="live-state-card-note">
+        Stored nowhere: a derivation over the chosen id, the project list and
+        the tasks. Choose a project on the task page and every line here moves.
+      </p>
+      <dl
+        class="live-state-readout"
+        aria-live="polite"
+        data-card="current-project"
+      >
+        @for (reading of currentProjectReadings(); track reading.label) {
+          <dt>{{ reading.label }}</dt>
+          <dd [attr.data-reading]="reading.label">{{ reading.value }}</dd>
+        }
+      </dl>
+    </mat-card>
+
+    <mat-card class="live-state-card" appearance="outlined">
       <h2 class="live-state-card-title">Notice</h2>
       <p class="live-state-card-note">
         Registered globally, owned by no manager, so any handle reaches it.
