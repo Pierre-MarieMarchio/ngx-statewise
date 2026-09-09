@@ -1,0 +1,25 @@
+/* Type-checks the compatibility fixture, which nothing else in the workspace
+   covers: the root config stops at `rootDir: ./projects`, and the fixture's
+   own tsconfigs are only ever used against another Angular major, in the
+   throwaway copy `verify.mjs` materialises outside the repository.
+
+   Extending the root config is what makes `ngx-statewise` resolve at all — the
+   mapping to `dist/ngx-statewise` lives in its `paths` — so `typecheck:tools`
+   runs after `build:library`, never before.
+
+   What this measures is narrow on purpose: the fixture's TypeScript against
+   the Angular this workspace holds, so a fixture that quietly stopped
+   compiling fails here instead of on the Monday cron. It is not the peer-range
+   check, and does not replace it. That is `verify.mjs`, which installs the
+   packed tarball under each major and asks that major's own CLI to build it
+   ahead of time with `skipLibCheck: false`. Templates are not checked here
+   either: `strictTemplates` belongs to the Angular compiler, not to tsc. */
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "src",
+    "types": ["vitest/globals"]
+  },
+  "include": ["src/**/*.ts"]
+}
