@@ -14,7 +14,7 @@ import {
 import { routes } from './app.routes';
 import { accessTokenInterceptor } from './features/auth/interceptors';
 import { provideStatewise } from 'ngx-statewise';
-import { fakeApiInterceptor } from './core/fake-api';
+import { fakeBackendInterceptor } from './fake-backend';
 import { ShowcaseErrorHandler } from './core/error-handling';
 import {
   AuthEffect,
@@ -37,7 +37,7 @@ export const appConfig: ApplicationConfig = {
       // The fake API answers without calling `next`, so it terminates the
       // chain and has to come last. The other way round, the access-token
       // interceptor was never reached at all.
-      withInterceptors([accessTokenInterceptor, fakeApiInterceptor]),
+      withInterceptors([accessTokenInterceptor, fakeBackendInterceptor]),
     ),
     provideZoneChangeDetection({ eventCoalescing: true }),
     // Everything the library reports — a misrouted dispatch, an effect that

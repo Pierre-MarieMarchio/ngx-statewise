@@ -4,8 +4,8 @@ import {
   withInterceptors,
 } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { fakeApiInterceptor } from '@app/core/fake-api';
-import { USERS } from '@app/core/fake-api/db.data';
+import { fakeBackendInterceptor } from '@app/fake-backend';
+import { USERS } from '@app/fake-backend/db.data';
 import { environment } from '../../../../environments/environment';
 import { firstValueFrom } from 'rxjs';
 import { AuthTokenService } from '../services';
@@ -34,7 +34,7 @@ describe('accessTokenInterceptor', () => {
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(
-          withInterceptors([accessTokenInterceptor, fakeApiInterceptor]),
+          withInterceptors([accessTokenInterceptor, fakeBackendInterceptor]),
         ),
         {
           provide: AuthManager,

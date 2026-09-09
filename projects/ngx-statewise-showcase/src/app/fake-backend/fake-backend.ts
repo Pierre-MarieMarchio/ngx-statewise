@@ -12,7 +12,7 @@ type RequestHandlers = Record<
   Record<string, () => HttpResponse<unknown>>
 >;
 
-export class FakeApi {
+export class FakeBackend {
   private readonly usersDB = new UsersDB();
   private readonly taskDB = new TaskDB();
   private readonly projectDB = new ProjectDB();

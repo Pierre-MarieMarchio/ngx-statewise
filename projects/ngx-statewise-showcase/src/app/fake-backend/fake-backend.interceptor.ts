@@ -2,7 +2,7 @@ import { HttpEvent, HttpRequest } from '@angular/common/http';
 import { isDevMode } from '@angular/core';
 import { Observable, catchError, delay, tap, throwError } from 'rxjs';
 
-import { FakeApi } from './fake-api';
+import { FakeBackend } from './fake-backend';
 
 /**
  * Traces every call the fake backend answers, in development only. A
@@ -14,17 +14,17 @@ function trace(label: string, detail: Record<string, unknown>): void {
     return;
   }
 
-  console.log(`[FakeApiInterceptor] ${label}`);
+  console.log(`[FakeBackendInterceptor] ${label}`);
   console.table(detail);
 }
 
-export function fakeApiInterceptor(
+export function fakeBackendInterceptor(
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> {
   const { method, url, body } = request;
   trace('Request ⏩', { method, url, body });
 
-  return new FakeApi(request as HttpRequest<Record<string, unknown>>)
+  return new FakeBackend(request as HttpRequest<Record<string, unknown>>)
     .handleRequest()
     .pipe(
       delay(200), // delay to simulate server latency
