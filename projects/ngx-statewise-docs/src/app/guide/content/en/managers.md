@@ -1,3 +1,19 @@
+---
+slug: managers
+title:
+  en: Managers
+  fr: Managers
+  es: Managers
+  de: Managers
+  pt-BR: Managers
+summary:
+  en: The dispatch handle your components talk to.
+  fr: La poignée de dispatch à laquelle parlent vos composants.
+  es: El manejador de dispatch con el que hablan tus componentes.
+  de: Der Dispatch-Griff, mit dem deine Komponenten sprechen.
+  pt-BR: A alça de dispatch com que seus componentes falam.
+---
+
 # Managers
 
 A manager is the only part of a feature your components should know about. It

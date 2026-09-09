@@ -2,9 +2,11 @@ import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from '../i18n';
 import {
   GUIDE_PAGES,
   GUIDE_SECTIONS,
+  defineGuideSections,
   findGuidePage,
   guideContent,
   type GuidePage,
+  type Translated,
 } from './guide-pages';
 import { renderOptions } from '../../testing/render-options';
 import { renderGuide } from './markdown';
@@ -20,9 +22,15 @@ function anchorsOf(page: GuidePage, code: LocaleCode): Set<string> {
 }
 
 describe('the guide registry', () => {
-  it('holds eleven pages across four sections', () => {
-    expect(GUIDE_SECTIONS.length).toBe(4);
-    expect(GUIDE_PAGES.length).toBe(11);
+  it('is made of sections that each hold at least one page', () => {
+    expect(GUIDE_SECTIONS.length).toBeGreaterThan(0);
+
+    for (const section of GUIDE_SECTIONS) {
+      expect(
+        section.pages.length,
+        `the "${section.title.en}" section has no pages`,
+      ).toBeGreaterThan(0);
+    }
   });
 
   it('flattens the sections in reading order, losing none of them', () => {
@@ -150,5 +158,104 @@ describe('the guide registry', () => {
         ).toEqual([]);
       }
     }
+  });
+});
+
+/** A section title, which the compiler already requires in every locale. */
+const SECTION: Translated = {
+  en: 'Section',
+  fr: 'Section',
+  es: 'Sección',
+  de: 'Abschnitt',
+  'pt-BR': 'Seção',
+};
+
+/** A page whose metadata block is complete, for a spec to spoil one line of. */
+const COMPLETE = [
+  '---',
+  'slug: effects',
+  'title:',
+  '  en: Effects',
+  '  fr: Effects',
+  '  es: Effects',
+  '  de: Effects',
+  '  pt-BR: Effects',
+  'summary:',
+  '  en: One line.',
+  '  fr: Une ligne.',
+  '  es: Una línea.',
+  '  de: Eine Zeile.',
+  '  pt-BR: Uma linha.',
+  '---',
+  '',
+  '# Effects',
+].join('\n');
+
+function declaring(page: string): () => unknown {
+  return () => defineGuideSections([{ title: SECTION, pages: [page] }]);
+}
+
+describe('declaring a guide page', () => {
+  it('accepts one whose metadata block is complete', () => {
+    const [section] = defineGuideSections([
+      { title: SECTION, pages: [COMPLETE] },
+    ]);
+
+    expect(section.pages[0].slug).toBe('effects');
+    expect(section.pages[0].title.de).toBe('Effects');
+    expect(section.pages[0].content.en).toBe('# Effects');
+  });
+
+  it('refuses one with no metadata block, naming it by its heading', () => {
+    expect(declaring('# Effects\n')).toThrow(
+      /the guide page "Effects" has no "slug"/,
+    );
+  });
+
+  it('refuses a slug that could not be a URL segment', () => {
+    expect(
+      declaring(COMPLETE.replace('slug: effects', 'slug: Effects!')),
+    ).toThrow(/cannot be a URL segment/);
+  });
+
+  it('refuses a summary missing in one locale, and says which', () => {
+    expect(declaring(COMPLETE.replace('  de: Eine Zeile.\n', ''))).toThrow(
+      /has no summary in de/,
+    );
+  });
+
+  it('refuses a title given a single value instead of one per locale', () => {
+    const flattened = COMPLETE.split('\n')
+      .filter((line) => !/^ {2}\w+(-BR)?: Effects$/.test(line))
+      .join('\n')
+      .replace('title:', 'title: Effects');
+
+    expect(declaring(flattened)).toThrow(/needs one per locale/);
+  });
+
+  it('refuses two pages claiming the same slug', () => {
+    expect(() =>
+      defineGuideSections([{ title: SECTION, pages: [COMPLETE, COMPLETE] }]),
+    ).toThrow(/both call themselves "effects"/);
+  });
+
+  it('takes a translation as prose, the metadata staying in the default file', () => {
+    const [section] = defineGuideSections([
+      {
+        title: SECTION,
+        pages: [
+          {
+            source: COMPLETE,
+            translations: {
+              fr: '---\nslug: effects\n---\n\n# Effects, en français',
+            },
+          },
+        ],
+      },
+    ]);
+
+    expect(section.pages[0].content.fr).toBe('# Effects, en français');
+    expect(guideContent(section.pages[0], 'fr').isFallback).toBe(false);
+    expect(guideContent(section.pages[0], 'de').isFallback).toBe(true);
   });
 });

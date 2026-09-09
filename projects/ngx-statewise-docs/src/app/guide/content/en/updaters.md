@@ -1,3 +1,19 @@
+---
+slug: updaters
+title:
+  en: Updaters
+  fr: Updaters
+  es: Updaters
+  de: Updaters
+  pt-BR: Updaters
+summary:
+  en: How a state reacts to an action, and which scope owns it.
+  fr: Comment un état réagit à une action, et quelle portée le détient.
+  es: Cómo reacciona un state a una action, y qué ámbito lo posee.
+  de: Wie ein State auf eine Action reagiert und welcher Bereich ihn besitzt.
+  pt-BR: Como um state reage a uma action, e qual escopo o detém.
+---
+
 # Updaters
 
 An updater describes how a state reacts to actions. It only writes state data: API calls, navigation and everything else belong in effects.

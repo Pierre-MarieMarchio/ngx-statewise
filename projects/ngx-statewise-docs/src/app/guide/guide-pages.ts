@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, type LocaleCode } from '../i18n';
+import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from '../i18n';
 import actionsEn from './content/en/actions.md';
 import apiEn from './content/en/api.md';
 import effectsEn from './content/en/effects.md';
@@ -10,9 +10,18 @@ import statesEn from './content/en/states.md';
 import testingEn from './content/en/testing.md';
 import updatersEn from './content/en/updaters.md';
 import whyEn from './content/en/why.md';
+import { parsePageSource, type MetadataValue } from './front-matter';
+
+/**
+ * URL segments, so: lower case, digits, and single hyphens between them.
+ *
+ * Declared up here because the guide below is built while this module loads,
+ * and a `const` the builder reads is not hoisted the way a function is.
+ */
+const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /** A value the interface must have in every locale. */
-type Translated = Record<LocaleCode, string>;
+export type Translated = Readonly<Record<LocaleCode, string>>;
 
 export interface GuidePage {
   /** Last segment of the route, and the name of the markdown file behind it. */
@@ -22,8 +31,7 @@ export interface GuidePage {
   readonly summary: Translated;
   /**
    * The markdown, per locale. Partial on purpose: a locale with no entry falls
-   * back to the default one, and the page says so. Adding a translation is a
-   * file in `content/<locale>/` and one key here.
+   * back to the default one, and the page says so.
    */
   readonly content: Partial<Translated>;
 }
@@ -34,11 +42,37 @@ export interface GuideSection {
 }
 
 /**
- * The guide, in reading order. This is the one place a page is declared: the
- * router, the sidebar, the landing page and the previous/next footer are all
- * derived from it.
+ * A page in the reading order. The imported markdown on its own is the usual
+ * case; the object form is for the day a page has translations beside it,
+ * which carry prose and nothing else — the metadata is declared once, in the
+ * default locale's file.
  */
-export const GUIDE_SECTIONS: readonly GuideSection[] = [
+export type GuideSource =
+  | string
+  | {
+      readonly source: string;
+      readonly translations: Partial<Readonly<Record<LocaleCode, string>>>;
+    };
+
+interface SectionSource {
+  readonly title: Translated;
+  readonly pages: readonly GuideSource[];
+}
+
+/**
+ * The guide, in reading order.
+ *
+ * This is all a new page needs here: its markdown, in the section and at the
+ * position it should be read at. Its slug, title and summary are declared in
+ * the file itself, beside the prose they describe — see
+ * `content/en/effects.md` for the shape, and CONTRIBUTING.md for the walk
+ * through. Nothing about a page is spelled out twice.
+ *
+ * The router, the sidebar, the landing page's contents, the previous/next
+ * footer and the search index are all derived from what this returns, so this
+ * stays the single place the guide is defined.
+ */
+export const GUIDE_SECTIONS: readonly GuideSection[] = defineGuideSections([
   {
     title: {
       en: 'Overview',
@@ -47,63 +81,7 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = [
       de: 'Überblick',
       'pt-BR': 'Visão geral',
     },
-    pages: [
-      {
-        slug: 'introduction',
-        title: {
-          en: 'Introduction',
-          fr: 'Introduction',
-          es: 'Introducción',
-          de: 'Einführung',
-          'pt-BR': 'Introdução',
-        },
-        summary: {
-          en: 'What ngx-statewise is, and the flow it is built around.',
-          fr: 'Ce qu’est ngx-statewise, et le flux qui le structure.',
-          es: 'Qué es ngx-statewise y el flujo sobre el que está construido.',
-          de: 'Was ngx-statewise ist und der Ablauf, um den herum es gebaut ist.',
-          'pt-BR':
-            'O que é ngx-statewise e o fluxo em torno do qual foi construído.',
-        },
-        content: { en: introductionEn },
-      },
-      {
-        slug: 'why',
-        title: {
-          en: 'Why ngx-statewise',
-          fr: 'Pourquoi ngx-statewise',
-          es: 'Por qué ngx-statewise',
-          de: 'Warum ngx-statewise',
-          'pt-BR': 'Por que ngx-statewise',
-        },
-        summary: {
-          en: 'What the design buys you, and when it fits.',
-          fr: 'Ce que la conception apporte, et quand elle convient.',
-          es: 'Qué te aporta el diseño y cuándo encaja.',
-          de: 'Was der Entwurf dir bringt und wann er passt.',
-          'pt-BR': 'O que o desenho te dá, e quando ele serve.',
-        },
-        content: { en: whyEn },
-      },
-      {
-        slug: 'getting-started',
-        title: {
-          en: 'Getting started',
-          fr: 'Démarrage',
-          es: 'Empezar',
-          de: 'Loslegen',
-          'pt-BR': 'Começar',
-        },
-        summary: {
-          en: 'Install the package and wire provideStatewise.',
-          fr: 'Installer le paquet et brancher provideStatewise.',
-          es: 'Instalar el paquete y conectar provideStatewise.',
-          de: 'Das Paket installieren und provideStatewise verdrahten.',
-          'pt-BR': 'Instalar o pacote e ligar provideStatewise.',
-        },
-        content: { en: gettingStartedEn },
-      },
-    ],
+    pages: [introductionEn, whyEn, gettingStartedEn],
   },
   {
     title: {
@@ -113,98 +91,7 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = [
       de: 'Kernkonzepte',
       'pt-BR': 'Conceitos-chave',
     },
-    pages: [
-      {
-        slug: 'states',
-        title: {
-          en: 'States',
-          fr: 'States',
-          es: 'States',
-          de: 'States',
-          'pt-BR': 'States',
-        },
-        summary: {
-          en: 'Where the data lives, with signals or plain properties.',
-          fr: 'Où vivent les données, en signals ou en propriétés simples.',
-          es: 'Dónde viven los datos, con signals o propiedades simples.',
-          de: 'Wo die Daten liegen, mit Signals oder einfachen Feldern.',
-          'pt-BR': 'Onde os dados moram, com signals ou propriedades simples.',
-        },
-        content: { en: statesEn },
-      },
-      {
-        slug: 'actions',
-        title: {
-          en: 'Actions',
-          fr: 'Actions',
-          es: 'Actions',
-          de: 'Actions',
-          'pt-BR': 'Actions',
-        },
-        summary: {
-          en: 'Action groups, single actions, and the types they generate.',
-          fr: 'Groupes d’actions, actions seules, et les types générés.',
-          es: 'Grupos de actions, actions sueltas y los tipos que generan.',
-          de: 'Action-Gruppen, einzelne Actions und die Typen, die sie erzeugen.',
-          'pt-BR': 'Grupos de actions, actions avulsas e os tipos que geram.',
-        },
-        content: { en: actionsEn },
-      },
-      {
-        slug: 'updaters',
-        title: {
-          en: 'Updaters',
-          fr: 'Updaters',
-          es: 'Updaters',
-          de: 'Updaters',
-          'pt-BR': 'Updaters',
-        },
-        summary: {
-          en: 'How a state reacts to an action, and which scope owns it.',
-          fr: 'Comment un état réagit à une action, et quelle portée le détient.',
-          es: 'Cómo reacciona un state a una action, y qué ámbito lo posee.',
-          de: 'Wie ein State auf eine Action reagiert und welcher Bereich ihn besitzt.',
-          'pt-BR': 'Como um state reage a uma action, e qual escopo o detém.',
-        },
-        content: { en: updatersEn },
-      },
-      {
-        slug: 'effects',
-        title: {
-          en: 'Effects',
-          fr: 'Effects',
-          es: 'Effects',
-          de: 'Effects',
-          'pt-BR': 'Effects',
-        },
-        summary: {
-          en: 'Asynchronous work, its scope and its lifecycle.',
-          fr: 'Le travail asynchrone, sa portée et son cycle de vie.',
-          es: 'El trabajo asíncrono, su ámbito y su ciclo de vida.',
-          de: 'Asynchrone Arbeit, ihr Geltungsbereich und ihr Lebenszyklus.',
-          'pt-BR': 'O trabalho assíncrono, seu escopo e seu ciclo de vida.',
-        },
-        content: { en: effectsEn },
-      },
-      {
-        slug: 'managers',
-        title: {
-          en: 'Managers',
-          fr: 'Managers',
-          es: 'Managers',
-          de: 'Managers',
-          'pt-BR': 'Managers',
-        },
-        summary: {
-          en: 'The dispatch handle your components talk to.',
-          fr: 'La poignée de dispatch à laquelle parlent vos composants.',
-          es: 'El manejador de dispatch con el que hablan tus componentes.',
-          de: 'Der Dispatch-Griff, mit dem deine Komponenten sprechen.',
-          'pt-BR': 'A alça de dispatch com que seus componentes falam.',
-        },
-        content: { en: managersEn },
-      },
-    ],
+    pages: [statesEn, actionsEn, updatersEn, effectsEn, managersEn],
   },
   {
     title: {
@@ -214,45 +101,7 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = [
       de: 'Anleitungen',
       'pt-BR': 'Guias',
     },
-    pages: [
-      {
-        slug: 'testing',
-        title: {
-          en: 'Testing',
-          fr: 'Tests',
-          es: 'Pruebas',
-          de: 'Tests',
-          'pt-BR': 'Testes',
-        },
-        summary: {
-          en: 'The ngx-statewise/testing entry point in a TestBed.',
-          fr: 'Le point d’entrée ngx-statewise/testing dans un TestBed.',
-          es: 'El punto de entrada ngx-statewise/testing en un TestBed.',
-          de: 'Der Einstiegspunkt ngx-statewise/testing in einem TestBed.',
-          'pt-BR': 'O ponto de entrada ngx-statewise/testing em um TestBed.',
-        },
-        content: { en: testingEn },
-      },
-      {
-        slug: 'migration',
-        title: {
-          en: 'Migrating from 0.6.x',
-          fr: 'Migrer depuis 0.6.x',
-          es: 'Migrar desde 0.6.x',
-          de: 'Migration von 0.6.x',
-          'pt-BR': 'Migrar do 0.6.x',
-        },
-        summary: {
-          en: 'What the rewrite renamed, and the four behaviours it changed.',
-          fr: 'Ce que la réécriture a renommé, et les quatre comportements changés.',
-          es: 'Qué renombró la reescritura y los cuatro comportamientos que cambió.',
-          de: 'Was die Neufassung umbenannt hat, und die vier geänderten Verhalten.',
-          'pt-BR':
-            'O que a reescrita renomeou, e os quatro comportamentos que mudou.',
-        },
-        content: { en: migrationEn },
-      },
-    ],
+    pages: [testingEn, migrationEn],
   },
   {
     title: {
@@ -262,28 +111,9 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = [
       de: 'Referenz',
       'pt-BR': 'Referência',
     },
-    pages: [
-      {
-        slug: 'api',
-        title: {
-          en: 'API reference',
-          fr: 'Référence d’API',
-          es: 'Referencia de API',
-          de: 'API-Referenz',
-          'pt-BR': 'Referência da API',
-        },
-        summary: {
-          en: 'Every export, with the signature the compiler sees.',
-          fr: 'Chaque export, avec la signature que voit le compilateur.',
-          es: 'Cada export, con la firma que ve el compilador.',
-          de: 'Jeder Export, mit der Signatur, die der Compiler sieht.',
-          'pt-BR': 'Cada export, com a assinatura que o compilador vê.',
-        },
-        content: { en: apiEn },
-      },
-    ],
+    pages: [apiEn],
   },
-];
+]);
 
 /** Every page, flattened, still in reading order. */
 export const GUIDE_PAGES: readonly GuidePage[] = GUIDE_SECTIONS.flatMap(
@@ -322,4 +152,145 @@ export function guideContent(page: GuidePage, code: LocaleCode): GuideContent {
     isFallback: true,
     locale: DEFAULT_LOCALE.code,
   };
+}
+
+/**
+ * Reads each page's own metadata block and refuses anything half-declared.
+ *
+ * This runs while the module is loading, which is the point: a page missing a
+ * summary in one locale, or carrying a slug that cannot be a URL, fails the
+ * prerender and every spec in the suite rather than shipping a blank sidebar
+ * entry. Two things it cannot see from inside the bundle — a markdown file
+ * nobody imported, and a slug that disagrees with its filename — are what
+ * `npm run verify:guide` checks against the filesystem instead.
+ */
+export function defineGuideSections(
+  sections: readonly SectionSource[],
+): readonly GuideSection[] {
+  const claimed = new Map<string, string>();
+
+  return sections.map((section) => ({
+    title: section.title,
+    pages: section.pages.map((source) => {
+      const page = definePage(source);
+      const owner = claimed.get(page.slug);
+
+      if (owner !== undefined) {
+        throw new Error(
+          `two guide pages both call themselves "${page.slug}": ${owner} and ${describe(page)}`,
+        );
+      }
+
+      claimed.set(page.slug, describe(page));
+
+      return page;
+    }),
+  }));
+}
+
+function definePage(source: GuideSource): GuidePage {
+  const markdown = typeof source === 'string' ? source : source.source;
+  const translations = typeof source === 'string' ? {} : source.translations;
+  const { metadata, body } = parsePageSource(markdown);
+  const where = name(body);
+
+  return {
+    slug: requireSlug(metadata, where),
+    title: requireTranslated(metadata, 'title', where),
+    summary: requireTranslated(metadata, 'summary', where),
+    content: {
+      ...translated(translations),
+      // Last, so a translation mistakenly filed under the default locale
+      // cannot displace the file the metadata came from.
+      [DEFAULT_LOCALE.code]: body,
+    },
+  };
+}
+
+function requireSlug(
+  metadata: ReadonlyMap<string, MetadataValue>,
+  where: string,
+): string {
+  const slug = metadata.get('slug');
+
+  if (slug === undefined) {
+    throw new Error(
+      `${where} has no "slug". Every page declares one in its metadata block, and it has to match the name of the file.`,
+    );
+  }
+
+  if (typeof slug !== 'string') {
+    throw new Error(`${where} indents values under "slug", which takes one`);
+  }
+
+  if (!SLUG.test(slug)) {
+    throw new Error(
+      `${where} has "${slug}" as its slug, which cannot be a URL segment. Lower-case letters, digits, and single hyphens between them.`,
+    );
+  }
+
+  return slug;
+}
+
+function requireTranslated(
+  metadata: ReadonlyMap<string, MetadataValue>,
+  field: string,
+  where: string,
+): Translated {
+  const value = metadata.get(field);
+
+  if (value === undefined) {
+    throw new Error(
+      `${where} has no "${field}". Every page declares one per locale, indented under "${field}:".`,
+    );
+  }
+
+  if (typeof value === 'string') {
+    throw new Error(
+      `${where} gives "${field}" a single value. It needs one per locale, indented under "${field}:".`,
+    );
+  }
+
+  const missing = LOCALES.filter(
+    (locale) => (value.get(locale.code) ?? '').trim().length === 0,
+  ).map((locale) => locale.code);
+
+  if (missing.length > 0) {
+    throw new Error(
+      `${where} has no ${field} in ${missing.join(', ')}. The interface is translated into all ${String(LOCALES.length)} locales, sidebar entries included.`,
+    );
+  }
+
+  // Every locale has a non-empty value: the check above is what makes reading
+  // the map back as a complete record safe.
+  return Object.fromEntries(
+    LOCALES.map((locale) => [locale.code, value.get(locale.code)]),
+  ) as Translated;
+}
+
+function translated(
+  sources: Partial<Readonly<Record<LocaleCode, string>>>,
+): Partial<Translated> {
+  return Object.fromEntries(
+    Object.entries(sources).map(([code, source]) => [
+      code,
+      parsePageSource(source).body,
+    ]),
+  );
+}
+
+/**
+ * How a page is named in an error, before it is known to have a slug: its
+ * first heading, which is the one thing every page has.
+ */
+function name(body: string): string {
+  const heading = /^#\s+(.+)$/m.exec(body);
+
+  return heading === null
+    ? 'a guide page with no heading'
+    : `the guide page "${heading[1].trim()}"`;
+}
+
+function describe(page: GuidePage): string {
+  return `"${page.title[DEFAULT_LOCALE.code]}"`;
 }

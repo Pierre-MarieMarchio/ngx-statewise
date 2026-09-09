@@ -1,3 +1,19 @@
+---
+slug: effects
+title:
+  en: Effects
+  fr: Effects
+  es: Effects
+  de: Effects
+  pt-BR: Effects
+summary:
+  en: Asynchronous work, its scope and its lifecycle.
+  fr: Le travail asynchrone, sa portée et son cycle de vie.
+  es: El trabajo asíncrono, su ámbito y su ciclo de vida.
+  de: Asynchrone Arbeit, ihr Geltungsbereich und ihr Lebenszyklus.
+  pt-BR: O trabalho assíncrono, seu escopo e seu ciclo de vida.
+---
+
 # Effects
 
 An effect is the asynchronous half of a feature: API calls, navigation, storage,

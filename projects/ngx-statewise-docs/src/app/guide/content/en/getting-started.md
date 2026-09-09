@@ -1,3 +1,19 @@
+---
+slug: getting-started
+title:
+  en: Getting started
+  fr: Démarrage
+  es: Empezar
+  de: Loslegen
+  pt-BR: Começar
+summary:
+  en: Install the package and wire provideStatewise.
+  fr: Installer le paquet et brancher provideStatewise.
+  es: Instalar el paquete y conectar provideStatewise.
+  de: Das Paket installieren und provideStatewise verdrahten.
+  pt-BR: Instalar o pacote e ligar provideStatewise.
+---
+
 # Getting started
 
 ## Installation
@@ -25,13 +41,13 @@ export const appConfig: ApplicationConfig = {
 
 `provideStatewise` accepts five optional options:
 
-| Option              | Type                              | Description                                                                                                          |
-| ------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `effects`           | `readonly Type<unknown>[]`        | Effect classes, instantiated eagerly so their effects are registered at startup.                                     |
-| `updaters`          | `readonly Updater<unknown>[]`     | Updaters available application-wide, whichever manager dispatches.                                                   |
+| Option              | Type                              | Description                                                                                                                                   |
+| ------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `effects`           | `readonly Type<unknown>[]`        | Effect classes, instantiated eagerly so their effects are registered at startup.                                                              |
+| `updaters`          | `readonly Updater<unknown>[]`     | Updaters available application-wide, whichever manager dispatches.                                                                            |
 | `history`           | `{ limit, redact? }`              | Records the last `limit` actions. Disabled by default; `limit` must be a positive integer. `redact` rewrites an action before it is recorded. |
-| `misroutedDispatch` | `'throw' \| 'report' \| 'ignore'` | What a dispatch reaching the wrong manager does. Throws in development, reports to the `ErrorHandler` in production. |
-| `maxCascadeDepth`   | `number`                          | How many actions one cascade may chain, the dispatched action included. Defaults to 50; must be a positive integer.  |
+| `misroutedDispatch` | `'throw' \| 'report' \| 'ignore'` | What a dispatch reaching the wrong manager does. Throws in development, reports to the `ErrorHandler` in production.                          |
+| `maxCascadeDepth`   | `number`                          | How many actions one cascade may chain, the dispatched action included. Defaults to 50; must be a positive integer.                           |
 
 > [!IMPORTANT]
 > `history.limit` must be a positive integer. `provideStatewise` checks it

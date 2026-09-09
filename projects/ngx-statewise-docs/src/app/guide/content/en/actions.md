@@ -1,3 +1,19 @@
+---
+slug: actions
+title:
+  en: Actions
+  fr: Actions
+  es: Actions
+  de: Actions
+  pt-BR: Actions
+summary:
+  en: Action groups, single actions, and the types they generate.
+  fr: Groupes d’actions, actions seules, et les types générés.
+  es: Grupos de actions, actions sueltas y los tipos que generan.
+  de: Action-Gruppen, einzelne Actions und die Typen, die sie erzeugen.
+  pt-BR: Grupos de actions, actions avulsas e os tipos que geram.
+---
+
 # Actions
 
 An action states an intent: something happened, and this is what came with it.
