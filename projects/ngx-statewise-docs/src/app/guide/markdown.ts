@@ -63,10 +63,26 @@ export function renderGuide(
 
   // Every sideways-scrolling block is a landmark, and two landmarks that share
   // a name cannot be told apart: a page with five code blocks announced five
-  // regions all called "Code sample". They are numbered in reading order, and
-  // a fenced block that names its file keeps that name instead.
+  // regions all called "Code sample". A block names itself after its file and
+  // its stance where it has them, and falls back to a number in reading order.
   let codeRegions = 0;
   let tableRegions = 0;
+  const usedRegionNames = new Set<string>();
+
+  /**
+   * A name no other region on this page is using. The pair a `prefer` and an
+   * `avoid` block make is the case that needs it: both belong to the same file,
+   * so both would otherwise announce that filename and nothing else.
+   */
+  const uniqueRegionName = (preferred: string, ordinal: number): string => {
+    const name = usedRegionNames.has(preferred)
+      ? `${preferred} ${String(ordinal)}`
+      : preferred;
+
+    usedRegionNames.add(name);
+
+    return name;
+  };
 
   const renderer: MarkedExtension['renderer'] = {
     heading(token: Tokens.Heading) {
@@ -110,6 +126,17 @@ export function renderGuide(
           : stance === 'avoid'
             ? options.avoidLabel
             : undefined;
+      // What the region announces: the file and the stance where they exist,
+      // because "auth.updater.ts" twice tells a screen reader nothing.
+      const regionName =
+        title === undefined
+          ? stanceLabel === undefined
+            ? `${options.codeRegionLabel} ${String(codeRegions)}`
+            : `${stanceLabel}: ${options.codeRegionLabel} ${String(codeRegions)}`
+          : stanceLabel === undefined
+            ? title
+            : `${stanceLabel}: ${title}`;
+
       const caption =
         stanceLabel !== undefined
           ? `<span class="code-block__stance">${escapeHtml(stanceLabel)}</span>${
@@ -134,7 +161,7 @@ export function renderGuide(
         '</div>',
         // tabindex and a role: the block scrolls sideways, and a scroll
         // container no keyboard can reach fails WCAG 2.1.1.
-        `<pre class="code-block__pre" tabindex="0" role="region" aria-label="${escapeAttribute(title ?? `${options.codeRegionLabel} ${String(codeRegions)}`)}"><code${languageClass}>${body}</code></pre>`,
+        `<pre class="code-block__pre" tabindex="0" role="region" aria-label="${escapeAttribute(uniqueRegionName(regionName, codeRegions))}"><code${languageClass}>${body}</code></pre>`,
         '</div>',
       ].join('');
     },
@@ -159,7 +186,7 @@ export function renderGuide(
         .join('');
 
       return [
-        `<div class="table-scroll" tabindex="0" role="region" aria-label="${escapeAttribute(`${options.tableRegionLabel} ${String(tableRegions)}`)}">`,
+        `<div class="table-scroll" tabindex="0" role="region" aria-label="${escapeAttribute(uniqueRegionName(`${options.tableRegionLabel} ${String(tableRegions)}`, tableRegions))}">`,
         `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`,
         '</div>',
       ].join('');

@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 export type IconName =
   | 'menu'
-  | 'home'
   | 'close'
   | 'dark-mode'
   | 'light-mode'

@@ -260,29 +260,26 @@
 }
 
 /* The way back to the landing page, above the guide and not part of it. */
+/* Set exactly like the section titles under it — same size, weight, tracking
+   and left edge — because it belongs to that row of the hierarchy. It is a
+   link rather than a heading, so it takes a hover and a current state, and
+   nothing else marks it out. The margin is the sections' own: the first one
+   below is no longer `:first-child`, so it keeps its top margin and that is
+   the whole separation. */
 .sidebar__home {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-5);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-sm);
+  display: block;
+  margin: 0;
+  padding-left: var(--space-3);
   color: var(--text-strong);
   font-size: var(--text-md);
   font-weight: var(--weight-semibold);
   letter-spacing: -0.012em;
   text-decoration: none;
-  transition: var(--transition-hover);
+  transition: color var(--duration-instant) var(--ease-out);
 
   &:hover {
-    background-color: var(--surface-hover);
+    color: var(--link);
   }
-}
-
-.sidebar__home-mark {
-  width: auto;
-  height: 1.1rem;
-  flex: none;
 }
 
 .sidebar__home--active {
