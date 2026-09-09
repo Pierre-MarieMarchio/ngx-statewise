@@ -55,6 +55,20 @@ export class AuthState {
 Updaters write plain properties too. The cost is that a component reading one
 has no way of knowing it changed, so you mark it for check yourself.
 
+That cost is the same under zoneless change detection, and it is measured
+rather than assumed — `zoneless-plain-properties.spec.ts` in the showcase:
+
+| What the component does | State | View      |
+| ----------------------- | ----- | --------- |
+| nothing                 | `5`   | **stale** |
+| `markForCheck()`        | `7`   | `7`       |
+| reads a signal instead  | `9`   | `9`       |
+
+Zoneless does not make this impossible, only manual: `markForCheck` notifies
+Angular's own scheduler, and no Zone.js is involved. **`detectChanges()` alone
+does not do it** — an `OnPush` component nothing has marked is not re-rendered
+by it, which is the trap worth knowing about.
+
 ```typescript avoid title="auth.state.ts"
 @Injectable({ providedIn: 'root' })
 export class AuthState {
