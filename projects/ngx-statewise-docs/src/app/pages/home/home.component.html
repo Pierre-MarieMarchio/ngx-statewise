@@ -71,7 +71,7 @@
       <div class="code-block">
         <pre
           class="code-block__pre"
-        ><code>export const authUpdater = defineUpdater(AuthStates, (on) =&gt; &#123;
+        ><code>export const authUpdater = defineUpdater(AuthState, (on) =&gt; &#123;
   on(loginActions.request, (state) =&gt; &#123;
     state.isLoading.set(true);
   &#125;);

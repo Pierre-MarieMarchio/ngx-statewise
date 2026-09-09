@@ -26,10 +26,10 @@ action.
 ```typescript title="auth.updater.ts"
 import { defineUpdater } from 'ngx-statewise';
 
-export const authUpdater = defineUpdater(AuthStates, (on) => {
+export const authUpdater = defineUpdater(AuthState, (on) => {
   on(loginActions.request, (state) => {
     state.isLoading.set(true);
-    state.hasError.set(false);
+    state.isError.set(false);
   });
 
   on(loginActions.success, (state, session) => {
@@ -201,8 +201,10 @@ reached, declare its updater globally instead of attaching it to a manager.
 
 ## Key notes
 
-- One action type, one updater, within the same scope. A duplicate is reported
-  at startup.
+- One action type, one updater, within the same scope. A duplicate always
+  throws, never passes silently — at the `defineUpdater` call when one updater
+  handles the same type twice, at `injectStatewise()` when two updaters of one
+  scope claim it, and at startup for the updaters given to `provideStatewise`.
 - Handlers write the state in place, usually through signals, and return
   nothing.
 - An action no updater handles is valid: it triggers its effects and nothing

@@ -29,7 +29,7 @@ import { injectStatewise } from 'ngx-statewise';
 
 @Injectable({ providedIn: 'root' })
 export class AuthManager {
-  private readonly authStates = inject(AuthStates);
+  private readonly authStates = inject(AuthState);
   private readonly statewise = injectStatewise(authUpdater);
 }
 ```
@@ -121,7 +121,7 @@ before reporting the first failure.
 ```typescript title="auth.manager.ts"
 @Injectable({ providedIn: 'root' })
 export class AuthManager {
-  private readonly authStates = inject(AuthStates);
+  private readonly authStates = inject(AuthState);
   private readonly statewise = injectStatewise(authUpdater);
 
   public readonly user = this.authStates.user.asReadonly();

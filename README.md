@@ -88,7 +88,7 @@ effect runs, and `dispatchAsync` awaits the entire chain.
 npm install
 npm start          # serve the showcase
 npm run start:docs # serve the documentation site
-npm run check      # format, lint, tests with coverage, build everything
+npm run check      # format, lint, every suite, build everything
 ```
 
 `npm run check` is what a commit is expected to pass.

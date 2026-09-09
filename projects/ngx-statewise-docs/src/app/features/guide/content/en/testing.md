@@ -66,7 +66,7 @@ it('loads the tasks', async () => {
 
   await tasks.refreshAndSettle();
 
-  expect(tasks.items()).toHaveSize(3);
+  expect(tasks.items()).toHaveLength(3);
 });
 ```
 

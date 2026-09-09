@@ -69,7 +69,7 @@ export const loginActions = defineActionsGroup({
 The updater says what it does to the state, and nothing else:
 
 ```typescript title="auth.updater.ts"
-export const authUpdater = defineUpdater(AuthStates, (on) => {
+export const authUpdater = defineUpdater(AuthState, (on) => {
   on(loginActions.request, (state) => {
     state.isLoading.set(true);
   });
