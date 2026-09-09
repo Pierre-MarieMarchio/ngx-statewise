@@ -120,8 +120,13 @@ export class InspectionHistoryPageComponent {
     this.refresh();
   }
 
-  public filterBy(type: string): void {
-    this.selectedType.update((current) => (current === type ? null : type));
+  /**
+   * Only records what the listbox already decided. The toggle used to live
+   * here, driven by a `(click)` the option never fires under a keyboard;
+   * deselecting hands back nothing, which is the same as no filter.
+   */
+  public filterBy(type: string | undefined): void {
+    this.selectedType.set(type ?? null);
   }
 
   public clearFilter(): void {

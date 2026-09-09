@@ -16,3 +16,11 @@
     cursor: pointer;
   }
 }
+
+/* The action column carries a button, not content: it takes what it needs. */
+.mat-mdc-header-cell.open-cell,
+.mat-mdc-cell.open-cell {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}

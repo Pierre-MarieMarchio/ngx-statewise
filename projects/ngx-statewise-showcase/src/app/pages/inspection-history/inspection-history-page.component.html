@@ -21,11 +21,21 @@
     <button mat-button (click)="refresh()">refresh</button>
   </div>
 
-  <mat-chip-listbox class="history-page-counts" aria-label="Filter by action">
+  <!--
+    The listbox owns the selection, and says so through `change`. A `(click)`
+    on the option never fired under a keyboard: `MatChipAction` calls
+    `preventDefault()` on ENTER and SPACE, which also removes the click the
+    browser would have synthesised.
+  -->
+  <mat-chip-listbox
+    class="history-page-counts"
+    aria-label="Filter by action"
+    [value]="selectedType()"
+    (change)="filterBy($event.value)"
+  >
     @for (tracked of counts(); track tracked.type) {
       <mat-chip-option
-        [selected]="selectedType() === tracked.type"
-        (click)="filterBy(tracked.type)"
+        [value]="tracked.type"
         [attr.data-tracked]="tracked.type"
       >
         {{ tracked.label }} — {{ tracked.count }}
@@ -33,7 +43,7 @@
     }
   </mat-chip-listbox>
 
-  <p class="history-page-summary">
+  <p class="history-page-summary" aria-live="polite">
     <span data-readout="total">{{ total() }}</span> recorded
     @if (selectedType(); as selected) {
       <span>
@@ -74,9 +84,11 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
 
-  @if (rows().length === 0) {
-    <p class="history-page-empty" data-readout="empty">
-      Nothing read yet. Dispatch something, or press refresh.
-    </p>
-  }
+  <div role="status">
+    @if (rows().length === 0) {
+      <p class="history-page-empty" data-readout="empty">
+        Nothing read yet. Dispatch something, or press refresh.
+      </p>
+    }
+  </div>
 </div>

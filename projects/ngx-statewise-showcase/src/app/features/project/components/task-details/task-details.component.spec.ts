@@ -36,6 +36,20 @@ describe('TaskDetailsComponent', () => {
   });
 
   /**
+   * `selected` is `MatChipOption`'s, and inert on a plain `MatChip`: the two
+   * chips looked ordinary however the task read.
+   */
+  it('highlights the status and the priority', async () => {
+    const fixture = await mount();
+
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'mat-chip.mat-mdc-chip-highlighted',
+      ).length,
+    ).toBe(2);
+  });
+
+  /**
    * Whether a date is late is the presentation service's rule, and its own spec
    * covers it. What belongs here is that the panel shows it: the warning marks
    * an overdue task and stays away once it is done.

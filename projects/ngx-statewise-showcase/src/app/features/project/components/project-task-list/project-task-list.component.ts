@@ -10,6 +10,7 @@ import { TaskColumnsService, TaskSelectionService } from '../../services';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTableModule } from '@angular/material/table';
+import { TaskOpenColumnComponent } from '../task-open-column/task-open-column.component';
 import { Project, Task } from '../../models';
 
 interface ProjectTasks {
@@ -20,7 +21,7 @@ import { ProjectManager } from '@app/features/project/states/project/project.man
 
 @Component({
   selector: 'app-project-task-list',
-  imports: [MatExpansionModule, MatTableModule],
+  imports: [MatExpansionModule, MatTableModule, TaskOpenColumnComponent],
   templateUrl: './project-task-list.component.html',
   styleUrl: './project-task-list.component.scss',
   providers: [provideNativeDateAdapter()],

@@ -15,8 +15,11 @@
     align-items: center;
     flex: 1;
 
-    mat-nav-list {
+    .side-nav-items {
       width: 100%;
+      margin: 0;
+      padding: 0;
+      list-style: none;
     }
 
     .side-nav-logo {
@@ -96,6 +99,13 @@
     align-items: center;
 
     .footer-groupe-button {
+      /* It is a button now, so it starts by giving up a button's chrome. */
+      appearance: none;
+      background: none;
+      border: 0;
+      color: inherit;
+      font: inherit;
+
       padding: 0.5rem 0;
       width: 100%;
       display: flex;

@@ -22,7 +22,7 @@ describe('TaskPresentationService', () => {
   });
 
   it('spells a date out in full', () => {
-    expect(presentation.formatDate('2026-03-09')).toBe('9 mars 2026');
+    expect(presentation.formatDate('2026-03-09')).toBe('March 9, 2026');
   });
 
   describe('being overdue', () => {

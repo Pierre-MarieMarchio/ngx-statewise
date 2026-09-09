@@ -41,12 +41,12 @@ export class TaskPresentationService {
   }
 
   /**
-   * Still `fr-FR`, like the panel that shows it. The whole panel is in French
-   * under `lang="en"`, and that is one change to make in one place rather than
-   * a locale corrected here and the surrounding labels left behind.
+   * `en-US`, like the document that shows it. It used to be `fr-FR` under a
+   * `lang="en"` page whose details panel was itself in French — a locale and
+   * six labels that had to move together, and did.
    */
   public formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('fr-FR', {
+    return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',

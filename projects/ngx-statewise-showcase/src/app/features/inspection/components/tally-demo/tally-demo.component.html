@@ -13,7 +13,11 @@
     <button mat-button (click)="reset()">reset</button>
   </div>
 
-  <dl class="tally-demo-readout">
+  <!--
+    Live, so the deferred increment is heard when redraw finally shows it —
+    the numbers move without anything else on the page moving.
+  -->
+  <dl class="tally-demo-readout" aria-live="polite">
     <dt>total</dt>
     <dd data-readout="total">{{ tallyState.total }}</dd>
     <dt>last step</dt>

@@ -6,6 +6,7 @@ import {
   sampleTask,
   sampleUser,
 } from '@testing/fake-managers';
+import { openedSampleTask, openFirstRow } from '@testing/task-table';
 import { OverviewTaskListComponent } from './overview-task-list.component';
 import { AUTH_SESSION } from '@app/features/common';
 import { TaskManager } from '@app/features/project/states/task/task.manager';
@@ -49,6 +50,7 @@ describe('OverviewTaskListComponent', () => {
       'title',
       'status',
       'priority',
+      'open',
     ]);
   });
 
@@ -64,5 +66,13 @@ describe('OverviewTaskListComponent', () => {
       ?.click();
 
     expect(selected).toEqual(['task-1']);
+  });
+
+  /**
+   * The row click is a mouse shortcut. This button is the path a keyboard has,
+   * and the shared column's spec holds the rest of its behaviour.
+   */
+  it('opens a task from a named button, once', async () => {
+    expect(openFirstRow(await mount())).toEqual(openedSampleTask());
   });
 });

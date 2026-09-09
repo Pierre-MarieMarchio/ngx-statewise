@@ -7,6 +7,7 @@ import {
   fakeProjectManager,
   sampleUser,
 } from '@testing/fake-managers';
+import { openFirstRow } from '@testing/task-table';
 import { ProjectTaskListComponent } from './project-task-list.component';
 import { AUTH_SESSION } from '@app/features/common';
 import { ProjectManager } from '@app/features/project/states/project/project.manager';
@@ -83,20 +84,37 @@ describe('ProjectTaskListComponent', () => {
   });
 
   it('shows the organisation column to an admin', () => {
-    expect(headers()).toEqual(['Title', 'Status', 'Priority', 'Organisation']);
+    expect(headers()).toEqual([
+      'Title',
+      'Status',
+      'Priority',
+      'Organisation',
+      'Open',
+    ]);
   });
 
   it('hides the organisation column from a contributor', () => {
     authManager.user.set(sampleUser({ role: 'contributor' }));
     fixture.detectChanges();
 
-    expect(headers()).toEqual(['Title', 'Status', 'Priority']);
+    expect(headers()).toEqual(['Title', 'Status', 'Priority', 'Open']);
   });
 
   it('hides the organisation column while no user is known', () => {
     authManager.user.set(null);
     fixture.detectChanges();
 
-    expect(headers()).toEqual(['Title', 'Status', 'Priority']);
+    expect(headers()).toEqual(['Title', 'Status', 'Priority', 'Open']);
+  });
+
+  /**
+   * The row click is a mouse shortcut. This button is the path a keyboard has,
+   * and the shared column's spec holds the rest of its behaviour.
+   */
+  it('opens a task from a named button, once', () => {
+    expect(openFirstRow(fixture)).toEqual({
+      name: 'Open Wire the columns to the role',
+      emitted: ['t-1'],
+    });
   });
 });

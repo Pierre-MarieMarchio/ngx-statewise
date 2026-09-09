@@ -1,3 +1,9 @@
+<!--
+  The region exists before it has anything to say: one inserted along with its
+  text is announced by no screen reader reliably.
+-->
+<p class="visually-hidden" role="status">{{ progress() }}</p>
+
 @if (loading()) {
   <mat-progress-bar
     class="data-state-progress"

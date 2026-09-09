@@ -17,12 +17,14 @@ describe('TaskColumnsService', () => {
     taskColumns = TestBed.inject(TaskColumnsService);
   });
 
+  /** The action column ends every table, whatever the role sees before it. */
   it('shows an admin every column', () => {
     expect(taskColumns.displayedColumns()).toEqual([
       'title',
       'status',
       'priority',
       'organisation',
+      'open',
     ]);
   });
 
@@ -33,6 +35,7 @@ describe('TaskColumnsService', () => {
       'title',
       'status',
       'priority',
+      'open',
     ]);
   });
 
@@ -43,6 +46,7 @@ describe('TaskColumnsService', () => {
       'title',
       'status',
       'priority',
+      'open',
     ]);
   });
 

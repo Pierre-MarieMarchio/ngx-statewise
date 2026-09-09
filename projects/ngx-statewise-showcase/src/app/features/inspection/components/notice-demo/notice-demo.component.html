@@ -22,7 +22,8 @@
     }
   </div>
 
-  <dl class="notice-demo-readout">
+  <!-- The readout is what the demonstration is about: it has to be heard. -->
+  <dl class="notice-demo-readout" aria-live="polite">
     <dt>message</dt>
     <dd data-readout="message">{{ noticeState.message() ?? '(none)' }}</dd>
     <dt>raised</dt>
