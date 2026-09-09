@@ -31,4 +31,4 @@ export const CHANGELOG_URL = `${REPOSITORY_URL}/blob/main/projects/ngx-statewise
  * dist/ngx-statewise and fails if it no longer rounds to this value. It runs in
  * `npm run check`, right after the library is built.
  */
-export const LIBRARY_GZIP_KB = 4.6;
+export const LIBRARY_GZIP_KB = 4.7;

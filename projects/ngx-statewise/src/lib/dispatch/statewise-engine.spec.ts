@@ -1,6 +1,7 @@
 import type { ErrorHandler } from '@angular/core';
 
 import type { Action } from '../action';
+import { historyEntry } from '../../spec-helpers/history-entry';
 import { registeredEffect } from '../../spec-helpers/registered-effect';
 import { EffectRegistry } from '../effect/effect-registry';
 import { PendingEffects } from '../effect/pending-effects';
@@ -550,14 +551,20 @@ describe('StatewiseEngine', () => {
   });
 
   describe('observation', () => {
+    /**
+     * The paths extend each other, which is what makes a cascade readable:
+     * three entries nothing used to relate now read out as one sequence.
+     */
     it('records the action and its cascade in the history', async () => {
       register('SOURCE', () => ({ type: 'CHILD' }));
+      register('CHILD', () => ({ type: 'GRANDCHILD' }));
 
       await engine.execute({ type: 'SOURCE' }, emptyScope);
 
       expect(history.snapshot()).toEqual([
-        { type: 'SOURCE' },
-        { type: 'CHILD' },
+        historyEntry({ type: 'SOURCE' }, ['SOURCE']),
+        historyEntry({ type: 'CHILD' }, ['SOURCE', 'CHILD']),
+        historyEntry({ type: 'GRANDCHILD' }, ['SOURCE', 'CHILD', 'GRANDCHILD']),
       ]);
     });
 
@@ -833,7 +840,9 @@ describe('StatewiseEngine', () => {
         ).resolves.not.toThrow();
 
         expect(recorder.applied).toEqual([]);
-        expect(history.snapshot()).toEqual([{ type: 'SOURCE' }]);
+        expect(history.snapshot()).toEqual([
+          historyEntry({ type: 'SOURCE' }, ['SOURCE']),
+        ]);
       });
     });
   });
@@ -894,7 +903,9 @@ describe('StatewiseEngine', () => {
 
       expect(recorder.applied).toEqual([]);
       expect(blockedEffectRuns).toBe(0);
-      expect(history.snapshot()).toEqual([{ type: 'SOURCE' }]);
+      expect(history.snapshot()).toEqual([
+        historyEntry({ type: 'SOURCE' }, ['SOURCE']),
+      ]);
     });
 
     /**

@@ -17,6 +17,8 @@ import {
   provideStatewiseTesting,
 } from 'ngx-statewise/testing';
 
+import { historyEntry } from '../spec-helpers/history-entry';
+
 interface Box {
   value: number;
 }
@@ -89,7 +91,7 @@ describe('ngx-statewise/testing', () => {
       await scope(ownedUpdater).dispatchAsync(testingActions.owned(1));
 
       expect(TestBed.inject(ActionHistory).snapshot()).toEqual([
-        testingActions.owned(1),
+        historyEntry(testingActions.owned(1), ['TESTINGENTRY_OWNED']),
       ]);
     });
 
@@ -101,7 +103,7 @@ describe('ngx-statewise/testing', () => {
       await statewise.dispatchAsync(testingActions.owned(2));
 
       expect(TestBed.inject(ActionHistory).snapshot()).toEqual([
-        testingActions.owned(2),
+        historyEntry(testingActions.owned(2), ['TESTINGENTRY_OWNED']),
       ]);
     });
 

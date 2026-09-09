@@ -56,6 +56,13 @@
       </td>
     </ng-container>
 
+    <ng-container matColumnDef="cascade">
+      <th mat-header-cell *matHeaderCellDef>Cascade</th>
+      <td mat-cell *matCellDef="let row">
+        <code>{{ row.cascade }}</code>
+      </td>
+    </ng-container>
+
     <ng-container matColumnDef="payload">
       <th mat-header-cell *matHeaderCellDef>Payload</th>
       <td mat-cell *matCellDef="let row" class="history-page-payload">

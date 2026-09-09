@@ -120,7 +120,7 @@ export class StatewiseEngine {
     }
 
     handler?.apply(action.payload);
-    this.actionHistory.record(action);
+    this.actionHistory.record(action, cascade);
 
     return this.runEffects(action, scope, cascade);
   }

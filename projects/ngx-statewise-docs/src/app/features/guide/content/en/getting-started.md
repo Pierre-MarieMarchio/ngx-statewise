@@ -83,6 +83,10 @@ global one, so a type a manager already owns never reaches these. See
 `ActionHistory`. It is off unless you ask for it, and `redact` rewrites an
 action before it is recorded — which is how a password stays out of the log.
 
+Each entry carries the action, the cascade path that led to it, and when it was
+recorded, so a chain of actions reads as a sequence rather than as N unrelated
+rows. See [`HistoryEntry`](/guide/api#actionhistory).
+
 `maxCascadeDepth` bounds how many actions one cascade may chain, the dispatched
 action included. Beyond it the cascade is stopped and the whole path is raised,
 which is what keeps two effects returning each other's action from exhausting

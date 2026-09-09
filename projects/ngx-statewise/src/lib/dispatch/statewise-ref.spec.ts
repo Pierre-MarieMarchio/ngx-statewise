@@ -7,6 +7,7 @@ import type { RegisteredEffect } from '../effect/registered-effect';
 import { RunningEffects } from '../effect/running-effects';
 import { InterceptorRegistry } from '../interceptor/interceptor-registry';
 import type { StateBoundHandler } from '../updater/updater-definition';
+import { historyEntry } from '../../spec-helpers/history-entry';
 import { ActionHistory, keepAction } from './action-history';
 import { DEFAULT_MAX_CASCADE_DEPTH } from './cascade-depth';
 import type { DispatchScope } from './dispatch-scope';
@@ -108,8 +109,8 @@ describe('ScopedStatewiseRef', () => {
         plainRef().dispatchAsync({ type: 'SOURCE' }),
       ).resolves.not.toThrow();
       expect(history.snapshot()).toEqual([
-        { type: 'SOURCE' },
-        { type: 'CHILD' },
+        historyEntry({ type: 'SOURCE' }, ['SOURCE']),
+        historyEntry({ type: 'CHILD' }, ['SOURCE', 'CHILD']),
       ]);
     });
 

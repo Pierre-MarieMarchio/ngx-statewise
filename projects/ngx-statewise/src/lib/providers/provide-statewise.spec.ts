@@ -15,6 +15,7 @@ import { createEffect } from '../effect';
 import { EffectRegistry } from '../effect/effect-registry';
 import { PendingEffects } from '../effect/pending-effects';
 import { defineUpdater } from '../updater';
+import { historyEntry } from '../../spec-helpers/history-entry';
 import { DUPLICATE_PROVIDER_REACTION } from './duplicate-provider';
 import { provideStatewise } from './provide-statewise';
 
@@ -228,7 +229,7 @@ describe('provideStatewise', () => {
       await engine.execute(provideActions.pinged(1), NO_SCOPE);
 
       expect(TestBed.inject(ActionHistory).snapshot()).toEqual([
-        provideActions.pinged(1),
+        historyEntry(provideActions.pinged(1), ['PROVIDEPROBE_PINGED']),
       ]);
     });
 

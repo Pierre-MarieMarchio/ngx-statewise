@@ -31,10 +31,10 @@ describe('the action history, as the application configures it', () => {
 
     const recorded = TestBed.inject(ActionHistory)
       .snapshot()
-      .filter((action) => action.type === ofType(loginActions.request));
+      .filter((entry) => entry.action.type === ofType(loginActions.request));
 
     expect(recorded).toHaveLength(1);
-    expect(at(recorded, 0).payload).toEqual({
+    expect(at(recorded, 0).action.payload).toEqual({
       email: CREDENTIALS.email,
       password: '[redacted]',
     });
