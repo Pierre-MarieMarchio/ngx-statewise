@@ -50,13 +50,16 @@ jobs:
     name: Build the site
     runs-on: ubuntu-latest
 
-    # A release commit would otherwise reach this twice: once as a push, since
-    # it writes the version into both the manifest and the site, and once
-    # through the call release.yml makes afterwards. Only the second one knows
-    # whether the publish succeeded, so the push defers to it.
+    # A release would otherwise reach this twice: once through the call
+    # release.yml makes after publishing, and once as the push of the version
+    # commit it merges — which writes the version into both the manifest and
+    # the site, so it matches the paths above. Only the call knows whether the
+    # publish succeeded, so the push defers to it. `contains` rather than
+    # `startsWith` because that commit arrives on main inside a merge commit,
+    # which quotes the pull request's title.
     if: >-
       inputs.after-release ||
-      !startsWith(github.event.head_commit.message, 'chore(release):')
+      !contains(github.event.head_commit.message, 'chore(release):')
 
     permissions:
       contents: read
@@ -65,6 +68,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+        with:
+          # `github.sha` is the commit that started the run, and after a
+          # release that is one commit behind: the version commit reached the
+          # branch through a pull request the release workflow merged while
+          # this run's ref was already fixed. The site has to describe the
+          # version that was published, so it is built from the branch tip.
+          ref: ${{ inputs.after-release && github.ref_name || github.sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v7

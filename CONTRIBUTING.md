@@ -242,16 +242,24 @@ Merging into `next` or `main` runs `.github/workflows/release.yml`, which:
 
 1. runs `npm run check` and stops there if it fails — nothing is tagged or published;
 2. refuses to continue if the branch moved since the run started;
-3. computes the version, writes `projects/ngx-statewise/CHANGELOG.md`, commits and tags;
-4. rebuilds the library so the published bundle carries the new version, and
+3. cuts a `release/…` branch. A required status check applies to a direct push
+   as much as to a merge, and the workflow's token has write access rather than
+   admin, so the version commit cannot reach `main` or `next` any other way;
+4. computes the version, writes `projects/ngx-statewise/CHANGELOG.md`, commits and tags;
+5. rebuilds the library so the published bundle carries the new version, and
    writes the same version into the site's `LIBRARY_VERSION` so both travel in
    the release commit — without that step `verify:claims` fails on the very
    next run, on `main` and on the back-merge pull request;
-5. publishes to npm with [provenance](https://docs.npmjs.com/generating-provenance-statements), under the `beta` or `latest` dist-tag;
-6. creates the GitHub release;
-7. on `main`, deploys the documentation site — after the publish, never before,
+6. publishes to npm with [provenance](https://docs.npmjs.com/generating-provenance-statements), under the `beta` or `latest` dist-tag;
+7. creates the GitHub release;
+8. opens a pull request for the version commit and merges it once the checks
+   that branch requires have passed. The tag and the package exist by then, so
+   a pull request that will not merge is a conflict to land by hand rather than
+   a release to redo — and the step says so and fails, instead of leaving the
+   run green with the commit still floating;
+9. on `main`, deploys the documentation site — after the publish, never before,
    so the site cannot state a version npm does not have;
-8. on `main`, opens the back-merge pull requests.
+10. on `main`, opens the back-merge pull requests.
 
 ### Why `next` exists
 
@@ -305,6 +313,12 @@ done
 Without the first command, a squash merge is one click away and it breaks
 versioning without any error. Without the second, a direct push to `main`
 publishes to npm.
+
+The second command is also why the release workflow builds its version commit
+on a `release/…` branch: those checks bind the release automation exactly as
+they bind you, and GitHub's own Actions app cannot be given a bypass on a
+personal repository — that is an organization-only setting. Nothing is exempt,
+which is the point.
 
 ### The four things `gh` cannot set
 
