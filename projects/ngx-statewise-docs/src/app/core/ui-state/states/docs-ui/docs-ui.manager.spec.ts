@@ -3,8 +3,8 @@ import { drainEffects, provideStatewiseTesting } from 'ngx-statewise/testing';
 import { DocsUiEffect } from './docs-ui.effect';
 import { DocsUiManager } from './docs-ui.manager';
 import { docsUiUpdater } from './docs-ui.updater';
-import { ThemeEnvironment } from './theme-environment.service';
-import { THEME_CLASSES, THEME_STORAGE_KEY, type Theme } from './theme';
+import { ThemeEnvironment } from '../../theme-environment.service';
+import { THEME_CLASSES, THEME_STORAGE_KEY, type Theme } from '../../theme';
 
 /** Lets a spec decide what the operating system is asking for. */
 function fakeSystem(theme: Theme) {
