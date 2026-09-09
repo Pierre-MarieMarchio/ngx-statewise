@@ -16,7 +16,7 @@
     "releaseName": "ngx-statewise@${version}"
   },
   "hooks": {
-    "after:bump": "cd ../.. && npm run build:library"
+    "after:bump": "cd ../.. && npm run build:library && npm run sync:site-version && git add projects/ngx-statewise-docs/src/app/core/site.ts"
   },
   "plugins": {
     "@release-it/conventional-changelog": {
