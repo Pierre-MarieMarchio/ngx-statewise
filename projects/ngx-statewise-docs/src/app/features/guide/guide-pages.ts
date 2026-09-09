@@ -4,6 +4,7 @@ import apiEn from './content/en/api.md';
 import cancellingRequestsEn from './content/en/cancelling-requests.md';
 import effectsEn from './content/en/effects.md';
 import gettingStartedEn from './content/en/getting-started.md';
+import interceptorsEn from './content/en/interceptors.md';
 import introductionEn from './content/en/introduction.md';
 import managersEn from './content/en/managers.md';
 import migrationEn from './content/en/migration.md';
@@ -104,7 +105,14 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = defineGuideSections([
       de: 'Kernkonzepte',
       'pt-BR': 'Conceitos-chave',
     },
-    pages: [statesEn, actionsEn, updatersEn, effectsEn, managersEn],
+    pages: [
+      statesEn,
+      actionsEn,
+      updatersEn,
+      effectsEn,
+      interceptorsEn,
+      managersEn,
+    ],
   },
   {
     title: {
