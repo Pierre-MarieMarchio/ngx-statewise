@@ -113,7 +113,7 @@ describe('TaskSearchComponent', () => {
     const box = await mount();
     const region = () =>
       (box.fixture.nativeElement as HTMLElement)
-        .querySelector('[role="status"]')
+        .querySelector('output')
         ?.textContent?.trim();
 
     expect(region()).toBe('');

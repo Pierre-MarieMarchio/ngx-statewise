@@ -89,7 +89,7 @@ describe('KanbanComponent', () => {
 
   const liveRegion = (fixture: { nativeElement: unknown }): string =>
     (fixture.nativeElement as HTMLElement)
-      .querySelector('[role="status"]')
+      .querySelector('output')
       ?.textContent?.trim() ?? '';
 
   it('renders one named list per column', async () => {
