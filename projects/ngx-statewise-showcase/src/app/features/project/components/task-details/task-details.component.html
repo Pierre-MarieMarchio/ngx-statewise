@@ -128,14 +128,14 @@
       <mat-tab>
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">settings</mat-icon>
-          Détails
+          Details
         </ng-template>
         <div class="tab-content">
           <div class="metadata-grid">
             <div class="metadata-item">
               <div class="metadata-label">
                 <mat-icon>fingerprint</mat-icon>
-                <strong>ID de la tâche</strong>
+                <strong>Task ID</strong>
               </div>
               <span class="metadata-value">{{ selectedTask()!.id }}</span>
             </div>
@@ -143,7 +143,7 @@
             <div class="metadata-item">
               <div class="metadata-label">
                 <mat-icon>folder</mat-icon>
-                <strong>Projet</strong>
+                <strong>Project</strong>
               </div>
               <span class="metadata-value">{{
                 selectedTask()!.projectId
@@ -163,7 +163,7 @@
             <div class="metadata-item">
               <div class="metadata-label">
                 <mat-icon>add_circle</mat-icon>
-                <strong>Créé le</strong>
+                <strong>Created</strong>
               </div>
               <span class="metadata-value">{{
                 presentation.formatDate(selectedTask()!.createdAt)
@@ -173,7 +173,7 @@
             <div class="metadata-item">
               <div class="metadata-label">
                 <mat-icon>edit</mat-icon>
-                <strong>Modifié le</strong>
+                <strong>Updated</strong>
               </div>
               <span class="metadata-value">{{
                 presentation.formatDate(selectedTask()!.updatedAt)
