@@ -4,7 +4,7 @@ import {
   FALLBACK_THEME,
   type Theme,
   type ThemeChoice,
-} from './theme';
+} from '../../theme';
 
 @Injectable({ providedIn: 'root' })
 export class DocsUiState {

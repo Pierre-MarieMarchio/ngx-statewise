@@ -1,8 +1,8 @@
-export { navActions, themeActions } from './docs-ui.action';
-export { DocsUiEffect } from './docs-ui.effect';
-export { DocsUiManager } from './docs-ui.manager';
-export { DocsUiState } from './docs-ui.state';
-export { docsUiUpdater } from './docs-ui.updater';
+export { navActions, themeActions } from './states/docs-ui/docs-ui.action';
+export { DocsUiEffect } from './states/docs-ui/docs-ui.effect';
+export { DocsUiManager } from './states/docs-ui/docs-ui.manager';
+export { DocsUiState } from './states/docs-ui/docs-ui.state';
+export { docsUiUpdater } from './states/docs-ui/docs-ui.updater';
 export { resolveTheme } from './resolve-theme';
 export { ThemeEnvironment } from './theme-environment.service';
 export {
