@@ -6,14 +6,13 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { TaskOpenColumnComponent } from '../task-open-column/task-open-column.component';
 import { Task } from '../../models';
 import { TaskColumnsService } from '../../services';
 
 @Component({
   selector: 'app-all-task-list',
-  imports: [MatTableModule, MatButtonModule, MatIconModule],
+  imports: [MatTableModule, TaskOpenColumnComponent],
   templateUrl: './all-task-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './all-task-list.component.scss',

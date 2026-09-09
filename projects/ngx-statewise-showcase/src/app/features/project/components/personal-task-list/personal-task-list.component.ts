@@ -7,14 +7,13 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { TaskOpenColumnComponent } from '../task-open-column/task-open-column.component';
 import { Task } from '../../models';
 import { AssignedTasksService, TaskColumnsService } from '../../services';
 
 @Component({
   selector: 'app-personal-task-list',
-  imports: [MatTableModule, MatButtonModule, MatIconModule],
+  imports: [MatTableModule, TaskOpenColumnComponent],
   templateUrl: './personal-task-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './personal-task-list.component.scss',

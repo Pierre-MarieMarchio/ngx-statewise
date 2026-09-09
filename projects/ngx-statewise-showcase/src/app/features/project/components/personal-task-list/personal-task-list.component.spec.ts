@@ -4,6 +4,7 @@ import {
   FakeAuthSession,
   sampleTask,
 } from '@testing/fake-managers';
+import { openedSampleTask, openFirstRow } from '@testing/task-table';
 import { PersonalTaskListComponent } from './personal-task-list.component';
 import { AUTH_SESSION } from '@app/features/common';
 
@@ -79,25 +80,9 @@ describe('PersonalTaskListComponent', () => {
 
   /**
    * The row click is a mouse shortcut. This button is the path a keyboard has,
-   * and stopping the propagation is what keeps one press to one selection.
+   * and the shared column's spec holds the rest of its behaviour.
    */
   it('opens a task from a named button, once', async () => {
-    const fixture = await mount();
-    const selected: string[] = [];
-    fixture.componentInstance.taskSelected.subscribe((task) =>
-      selected.push(task.id),
-    );
-
-    const open = (
-      fixture.nativeElement as HTMLElement
-    ).querySelector<HTMLButtonElement>('td.open-cell button');
-
-    expect(open?.getAttribute('aria-label')).toBe(
-      'Open Wire the showcase to a smoke test',
-    );
-
-    open?.click();
-
-    expect(selected).toEqual(['mine']);
+    expect(openFirstRow(await mount())).toEqual(openedSampleTask('mine'));
   });
 });
