@@ -43,7 +43,8 @@ await this.auth.login(credentials);
 A flow like "log in, then load the workspace, then navigate" reads as one call
 instead of a tree of callbacks.
 
-**Mistakes that surface.** A duplicate updater is reported at startup. A
+**Mistakes that surface.** A duplicate updater throws rather than quietly
+losing one. A
 dispatch aimed at the wrong manager throws in development and reaches your
 `ErrorHandler` in production. A failing effect does the same.
 

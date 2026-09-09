@@ -19,13 +19,13 @@ summary:
 A plain injectable class holding the data of one feature. There is nothing to
 register and no shape to declare — the fields on the class are the state.
 
-```typescript title="auth.states.ts"
+```typescript title="auth.state.ts"
 @Injectable({ providedIn: 'root' })
-export class AuthStates {
+export class AuthState {
   public user = signal<User | null>(null);
   public isLoggedIn = signal(false);
   public isLoading = signal(false);
-  public hasError = signal(false);
+  public isError = signal(false);
 }
 ```
 
@@ -42,9 +42,9 @@ shape to reach for.
 Derived values are `computed`, on the state or on the manager — there is no
 selector layer, and none is needed:
 
-```typescript title="auth.states.ts"
+```typescript title="auth.state.ts"
 @Injectable({ providedIn: 'root' })
-export class AuthStates {
+export class AuthState {
   public user = signal<User | null>(null);
   public readonly displayName = computed(() => this.user()?.name ?? 'Guest');
 }
@@ -55,17 +55,17 @@ export class AuthStates {
 Updaters write plain properties too. The cost is that a component reading one
 has no way of knowing it changed, so you mark it for check yourself.
 
-```typescript avoid title="auth.states.ts"
+```typescript avoid title="auth.state.ts"
 @Injectable({ providedIn: 'root' })
-export class AuthStates {
+export class AuthState {
   public user: User | null = null;
   public isLoading = false;
 }
 ```
 
-```typescript prefer title="auth.states.ts"
+```typescript prefer title="auth.state.ts"
 @Injectable({ providedIn: 'root' })
-export class AuthStates {
+export class AuthState {
   public user = signal<User | null>(null);
   public isLoading = signal(false);
 }
@@ -79,9 +79,9 @@ access token, a cursor, a cache key. Reach for it deliberately, not by default.
 State holds data. It holds no methods that change it, no API calls and no
 navigation.
 
-```typescript avoid title="auth.states.ts"
+```typescript avoid title="auth.state.ts"
 @Injectable({ providedIn: 'root' })
-export class AuthStates {
+export class AuthState {
   public user = signal<User | null>(null);
 
   public logIn(user: User): void {
@@ -95,7 +95,7 @@ The updater is the only writer, and that is what makes a wrong value traceable
 to one place.
 
 ```typescript prefer title="auth.updater.ts"
-export const authUpdater = defineUpdater(AuthStates, (on) => {
+export const authUpdater = defineUpdater(AuthState, (on) => {
   on(loginActions.success, (state, session) => {
     state.user.set(session.user);
   });

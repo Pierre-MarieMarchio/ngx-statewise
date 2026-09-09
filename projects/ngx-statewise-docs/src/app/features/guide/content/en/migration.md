@@ -50,10 +50,10 @@ An updater class becomes a declaration, and loses its `ofType` keys:
 
 ```typescript title="0.6.x"
 @Injectable({ providedIn: 'root' })
-export class AuthUpdator implements IUpdator<AuthStates> {
-  public readonly state = inject(AuthStates);
+export class AuthUpdator implements IUpdator<AuthState> {
+  public readonly state = inject(AuthState);
 
-  public readonly updators: UpdatorRegistry<AuthStates> = {
+  public readonly updators: UpdatorRegistry<AuthState> = {
     [ofType(loginActions.request)]: (state) => {
       state.isLoading.set(true);
     },
@@ -62,7 +62,7 @@ export class AuthUpdator implements IUpdator<AuthStates> {
 ```
 
 ```typescript title="Now"
-export const authUpdater = defineUpdater(AuthStates, (on) => {
+export const authUpdater = defineUpdater(AuthState, (on) => {
   on(loginActions.request, (state) => {
     state.isLoading.set(true);
   });
