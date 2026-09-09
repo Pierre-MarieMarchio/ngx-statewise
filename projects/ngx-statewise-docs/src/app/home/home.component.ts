@@ -40,7 +40,7 @@ export class HomeComponent {
 
   /**
    * The one measurable promise the library can make, in the reader's own
-   * notation: 2.7 in English, 2,7 in French. The number lives in site.ts and
+   * notation: 4.1 in English, 4,1 in French. The number lives in site.ts and
    * `npm run verify:claims` fails the build if it stops being true.
    */
   protected readonly sizeSentence = computed(() =>

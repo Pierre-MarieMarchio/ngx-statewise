@@ -27,8 +27,8 @@ export const CHANGELOG_URL = `${REPOSITORY_URL}/blob/main/projects/ngx-statewise
  * The whole public API, bundled, minified and gzipped, in kilobytes.
  *
  * A number on a page rots the moment the library grows, so this one is checked
- * rather than trusted: `npm run verify:size` rebuilds the measurement from
+ * rather than trusted: `npm run verify:claims` rebuilds the measurement from
  * dist/ngx-statewise and fails if it no longer rounds to this value. It runs in
  * `npm run check`, right after the library is built.
  */
-export const LIBRARY_GZIP_KB = 2.7;
+export const LIBRARY_GZIP_KB = 4.1;

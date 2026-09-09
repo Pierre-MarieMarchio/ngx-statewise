@@ -32,7 +32,7 @@ TestBed.configureTestingModule({
 manager.refresh(); // calls statewise.dispatch(...)
 await drainEffects();
 
-expect(manager.tasks()).toHaveSize(3);
+expect(manager.tasks()).toHaveLength(3);
 ```
 
 > [!TIP]

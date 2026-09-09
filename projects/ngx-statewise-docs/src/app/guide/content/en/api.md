@@ -199,8 +199,9 @@ option is optional.
 | ------------------- | --------------------------------- | ------------- |
 | `effects`           | `readonly Type<unknown>[]`        | none          |
 | `updaters`          | `readonly Updater<unknown>[]`     | none          |
-| `history`           | `{ limit: number }`               | disabled      |
+| `history`           | `{ limit, redact? }`              | disabled      |
 | `misroutedDispatch` | `'throw' \| 'report' \| 'ignore'` | by build mode |
+| `maxCascadeDepth`   | `number`                          | `50`          |
 
 `updaters` are reachable from whichever manager dispatches, including
 `injectStatewise()` with no updater at all. A scoped updater always wins over a
@@ -208,6 +209,10 @@ global one, so a type a manager already owns never reaches them.
 
 `misroutedDispatch` defaults to `'throw'` in development and `'report'` in
 production, where it goes to Angular's `ErrorHandler`.
+
+`maxCascadeDepth` bounds how many actions one cascade may chain. Beyond it the
+cascade is stopped and the whole path is raised, which is what keeps two effects
+returning each other's action from exhausting the heap.
 
 See [Getting started](/guide/getting-started#setting-up-your-application).
 
