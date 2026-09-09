@@ -1,64 +1,67 @@
 <div class="side-nav-container">
-  <div class="side-nav-content">
-    <mat-nav-list>
-      <!-- The name goes on the link; the image is decorative beside it. -->
-      <a
-        class="side-nav-logo"
-        mat-item
-        [routerLink]="''"
-        aria-label="Ngx-Statewise, back to home"
-      >
-        <img class="side-nav-logo-img" src="icon-logo.png" alt="" />
-      </a>
-      @if (isLoggedIn()) {
+  <nav class="side-nav-content" aria-label="Main">
+    <!-- The name goes on the link; the image is decorative beside it. -->
+    <a
+      class="side-nav-logo"
+      [routerLink]="''"
+      aria-label="Ngx-Statewise, back to home"
+    >
+      <img class="side-nav-logo-img" src="icon-logo.png" alt="" />
+    </a>
+    @if (isLoggedIn()) {
+      <ul class="side-nav-items">
         @for (item of navigationItems(); track item.label) {
-          @if (item.href) {
-            <!-- Leaves the application, so a plain link and a new tab. -->
-            <a
-              mat-item
-              class="nav-groupe-icon color-secondary"
-              [href]="item.href"
-              target="_blank"
-              rel="noopener"
-            >
-              <mat-icon class="nav-icon icon-outlined" matListItemIcon>
-                {{ item.icon }}
-              </mat-icon>
-              <span>{{ item.label }}</span>
-            </a>
-          } @else {
-            <a
-              mat-item
-              class="nav-groupe-icon color-secondary"
-              [routerLink]="item.route"
-              routerLinkActive="active-link"
-            >
-              <mat-icon class="nav-icon icon-outlined" matListItemIcon>
-                {{ item.icon }}
-              </mat-icon>
-              <span>{{ item.label }}</span>
-            </a>
-          }
+          <li>
+            @if (item.href) {
+              <!-- Leaves the application, so a plain link and a new tab. -->
+              <a
+                class="nav-groupe-icon color-secondary"
+                [href]="item.href"
+                target="_blank"
+                rel="noopener"
+              >
+                <mat-icon class="nav-icon icon-outlined" aria-hidden="true">
+                  {{ item.icon }}
+                </mat-icon>
+                <span>{{ item.label }}</span>
+              </a>
+            } @else {
+              <a
+                class="nav-groupe-icon color-secondary"
+                [routerLink]="item.route"
+                routerLinkActive="active-link"
+              >
+                <mat-icon class="nav-icon icon-outlined" aria-hidden="true">
+                  {{ item.icon }}
+                </mat-icon>
+                <span>{{ item.label }}</span>
+              </a>
+            }
+          </li>
         }
-      }
-    </mat-nav-list>
-  </div>
+      </ul>
+    }
+  </nav>
   <div class="footer-toggles">
     @if (isLoggedIn()) {
-      <div class="footer-groupe-button color-secondary">
-        <button
-          (click)="logout.emit()"
-          disableRipple="true"
-          class=".no-hover-button"
-          mat-icon-button
-          aria-label="Log out"
+      <!--
+        One button carrying both the icon and the word, laid out like a
+        navigation link. The word used to sit outside the button: it named
+        nothing, and clicking it did nothing.
+      -->
+      <button
+        type="button"
+        class="footer-groupe-button color-secondary"
+        (click)="logout.emit()"
+      >
+        <mat-icon
+          class="footer-icon color-secondary icon-outlined"
+          aria-hidden="true"
         >
-          <mat-icon class="footer-icon color-secondary icon-outlined">
-            logout
-          </mat-icon>
-        </button>
+          logout
+        </mat-icon>
         <span>logout</span>
-      </div>
+      </button>
     }
     <app-theme-toggle />
   </div>

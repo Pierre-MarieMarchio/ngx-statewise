@@ -21,14 +21,15 @@ describe('NavShellComponent', () => {
     return fixture;
   };
 
+  const links = (host: HTMLElement): HTMLAnchorElement[] =>
+    Array.from(host.querySelectorAll<HTMLAnchorElement>('nav a'));
+
   it('lists one link per navigation item while logged in', async () => {
     const fixture = await mount();
 
-    expect(
-      Array.from(
-        (fixture.nativeElement as HTMLElement).querySelectorAll('a[mat-item]'),
-      ).length,
-    ).toBe(ITEMS.length + 1);
+    expect(links(fixture.nativeElement as HTMLElement).length).toBe(
+      ITEMS.length + 1,
+    );
   });
 
   it('hides the navigation items and the logout while logged out', async () => {
@@ -36,18 +37,37 @@ describe('NavShellComponent', () => {
 
     const host = fixture.nativeElement as HTMLElement;
 
-    expect(host.querySelectorAll('a[mat-item]').length).toBe(1);
+    expect(links(host).length).toBe(1);
     expect(host.querySelector('.footer-groupe-button')).toBeNull();
   });
 
-  it('asks whoever composes the shell to log out', async () => {
+  /** A landmark, so a screen reader can jump straight to it or straight past. */
+  it('names its navigation landmark', async () => {
+    const fixture = await mount();
+
+    expect(
+      (fixture.nativeElement as HTMLElement)
+        .querySelector('nav')
+        ?.getAttribute('aria-label'),
+    ).toBe('Main');
+  });
+
+  /**
+   * The word used to sit outside the button, so it named nothing and clicking
+   * it did nothing.
+   */
+  it('asks whoever composes the shell to log out, from the word itself', async () => {
     const fixture = await mount();
     const asked: void[] = [];
     fixture.componentInstance.logout.subscribe((value) => asked.push(value));
 
-    (fixture.nativeElement as HTMLElement)
-      .querySelector<HTMLButtonElement>('.footer-groupe-button button')
-      ?.click();
+    const button = (
+      fixture.nativeElement as HTMLElement
+    ).querySelector<HTMLButtonElement>('button.footer-groupe-button');
+
+    expect(button?.querySelector('span')?.textContent?.trim()).toBe('logout');
+
+    button?.click();
 
     expect(asked.length).toBe(1);
   });
