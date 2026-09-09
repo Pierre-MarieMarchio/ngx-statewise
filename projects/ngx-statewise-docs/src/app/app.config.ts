@@ -12,6 +12,7 @@ import {
 } from '@angular/router';
 import { provideStatewise } from 'ngx-statewise';
 import { routes } from './app.routes';
+import { FlowDemoEffect, flowDemoUpdater } from './flow-demo';
 import { DocsUiEffect, DocsUiManager, docsUiUpdater } from './ui-state';
 
 /**
@@ -37,8 +38,10 @@ export const appConfig: ApplicationConfig = {
     // throwing it away and rendering the same thing again.
     provideClientHydration(),
     provideStatewise({
-      effects: [DocsUiEffect],
-      updaters: [docsUiUpdater],
+      // The landing page runs a real flow through the library it documents, so
+      // its effect is registered alongside the site's own.
+      effects: [DocsUiEffect, FlowDemoEffect],
+      updaters: [docsUiUpdater, flowDemoUpdater],
     }),
     provideAppInitializer(() => {
       inject(DocsUiManager).start();

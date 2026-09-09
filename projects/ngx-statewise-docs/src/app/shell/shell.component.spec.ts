@@ -9,6 +9,7 @@ import {
   findLocale,
   type LocaleCode,
 } from '../i18n';
+import { LIBRARY_VERSION } from '../site';
 import { DocsUiEffect, THEME_CLASSES, docsUiUpdater } from '../ui-state';
 import { ShellComponent } from './shell.component';
 
@@ -121,14 +122,21 @@ describe('ShellComponent', () => {
     expect(host.querySelector('.layout--nav-open')).not.toBeNull();
   });
 
-  it('leaves the guide sidebar out of the landing page', () => {
-    // The landing page lists every guide page itself, so the sidebar beside it
-    // would be the same links twice on one screen.
+  it('keeps the sidebar on the landing page, in a wider shell', () => {
     const host = mount('').nativeElement as HTMLElement;
 
-    expect(host.querySelector('.sidebar')).toBeNull();
-    expect(host.querySelector('.header__nav-toggle')).toBeNull();
-    expect(host.querySelector('.layout--no-nav')).not.toBeNull();
+    expect(host.querySelectorAll('.sidebar__link').length).toBe(
+      GUIDE_PAGES.length,
+    );
+    expect(host.querySelector('.layout--landing')).not.toBeNull();
+  });
+
+  it('shows the published version, pointing at the releases', () => {
+    const host = mount().nativeElement as HTMLElement;
+    const badge = host.querySelector<HTMLAnchorElement>('.header__version');
+
+    expect(badge?.textContent?.trim()).toBe(LIBRARY_VERSION);
+    expect(badge?.getAttribute('href')).toContain('/releases');
   });
 
   it('offers every locale, and says which one is being read', () => {

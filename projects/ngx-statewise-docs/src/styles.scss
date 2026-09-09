@@ -1,30 +1,7 @@
+@use './assets/scroll-shadows' as shadows;
 @use './assets/fonts';
 @use './assets/themes';
 @use './assets/tokens';
-
-/* A pair of shadows at the edges of anything that scrolls sideways, each one
-   hidden by a patch of the surface colour until there is something in that
-   direction to reach. The patches are attached to the content and the shadows
-   to the box, which is what makes them appear and disappear on their own —
-   no scroll listener, and nothing to run on a prerendered page.
-
-   Without this a table that runs off the edge of a phone looks like a table
-   that ends there. */
-@mixin scroll-shadows($surface) {
-  background:
-    linear-gradient(to right, #{$surface} 40%, transparent) 0 0 / 2.5rem 100%
-      no-repeat local,
-    linear-gradient(to left, #{$surface} 40%, transparent) 100% 0 / 2.5rem 100%
-      no-repeat local,
-    radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / 14%), rgb(0 0 0 / 0%)) 0
-      0 / 0.75rem 100% no-repeat scroll,
-    radial-gradient(
-        farthest-side at 100% 50%,
-        rgb(0 0 0 / 14%),
-        rgb(0 0 0 / 0%)
-      )
-      100% 0 / 0.75rem 100% no-repeat scroll;
-}
 
 * {
   box-sizing: border-box;
@@ -133,6 +110,82 @@ main:focus {
   &:focus {
     left: var(--space-2);
     top: var(--space-2);
+  }
+}
+
+/* --- Buttons -------------------------------------------------------------
+   Global because two components need the same one: the landing page's calls to
+   action, and the controls on the flow demo. A second copy in a second
+   component sheet is how two buttons start to differ. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  height: 2.25rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  /* Explicit, because this class is worn by both an <a> and a <button>: a
+     button carries the platform's own grey otherwise, which in the dark theme
+     took the outlined variant down to 2.3:1. */
+  background-color: transparent;
+  color: var(--text-strong);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  transition: var(--transition-hover);
+
+  &:hover {
+    border-color: var(--text-faint);
+    background-color: var(--surface-hover);
+    color: var(--text-strong);
+  }
+
+  &:disabled {
+    border-color: var(--border);
+    background: none;
+    color: var(--text-faint);
+    cursor: not-allowed;
+  }
+}
+
+/* Violet, not red. Red means "you are here" everywhere else on the site — on
+   the current page in the sidebar, on the current heading, on the focus ring —
+   and a primary button means the opposite of that. Violet is the colour of
+   everything that takes you somewhere. */
+.button--primary {
+  border-color: transparent;
+  background-color: var(--link);
+  color: var(--on-link);
+
+  &:hover {
+    border-color: transparent;
+    background-color: var(--link-hover);
+    color: var(--on-link);
+  }
+
+  &:disabled {
+    border-color: transparent;
+    background-color: var(--surface-sunken);
+    color: var(--text-faint);
+  }
+}
+
+/* Outlined in the link colour: unmistakably a control, without competing with
+   the one filled button on the page. The demo's own call to action. */
+.button--accent {
+  border-color: var(--link);
+  color: var(--link);
+
+  &:hover {
+    border-color: var(--link);
+    background-color: var(--link-soft);
+    color: var(--link-hover);
+  }
+
+  &:disabled {
+    border-color: var(--border);
+    background: none;
+    color: var(--text-faint);
   }
 }
 
@@ -297,7 +350,7 @@ main:focus {
     max-width: var(--column);
     margin: 0 0 var(--space-5);
     overflow-x: auto;
-    @include scroll-shadows(var(--surface-page));
+    @include shadows.scroll-shadows(var(--surface-page));
   }
 
   table {
@@ -490,7 +543,7 @@ main:focus {
   overflow-x: auto;
   font-size: var(--text-sm);
   line-height: 1.65;
-  @include scroll-shadows(var(--surface-code));
+  @include shadows.scroll-shadows(var(--surface-code));
 
   code {
     font-family: var(--font-mono);

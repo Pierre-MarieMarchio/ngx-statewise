@@ -30,71 +30,12 @@
   <p class="hero__size">{{ sizeSentence() }}</p>
 </section>
 
-<!--
-  The centrepiece, and the one thing on the site that is drawn rather than
-  written: the cycle the whole library is built around. The three stations are
-  a real ordered list, so the rule above them and the bracket below are
-  pseudo-elements over honest markup rather than a picture with a caption. The
-  box around them is the manager, which is what a manager actually is.
--->
-<section class="cycle" aria-labelledby="cycle-title">
-  <h2 class="cycle__title" id="cycle-title">{{ text().homeFlowTitle }}</h2>
-
-  <div class="cycle__scope">
-    <p class="cycle__owner">
-      <span class="cycle__owner-name">{{ text().homeFlowManager }}</span>
-      <span class="cycle__owner-text">{{ text().homeFlowManagerText }}</span>
-    </p>
-
-    <div class="cycle__track">
-      <!--
-        The legend for the two colours. Hidden from assistive technology on
-        purpose: it names a convention that only exists visually, and the two
-        words on their own read as nonsense out loud. What it says is already
-        written into the stations underneath — "synchronously", "on state
-        already up to date".
-      -->
-      <p class="cycle__phases" aria-hidden="true">
-        <span class="cycle__phase cycle__phase--sync">
-          {{ text().homeFlowSynchronous }}
-        </span>
-        <span class="cycle__phase cycle__phase--async">
-          {{ text().homeFlowAsynchronous }}
-        </span>
-      </p>
-
-      <ol class="cycle__stations" role="list">
-        <li class="cycle__station cycle__station--first">
-          <span class="cycle__station-name">{{ text().homeFlowAction }}</span>
-          <span class="cycle__station-text">
-            {{ text().homeFlowActionText }}
-          </span>
-        </li>
-        <li class="cycle__station cycle__station--crossing">
-          <span class="cycle__station-name">{{ text().homeFlowUpdater }}</span>
-          <span class="cycle__station-text">
-            {{ text().homeFlowUpdaterText }}
-          </span>
-        </li>
-        <li class="cycle__station cycle__station--last">
-          <span class="cycle__station-name">{{ text().homeFlowEffect }}</span>
-          <span class="cycle__station-text">
-            {{ text().homeFlowEffectText }}
-          </span>
-        </li>
-      </ol>
-
-      <p class="cycle__return">
-        <span class="cycle__return-text">{{ text().homeFlowReturn }}</span>
-      </p>
-    </div>
-  </div>
-</section>
+<docs-flow-demo class="landing__demo" />
 
 <!--
   The same three stations, in the same order and the same colours, as the code
-  you would actually write. The diagram says what the library does; this says
-  what it costs to use it, which is the other question a reader arrives with.
+  you would write. The effect panel lights while the effect above it is
+  running, so the drawing, the code and the state are one thing.
 -->
 <section class="shape" aria-labelledby="shape-title">
   <h2 class="shape__title" id="shape-title">{{ text().homeShapeTitle }}</h2>
@@ -134,7 +75,10 @@
       </div>
     </li>
 
-    <li class="shape__step shape__step--async">
+    <li
+      class="shape__step shape__step--async"
+      [class.shape__step--running]="demo.station() === 'effect'"
+    >
       <p class="shape__step-name">{{ text().homeFlowEffect }}</p>
       <div class="code-block">
         <pre
@@ -151,6 +95,83 @@
   </ol>
 
   <p class="shape__note">{{ text().homeShapeNote }}</p>
+</section>
+
+<section class="compare" aria-labelledby="compare-title">
+  <h2 class="compare__title" id="compare-title">
+    {{ text().homeCompareTitle }}
+  </h2>
+
+  <!--
+    A group, not a region: the section around it is already a landmark with
+    this name, and two landmarks sharing one name cannot be told apart. The
+    tabindex is what a keyboard needs to scroll it; the role is not.
+  -->
+  <div
+    class="compare__scroll"
+    tabindex="0"
+    role="group"
+    [attr.aria-label]="text().homeCompareTitle"
+  >
+    <table class="compare__table">
+      <thead>
+        <tr>
+          <th scope="col"></th>
+          <th scope="col">{{ text().homeCompareByHand }}</th>
+          <th scope="col">{{ text().homeCompareWith }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of comparison; track row.axis.en) {
+          <tr>
+            <th scope="row">{{ row.axis[locale.code] }}</th>
+            <td>{{ row.byHand[locale.code] }}</td>
+            <td class="compare__ours">{{ row.withLibrary[locale.code] }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="not-for" aria-labelledby="not-for-title">
+  <h2 class="not-for__title" id="not-for-title">
+    {{ text().homeNotForTitle }}
+  </h2>
+  <p class="not-for__lead">{{ text().homeNotForLead }}</p>
+
+  <ul class="not-for__list" role="list">
+    @for (reason of notFor; track reason.en) {
+      <li class="not-for__item">{{ reason[locale.code] }}</li>
+    }
+  </ul>
+</section>
+
+<section class="doors" aria-labelledby="doors-title">
+  <h2 class="doors__title" id="doors-title">{{ text().homeDoorsTitle }}</h2>
+
+  <ul class="doors__list" role="list">
+    @for (door of doors; track door.title.en) {
+      <li>
+        @if (doorLink(door); as link) {
+          <a class="doors__door" [routerLink]="link">
+            <span class="doors__door-title">{{ door.title[locale.code] }}</span>
+            <span class="doors__door-text">{{ door.text[locale.code] }}</span>
+          </a>
+        } @else {
+          <a
+            class="doors__door"
+            [href]="door.href"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <span class="doors__door-title">{{ door.title[locale.code] }}</span>
+            <span class="doors__door-text">{{ door.text[locale.code] }}</span>
+          </a>
+        }
+      </li>
+    }
+  </ul>
 </section>
 
 <section class="contents" aria-labelledby="contents-title">

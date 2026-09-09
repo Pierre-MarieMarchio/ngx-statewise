@@ -1,23 +1,21 @@
 <a class="skip-link" href="#main">{{ text().skipToContent }}</a>
 
 <header class="header">
-  @if (showsGuideNav()) {
-    <button
-      class="header__icon-button header__nav-toggle"
-      type="button"
-      aria-controls="sidebar"
-      [attr.aria-expanded]="navOpen()"
-      [attr.aria-label]="
-        navOpen() ? text().closeNavigation : text().openNavigation
-      "
-      (click)="toggleNav()"
-    >
-      <docs-icon
-        class="header__nav-toggle-icon"
-        [name]="navOpen() ? 'close' : 'menu'"
-      />
-    </button>
-  }
+  <button
+    class="header__icon-button header__nav-toggle"
+    type="button"
+    aria-controls="sidebar"
+    [attr.aria-expanded]="navOpen()"
+    [attr.aria-label]="
+      navOpen() ? text().closeNavigation : text().openNavigation
+    "
+    (click)="toggleNav()"
+  >
+    <docs-icon
+      class="header__nav-toggle-icon"
+      [name]="navOpen() ? 'close' : 'menu'"
+    />
+  </button>
 
   <a class="header__brand" [routerLink]="homeLink()">
     <img
@@ -28,6 +26,21 @@
       height="22"
     />
     <span class="header__brand-name">ngx-statewise</span>
+  </a>
+
+  <!--
+    The published version, not a switcher: one version has ever been deployed,
+    and a menu with one entry is furniture. It links to the releases, which is
+    where the answer to "what changed" actually lives.
+  -->
+  <a
+    class="header__version"
+    [href]="releasesUrl"
+    target="_blank"
+    rel="noreferrer"
+    [attr.aria-label]="text().versionLabel + ' ' + version"
+  >
+    {{ version }}
   </a>
 
   <div class="header__actions">
@@ -121,41 +134,38 @@
 </header>
 
 <!--
-  The landing page carries its own contents, so the guide sidebar would be the
-  same ten links twice, side by side. It is left out there, and the page gets
-  the whole width instead.
+  The landing page gets a wider shell than a guide page: it has no table of
+  contents on the right, and the demo in the middle of it wants the room.
 -->
 <div
   class="layout"
   [class.layout--nav-open]="navOpen()"
-  [class.layout--no-nav]="!showsGuideNav()"
+  [class.layout--landing]="isLanding()"
 >
-  @if (showsGuideNav()) {
-    <nav class="sidebar" id="sidebar" [attr.aria-label]="text().guideNavLabel">
-      <!-- The drawer animates its row height; the inner element is what keeps
-           the content from being squashed while it does. -->
-      <div class="sidebar__inner">
-        @for (section of sections; track section.title.en) {
-          <p class="sidebar__section">{{ section.title[locale.code] }}</p>
-          <ul class="sidebar__list" role="list">
-            @for (page of section.pages; track page.slug) {
-              <li>
-                <a
-                  class="sidebar__link"
-                  routerLinkActive="sidebar__link--active"
-                  [routerLink]="pageLink(page.slug)"
-                  [title]="page.summary[locale.code]"
-                  (click)="closeNav()"
-                >
-                  {{ page.title[locale.code] }}
-                </a>
-              </li>
-            }
-          </ul>
-        }
-      </div>
-    </nav>
-  }
+  <nav class="sidebar" id="sidebar" [attr.aria-label]="text().guideNavLabel">
+    <!-- The drawer animates its row height; the inner element is what keeps
+         the content from being squashed while it does. -->
+    <div class="sidebar__inner">
+      @for (section of sections; track section.title.en) {
+        <p class="sidebar__section">{{ section.title[locale.code] }}</p>
+        <ul class="sidebar__list" role="list">
+          @for (page of section.pages; track page.slug) {
+            <li>
+              <a
+                class="sidebar__link"
+                routerLinkActive="sidebar__link--active"
+                [routerLink]="pageLink(page.slug)"
+                [title]="page.summary[locale.code]"
+                (click)="closeNav()"
+              >
+                {{ page.title[locale.code] }}
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </nav>
 
   <main class="main" id="main" tabindex="-1">
     <router-outlet />

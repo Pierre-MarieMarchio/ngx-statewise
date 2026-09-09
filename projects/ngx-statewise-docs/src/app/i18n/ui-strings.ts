@@ -40,6 +40,7 @@ export interface UiStrings {
   readonly untranslatedBody: string;
   readonly footerLicence: string;
   readonly changelog: string;
+  readonly versionLabel: string;
   readonly homeSubtitle: string;
   readonly homeThesis: string;
   readonly homeTagline: string;
@@ -60,6 +61,22 @@ export interface UiStrings {
   readonly homeShapeTitle: string;
   readonly homeShapeNote: string;
   readonly homeSize: string;
+  readonly demoRun: string;
+  readonly demoReset: string;
+  readonly demoStateTitle: string;
+  readonly demoJournalTitle: string;
+  readonly demoReturned: string;
+  readonly demoEmpty: string;
+  readonly demoStatusIdle: string;
+  readonly demoStatusRunning: string;
+  readonly demoStatusDone: string;
+  readonly demoNote: string;
+  readonly homeCompareTitle: string;
+  readonly homeCompareByHand: string;
+  readonly homeCompareWith: string;
+  readonly homeNotForTitle: string;
+  readonly homeNotForLead: string;
+  readonly homeDoorsTitle: string;
   readonly homeContentsTitle: string;
   readonly homeTitle: string;
 }
@@ -99,6 +116,7 @@ const EN: UiStrings = {
   untranslatedBody: 'It is shown in English.',
   footerLicence: 'ngx-statewise is released under the GPL-3.0 licence.',
   changelog: 'Changelog',
+  versionLabel: 'Published version',
   homeSubtitle: 'Angular state management',
   homeThesis: 'The state is already written when your effects run.',
   homeTagline:
@@ -121,6 +139,25 @@ const EN: UiStrings = {
   homeShapeNote:
     'That is the whole surface for one feature. The rest of the guide is what happens when a flow gets harder than a login.',
   homeSize: 'The whole library is {size} kB minified and gzipped.',
+  demoRun: 'Dispatch loginRequest',
+  demoReset: 'Reset',
+  demoStateTitle: 'State',
+  demoJournalTitle: 'Dispatched',
+  demoReturned: 'returned by the effect',
+  demoEmpty: 'Nothing dispatched yet.',
+  demoStatusIdle: 'Idle. Press the button to send an action.',
+  demoStatusRunning:
+    'The updater has already written the state. The effect is working.',
+  demoStatusDone:
+    'The effect answered with an action, and its updater wrote the state again.',
+  demoNote:
+    'This runs on the real library. The action and the updater are one synchronous tick, so they finish before the effect starts — the wait you can see is the effect, and nothing else.',
+  homeCompareTitle: 'What it replaces',
+  homeCompareByHand: 'By hand',
+  homeCompareWith: 'With ngx-statewise',
+  homeNotForTitle: 'When not to use it',
+  homeNotForLead: 'Three cases where something else will serve you better.',
+  homeDoorsTitle: 'Where to start',
   homeContentsTitle: 'Contents',
   homeTitle: 'ngx-statewise — state management for Angular',
 };
@@ -160,6 +197,7 @@ const FR: UiStrings = {
   untranslatedBody: 'Elle est affichée en anglais.',
   footerLicence: 'ngx-statewise est publié sous licence GPL-3.0.',
   changelog: 'Journal des versions',
+  versionLabel: 'Version publiée',
   homeSubtitle: 'Gestion d’état pour Angular',
   homeThesis: 'L’état est déjà écrit quand vos effects démarrent.',
   homeTagline:
@@ -183,6 +221,24 @@ const FR: UiStrings = {
   homeShapeNote:
     'C’est toute la surface pour une fonctionnalité. Le reste du guide traite des flux plus retors qu’un login.',
   homeSize: 'Toute la librairie pèse {size} ko, minifiée et gzippée.',
+  demoRun: 'Dispatcher loginRequest',
+  demoReset: 'Réinitialiser',
+  demoStateTitle: 'État',
+  demoJournalTitle: 'Dispatché',
+  demoReturned: 'renvoyée par l’effect',
+  demoEmpty: 'Rien n’a encore été dispatché.',
+  demoStatusIdle: 'En attente. Appuyez sur le bouton pour envoyer une action.',
+  demoStatusRunning: 'L’updater a déjà écrit l’état. L’effect travaille.',
+  demoStatusDone:
+    'L’effect a répondu par une action, et son updater a réécrit l’état.',
+  demoNote:
+    'Ceci tourne sur la vraie librairie. L’action et l’updater tiennent dans un seul tick synchrone, ils sont donc terminés avant que l’effect démarre — l’attente que vous voyez, c’est l’effect, et rien d’autre.',
+  homeCompareTitle: 'Ce que ça remplace',
+  homeCompareByHand: 'À la main',
+  homeCompareWith: 'Avec ngx-statewise',
+  homeNotForTitle: 'Quand ne pas l’utiliser',
+  homeNotForLead: 'Trois cas où autre chose vous servira mieux.',
+  homeDoorsTitle: 'Par où commencer',
   homeContentsTitle: 'Sommaire',
   homeTitle: 'ngx-statewise — gestion d’état pour Angular',
 };

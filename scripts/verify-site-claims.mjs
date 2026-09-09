@@ -1,10 +1,10 @@
 /**
- * The landing page tells the reader how big the library is. A number written
- * into a page is true on the day it is written and silently false afterwards,
- * so this rebuilds the measurement from the freshly built package and fails if
- * it no longer rounds to what the site claims.
+ * The site states two numbers about the library: the version it documents, and
+ * how big it is. Both are true on the day they are written and silently false
+ * afterwards, so neither is trusted — this reads them back from the package
+ * and from a fresh measurement, and fails if either has drifted.
  *
- * The measurement is the one people mean by "bundle size": every public export
+ * The size is the one people mean by "bundle size": every public export
  * bundled together, minified, gzipped, with Angular and RxJS left out because
  * an Angular application already carries them.
  *
@@ -28,14 +28,35 @@ const claimSource = join(
   'site.ts',
 );
 
+const packageManifest = join(root, 'projects', 'ngx-statewise', 'package.json');
+
 function fail(message) {
-  console.error(`verify:size — ${message}`);
+  console.error(`verify:claims — ${message}`);
   process.exit(1);
 }
 
-const claimed = /export const LIBRARY_GZIP_KB = ([\d.]+);/.exec(
-  readFileSync(claimSource, 'utf8'),
-);
+const site = readFileSync(claimSource, 'utf8');
+
+// --- the version -----------------------------------------------------------
+const claimedVersion = /export const LIBRARY_VERSION = '([^']+)';/.exec(site);
+
+if (claimedVersion === null) {
+  fail(`no LIBRARY_VERSION found in ${claimSource}`);
+}
+
+const publishedVersion = JSON.parse(
+  readFileSync(packageManifest, 'utf8'),
+).version;
+
+if (claimedVersion[1] !== publishedVersion) {
+  fail(
+    `the site says version ${claimedVersion[1]}, the package says ${publishedVersion}.\n` +
+      `Update LIBRARY_VERSION in ${claimSource}.`,
+  );
+}
+
+// --- the size --------------------------------------------------------------
+const claimed = /export const LIBRARY_GZIP_KB = ([\d.]+);/.exec(site);
 
 if (claimed === null) {
   fail(`no LIBRARY_GZIP_KB found in ${claimSource}`);
@@ -78,5 +99,6 @@ if (measured !== Number(claimed[1])) {
 }
 
 console.log(
-  `verify:size — ${String(measured)} kB minified and gzipped, as claimed.`,
+  `verify:claims — version ${publishedVersion}, ` +
+    `${String(measured)} kB minified and gzipped. Both as claimed.`,
 );

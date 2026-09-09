@@ -59,6 +59,34 @@
   white-space: nowrap;
 }
 
+/* Small, quiet, and next to the name rather than in the corner: it answers
+   "which version is this documenting", which is the first thing a reader of a
+   pre-1.0 library wants to know. */
+.header__version {
+  align-self: center;
+  margin-left: calc(var(--space-1) * -1);
+  padding: 0.05rem var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: var(--transition-hover);
+
+  &:hover {
+    border-color: var(--border-strong);
+    color: var(--text-strong);
+  }
+}
+
+@media (max-width: 30rem) {
+  .header__version {
+    display: none;
+  }
+}
+
 .header__brand-mark {
   width: auto;
   height: 1.35rem;
@@ -319,9 +347,10 @@
   flex: 1;
 }
 
-.layout--no-nav {
-  grid-template-columns: minmax(0, 1fr);
-  max-width: 68rem;
+/* The landing page has no table of contents on its right, so the shell gives
+   the middle column what the guide spends on one. */
+.layout--landing {
+  max-width: 96rem;
 }
 
 .sidebar {
@@ -435,6 +464,10 @@
 .footer__link {
   color: inherit;
   text-underline-offset: 0.2em;
+
+  & + & {
+    margin-left: var(--space-4);
+  }
 
   &:hover {
     color: var(--text-strong);

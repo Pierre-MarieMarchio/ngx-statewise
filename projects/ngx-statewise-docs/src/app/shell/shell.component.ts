@@ -18,7 +18,14 @@ import {
   uiStrings,
   type Locale,
 } from '../i18n';
-import { CHANGELOG_URL, NPM_URL, REPOSITORY_URL, SITE_URL } from '../site';
+import {
+  CHANGELOG_URL,
+  LIBRARY_VERSION,
+  NPM_URL,
+  RELEASES_URL,
+  REPOSITORY_URL,
+  SITE_URL,
+} from '../site';
 import { DocsUiManager, THEME_CHOICES, type ThemeChoice } from '../ui-state';
 import { SearchDialogComponent } from '../search/search-dialog.component';
 import { IconComponent } from './icon.component';
@@ -56,6 +63,8 @@ export class ShellComponent {
   protected readonly repositoryUrl = REPOSITORY_URL;
   protected readonly npmUrl = NPM_URL;
   protected readonly changelogUrl = CHANGELOG_URL;
+  protected readonly releasesUrl = RELEASES_URL;
+  protected readonly version = LIBRARY_VERSION;
 
   protected readonly text = computed(() => uiStrings(this.locale.code));
 
@@ -68,14 +77,12 @@ export class ShellComponent {
   protected readonly navOpen = this.ui.navOpen;
 
   /**
-   * The guide sidebar, and the button that opens it on a narrow screen. The
-   * landing page already lists every page of the guide, so showing the sidebar
-   * there would be the same links twice on one screen; every other page is a
-   * guide page and wants it. The landing page is the one that reports an empty
-   * path.
+   * The landing page, which is the one that reports an empty path. It keeps the
+   * sidebar like every other page, and only takes a wider shell: it has no
+   * table of contents on the right to fill the slack.
    */
-  protected readonly showsGuideNav = computed(
-    () => this.currentPage.path().length > 0,
+  protected readonly isLanding = computed(
+    () => this.currentPage.path().length === 0,
   );
 
   /** The icon on the closed menu reflects what is painted, not what was picked:
