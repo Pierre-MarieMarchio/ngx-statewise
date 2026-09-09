@@ -22,7 +22,6 @@ import { TaskTableComponent } from '../task-table/task-table.component';
   imports: [TaskTableComponent],
   templateUrl: './personal-task-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './personal-task-list.component.scss',
 })
 export class PersonalTaskListComponent {
   public allTasks = input.required<Task[]>();

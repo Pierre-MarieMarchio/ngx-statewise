@@ -1,8 +1,6 @@
 export { PersonalTaskListComponent } from './personal-task-list/personal-task-list.component';
 export { ProjectPickerComponent } from './project-picker/project-picker.component';
 export { TaskKanbanComponent } from './task-kanban/task-kanban.component';
-export { OverviewKanbanComponent } from './overview-kanban/overview-kanban.component';
-export { OverviewTaskListComponent } from './overview-task-list/overview-task-list.component';
 export { TaskDetailsComponent } from './task-details/task-details.component';
 export { TaskSearchComponent } from './task-search/task-search.component';
 export { TaskTableComponent } from './task-table/task-table.component';

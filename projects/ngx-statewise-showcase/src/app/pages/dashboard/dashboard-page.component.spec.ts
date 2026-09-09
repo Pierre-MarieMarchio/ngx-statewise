@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import {
   fakeAuthManager,
   fakeAuthSession,
@@ -22,10 +23,13 @@ import { ProjectManager } from '@app/features/project/states/project/project.man
 import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 describe('DashboardPageComponent', () => {
+  let navigations: unknown[];
+
   let taskManager: FakeTaskManager;
 
   const mount = async () => {
     taskManager = fakeTaskManager([sampleTask()]);
+    navigations = [];
 
     await TestBed.configureTestingModule({
       imports: [DashboardPageComponent],
@@ -39,6 +43,16 @@ describe('DashboardPageComponent', () => {
         { provide: TASK_RELOAD, useValue: fakeTaskReload() },
         { provide: PROJECT_RELOAD, useValue: fakeProjectReload() },
         { provide: TaskManager, useValue: taskManager },
+        {
+          provide: Router,
+          useValue: {
+            navigate: (commands: unknown) => {
+              navigations.push(commands);
+
+              return Promise.resolve(true);
+            },
+          },
+        },
         { provide: ProjectManager, useValue: fakeProjectManager() },
         // The details panel names its assignees through the port
         // `features/project` declares and the composition answers.
@@ -51,13 +65,38 @@ describe('DashboardPageComponent', () => {
     return fixture;
   };
 
-  it('renders the task list, the kanban and the user picker', async () => {
+  it('renders the projects, my tasks and the user picker', async () => {
     const fixture = await mount();
     const host = fixture.nativeElement as HTMLElement;
 
-    expect(host.querySelector('app-overview-task-list')).not.toBeNull();
-    expect(host.querySelector('app-overview-kanban')).not.toBeNull();
+    expect(host.querySelector('app-project-picker')).not.toBeNull();
+    expect(host.querySelector('app-personal-task-list')).not.toBeNull();
     expect(host.querySelector('app-user-picker')).not.toBeNull();
+  });
+
+  /** The two headings this page is, now that it is no longer the board again. */
+  it('says what each half of it is', async () => {
+    const fixture = await mount();
+
+    expect(
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          '.section-card-title',
+        ),
+      ).map((title) => title.textContent?.trim()),
+    ).toEqual(['Projects', 'My tasks']);
+  });
+
+  /**
+   * Choosing a project is choosing it everywhere, so the only thing left is to
+   * go where it can be worked on.
+   */
+  it('goes to the board once a project is chosen', async () => {
+    const fixture = await mount();
+
+    await fixture.componentInstance.openBoard();
+
+    expect(navigations).toEqual([['/task']]);
   });
 
   it('opens the panel on the task it was given and closes it again', async () => {

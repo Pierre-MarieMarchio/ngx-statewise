@@ -12,6 +12,7 @@
       [retryable]="true"
       (retried)="taskManager.getAll()"
     />
+
     <!--
       A refused write, in the server's own words. Not retryable: what to do
       about "assign someone before marking it done" is to assign someone, not
@@ -22,9 +23,27 @@
       [error]="taskManager.saveError() !== null"
       [errorMessage]="taskManager.saveError() ?? ''"
     />
+
     <div class="dashboard-container">
-      <app-overview-task-list (taskSelected)="selectTask($event)" />
-      <app-overview-kanban />
+      <!--
+        The same picker the task page ends with, because it is the same
+        question. Choosing here goes on to the board, since choosing a project
+        and then staying on a page that shows every project is a choice with
+        nothing to show for itself.
+      -->
+      <app-section-card heading="Projects">
+        <app-project-picker
+          [tasks]="taskManager.tasks()"
+          (chosen)="openBoard()"
+        />
+      </app-section-card>
+
+      <app-section-card heading="My tasks">
+        <app-personal-task-list
+          [allTasks]="taskManager.tasks()"
+          (taskSelected)="selectTask($event)"
+        />
+      </app-section-card>
     </div>
   </div>
 

@@ -16,10 +16,10 @@
         <mat-label>Project</mat-label>
         <mat-select
           aria-label="The project every tab of this page is showing"
-          [value]="projectManager.selectedProjectId()"
-          (valueChange)="projectManager.selectProject($event)"
+          [value]="projectManager.selectedProjectId() ?? allProjects"
+          (valueChange)="onProjectPicked($event)"
         >
-          <mat-option [value]="null">All projects</mat-option>
+          <mat-option [value]="allProjects">All projects</mat-option>
           @for (project of projectManager.projects(); track project.id) {
             <mat-option [value]="project.id">{{ project.title }}</mat-option>
           }
@@ -112,10 +112,12 @@
           <mat-icon class="tab-icon">person</mat-icon>
           My Tasks
         </ng-template>
-        <app-personal-task-list
-          (taskSelected)="selectTask($event)"
-          [allTasks]="currentProject.tasks()"
-        />
+        <div class="tab-body">
+          <app-personal-task-list
+            (taskSelected)="selectTask($event)"
+            [allTasks]="currentProject.tasks()"
+          />
+        </div>
       </mat-tab>
       <mat-tab>
         <ng-template mat-tab-label>

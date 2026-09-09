@@ -75,6 +75,21 @@ export class BoardPageComponent {
    */
   public readonly selectedTab = signal(0);
 
+  /**
+   * What the selector holds for "all of them".
+   *
+   * Not `null`: a `mat-select` reads a null value as no selection at all and
+   * draws an empty box, so the one option that means something would have been
+   * the one with nothing written in it.
+   */
+  public readonly allProjects = 'all-projects';
+
+  public onProjectPicked(value: string): void {
+    this.projectManager.selectProject(
+      value === this.allProjects ? null : value,
+    );
+  }
+
   private readonly selectedTaskId = signal<string | null>(null);
 
   /**

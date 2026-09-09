@@ -64,7 +64,8 @@ describe('ProjectPickerComponent', () => {
 
     expect(counts[0]).toBe('3 tasks');
     expect(counts[1]).toBe('2 tasks — 1 to do, 0 in progress, 1 done');
-    expect(counts[2]).toBe('1 tasks — 1 to do, 0 in progress, 0 done');
+    // Not "1 tasks": the count is read as often as the name beside it.
+    expect(counts[2]).toBe('1 task — 1 to do, 0 in progress, 0 done');
   });
 
   it('chooses the project whose row was pressed, and says it did', async () => {

@@ -60,6 +60,11 @@ export class ProjectPickerComponent {
 
   public readonly total = computed(() => this.tasks().length);
 
+  /** "1 task", not "1 tasks" — the count is read as often as the name. */
+  public counted(total: number): string {
+    return total === 1 ? '1 task' : `${String(total)} tasks`;
+  }
+
   public choose(projectId: string | null): void {
     this.projectManager.selectProject(projectId);
     this.chosen.emit();

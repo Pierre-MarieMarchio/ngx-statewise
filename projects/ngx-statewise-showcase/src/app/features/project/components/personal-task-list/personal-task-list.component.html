@@ -1,7 +1,5 @@
-<div class="personal-task-list-container">
-  <app-task-table
-    [tasks]="tasks()"
-    emptyMessage="No task is assigned to you."
-    (taskSelected)="taskSelected.emit($event)"
-  />
-</div>
+<app-task-table
+  [tasks]="tasks()"
+  emptyMessage="No task is assigned to you."
+  (taskSelected)="taskSelected.emit($event)"
+/>

@@ -18,7 +18,7 @@
           (click)="choose(null)"
         >
           <span class="project-picker-name">All projects</span>
-          <span class="project-picker-counts">{{ total() }} tasks</span>
+          <span class="project-picker-counts">{{ counted(total()) }}</span>
         </button>
       </li>
 
@@ -44,7 +44,7 @@
             ></span>
             <span class="project-picker-name">{{ row.project.title }}</span>
             <span class="project-picker-counts">
-              {{ row.total }} tasks — {{ row.counts.todo }} to do,
+              {{ counted(row.total) }} — {{ row.counts.todo }} to do,
               {{ row.counts['in-progress'] }} in progress,
               {{ row.counts.done }} done
             </span>
