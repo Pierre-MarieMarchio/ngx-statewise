@@ -4,8 +4,8 @@ import {
   computed,
   inject,
 } from '@angular/core';
-import { LOCALE, uiStrings } from '../../core/i18n';
-import { FlowDemoManager } from './flow-demo.manager';
+import { LOCALE, uiStrings } from '../../../../core/i18n';
+import { FlowDemoManager } from '../../flow-demo.manager';
 
 /**
  * The landing page's diagram, with the library running underneath it. Its own
