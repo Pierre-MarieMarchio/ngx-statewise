@@ -1,58 +1,30 @@
+/*
+ * Six selectors are gone from this sheet, and five from `overview-kanban`:
+ * `.kanban-task-body`, `.kanban-task-column`, `.kanban-task-column-header`,
+ * `.kanban-task-header`, `.kanban-task-header-section` and `--column-width`,
+ * none of which their templates had rendered since the board moved into
+ * `shared/ui` under its own class names. They carried the columns' fill,
+ * padding, scroll and radius — which is why an empty column had become an
+ * empty space. Those live with the board now.
+ */
 .kanban-task-container {
-  --column-width: 600px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   height: calc(100vh - 187px);
   margin-right: 1rem;
+}
 
-  .project-accordion {
-    margin-top: 1rem;
+.project-accordion {
+  margin-top: 1rem;
+}
 
-    .kanban-project-task-expansion-panel {
-      background: transparent !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-
-      .kanban-task-header-section {
-        max-width: calc(var(--column-width) * 3);
-        padding-left: 1rem;
-        padding-right: 1rem;
-        background-color: var(--mat-sys-background, #fff);
-      }
-
-      .kanban-task-header {
-        max-width: calc(var(--column-width) * 3);
-        width: 100%;
-        display: flex;
-        justify-content: left !important;
-        margin-left: 1rem;
-      }
-
-      .kanban-task-column-header {
-        max-width: var(--column-width);
-        background-color: var(--mat-sys-surface);
-        border-radius: 0.3rem 0.3rem 0 0;
-      }
-
-      .kanban-task-body {
-        display: flex;
-        gap: 1rem;
-        flex: 1;
-        max-height: 80%;
-
-        .kanban-task-column {
-          box-sizing: border-box;
-          flex: 1;
-          max-width: var(--column-width);
-          display: flex;
-          flex-direction: column;
-          background-color: var(--mat-sys-surface);
-          padding: 1rem;
-          overflow-y: auto;
-          border-radius: 0 0 0.3rem 0.3rem;
-        }
-      }
-    }
-  }
+/*
+ * The panel draws no chrome of its own: it is a project heading over a board,
+ * and a raised surface around one only competed with the columns' own.
+ */
+.kanban-project-task-expansion-panel {
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
