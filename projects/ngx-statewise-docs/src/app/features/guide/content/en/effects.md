@@ -20,7 +20,9 @@ The asynchronous half of a feature: API calls, navigation, storage, logging —
 everything that is not a state change.
 
 Effects always run **after** the updater, so they never read stale state. The
-library enforces the sequence action → updater → effect.
+library enforces the sequence action → updater → effect. An
+[interceptor](/guide/interceptors) is the one step that runs earlier, when one
+guards the action.
 
 An effect may return another action, and that action goes through the same
 cycle: its updater, then its own effects. A flow like "log in, load the
