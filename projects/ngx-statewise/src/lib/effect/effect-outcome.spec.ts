@@ -45,6 +45,21 @@ describe('resolveEffectOutcome', () => {
   });
 
   /**
+   * Asserted on the subscription, not on the result: the promise resolves once
+   * whether or not the source is left subscribed, so dropping `take(1)` would
+   * keep a subscriber on a long-lived source for ever and change nothing else.
+   */
+  it('stops listening to a one-shot source after its first emission', async () => {
+    const source = new Subject<Action>();
+    const outcome = resolve(source);
+
+    source.next(first);
+
+    await expect(outcome).resolves.toEqual([first]);
+    expect(source.observed).toBe(false);
+  });
+
+  /**
    * An `async` handler returns a promise built by the intrinsic constructor,
    * while `zone.js` replaces the global one with `ZoneAwarePromise`. Recognizing
    * a promise by identity would drop the actions of every such effect, so the
