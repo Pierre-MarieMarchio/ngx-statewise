@@ -233,6 +233,14 @@ describe('declaring a guide page', () => {
     expect(declaring(flattened)).toThrow(/needs one per locale/);
   });
 
+  it('refuses a field nothing reads, rather than ignoring it', () => {
+    expect(
+      declaring(
+        COMPLETE.replace('slug: effects', 'slug: effects\nauthor: someone'),
+      ),
+    ).toThrow(/declares "author", which nothing reads/);
+  });
+
   it('refuses two pages claiming the same slug', () => {
     expect(() =>
       defineGuideSections([{ title: SECTION, pages: [COMPLETE, COMPLETE] }]),

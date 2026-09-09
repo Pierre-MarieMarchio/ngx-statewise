@@ -13,12 +13,21 @@ import whyEn from './content/en/why.md';
 import { parsePageSource, type MetadataValue } from './front-matter';
 
 /**
- * URL segments, so: lower case, digits, and single hyphens between them.
+ * Everything the guide is built from has to be initialised above
+ * `GUIDE_SECTIONS`.
  *
- * Declared up here because the guide below is built while this module loads,
- * and a `const` the builder reads is not hoisted the way a function is.
+ * That list is built while this module loads, and `defineGuideSections` is
+ * only reachable up there because a function declaration is hoisted. A `const`
+ * is not: one of these declared below the list reads as `undefined` at the
+ * moment the guide is assembled, and the failure surfaces as every spec in the
+ * suite dying on a property of undefined.
  */
+
+/** URL segments, so: lower case, digits, and single hyphens between them. */
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/** The three fields a page declares. Anything else is a typo or a hope. */
+const FIELDS = ['slug', 'title', 'summary'];
 
 /** A value the interface must have in every locale. */
 export type Translated = Readonly<Record<LocaleCode, string>>;
@@ -194,6 +203,8 @@ function definePage(source: GuideSource): GuidePage {
   const { metadata, body } = parsePageSource(markdown);
   const where = name(body);
 
+  refuseUnknownFields(metadata, where);
+
   return {
     slug: requireSlug(metadata, where),
     title: requireTranslated(metadata, 'title', where),
@@ -205,6 +216,19 @@ function definePage(source: GuideSource): GuidePage {
       [DEFAULT_LOCALE.code]: body,
     },
   };
+}
+
+function refuseUnknownFields(
+  metadata: ReadonlyMap<string, MetadataValue>,
+  where: string,
+): void {
+  const unknown = [...metadata.keys()].filter((key) => !FIELDS.includes(key));
+
+  if (unknown.length > 0) {
+    throw new Error(
+      `${where} declares ${unknown.map((key) => `"${key}"`).join(', ')}, which nothing reads. A page declares ${FIELDS.join(', ')}, and only those.`,
+    );
+  }
 }
 
 function requireSlug(
