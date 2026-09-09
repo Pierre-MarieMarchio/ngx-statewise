@@ -1,0 +1,49 @@
+name: Bundle size
+
+# What the README publishes about weight, re-measured through Angular's own
+# production pipeline: three builds of one throwaway application — nothing
+# imported, the action helpers only, everything — so the figures are the
+# library's cost rather than Angular's.
+#
+# Not in `ci.yml`, and not in `npm run check`: it needs a full `npm install` of
+# a fixture outside the repository, which is minutes per run and would be spent
+# re-answering a question most diffs do not ask. What changes the answer is a
+# new export or a new dependency edge, which is a slow clock — so this runs
+# weekly, and on demand when a change is expected to move it.
+#
+# The ceiling lives in tools/bundle-size/measure.mjs and is what makes this a
+# gate rather than a report: a measurement without one is taken once and never
+# again.
+on:
+  schedule:
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: bundle-size-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    name: Measure what the library adds
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build, pack and weigh three production builds
+        run: npm run measure:size

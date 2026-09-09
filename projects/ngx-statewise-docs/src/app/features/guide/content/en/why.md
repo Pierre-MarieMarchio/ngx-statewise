@@ -88,6 +88,11 @@ need conventions everyone follows, and cannot spend a week teaching them.
 Five cases, and they are real. If you are in one of them, something else will
 serve you better.
 
+Not on this list any more, because it was measured and it was wrong: wanting
+only the action helpers. Through Angular's production pipeline they cost
+**0.2 kB gzipped** on their own, engine excluded — the package tree-shakes.
+See [what it weighs](/guide/why#what-it-weighs).
+
 **You need one serialisable state tree**, for time-travel debugging or for
 replaying a session. State here is spread across injectables, and no single
 object holds it.
@@ -101,10 +106,10 @@ observables drive your state more than your users do, an Observable-first
 library suits you better. An effect reads one emission and stops listening —
 that is a deliberate limit, not an oversight.
 
-**You want only the action helpers.** `defineActionsGroup` and `payload` are
-pleasant on their own, and you cannot have them on their own: the package is
-one graph, so importing any of it brings the engine. There is no tree-shaken
-subset — the whole 4.8 kB gzipped comes along. Copy the twenty lines instead.
+**You want a store, or a devtools timeline.** There is no central object to
+inspect and no extension to plug in. The action history reads back what was
+dispatched and the path it took, which covers "what happened"; it does not
+cover stepping through it.
 
 **Your features call each other past an `await`.** A dispatch a _synchronous_
 effect handler emits joins the cascade, whichever manager it went through.
@@ -113,6 +118,23 @@ browser — so you pass the manager's promise on yourself. That is one line, and
 it is a line you have to know about; if crossing feature boundaries mid-effect
 is your normal shape, a central store never asks the question.
 [The rule, and both forms](/guide/managers).
+
+## What it weighs
+
+Measured through `ng build --configuration production`, as the delta against
+the same application built without the library at all — reproduce it with
+`npm run measure:size`:
+
+| What you import         | Adds, gzipped |
+| ----------------------- | ------------- |
+| the action helpers only | 0.2 kB        |
+| every public export     | 4.2 kB        |
+
+The first row is the interesting one, and it corrects something this project
+believed about itself: a measurement taken with a plain bundler over the whole
+barrel put the irreducible floor at three quarters of the total. Through
+Angular's own pipeline there is no such floor. Import `defineActionsGroup` and
+`payload` and the engine does not come with them.
 
 > [!NOTE]
 > None of these is a performance argument. The library does almost nothing at
