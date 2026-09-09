@@ -1,4 +1,5 @@
 import {
+  CdkDrag,
   CdkDragDrop,
   CdkDropList,
   moveItemInArray,
@@ -18,7 +19,6 @@ import {
   signal,
   TemplateRef,
 } from '@angular/core';
-import { MatGridListModule } from '@angular/material/grid-list';
 import {
   KanbanCardComponent,
   type KanbanCardData,
@@ -39,12 +39,7 @@ import type {
  */
 @Component({
   selector: 'app-kanban',
-  imports: [
-    CdkDropList,
-    KanbanCardComponent,
-    MatGridListModule,
-    NgTemplateOutlet,
-  ],
+  imports: [CdkDrag, CdkDropList, KanbanCardComponent, NgTemplateOutlet],
   templateUrl: './kanban.component.html',
   styleUrl: './kanban.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -84,6 +79,15 @@ export class KanbanComponent<Item extends KanbanCardData> {
    * was — so the result has to be said.
    */
   public readonly announcement = signal('');
+
+  /**
+   * The grid's tracks, one per column. Written here rather than as a custom
+   * property because `repeat()` reading a `var()` count is not something every
+   * engine agrees on.
+   */
+  public readonly columnTracks = computed(
+    () => `repeat(${String(this.columns().length)}, minmax(0, 1fr))`,
+  );
 
   /** Every list of this board, which is what connects them to each other. */
   public readonly dropListIds = computed(() =>

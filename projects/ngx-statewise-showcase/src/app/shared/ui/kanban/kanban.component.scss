@@ -1,14 +1,58 @@
-.kanban-body {
-  display: flex;
-  gap: 1rem;
+/* A box, so a caller can give the board a height to fill. */
+:host {
+  display: block;
 }
 
-.kanban-column {
-  flex: 1 1 0;
-  min-width: 0;
-  min-height: 4rem;
+/*
+ * One grid, whose track definition the headers and the columns share. The
+ * number of tracks comes from the component rather than a custom property:
+ * `repeat()` reading a `var()` count is not something every engine agrees on.
+ *
+ * Two rows: the headers size the first, the tallest column sizes the second.
+ * Stretching is what makes three columns of unequal content read as one board
+ * rather than three ragged stacks.
+ */
+.kanban {
+  display: grid;
+  gap: 0.5rem 1rem;
 }
 
-.kanban-column-header h3 {
+.kanban-column-header {
   margin: 0;
+  padding: 0 0.25rem;
+  font-size: 1rem;
+}
+
+/*
+ * A column is a surface, and it has to look like somewhere a card can land
+ * even when it holds none.
+ *
+ * This is what extracting the board into `shared/ui` silently lost: the two
+ * callers went on styling `.kanban-task-column` and `.overview-kanban-column`,
+ * class names their templates had stopped rendering. The fill, the padding and
+ * the scroll went with them, and an empty column became an empty space with a
+ * label floating over it.
+ */
+.kanban-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 8rem;
+  overflow-y: auto;
+  padding: 0.75rem;
+  border: 1px dashed transparent;
+  border-radius: 0.3rem;
+  background-color: var(--mat-sys-surface);
+}
+
+/*
+ * Where the card being dragged may be dropped. The CDK puts `receiving` on
+ * every connected list other than the one it came from, so the highlight
+ * names the choices rather than restating where the card already is —
+ * `dragging`, on the source column, is deliberately left plain.
+ */
+.kanban-column.cdk-drop-list-receiving {
+  border-color: var(--mat-sys-primary);
 }

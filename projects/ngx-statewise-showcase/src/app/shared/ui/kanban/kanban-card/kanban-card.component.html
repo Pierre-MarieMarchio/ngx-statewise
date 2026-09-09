@@ -1,9 +1,4 @@
-<mat-card
-  cdkDrag
-  [cdkDragData]="data()"
-  class="kanban-card cdk-drag-animating"
-  appearance="outlined"
->
+<mat-card class="kanban-card" appearance="outlined">
   <div class="card-type-indicator" [class]="'indicator-' + cardType()">
     <ng-content></ng-content>
   </div>

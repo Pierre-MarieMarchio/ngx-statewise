@@ -1,16 +1,22 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
-import { CdkDrag } from '@angular/cdk/drag-drop';
 
+/**
+ * What one card of a board looks like. It draws the frame and the indicator;
+ * the caller's template fills the body.
+ *
+ * It carries no `cdkDrag` of its own. The board puts one on this host, because
+ * the host is what the drop list holds and what carries the card's role, its
+ * label and its id — so it has to be what moves.
+ */
 @Component({
   selector: 'app-kanban-card',
-  imports: [MatCardModule, CdkDrag],
+  imports: [MatCardModule],
   templateUrl: './kanban-card.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './kanban-card.component.scss',
 })
-export class KanbanCardComponent<T extends KanbanCardData> {
-  public data = input.required<T>();
+export class KanbanCardComponent {
   public cardType = input.required<string>();
 }
 
