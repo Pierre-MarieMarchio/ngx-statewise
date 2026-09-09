@@ -1,0 +1,137 @@
+<!--
+  The centrepiece. The diagram is not a picture of the flow: the library the
+  site documents is wired underneath it, and the button dispatches a real
+  action through a real updater and a real effect. The state panel and the
+  journal show what happened, not a script of what would.
+
+  It prerenders in its resting state, so the page is whole before any of this
+  becomes interactive.
+-->
+<section class="cycle" aria-labelledby="cycle-title">
+  <div class="cycle__head">
+    <h2 class="cycle__title" id="cycle-title">{{ text().homeFlowTitle }}</h2>
+
+    <div class="cycle__controls">
+      <button
+        class="button button--accent"
+        type="button"
+        [disabled]="demo.isRunning()"
+        (click)="demo.run()"
+      >
+        {{ text().demoRun }}
+      </button>
+      <button
+        class="button"
+        type="button"
+        [disabled]="!demo.hasRun()"
+        (click)="demo.reset()"
+      >
+        {{ text().demoReset }}
+      </button>
+    </div>
+  </div>
+
+  <div class="cycle__scope">
+    <p class="cycle__owner">
+      <span class="cycle__owner-name">{{ text().homeFlowManager }}</span>
+      <span class="cycle__owner-text">{{ text().homeFlowManagerText }}</span>
+    </p>
+
+    <div class="cycle__track" [attr.data-phase]="demo.phase()">
+      <!--
+        The legend for the two colours. Hidden from assistive technology on
+        purpose: it names a convention that only exists visually, and the two
+        words on their own read as nonsense out loud.
+      -->
+      <p class="cycle__phases" aria-hidden="true">
+        <span class="cycle__phase cycle__phase--sync">
+          {{ text().homeFlowSynchronous }}
+        </span>
+        <span class="cycle__phase cycle__phase--async">
+          {{ text().homeFlowAsynchronous }}
+        </span>
+      </p>
+
+      <ol class="cycle__stations" role="list">
+        <li
+          class="cycle__station cycle__station--first"
+          [class.cycle__station--passed]="demo.hasRun()"
+        >
+          <span class="cycle__station-name">{{ text().homeFlowAction }}</span>
+          <span class="cycle__station-text">
+            {{ text().homeFlowActionText }}
+          </span>
+        </li>
+        <li
+          class="cycle__station cycle__station--crossing"
+          [class.cycle__station--passed]="demo.hasRun()"
+        >
+          <span class="cycle__station-name">{{ text().homeFlowUpdater }}</span>
+          <span class="cycle__station-text">
+            {{ text().homeFlowUpdaterText }}
+          </span>
+        </li>
+        <li
+          class="cycle__station cycle__station--last"
+          [class.cycle__station--running]="demo.isRunning()"
+          [class.cycle__station--passed]="demo.phase() === 'done'"
+        >
+          <span class="cycle__station-name">{{ text().homeFlowEffect }}</span>
+          <span class="cycle__station-text">
+            {{ text().homeFlowEffectText }}
+          </span>
+        </li>
+      </ol>
+
+      <p
+        class="cycle__return"
+        [class.cycle__return--live]="demo.phase() === 'done'"
+      >
+        <span class="cycle__return-text">{{ text().homeFlowReturn }}</span>
+      </p>
+    </div>
+
+    <!-- What the run actually did, rather than what the drawing implies. -->
+    <div class="readout">
+      <div class="readout__panel">
+        <p class="readout__title">{{ text().demoStateTitle }}</p>
+        <dl class="readout__state">
+          <div class="readout__field">
+            <dt>isLoading</dt>
+            <dd [class.readout__value--set]="demo.isLoading()">
+              {{ demo.isLoading() }}
+            </dd>
+          </div>
+          <div class="readout__field">
+            <dt>user</dt>
+            <dd [class.readout__value--set]="demo.user() !== null">
+              {{ demo.user() ?? 'null' }}
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="readout__panel">
+        <p class="readout__title">{{ text().demoJournalTitle }}</p>
+        <ol class="readout__journal" role="list">
+          @for (entry of demo.journal(); track $index) {
+            <li class="readout__entry">
+              <code>{{ entry.type }}</code>
+              @if (entry.returned) {
+                <span class="readout__origin">{{ text().demoReturned }}</span>
+              }
+            </li>
+          } @empty {
+            <li class="readout__entry readout__entry--empty">
+              {{ text().demoEmpty }}
+            </li>
+          }
+        </ol>
+      </div>
+    </div>
+
+    <p class="readout__status" aria-live="polite">{{ status() }}</p>
+  </div>
+
+  <p class="cycle__note">{{ text().demoNote }}</p>
+</section>

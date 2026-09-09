@@ -1,0 +1,460 @@
+@use '../../../assets/scroll-shadows' as shadows;
+
+/* The shell gives the landing page a wider grid than a guide page, and the
+   page uses it: the demo, the comparison and the doors are all things that
+   read better wide. The cap keeps a line of prose from crossing an ultrawide
+   monitor; the blocks that want the room set their own width. */
+:host {
+  display: block;
+  max-width: 76rem;
+  /* The shell centres this in a flex row below 72rem, and a flex item defaults
+     to min-width: auto — which the comparison table's own minimum then pushes
+     past the viewport. */
+  min-width: 0;
+}
+
+/* --- Hero ----------------------------------------------------------------
+   Argument on the left, mark on the right. Stacked, the lockup pushed the
+   sentence down the page and left the other half of the row empty; side by
+   side, each holds up its own end. The heading comes first in the markup
+   whatever the columns do, so the page still announces its name first. */
+.hero {
+  display: grid;
+  gap: var(--space-6);
+  align-items: center;
+}
+
+@media (min-width: 60rem) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+  }
+
+  .hero__title {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+  }
+
+  .hero__lead {
+    grid-column: 1;
+    grid-row: 1;
+  }
+}
+
+.hero__title {
+  margin: 0;
+  line-height: 0;
+}
+
+.hero__logo {
+  width: clamp(8rem, 26vw, 17rem);
+  height: auto;
+}
+
+.hero__subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-md);
+}
+
+.hero__thesis {
+  max-width: 22ch;
+  margin: var(--space-4) 0 0;
+  color: var(--text-strong);
+  font-size: clamp(1.875rem, 5vw, 3.5rem);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.032em;
+  line-height: 1.06;
+  text-wrap: balance;
+}
+
+.hero__tagline {
+  max-width: 34rem;
+  margin: var(--space-5) 0 0;
+  color: var(--text-muted);
+  font-family: var(--font-serif);
+  font-size: var(--text-body);
+  line-height: var(--leading-prose);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.hero__install {
+  display: inline-flex;
+  align-items: center;
+  height: 2.25rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--surface-code);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+/* A measured number rather than an adjective, and the only claim on the page
+   that could rot: `npm run verify:size` rebuilds it from the package on every
+   check. Set quietly — it is a fact, not a badge. */
+.hero__size {
+  margin: var(--space-3) 0 0;
+  color: var(--text-faint);
+  font-size: var(--text-base);
+}
+
+/* The demo is its own component; the page owns the space around it. */
+.landing__demo {
+  display: block;
+  margin-top: var(--space-9);
+}
+
+/* --- The shape of the code -----------------------------------------------
+   The same three stations, same order, same colours, as code. A state library
+   is chosen on what it costs to use, and the page had none on it. */
+.shape {
+  margin-top: var(--space-8);
+}
+
+.shape__title {
+  margin: 0 0 var(--space-5);
+  color: var(--text-strong);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.02em;
+}
+
+/* `minmax(0, 1fr)` and `min-width: 0`, both of them: a grid item's automatic
+   minimum size is its content's, and the content here is a `pre` whose longest
+   line does not wrap. Without these the column cannot shrink below the widest
+   line of code and the whole page scrolls sideways on a phone. */
+/* Capped, unlike the sections around it: the longest line here is 62
+   characters, and a block twice that wide is mostly empty box. The comparison
+   and the doors are what spend the page's width. */
+.shape__steps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  max-width: 46rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shape__step {
+  min-width: 0;
+}
+
+.shape__step-name {
+  margin: 0 0 var(--space-2);
+  color: var(--mark);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
+}
+
+.shape__step--async .shape__step-name {
+  color: var(--link);
+}
+
+/* The one edge that ties a block back to its station on the track above. */
+.shape__step .code-block {
+  max-width: none;
+  border-left: 2px solid var(--mark);
+  transition: border-left-width var(--duration-fast) var(--ease-out);
+}
+
+.shape__step--async .code-block {
+  border-left-color: var(--link);
+}
+
+/* While the effect above is running, this is the code that is running. */
+.shape__step--running .code-block {
+  border-left-width: 4px;
+  background-color: var(--link-soft);
+}
+
+.shape__step--running .shape__step-name::after {
+  content: '';
+  display: inline-block;
+  width: 0.45em;
+  height: 0.45em;
+  margin-left: 0.5em;
+  vertical-align: 0.1em;
+  border-radius: 50%;
+  background-color: currentcolor;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .shape__step--running .shape__step-name::after {
+    animation: station-pulse 1s ease-in-out infinite;
+  }
+}
+
+.shape__note {
+  margin: var(--space-5) 0 0;
+  color: var(--text-muted);
+  font-family: var(--font-serif);
+  font-size: var(--text-body);
+  line-height: var(--leading-prose);
+}
+
+/* --- What it replaces ----------------------------------------------------
+   Against writing the same thing with plain services, which is what the reader
+   is doing today. Not against another library: the argument here is that the
+   flow is worth having, not that someone else got it wrong. */
+.compare {
+  margin-top: var(--space-9);
+}
+
+.compare__title {
+  margin: 0 0 var(--space-5);
+  color: var(--text-strong);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.02em;
+}
+
+.compare__scroll {
+  overflow-x: auto;
+  @include shadows.scroll-shadows(var(--surface-page));
+}
+
+.compare__table {
+  width: 100%;
+  /* Below this the three columns squeeze into unreadable slivers. It scrolls
+     instead, and the shadow on the wrapper says so. */
+  min-width: 34rem;
+  border-collapse: collapse;
+  font-size: var(--text-base);
+  line-height: var(--leading-snug);
+  text-align: left;
+
+  th,
+  td {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  thead th {
+    border-bottom: 1px solid var(--border-strong);
+    color: var(--text-strong);
+    font-weight: var(--weight-semibold);
+    white-space: nowrap;
+  }
+
+  tbody th {
+    width: 14rem;
+    color: var(--text-strong);
+    font-weight: var(--weight-medium);
+  }
+
+  td {
+    color: var(--text-muted);
+  }
+
+  tbody tr:last-child th,
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+/* The one column the page is arguing for. A tint, not a colour: the words are
+   doing the work. */
+.compare__ours {
+  background-color: var(--surface-subtle);
+  color: var(--text) !important;
+}
+
+/* --- When not to use it --------------------------------------------------
+   On the landing page on purpose. A reader deciding is better served finding
+   this here than four clicks in, and no competitor puts it anywhere. */
+.not-for {
+  margin-top: var(--space-9);
+}
+
+.not-for__title {
+  margin: 0 0 var(--space-2);
+  color: var(--text-strong);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.02em;
+}
+
+.not-for__lead {
+  max-width: 34rem;
+  margin: 0 0 var(--space-5);
+  color: var(--text-muted);
+  font-family: var(--font-serif);
+  font-size: var(--text-body);
+}
+
+.not-for__list {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 60rem) {
+  .not-for__list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.not-for__item {
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--border-strong);
+  color: var(--text-muted);
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  line-height: var(--leading-prose);
+}
+
+/* --- Where to start ------------------------------------------------------ */
+.doors {
+  margin-top: var(--space-9);
+}
+
+.doors__title {
+  margin: 0 0 var(--space-5);
+  color: var(--text-strong);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.02em;
+}
+
+.doors__list {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 48rem) {
+  .doors__list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.doors__door {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  height: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: var(--transition-hover);
+
+  &:hover {
+    border-color: var(--border-strong);
+    background-color: var(--surface-hover);
+  }
+
+  &:hover .doors__door-title {
+    color: var(--link);
+  }
+}
+
+.doors__door-title {
+  color: var(--text-strong);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  transition: color var(--duration-instant) var(--ease-out);
+}
+
+.doors__door-text {
+  color: var(--text-muted);
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  line-height: var(--leading-snug);
+}
+
+/* --- Contents ------------------------------------------------------------
+   A table of contents, not a grid of cards: a title, a summary, one row each.
+   It has to hold ten entries today and about forty after the guide is split. */
+.contents {
+  margin-top: var(--space-9);
+}
+
+.contents__title {
+  margin: 0 0 var(--space-5);
+  color: var(--text-strong);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.02em;
+}
+
+.contents__section + .contents__section {
+  margin-top: var(--space-6);
+}
+
+.contents__section-title {
+  margin: 0 0 var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-strong);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+}
+
+.contents__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A fixed title column, not one sized to its content: each row is its own
+   grid, so `max-content` gives every row a different split and the summaries
+   come out on a ragged left edge. 11rem clears the longest title in either
+   language — "Migrating from 0.6.x" measures 150px — and one straight edge
+   down the middle is what makes a table of contents scannable. */
+.contents__link {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  gap: 0 var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  margin-left: calc(var(--space-3) * -1);
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: background-color var(--duration-instant) var(--ease-out);
+
+  &:hover {
+    background-color: var(--surface-hover);
+  }
+
+  &:hover .contents__link-title {
+    color: var(--link);
+  }
+}
+
+.contents__link-title {
+  color: var(--text-strong);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  transition: color var(--duration-instant) var(--ease-out);
+}
+
+.contents__link-summary {
+  color: var(--text-muted);
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  line-height: var(--leading-snug);
+}
+
+/* --- Narrow ------------------------------------------------------------- */
+@media (max-width: 44rem) {
+  .contents__link {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.1rem;
+  }
+}

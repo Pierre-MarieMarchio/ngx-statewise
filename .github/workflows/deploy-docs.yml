@@ -1,0 +1,98 @@
+name: Deploy docs
+
+# main, not dev: the site is the guide of the *published* library, and main is
+# what release.yml publishes to npm as `latest`. Deploying from dev would
+# document an API that is not released yet, to readers the npm page sends here.
+on:
+  push:
+    branches: [main]
+    # A release commit only touches the version and the changelog, so it does
+    # not need to redeploy. Everything under these paths does.
+    paths:
+      - 'projects/ngx-statewise-docs/**'
+      - '.github/workflows/deploy-docs.yml'
+      - 'angular.json'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+# Never cancel a run that may already be deploying: queue instead.
+concurrency:
+  group: deploy-docs
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build the site
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v6
+        with:
+          # Turns Pages on the first time this runs, so the site does not wait
+          # on someone flipping a switch in the repository settings.
+          enablement: true
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The docs site resolves `ngx-statewise` to dist, like the showcase does.
+      - name: Build the library
+        run: npm run build:library
+
+      - name: Build the documentation site
+        run: npm run build:docs
+
+      - name: Upload the prerendered site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist/ngx-statewise-docs/browser
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+      - name: Summarise the run
+        if: always()
+        run: |
+          {
+            echo "## Documentation site"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| URL | ${{ steps.deployment.outputs.page_url }} |"
+            echo "| Commit | \`${{ github.sha }}\` |"
+            echo "| Outcome | ${{ job.status }} |"
+          } >> "$GITHUB_STEP_SUMMARY"

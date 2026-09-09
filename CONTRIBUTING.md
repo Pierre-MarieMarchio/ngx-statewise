@@ -87,8 +87,13 @@ longer runs when that action is dispatched through another manager.
 npm run check
 ```
 
-Format check, lint, library tests with coverage, both library entry points
-built, showcase tests, showcase built. It must exit 0 from a clean tree.
+Format check, lint, the documentation site's own checks, library tests with
+coverage, both library entry points built, the compatibility fixture
+type-checked, the site's claims about the library remeasured, showcase tests,
+showcase built, docs tests, docs built. It must exit 0 from a clean tree.
+
+Never check it with `npm run check | tail`: the exit status you would read is
+`tail`'s, so a failing run reports 0. Redirect to a file instead.
 
 The library is held to **100% statements, lines and functions, and 95%
 branches**, and the gate fails the command. Both halves of it live on the
@@ -109,6 +114,93 @@ The showcase is tested but deliberately outside the gate.
 > `npm run build:library` has to run before serving or testing it. `npm run check`
 > already orders this correctly. Never rebuild the library while `npm start` is
 > serving — restart the serve instead.
+
+## Adding a page to the guide
+
+The guide is at
+[`projects/ngx-statewise-docs`](projects/ngx-statewise-docs). A page is one
+markdown file that declares itself, plus one line saying where it is read.
+
+**1. Write the file** at
+`projects/ngx-statewise-docs/src/app/features/guide/content/en/<slug>.md`. It
+opens with its own metadata, and the slug has to be the filename:
+
+```markdown
+---
+slug: interceptors
+title:
+  en: Interceptors
+  fr: Interceptors
+  es: Interceptors
+  de: Interceptors
+  pt-BR: Interceptors
+summary:
+  en: Asking before an updater applies.
+  fr: Demander avant qu'un updater s'applique.
+  es: Preguntar antes de que un updater se aplique.
+  de: Fragen, bevor ein Updater greift.
+  pt-BR: Perguntar antes de um updater se aplicar.
+---
+
+# Interceptors
+
+The first heading repeats the English title, and a spec holds you to it.
+```
+
+The title and the summary are needed in all five locales because the interface
+is translated even though the guide is not: they are what the sidebar, the
+landing page's contents and the browser tab show. The prose itself stays in
+English, with the banner every page carries.
+
+A value runs to the end of its line, so a colon inside a summary needs no
+quoting. Only `slug`, `title` and `summary` are read; anything else in the
+block is an error rather than a silently ignored line.
+
+**2. Place it** in
+[`guide-pages.ts`](projects/ngx-statewise-docs/src/app/features/guide/guide-pages.ts) —
+an import, and the identifier in the section it belongs to, at the position it
+should be read at:
+
+```typescript
+import interceptorsEn from './content/en/interceptors.md';
+
+// …
+  {
+    title: { en: 'Key concepts' /* … */ },
+    pages: [statesEn, actionsEn, updatersEn, effectsEn, interceptorsEn],
+  },
+```
+
+That file holds sections and reading order and nothing else. The router, the
+sidebar, the landing page's contents, the previous/next footer and the search
+index are all derived from it, so those five need no edit.
+
+Run `npm run format` after this step. One more identifier is usually what
+pushes a `pages:` line past Prettier's width, and `npm run check` starts with
+`format:check`.
+
+**That is the whole change.** Fenced blocks take `title="auth.updater.ts"` and
+a `prefer` or `avoid` stance; callouts use GitHub's `> [!NOTE]` syntax. Links
+between pages are absolute, `](/guide/effects#scope)`, never bare anchors.
+
+### What fails if you stop half way
+
+Nothing about a page is checked by eye:
+
+- a missing title or summary in any locale, a slug that could not be a URL
+  segment, or two pages claiming one slug **fails the prerender and every
+  spec** — the metadata is read while the module loads;
+- an import you forgot to place in a section is an unused binding, so
+  **`npm run lint`** refuses it;
+- a markdown file no one imported, or a slug that disagrees with its filename,
+  is invisible from inside the bundle, so **`npm run verify:docs`** checks
+  those against the filesystem;
+- a page whose first heading is not its English title fails
+  `guide-pages.spec.ts`.
+
+To translate a page's prose rather than add one, put the translation at
+`content/<locale>/<slug>.md` — body only, no metadata block — and give the
+registry the object form: `{ source: effectsEn, translations: { fr: effectsFr } }`.
 
 ## Releasing
 
