@@ -1,15 +1,20 @@
 import { TestBed } from '@angular/core/testing';
 import { AUTH_SESSION } from '@app/features/common';
+import { TEAM_DIRECTORY } from '@app/features/project/ports';
 import {
   fakeAuthSession,
   FakeAuthSession,
   sampleTask,
+  fakeTeamDirectory,
   sampleUser,
 } from '@testing/fake-managers';
 import { openedSampleTask, openFirstRow } from '@testing/task-table';
 import { TaskTableComponent } from './task-table.component';
 
 const TASKS = [sampleTask(), sampleTask({ id: 'task-2', title: 'Second' })];
+
+/** The headers every role sees, before the one only an admin does. */
+const READS = ['Title', 'Status', 'Priority', 'Due date', 'Assigned to'];
 
 describe('TaskTableComponent', () => {
   let authManager: FakeAuthSession;
@@ -21,7 +26,10 @@ describe('TaskTableComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [TaskTableComponent],
-      providers: [{ provide: AUTH_SESSION, useValue: authManager }],
+      providers: [
+        { provide: AUTH_SESSION, useValue: authManager },
+        { provide: TEAM_DIRECTORY, useValue: fakeTeamDirectory() },
+      ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(TaskTableComponent);
@@ -55,9 +63,7 @@ describe('TaskTableComponent', () => {
     const fixture = await mount();
 
     expect(headers(fixture.nativeElement as HTMLElement)).toEqual([
-      'Title',
-      'Status',
-      'Priority',
+      ...READS,
       'Organisation',
       'Open',
     ]);
@@ -69,9 +75,7 @@ describe('TaskTableComponent', () => {
     fixture.detectChanges();
 
     expect(headers(fixture.nativeElement as HTMLElement)).toEqual([
-      'Title',
-      'Status',
-      'Priority',
+      ...READS,
       'Open',
     ]);
   });
@@ -82,9 +86,7 @@ describe('TaskTableComponent', () => {
     fixture.detectChanges();
 
     expect(headers(fixture.nativeElement as HTMLElement)).toEqual([
-      'Title',
-      'Status',
-      'Priority',
+      ...READS,
       'Open',
     ]);
   });
@@ -141,13 +143,9 @@ describe('TaskTableComponent', () => {
     it('leaves them alone by default', async () => {
       const fixture = await mount();
 
-      expect(widths(fixture.nativeElement as HTMLElement)).toEqual([
-        null,
-        null,
-        null,
-        null,
-        null,
-      ]);
+      expect(widths(fixture.nativeElement as HTMLElement)).toEqual(
+        [...READS, 'Organisation', 'Open'].map(() => null),
+      );
     });
 
     /** The title keeps the slack the others give up: it identifies the row. */
@@ -156,6 +154,8 @@ describe('TaskTableComponent', () => {
 
       expect(widths(fixture.nativeElement as HTMLElement)).toEqual([
         null,
+        '200px',
+        '200px',
         '200px',
         '200px',
         '200px',

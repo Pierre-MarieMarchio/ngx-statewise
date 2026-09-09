@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { AUTH_SESSION } from '@app/features/common';
+import { TEAM_DIRECTORY } from '@app/features/project/ports';
 import {
   fakeAuthSession,
   FakeAuthSession,
+  fakeTeamDirectory,
   sampleTask,
 } from '@testing/fake-managers';
 import { openedSampleTask, openFirstRow } from '@testing/task-table';
@@ -26,7 +28,10 @@ describe('PersonalTaskListComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [PersonalTaskListComponent],
-      providers: [{ provide: AUTH_SESSION, useValue: authManager }],
+      providers: [
+        { provide: AUTH_SESSION, useValue: authManager },
+        { provide: TEAM_DIRECTORY, useValue: fakeTeamDirectory() },
+      ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(PersonalTaskListComponent);

@@ -1,10 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { AUTH_SESSION } from '@app/features/common';
+import { TEAM_DIRECTORY } from '@app/features/project/ports';
 import { TaskManager } from '@app/features/project/states/task/task.manager';
 import {
   fakeAuthSession,
   fakeTaskManager,
   sampleTask,
+  fakeTeamDirectory,
 } from '@testing/fake-managers';
 import { openedSampleTask, openFirstRow } from '@testing/task-table';
 import { OverviewTaskListComponent } from './overview-task-list.component';
@@ -22,6 +24,7 @@ describe('OverviewTaskListComponent', () => {
       imports: [OverviewTaskListComponent],
       providers: [
         { provide: AUTH_SESSION, useValue: fakeAuthSession() },
+        { provide: TEAM_DIRECTORY, useValue: fakeTeamDirectory() },
         { provide: TaskManager, useValue: fakeTaskManager(TASKS) },
       ],
     }).compileComponents();

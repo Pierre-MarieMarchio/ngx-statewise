@@ -1,10 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AUTH_SESSION } from '@app/features/common';
+import { TEAM_DIRECTORY } from '@app/features/project/ports';
 import { Project } from '@app/features/project/models';
 import { ProjectManager } from '@app/features/project/states/project/project.manager';
 import {
   fakeAuthSession,
   fakeProjectManager,
+  fakeTeamDirectory,
   sampleUser,
 } from '@testing/fake-managers';
 import { openFirstRow } from '@testing/task-table';
@@ -57,6 +59,7 @@ describe('ProjectTaskListComponent', () => {
           provide: AUTH_SESSION,
           useValue: fakeAuthSession(sampleUser({ role: 'admin' })),
         },
+        { provide: TEAM_DIRECTORY, useValue: fakeTeamDirectory() },
       ],
     }).compileComponents();
 
@@ -86,7 +89,17 @@ describe('ProjectTaskListComponent', () => {
       host().querySelectorAll<HTMLElement>('th[mat-header-cell]'),
     ).map((cell) => cell.style.width || null);
 
-    expect(capped).toEqual([null, '200px', '200px', '200px', null]);
+    // The title keeps its slack, the action column has none to give, and the
+    // five between them are capped — including the two an admin alone sees.
+    expect(capped).toEqual([
+      null,
+      '200px',
+      '200px',
+      '200px',
+      '200px',
+      '200px',
+      null,
+    ]);
   });
 
   it('opens a task from a named button, once', () => {

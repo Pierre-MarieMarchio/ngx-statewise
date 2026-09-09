@@ -1,6 +1,11 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { AUTH_SESSION } from '@app/features/common';
 import { Task, TaskListColumnItem } from '../models';
+import { TEAM_DIRECTORY } from '../ports';
+import { TaskPresentationService } from './task-presentation.service';
+
+/** What a cell shows for a field the task does not carry. */
+const NOTHING = '—';
 
 /** The action column, spelled the same way by the four templates. */
 const OPEN_TASK_COLUMN = 'open';
@@ -16,6 +21,8 @@ const OPEN_TASK_COLUMN = 'open';
 @Injectable({ providedIn: 'root' })
 export class TaskColumnsService {
   private readonly session = inject(AUTH_SESSION);
+  private readonly directory = inject(TEAM_DIRECTORY);
+  private readonly presentation = inject(TaskPresentationService);
 
   /** The order the tables show, and the only place these are declared. */
   private readonly all: readonly TaskListColumnItem[] = [
@@ -33,6 +40,29 @@ export class TaskColumnsService {
       columnDef: 'priority',
       header: 'Priority',
       cell: (task: Task) => `${task.priority}`,
+    },
+    /*
+     * Both read a field the tables never showed, although the panel did and
+     * the "My Tasks" tab sorted by one of them. The cells are arrow functions
+     * called from a template, so the signal each one reads is a dependency of
+     * the view that calls it: a directory arriving late redraws the column.
+     */
+    {
+      columnDef: 'dueDate',
+      header: 'Due date',
+      cell: (task: Task) =>
+        task.dueDate ? this.presentation.formatDate(task.dueDate) : NOTHING,
+    },
+    {
+      columnDef: 'assignee',
+      header: 'Assigned to',
+      cell: (task: Task) => {
+        const names = (task.assignedUserIds ?? []).map((userId) =>
+          this.directory.nameOf(userId),
+        );
+
+        return names.length > 0 ? names.join(', ') : NOTHING;
+      },
     },
     {
       columnDef: 'organisation',
