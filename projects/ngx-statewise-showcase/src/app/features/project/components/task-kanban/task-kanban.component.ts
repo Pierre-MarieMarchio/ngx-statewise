@@ -15,7 +15,7 @@ import {
   type KanbanColumn,
   type KanbanMove,
   type KanbanReorder,
-} from '@shared/reusable/kanban';
+} from '@shared/ui/kanban';
 import { TaskBoardService, TaskSelectionService } from '../../services';
 
 @Component({

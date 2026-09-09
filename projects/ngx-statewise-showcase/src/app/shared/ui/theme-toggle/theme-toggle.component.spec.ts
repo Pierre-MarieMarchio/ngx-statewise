@@ -1,14 +1,14 @@
 import { TestBed } from '@angular/core/testing';
-import { DarkModeComponent } from './dark-mode.component';
+import { ThemeToggleComponent } from './theme-toggle.component';
 import { Theme } from './theme.enum';
 
-describe('DarkModeComponent', () => {
+describe('ThemeToggleComponent', () => {
   it('shows the icon of the theme in use and flips it on click', async () => {
     await TestBed.configureTestingModule({
-      imports: [DarkModeComponent],
+      imports: [ThemeToggleComponent],
     }).compileComponents();
 
-    const fixture = TestBed.createComponent(DarkModeComponent);
+    const fixture = TestBed.createComponent(ThemeToggleComponent);
     fixture.detectChanges();
 
     const host = fixture.nativeElement as HTMLElement;

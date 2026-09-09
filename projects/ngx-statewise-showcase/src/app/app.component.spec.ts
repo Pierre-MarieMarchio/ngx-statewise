@@ -3,8 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { fakeAuthManager } from '@testing/fake-managers';
 import { AppComponent } from './app.component';
 import { AuthManager } from './features/auth/states/auth/auth.manager';
-import { ThemeService } from './shared/reusable/dark-mode/theme.service';
-import { Theme } from './shared/reusable/dark-mode/theme.enum';
+import { Theme, ThemeService } from './shared/ui/theme-toggle';
 
 describe('AppComponent', () => {
   let previousBodyClass: string;

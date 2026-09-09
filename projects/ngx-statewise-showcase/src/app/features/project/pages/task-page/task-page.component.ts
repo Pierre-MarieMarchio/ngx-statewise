@@ -10,10 +10,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { Task } from '@shared/app-common/models';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
 import { SidePanelComponent } from '@shared/ui/side-panel';
-import {
-  DataStateComponent,
-  TaskDetailsComponent,
-} from '@shared/app-common/components';
+import { DataStateComponent } from '@shared/ui/data-state';
+import { TaskDetailsComponent } from '@shared/app-common/components';
 import {
   TaskKanbanComponent,
   AllTaskListComponent,

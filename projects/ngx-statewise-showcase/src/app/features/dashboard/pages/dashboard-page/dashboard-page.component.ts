@@ -11,10 +11,8 @@ import {
 } from '../../components';
 import { SidePanelComponent } from '@shared/ui/side-panel';
 import { Task } from '@shared/app-common/models';
-import {
-  DataStateComponent,
-  TaskDetailsComponent,
-} from '@shared/app-common/components';
+import { DataStateComponent } from '@shared/ui/data-state';
+import { TaskDetailsComponent } from '@shared/app-common/components';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
 import { DashboardUserPickerComponent } from '../../components/dashboard-user-picker/dashboard-user-picker.component';
 

@@ -1,5 +1,5 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { DataStateComponent } from '@shared/app-common/components';
+import { DataStateComponent } from '@shared/ui/data-state';
 import { LoginFormComponent } from './components/login-form/login-form.component';
 import { AuthManager } from '../states';
 import { LoginSubmit } from '../models';

@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { ThemeService } from './theme.service';
 
 @Component({
-  selector: 'dm-toggle',
+  selector: 'app-theme-toggle',
   standalone: true,
   imports: [
     MatSlideToggleModule,
@@ -17,7 +17,7 @@ import { ThemeService } from './theme.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <button
-      (click)="togleTheme()"
+      (click)="toggleTheme()"
       mat-icon-button
       class="m-1 color-secondary"
       [attr.aria-label]="
@@ -34,10 +34,10 @@ import { ThemeService } from './theme.service';
     </button>
   `,
 })
-export class DarkModeComponent {
+export class ThemeToggleComponent {
   public readonly themeService = inject(ThemeService);
 
-  public togleTheme(): void {
+  public toggleTheme(): void {
     this.themeService.updateTheme();
   }
 }

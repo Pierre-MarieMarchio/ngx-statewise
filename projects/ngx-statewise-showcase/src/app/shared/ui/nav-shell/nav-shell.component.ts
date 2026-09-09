@@ -7,7 +7,7 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { RouterModule } from '@angular/router';
-import { DarkModeComponent } from '@shared/reusable/dark-mode/dark-mode.component';
+import { ThemeToggleComponent } from '@shared/ui/theme-toggle';
 import { MatButtonModule } from '@angular/material/button';
 import { NavigationItem } from './navigation-item.model';
 
@@ -23,7 +23,7 @@ import { NavigationItem } from './navigation-item.model';
   selector: 'app-nav-shell',
   imports: [
     MatListModule,
-    DarkModeComponent,
+    ThemeToggleComponent,
     MatIconModule,
     RouterModule,
     MatButtonModule,

@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-import { ThemeService } from './shared/reusable/dark-mode/theme.service';
+import { ThemeService } from './shared/ui/theme-toggle';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { NavShellComponent } from './shared/ui/nav-shell';
 import { navigationItems } from './config/navigation.configuration';

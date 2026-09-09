@@ -15,7 +15,7 @@ import {
   KanbanComponent,
   type KanbanColumn,
   type KanbanMove,
-} from '@shared/reusable/kanban';
+} from '@shared/ui/kanban';
 
 @Component({
   selector: 'app-dashboard-kanban',
