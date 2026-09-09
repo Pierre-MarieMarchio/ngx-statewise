@@ -16,8 +16,8 @@ summary:
 
 # Why ngx-statewise
 
-What you get for accepting one rule about ordering, and the three cases where
-you should reach for something else.
+What you get for accepting one rule about ordering, what it costs you in
+lines, and the five cases where you should reach for something else.
 
 ## What the design buys you
 
@@ -49,8 +49,22 @@ losing one. A
 dispatch aimed at the wrong manager throws in development and reaches your
 `ErrorHandler` in production. A failing effect does the same.
 
-**Little to write.** A feature is a state class, an action group, an updater
-and a manager. No reducer switch, no selector file, no module.
+**Little to write, for the library's part.** No reducer switch, no selector
+file, no module, no store to register a slice with.
+
+**And a fair amount to write, for yours.** This is the claim to be careful
+with, so it is measured rather than felt — on this repository's own showcase,
+and re-measured by `npm run check`, so these numbers cannot rot:
+
+| What                                                      | Measured           |
+| --------------------------------------------------------- | ------------------ |
+| the complete `task` flow                                  | 5 files, 380 lines |
+| `asReadonly()` lines re-exposing state, across 3 managers | 14                 |
+| `isLoading.set` / `isError.set` lines, across 3 updaters  | 29                 |
+
+A library that declares state, derived values and methods in one block will be
+shorter than that. What you get for the length is that every one of those lines
+says what it does, and that no two of them are the same kind of thing.
 
 ## When it fits
 
@@ -66,7 +80,7 @@ need conventions everyone follows, and cannot spend a week teaching them.
 
 ## When it does not
 
-Three cases, and they are real. If you are in one of them, something else will
+Five cases, and they are real. If you are in one of them, something else will
 serve you better.
 
 **You need one serialisable state tree**, for time-travel debugging or for
@@ -81,6 +95,19 @@ application is mostly derivations of derivations, you will miss it.
 observables drive your state more than your users do, an Observable-first
 library suits you better. An effect reads one emission and stops listening —
 that is a deliberate limit, not an oversight.
+
+**You want only the action helpers.** `defineActionsGroup` and `payload` are
+pleasant on their own, and you cannot have them on their own: the package is
+one graph, so importing any of it brings the engine. There is no tree-shaken
+subset — the whole 4.7 kB gzipped comes along. Copy the twenty lines instead.
+
+**Your features call each other past an `await`.** A dispatch a _synchronous_
+effect handler emits joins the cascade, whichever manager it went through.
+Past an `await` it cannot — there is no asynchronous context to read in a
+browser — so you pass the manager's promise on yourself. That is one line, and
+it is a line you have to know about; if crossing feature boundaries mid-effect
+is your normal shape, a central store never asks the question.
+[The rule, and both forms](/guide/managers).
 
 > [!NOTE]
 > None of these is a performance argument. The library does almost nothing at
