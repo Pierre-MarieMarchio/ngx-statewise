@@ -9,6 +9,7 @@ import { RunningEffects } from '../effect/running-effects';
 import { declareUpdaterActionTypes } from '../updater/declared-action-types';
 import type { StateBoundHandler } from '../updater/updater-definition';
 import { ActionHistory, keepAction } from './action-history';
+import { DEFAULT_MAX_CASCADE_DEPTH } from './cascade-depth';
 import type { DispatchScope } from './dispatch-scope';
 import { GlobalUpdaterRegistry } from './global-updater-registry';
 import type { MisroutedDispatchReaction } from './misrouted-dispatch';
@@ -53,6 +54,7 @@ describe('StatewiseEngine', () => {
 
   function build(
     misroutedDispatch: MisroutedDispatchReaction,
+    maxCascadeDepth: number = DEFAULT_MAX_CASCADE_DEPTH,
   ): StatewiseEngine {
     return new StatewiseEngine(
       effects,
@@ -62,6 +64,7 @@ describe('StatewiseEngine', () => {
       history,
       errorHandler,
       misroutedDispatch,
+      maxCascadeDepth,
     );
   }
 
@@ -502,6 +505,88 @@ describe('StatewiseEngine', () => {
       await execution;
     });
   });
+  describe('cascade bound', () => {
+    it("stops two effects returning each other's action", async () => {
+      register('PING', () => ({ type: 'PONG' }));
+      register('PONG', () => ({ type: 'PING' }));
+
+      await expect(
+        engine.execute({ type: 'PING' }, emptyScope),
+      ).rejects.toThrow(/PING → PONG → PING/);
+    });
+
+    it('names the whole path of the cascade it stopped', async () => {
+      register('SOURCE', () => ({ type: 'CHILD' }));
+      register('CHILD', () => ({ type: 'GRANDCHILD' }));
+      engine = build('ignore', 2);
+
+      await expect(
+        engine.execute({ type: 'SOURCE' }, emptyScope),
+      ).rejects.toThrow('SOURCE → CHILD → GRANDCHILD');
+    });
+
+    it('lets a cascade reaching the bound exactly through', async () => {
+      const recorder: Recorder = { applied: [] };
+      register('SOURCE', () => ({ type: 'CHILD' }));
+      engine = build('ignore', 2);
+
+      await engine.execute(
+        { type: 'SOURCE' },
+        scopeOf(['CHILD', recordingHandler(recorder)]),
+      );
+
+      expect(recorder.applied).toEqual([undefined]);
+    });
+
+    /**
+     * The bound is checked before anything is applied, so the action it
+     * refuses leaves nothing behind — otherwise a half-applied cascade would
+     * be harder to reason about than the one that was stopped.
+     */
+    it('leaves no trace of the action it refused', async () => {
+      const recorder: Recorder = { applied: [] };
+      let blockedEffectRuns = 0;
+      register('SOURCE', () => ({ type: 'BLOCKED' }));
+      register('BLOCKED', () => {
+        blockedEffectRuns += 1;
+      });
+      engine = build('ignore', 1);
+
+      await expect(
+        engine.execute(
+          { type: 'SOURCE' },
+          scopeOf(['BLOCKED', recordingHandler(recorder)]),
+        ),
+      ).rejects.toThrow(/maxCascadeDepth/);
+
+      expect(recorder.applied).toEqual([]);
+      expect(blockedEffectRuns).toBe(0);
+      expect(history.snapshot()).toEqual([{ type: 'SOURCE' }]);
+    });
+
+    /**
+     * Depth is what the bound counts, not breadth: a fan-out of siblings all
+     * sits at the same level, and stopping it would fire on a cascade that
+     * was going to end.
+     */
+    it('counts the depth of a cascade, not the actions it fans out', async () => {
+      const recorder: Recorder = { applied: [] };
+      register('SOURCE', () => [
+        { type: 'CHILD', payload: 'first' },
+        { type: 'CHILD', payload: 'second' },
+        { type: 'CHILD', payload: 'third' },
+      ]);
+      engine = build('ignore', 2);
+
+      await engine.execute(
+        { type: 'SOURCE' },
+        scopeOf(['CHILD', recordingHandler(recorder)]),
+      );
+
+      expect(recorder.applied).toEqual(['first', 'second', 'third']);
+    });
+  });
+
   describe('concurrency policy', () => {
     /**
      * The run was abandoned while its cascade was still going, so the failure

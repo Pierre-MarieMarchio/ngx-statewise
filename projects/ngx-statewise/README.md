@@ -100,7 +100,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-`provideStatewise` accepts four optional options:
+`provideStatewise` accepts five optional options:
 
 | Option              | Type                              | Description                                                                                                                                   |
 | ------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -108,6 +108,16 @@ export const appConfig: ApplicationConfig = {
 | `updaters`          | `Updater<unknown>[]`              | Updaters available application-wide, whichever manager dispatches.                                                                            |
 | `history`           | `{ limit, redact? }`              | Records the last `limit` actions. Disabled by default; `limit` must be a positive integer. `redact` replaces an action before it is recorded. |
 | `misroutedDispatch` | `'throw' \| 'report' \| 'ignore'` | What a dispatch reaching the wrong manager does. Throws in development, reports to the `ErrorHandler` in production.                          |
+| `maxCascadeDepth`   | `number`                          | How many actions one cascade may chain, the dispatched action included. Defaults to `50`; must be a positive integer.                         |
+
+A cascade is held from its root — `dispatchAsync` resolves once every action an effect returned is over, so each level retains the next one. Two effects returning each other's action would therefore not merely spin, they would exhaust the heap and take the tab down with nothing diagnosable left behind. Past `maxCascadeDepth` the cascade is stopped instead, and the error names the whole path, so the cycle reads out directly:
+
+```
+[ngx-statewise] The cascade started by "PING_ACTION" exceeded maxCascadeDepth (50) and was stopped. …
+PING_ACTION → PONG_ACTION → PING_ACTION → …
+```
+
+The bound is checked before anything is applied, so the action it refuses leaves no trace: no state update, no history entry, no effect started. It reaches you like any other cascade failure — `dispatchAsync` rejects, a bare `dispatch` reports to the `ErrorHandler`. Legitimate cascades are short, so the default cannot fire on one that was going to end; raise it only if yours genuinely chains more than fifty actions.
 
 ## Key Concepts
 

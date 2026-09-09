@@ -76,6 +76,11 @@ const orderedActions = defineActionsGroup({
   source: 'Ordered',
   events: { appended: payload<string>() },
 });
+/** Two effects returning each other's action: the cascade never ends. */
+const cycleActions = defineActionsGroup({
+  source: 'Cycle',
+  events: { pinged: emptyPayload, ponged: emptyPayload },
+});
 
 let effectOnlyStarted: Deferred;
 let effectOnlyGate: Deferred;
@@ -141,6 +146,14 @@ class ContractEffects {
 
     return scopedActions.applied(value);
   });
+
+  private readonly cyclePing = createEffect(cycleActions.pinged, () =>
+    cycleActions.ponged(),
+  );
+
+  private readonly cyclePong = createEffect(cycleActions.ponged, () =>
+    cycleActions.pinged(),
+  );
 
   private readonly concurrent = createEffect(
     concurrentActions.started,
@@ -289,6 +302,34 @@ describe('public execution contract', () => {
     expect((handledErrors[0] as Error).message).toBe(
       'unexpected effect failure',
     );
+  });
+
+  describe('a cascade that never ends', () => {
+    it('rejects dispatchAsync instead of exhausting the heap', async () => {
+      await expect(
+        statewise.dispatchAsync(cycleActions.pinged()),
+      ).rejects.toThrow(/exceeded maxCascadeDepth \(50\)/);
+
+      expect(handledErrors).toEqual([]);
+    });
+
+    it('names the cycle it stopped', async () => {
+      await expect(
+        statewise.dispatchAsync(cycleActions.pinged()),
+      ).rejects.toThrow(/CYCLE_PINGED → CYCLE_PONGED → CYCLE_PINGED/);
+    });
+
+    it('reports it to the ErrorHandler when started by dispatch', async () => {
+      statewise.dispatch(cycleActions.pinged());
+
+      await statewise.waitForAllEffects();
+      await Promise.resolve();
+
+      expect(handledErrors.length).toBe(1);
+      expect((handledErrors[0] as Error).message).toMatch(
+        /exceeded maxCascadeDepth/,
+      );
+    });
   });
 
   describe('an effect that promises an action', () => {
