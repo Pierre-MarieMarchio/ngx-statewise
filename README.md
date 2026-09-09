@@ -68,9 +68,10 @@ export class AuthManager {
 }
 ```
 
-The flow is one-way: **action → updater → effect → possibly more actions**. The
-state is settled before any effect runs, and `dispatchAsync` awaits the entire
-chain.
+The flow is one-way: **action → interceptor → updater → effect → possibly more
+actions**. An interceptor — synchronous, and free to refuse the action — is the
+one step that runs ahead of the state; past it, the state is settled before any
+effect runs, and `dispatchAsync` awaits the entire chain.
 
 ## Where things are
 

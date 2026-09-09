@@ -261,9 +261,14 @@ describe('createEffect', () => {
     });
   });
 
+  /**
+   * Named in the message on purpose: `inject` would refuse here too, but its
+   * error blames `inject()`, which says nothing about what the caller wrote.
+   * Matching only on "injection context" passed with the assertion removed.
+   */
   it('refuses to register outside an injection context', () => {
     expect(() => {
       createEffect(actions.withoutPayload, () => undefined);
-    }).toThrow(/injection context/i);
+    }).toThrow(/createEffect\(\).*injection context/is);
   });
 });

@@ -15,6 +15,7 @@ A lightweight and intuitive state management library for Angular.
   - [4. Effects](#4-effects)
   - [5. Managers](#5-managers)
   - [6. Action history](#6-action-history)
+  - [7. Interceptors](#7-interceptors)
 - [Testing](#testing)
 - [Migrating from 0.6.x](#migrating-from-06x)
 - [Benefits](#benefits)
@@ -38,6 +39,8 @@ The core concept of ngx-statewise revolves around a clear, predictable flow of a
 
 - **Manager Dispatches Action**: The manager dispatches this action, which triggers the appropriate updater.
 
+- **Interceptor Decides When Registered**: An interceptor, if one guards the action, is asked first — before any state is touched — and may refuse the action outright. It is the only step that runs ahead of the state.
+
 - **Updater Updates State When Registered**: If an updater handles the action, it modifies the state before effects run. Effect-only actions are also valid.
 
 - **Effect Handles Side Effects**: After the state is updated, any related effect is triggered to handle side operations (like API calls).
@@ -56,7 +59,7 @@ While NgRx and NGXS implement state management based on redux-style patterns wit
 
 - **Simplified Boilerplate**: The amount of code required to implement state management is significantly reduced compared to NgRx or NGXS.
 
-The unidirectional flow (Action → optional Updater → Effect → Potentially More Actions) in ngx-statewise makes state management predictable and easier to debug. When an updater handles an action, its state update is completed before effects execute. Actions without an updater are valid when they exist only to trigger effects.
+The unidirectional flow (Action → optional Interceptor → optional Updater → Effect → Potentially More Actions) in ngx-statewise makes state management predictable and easier to debug. When an updater handles an action, its state update is completed before effects execute — an [interceptor](#7-interceptors) is the one thing that runs earlier, and it runs synchronously, so the guarantee holds unchanged for everything downstream of it. Actions without an updater are valid when they exist only to trigger effects.
 
 ### Considerations
 
@@ -74,6 +77,7 @@ The clear, unidirectional flow with emphasis on cascading effects makes ngx-stat
 - 🧩 Modular and maintainable architecture: Easily extendable with actions, effects, and handlers.
 - 📦 Predictable state updates: Updates are dispatched through actions, with clear and explicit state mutations.
 - 🚀 Effects: Handles asynchronous operations and side effects in a clean and declarative way.
+- 🛑 Interceptors: Asked before the updater, and free to refuse the action — validation, or confirmation before something destructive.
 - 🔍 Easy to debug: State changes and effects are transparent and easy to track.
 
 ## Getting Started
@@ -294,7 +298,7 @@ Handlers are fully inferred from the action creator, no annotation needed:
 
 - `state` is typed by the token passed to `defineUpdater`.
 - `payload` is typed by the action creator. An action without payload produces a handler with no second parameter.
-- A handler must be synchronous. An `async` handler is a compile error, since state must be up to date before effects run.
+- A handler must be synchronous. An `async` handler is a compile error, since state must be up to date before effects run. An [interceptor](#7-interceptors) handler is synchronous for the same reason: it runs before the updater, so anything it awaited would push the state update past the dispatch.
 
 ```typescript
 defineUpdater(AuthState, (on) => {
@@ -774,10 +778,13 @@ await this.statewise.dispatchAsync(loginActions.request(credentials));
 
 The two dispatches differ in how they report failures, and the difference is deliberate:
 
-| Failure           | `dispatch`                            | `dispatchAsync`     |
-| ----------------- | ------------------------------------- | ------------------- |
-| An updater throws | Throws synchronously at the call site | Rejects the promise |
-| An effect fails   | Reported to Angular's `ErrorHandler`  | Rejects the promise |
+| Failure               | `dispatch`                            | `dispatchAsync`     |
+| --------------------- | ------------------------------------- | ------------------- |
+| An updater throws     | Throws synchronously at the call site | Rejects the promise |
+| An interceptor throws | Throws synchronously at the call site | Rejects the promise |
+| An effect fails       | Reported to Angular's `ErrorHandler`  | Rejects the promise |
+
+A refusal is not on that table: it is an expected outcome, not a failure. See [Interceptors](#7-interceptors).
 
 An updater failure is a programming error: it surfaces where it happened rather than being buried in a promise nobody awaits. An effect failure is an execution error: with `dispatch` nobody is there to receive it, so it goes to the `ErrorHandler`; with `dispatchAsync` the caller gets it.
 
@@ -851,6 +858,60 @@ provideStatewise({
 ```
 
 The action itself is untouched — the updater and the effects still receive what was dispatched. Only the entry differs. A redaction that throws takes the dispatch down with it, like any other programming error in a synchronous step.
+
+### 7. Interceptors
+
+An interceptor is asked **before** the updater of its action is applied, and it may refuse the action. That is the whole of it: no state, no side effect, one decision.
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class TaskGuards {
+  private readonly states = inject(TaskStates);
+
+  // Validation: refuse what the current state cannot accept.
+  private readonly beforeAssign = createInterceptor(assignTaskActions.request, ({ taskId }) => this.states.tasks().some((task) => task.id === taskId));
+
+  // Confirmation: the answer has to be available synchronously.
+  private readonly beforeDelete = createInterceptor(deleteTaskActions.request, (task) => window.confirm(`Delete "${task.title}"?`));
+}
+```
+
+Only `false` refuses. Returning nothing — which is what a handler with no return statement does — lets the action through, so an interceptor that only wants to look at what passes reads the same as one that decides.
+
+It needs an injection context, exactly like `createEffect`, and nothing else: declare it in a class the application already instantiates — an effect class listed in `provideStatewise({ effects })`, a manager, or a component. The registration lasts as long as the injector that created it, so an interceptor declared in a component dies with it. The returned handle unregisters it earlier if you need that; ignoring the handle is fine.
+
+#### What a refusal costs
+
+A refused action does **nothing**:
+
+- no updater is applied,
+- no effect is started,
+- nothing is recorded in the [action history](#6-action-history) — the history shows what changed the state, and an entry whose effect is nowhere to be found would be worse than no entry,
+- `dispatchAsync` **resolves**, because a refusal is an expected outcome and not a failure. Rejecting would force a `try/catch` around intended behaviour,
+- nothing reaches Angular's `ErrorHandler`, for the same reason.
+
+The caller therefore does not learn that it was refused: `dispatch` returns `void` and `dispatchAsync` resolves either way. That is deliberate, and it is the right shape for the case interceptors exist for — the interceptor asked, the user said no, the state did not move. Making `dispatchAsync` return `Promise<boolean>` would change the `Statewise` interface and push that boolean through every manager in the application.
+
+One thing a refusal does not undo: the runs the action declares cancelling through an effect's [`cancelOn`](#4-effects) are abandoned before any interceptor is asked. A refusal stops what the action would start, not what it was told to stop.
+
+#### Several interceptors on one action
+
+They all run, in registration order, and asking stops at the first refusal — once the decision is made, there is nothing left for the others to decide.
+
+#### It is synchronous, and takes no options
+
+An interceptor handler is synchronous. An `async` handler is a compile error, and the reason is the same as for an [updater](#3-updaters): everything the library guarantees rests on the dispatch being a synchronous step. The state is settled before effects run, `dispatch()` applies its updater immediately, an updater failure throws at the call site, and two successive dispatches apply their updaters in call order. A decision awaited elsewhere would cost all four.
+
+For the same reason an interceptor cannot run an upstream action. Executing one would apply its updater synchronously while starting its effects asynchronously, so "before" would hold for the state and not for the effects — a guarantee that cannot be stated honestly has no place here. An interceptor that wants to trigger something calls a manager, which is what this guide prescribes anyway.
+
+And it takes **no options** — no `concurrency`, no `cancelOn`, no `mustAnswer`, no `key`, no `abortSignal`. Those govern the runs of an effect, and an interceptor starts no run: there is nothing to cancel, nothing to supersede, nothing to await.
+
+Two more things it does not do:
+
+- It does not run on a [misrouted dispatch](#setup-in-your-angular-application). Nothing of that action belongs to that scope, its decision included.
+- It has no scope of its own. An interceptor guards an action type application-wide, whichever manager dispatches it — like an effect, and unlike an updater.
+
+An interceptor that throws is a programming error, and is treated as one: it escapes synchronously at the call site, exactly like an updater that throws.
 
 ## Testing
 
@@ -989,7 +1050,7 @@ What this buys you: two managers can now dispatch the same action type concurren
 
 - **Signals-First Approach**: Leveraging Angular's native signals for reactive state management, ngx-statewise offers superior performance with automatic UI updates when state changes. This eliminates the need for manual subscription handling that's common with Observable-based solutions.
 
-- **Enforced Unidirectional Flow**: The library's design enforces a predictable sequence (Action → Updater → Effect → Potentially More Actions) that makes debugging and reasoning about application state much simpler. By ensuring state is updated before effects run, all side effects work with the latest state data.
+- **Enforced Unidirectional Flow**: The library's design enforces a predictable sequence (Action → Interceptor → Updater → Effect → Potentially More Actions) that makes debugging and reasoning about application state much simpler. By ensuring state is updated before effects run, all side effects work with the latest state data.
 
 - **Cascading Effects**: ngx-statewise excels at creating powerful chains of operations through its cascading effects design. One action can trigger state updates which lead to effects that dispatch additional actions, making complex workflows easier to orchestrate and maintain.
 

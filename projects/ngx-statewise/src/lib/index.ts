@@ -1,6 +1,7 @@
 export * from './action';
 export * from './dispatch';
 export * from './effect';
+export * from './interceptor';
 export * from './providers';
 export * from './updater';
 

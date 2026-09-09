@@ -7,6 +7,7 @@ import { PendingEffects } from '../effect/pending-effects';
 import type { RegisteredEffect } from '../effect/registered-effect';
 import { RunningEffects, type EffectRun } from '../effect/running-effects';
 import { unansweredEffectError } from '../effect/unanswered-effect';
+import { InterceptorRegistry } from '../interceptor/interceptor-registry';
 import { isUpdaterActionTypeDeclared } from '../updater/declared-action-types';
 import type { StateBoundHandler } from '../updater/updater-definition';
 import { ActionHistory } from './action-history';
@@ -20,14 +21,15 @@ import {
 } from './misrouted-dispatch';
 
 /**
- * Runs actions: applies their updater, then their effects, and recursively the
- * actions those effects return. The returned promise settles once the whole
- * cascade started by the action is over.
+ * Runs actions: asks their interceptors, applies their updater, then their
+ * effects, and recursively the actions those effects return. The returned
+ * promise settles once the whole cascade started by the action is over.
  */
 @Injectable()
 export class StatewiseEngine {
   public constructor(
     private readonly effects: EffectRegistry,
+    private readonly interceptors: InterceptorRegistry,
     private readonly runningEffects: RunningEffects,
     private readonly globalUpdaters: GlobalUpdaterRegistry,
     private readonly pendingEffects: PendingEffects,
@@ -41,6 +43,8 @@ export class StatewiseEngine {
   /**
    * An updater failure is a programming error and escapes synchronously, so it
    * surfaces at the call site instead of being buried in a rejected promise.
+   * An interceptor failure is the same kind of error, and escapes the same
+   * way — being synchronous is what lets it.
    *
    * `path` is the chain of action types that led here, and is internal: a
    * caller dispatches an action, never a cascade.
@@ -65,6 +69,16 @@ export class StatewiseEngine {
 
       // Nothing of this action belongs to this scope, its effects included:
       // running them here would cascade their actions into the wrong scope.
+      return Promise.resolve();
+    }
+
+    // Abandoned before the interceptors are asked, so an action that both
+    // cancels an effect and may be refused still replaces the runs it
+    // declares cancelling. A refusal stops what this action would start, not
+    // what it was told to stop.
+    this.abandonRunsCancelledBy(action.type, scope);
+
+    if (!this.wasGranted(action)) {
       return Promise.resolve();
     }
 
@@ -128,13 +142,28 @@ export class StatewiseEngine {
     this.errorHandler.handleError(misroutedActionError(actionType));
   }
 
+  /**
+   * Whether every interceptor guarding this action type let it through.
+   *
+   * Asked in registration order and stopped at the first refusal: once the
+   * decision is made, running the interceptors after it would let them act on
+   * an action that is not going to happen.
+   */
+  private wasGranted(action: Action): boolean {
+    for (const interceptor of this.interceptors.guarding(action.type)) {
+      if (interceptor.ask(action) === false) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   private runEffects(
     action: Action,
     scope: DispatchScope,
     cascade: readonly string[],
   ): Promise<void> {
-    this.abandonRunsCancelledBy(action.type, scope);
-
     return settleAll(
       this.effects
         .triggeredBy(action.type)
@@ -143,8 +172,9 @@ export class StatewiseEngine {
   }
 
   /**
-   * Abandons before starting anything, so an action that both cancels and
-   * triggers an effect replaces its own runs instead of competing with them.
+   * Abandons before anything of this action happens, so an action that both
+   * cancels and triggers an effect replaces its own runs instead of competing
+   * with them.
    */
   private abandonRunsCancelledBy(
     actionType: string,
