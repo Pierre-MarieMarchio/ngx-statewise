@@ -305,33 +305,49 @@ See [Testing](/guide/testing).
 
 ## Exported types
 
-Almost everything here is inferred for you. These are the names to reach for
-when a signature has to be written out.
+**The rule that selects them: a type is exported when a consumer has to write
+it to annotate a declaration they cannot leave inferred.** Everything else is
+inferred, and exporting it would only invite people to write out what the
+compiler already knows — and would freeze it into the contract.
 
-| Type                                   | What it is                                         |
-| -------------------------------------- | -------------------------------------------------- |
-| `Action`                               | A type, and an optional payload.                   |
-| `EmptyAction` / `ActionWithPayload`    | The two shapes an action takes.                    |
-| `ActionCreator` / `AnyActionCreator`   | What a declaration produces.                       |
-| `EmptyActionCreator`                   | A creator called with no argument.                 |
-| `PayloadActionCreator`                 | A creator called with a payload.                   |
-| `ActionCreatorsGroup`                  | What `defineActionsGroup` returns.                 |
-| `CreatorFromDefinition`                | Picks the creator shape from a payload definition. |
-| `ActionPayloadOf`                      | The payload type carried by a creator.             |
-| `GroupActionType` / `SingleActionType` | The generated type-name strings.                   |
-| `PayloadDefinition`                    | `payload<T>()` or `emptyPayload`.                  |
-| `EmptyPayloadFn` / `ValuePayloadFn`    | What those two are.                                |
-| `Updater`                              | What `defineUpdater` returns.                      |
-| `On` / `StateUpdate`                   | The registration callback, and one handler.        |
-| `EffectHandler`                        | The function `createEffect` takes.                 |
-| `EffectOutcome` / `ResolvedActions`    | What an effect handler may return.                 |
-| `EffectRef`                            | The handle `createEffect` returns.                 |
-| `Statewise`                            | The dispatch handle.                               |
-| `ActionIdentity`                       | Anything carrying a `type`.                        |
-| `StatewiseConfig`                      | The `provideStatewise` options.                    |
-| `StatewiseHistoryOptions`              | The `history` option.                              |
-| `MisroutedDispatchReaction`            | `'throw' \| 'report' \| 'ignore'`.                 |
-| `StatewiseTestingConfig`               | The `provideStatewiseTesting` options.             |
+That is nineteen names. Fifteen more used to be here and were removed in 1.0;
+they are still declared, and still serve these signatures, they are simply not
+yours to name. If you had one written out, delete the annotation: the value it
+described is inferred.
+
+| Type                        | What it is                                      |
+| --------------------------- | ----------------------------------------------- |
+| `Action`                    | A type, and an optional payload.                |
+| `AnyActionCreator`          | Any creator, for writing a generic of your own. |
+| `ActionPayloadOf`           | The payload type carried by a creator.          |
+| `ActionIdentity`            | Anything carrying a `type`.                     |
+| `Updater`                   | What `defineUpdater` returns.                   |
+| `EffectHandler`             | The function `createEffect` takes.              |
+| `EffectOutcome`             | What an effect handler may return.              |
+| `EffectOptions`             | The third argument of `createEffect`.           |
+| `EffectConcurrency`         | `'parallel' \| 'latest' \| 'first'`.            |
+| `EffectContext`             | The second argument of an effect handler.       |
+| `EffectRef`                 | The handle `createEffect` returns.              |
+| `InterceptorHandler`        | The function `createInterceptor` takes.         |
+| `InterceptorRef`            | The handle `createInterceptor` returns.         |
+| `Statewise`                 | The dispatch handle.                            |
+| `HistoryEntry`              | One entry of the action history.                |
+| `ActionRedaction`           | The `history.redact` hook.                      |
+| `StatewiseConfig`           | The `provideStatewise` options.                 |
+| `StatewiseHistoryOptions`   | The `history` option.                           |
+| `MisroutedDispatchReaction` | `'throw' \| 'report' \| 'ignore'`.              |
+
+`StatewiseTestingConfig` comes from `ngx-statewise/testing`, and extends
+`StatewiseConfig` with `strict`.
+
+> [!NOTE]
+> One place the inference needs a hand, and it needs no library type. An
+> updater handler passed inline is contextually typed, so it compiles as
+> written. Pulled out into a constant it loses that context, and an arrow with
+> no `return` infers `void` where the collector wants `undefined` — so annotate
+> the return, `(state: State, value: number): undefined => { ... }`.
+> `undefined` is a language keyword, which is why `StateUpdate` did not have to
+> stay exported for this.
 
 Names prefixed with `ɵ` are not part of the public contract. They exist for
 `ngx-statewise/testing` and can change in any release.
