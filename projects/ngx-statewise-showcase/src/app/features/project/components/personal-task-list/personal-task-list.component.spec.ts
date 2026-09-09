@@ -50,15 +50,24 @@ describe('PersonalTaskListComponent', () => {
     expect(fixture.componentInstance.tasks()).toEqual([]);
   });
 
-  it('never offers the organisation column', async () => {
+  /**
+   * It used to show a fixed three, alone among the four tables in filtering
+   * nothing. It follows the role now, like its siblings.
+   */
+  it('offers the organisation column to an admin, and not to anyone else', async () => {
     const fixture = await mount();
-
-    expect(
+    const headers = () =>
       Array.from(
         (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
           'th[mat-header-cell]',
         ),
-      ).map((cell) => cell.textContent?.trim()),
-    ).toEqual(['Title', 'Status', 'Priority']);
+      ).map((cell) => cell.textContent?.trim());
+
+    expect(headers()).toEqual(['Title', 'Status', 'Priority', 'Organisation']);
+
+    authManager.user.set({ userId: 'user-1', role: 'member' });
+    fixture.detectChanges();
+
+    expect(headers()).toEqual(['Title', 'Status', 'Priority']);
   });
 });
