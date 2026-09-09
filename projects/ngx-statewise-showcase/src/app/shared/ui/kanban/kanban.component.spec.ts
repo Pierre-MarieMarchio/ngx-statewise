@@ -7,6 +7,7 @@ import type {
   KanbanMove,
   KanbanReorder,
 } from './kanban-column.model';
+import { at } from '@testing/at';
 
 interface Card {
   readonly id: string;
@@ -73,13 +74,15 @@ describe('KanbanComponent', () => {
   };
 
   const board = (fixture: { debugElement: { children: unknown[] } }) =>
-    (
-      fixture as unknown as {
-        debugElement: {
-          children: { componentInstance: KanbanComponent<Card> }[];
-        };
-      }
-    ).debugElement.children[0].componentInstance;
+    at(
+      (
+        fixture as unknown as {
+          debugElement: {
+            children: { componentInstance: KanbanComponent<Card> }[];
+          };
+        }
+      ).debugElement.children,
+    ).componentInstance;
 
   it('renders one named list per column', async () => {
     const fixture = await mount();
@@ -145,7 +148,7 @@ describe('KanbanComponent', () => {
     it('reports a drop into another column, source and target', async () => {
       const fixture = await mount();
 
-      board(fixture).onDrop(dropOf(COLUMNS[0], COLUMNS[2], 1, 0));
+      board(fixture).onDrop(dropOf(at(COLUMNS, 0), at(COLUMNS, 2), 1, 0));
 
       expect(fixture.componentInstance.moves).toEqual([
         { item: card('b'), from: 'left', to: 'right' },
@@ -155,7 +158,7 @@ describe('KanbanComponent', () => {
     it('reports a reorder inside one column, in its new order', async () => {
       const fixture = await mount();
 
-      board(fixture).onDrop(dropOf(COLUMNS[0], COLUMNS[0], 0, 1));
+      board(fixture).onDrop(dropOf(at(COLUMNS, 0), at(COLUMNS, 0), 0, 1));
 
       expect(fixture.componentInstance.reorders).toEqual([
         { columnId: 'left', items: [card('b'), card('a')] },
@@ -170,10 +173,10 @@ describe('KanbanComponent', () => {
     it('leaves the columns it was given untouched', async () => {
       const fixture = await mount();
 
-      board(fixture).onDrop(dropOf(COLUMNS[0], COLUMNS[2], 0, 0));
+      board(fixture).onDrop(dropOf(at(COLUMNS, 0), at(COLUMNS, 2), 0, 0));
 
-      expect(COLUMNS[0].items.map((item) => item.id)).toEqual(['a', 'b']);
-      expect(COLUMNS[2].items).toEqual([]);
+      expect(at(COLUMNS, 0).items.map((item) => item.id)).toEqual(['a', 'b']);
+      expect(at(COLUMNS, 2).items).toEqual([]);
     });
   });
 
@@ -181,7 +184,7 @@ describe('KanbanComponent', () => {
     it('moves a card to the next column', async () => {
       const fixture = await mount();
 
-      board(fixture).moveByKeyboard(card('a'), COLUMNS[0], 1);
+      board(fixture).moveByKeyboard(card('a'), at(COLUMNS, 0), 1);
 
       expect(fixture.componentInstance.moves).toEqual([
         { item: card('a'), from: 'left', to: 'middle' },
@@ -191,7 +194,7 @@ describe('KanbanComponent', () => {
     it('moves it to the previous one', async () => {
       const fixture = await mount();
 
-      board(fixture).moveByKeyboard(card('c'), COLUMNS[1], -1);
+      board(fixture).moveByKeyboard(card('c'), at(COLUMNS, 1), -1);
 
       expect(fixture.componentInstance.moves).toEqual([
         { item: card('c'), from: 'middle', to: 'left' },
@@ -201,8 +204,8 @@ describe('KanbanComponent', () => {
     it('stops at the ends rather than wrapping around', async () => {
       const fixture = await mount();
 
-      board(fixture).moveByKeyboard(card('a'), COLUMNS[0], -1);
-      board(fixture).moveByKeyboard(card('c'), COLUMNS[2], 1);
+      board(fixture).moveByKeyboard(card('a'), at(COLUMNS, 0), -1);
+      board(fixture).moveByKeyboard(card('c'), at(COLUMNS, 2), 1);
 
       expect(fixture.componentInstance.moves).toEqual([]);
     });

@@ -3,8 +3,8 @@ export { DocsUiEffect } from './states/docs-ui/docs-ui.effect';
 export { DocsUiManager } from './states/docs-ui/docs-ui.manager';
 export { DocsUiState } from './states/docs-ui/docs-ui.state';
 export { docsUiUpdater } from './states/docs-ui/docs-ui.updater';
-export { resolveTheme } from './resolve-theme';
-export { ThemeEnvironment } from './theme-environment.service';
+export { resolveTheme } from './utils/theme.utils';
+export { ThemeEnvironment } from './services/theme-environment.service';
 export {
   DEFAULT_THEME_CHOICE,
   FALLBACK_THEME,
@@ -15,4 +15,4 @@ export {
   isThemeChoice,
   type Theme,
   type ThemeChoice,
-} from './theme';
+} from './models/theme.model';

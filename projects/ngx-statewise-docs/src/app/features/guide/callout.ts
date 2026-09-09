@@ -68,6 +68,12 @@ export function calloutExtension(labels: CalloutLabels): MarkedExtension {
             rest = rest.slice(line[0].length);
           }
 
+          const keyword = opening[1];
+
+          if (keyword === undefined) {
+            return undefined;
+          }
+
           const body = raw
             .slice(opening[0].length)
             .replace(/^> ?/gm, '')
@@ -76,7 +82,7 @@ export function calloutExtension(labels: CalloutLabels): MarkedExtension {
           return {
             type: 'callout',
             raw,
-            kind: opening[1].toLowerCase() as CalloutKind,
+            kind: keyword.toLowerCase() as CalloutKind,
             tokens: this.lexer.blockTokens(body),
           };
         },

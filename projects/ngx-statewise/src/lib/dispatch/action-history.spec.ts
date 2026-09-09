@@ -1,4 +1,5 @@
 import { ActionHistory, keepAction } from './action-history';
+import { firstEntry } from '../../spec-helpers/first-entry';
 
 describe('ActionHistory', () => {
   it('records nothing when its limit is zero', () => {
@@ -48,14 +49,14 @@ describe('ActionHistory', () => {
 
       history.record(dispatched);
 
-      expect(history.snapshot()[0]).not.toBe(dispatched);
+      expect(firstEntry(history.snapshot())).not.toBe(dispatched);
     });
 
     it('freezes the entry, so a reader cannot rewrite the past', () => {
       const history = new ActionHistory(2, keepAction);
       history.record({ type: 'RECORDED', payload: 1 });
 
-      const [entry] = history.snapshot() as { type: string }[];
+      const entry = firstEntry(history.snapshot() as { type: string }[]);
 
       expect(Object.isFrozen(entry)).toBe(true);
       expect(() => {
@@ -77,7 +78,7 @@ describe('ActionHistory', () => {
       history.record({ type: 'RECORDED', payload });
       payload.items.push('second');
 
-      expect(history.snapshot()[0].payload).toEqual({
+      expect(firstEntry(history.snapshot()).payload).toEqual({
         items: ['first', 'second'],
       });
     });

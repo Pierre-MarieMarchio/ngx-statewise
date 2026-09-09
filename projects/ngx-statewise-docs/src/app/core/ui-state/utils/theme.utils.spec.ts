@@ -1,4 +1,4 @@
-import { resolveTheme } from './resolve-theme';
+import { resolveTheme } from './theme.utils';
 
 describe('resolveTheme', () => {
   it('paints what was picked, when something was picked', () => {

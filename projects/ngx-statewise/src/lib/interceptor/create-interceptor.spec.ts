@@ -8,6 +8,7 @@ import { TestBed } from '@angular/core/testing';
 import { defineActionsGroup, emptyPayload, payload } from '../action';
 import { createInterceptor } from './create-interceptor';
 import { InterceptorRegistry } from './interceptor-registry';
+import { firstEntry } from '../../spec-helpers/first-entry';
 
 const actions = defineActionsGroup({
   source: 'guarded',
@@ -45,7 +46,7 @@ describe('createInterceptor', () => {
       });
     });
 
-    const [interceptor] = registry.guarding(actions.withPayload.type);
+    const interceptor = firstEntry(registry.guarding(actions.withPayload.type));
     interceptor.ask(actions.withPayload(7));
 
     expect(received).toEqual([7]);
@@ -56,7 +57,7 @@ describe('createInterceptor', () => {
       createInterceptor(actions.withPayload, (amount) => amount > 0);
     });
 
-    const [interceptor] = registry.guarding(actions.withPayload.type);
+    const interceptor = firstEntry(registry.guarding(actions.withPayload.type));
 
     expect(interceptor.ask(actions.withPayload(1))).toBe(true);
     expect(interceptor.ask(actions.withPayload(-1))).toBe(false);

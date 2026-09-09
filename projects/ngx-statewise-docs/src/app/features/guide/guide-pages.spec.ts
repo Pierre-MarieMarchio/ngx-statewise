@@ -10,6 +10,7 @@ import {
 } from './guide-pages';
 import { renderOptions } from '../../../testing/render-options';
 import { renderGuide } from './markdown';
+import { at } from '../../../testing/at';
 
 /** Every `id="…"` the rendered page carries, heading anchors included. */
 function anchorsOf(page: GuidePage, code: LocaleCode): Set<string> {
@@ -18,7 +19,9 @@ function anchorsOf(page: GuidePage, code: LocaleCode): Set<string> {
     renderOptions(),
   );
 
-  return new Set([...html.matchAll(/ id="([^"]+)"/g)].map((match) => match[1]));
+  return new Set(
+    [...html.matchAll(/ id="([^"]+)"/g)].map((match) => match[1] ?? ''),
+  );
 }
 
 describe('the guide registry', () => {
@@ -101,7 +104,7 @@ describe('the guide registry', () => {
   });
 
   it('falls back to the default locale, and says which locale it served', () => {
-    const page = GUIDE_PAGES[0];
+    const page = at(GUIDE_PAGES, 0);
     const translated = 'fr' in page.content;
     const content = guideContent(page, 'fr');
 
@@ -119,7 +122,7 @@ describe('the guide registry', () => {
         ].map((match) => ({
           from: page.slug,
           locale: locale.code,
-          slug: match[1],
+          slug: match[1] ?? '',
           anchor: match[2],
         })),
       ),
@@ -153,7 +156,7 @@ describe('the guide registry', () => {
         const bare = [...markdown.matchAll(/]\(#([a-z0-9-]+)\)/g)];
 
         expect(
-          bare.map((match) => match[1]),
+          bare.map((match) => match[1] ?? ''),
           `${page.slug} (${locale.code}) keeps README anchors`,
         ).toEqual([]);
       }
@@ -197,13 +200,13 @@ function declaring(page: string): () => unknown {
 
 describe('declaring a guide page', () => {
   it('accepts one whose metadata block is complete', () => {
-    const [section] = defineGuideSections([
-      { title: SECTION, pages: [COMPLETE] },
-    ]);
+    const section = at(
+      defineGuideSections([{ title: SECTION, pages: [COMPLETE] }]),
+    );
 
-    expect(section.pages[0].slug).toBe('effects');
-    expect(section.pages[0].title.de).toBe('Effects');
-    expect(section.pages[0].content.en).toBe('# Effects');
+    expect(at(section.pages, 0).slug).toBe('effects');
+    expect(at(section.pages, 0).title.de).toBe('Effects');
+    expect(at(section.pages, 0).content.en).toBe('# Effects');
   });
 
   it('refuses one with no metadata block, naming it by its heading', () => {
@@ -248,22 +251,24 @@ describe('declaring a guide page', () => {
   });
 
   it('takes a translation as prose, the metadata staying in the default file', () => {
-    const [section] = defineGuideSections([
-      {
-        title: SECTION,
-        pages: [
-          {
-            source: COMPLETE,
-            translations: {
-              fr: '---\nslug: effects\n---\n\n# Effects, en français',
+    const section = at(
+      defineGuideSections([
+        {
+          title: SECTION,
+          pages: [
+            {
+              source: COMPLETE,
+              translations: {
+                fr: '---\nslug: effects\n---\n\n# Effects, en français',
+              },
             },
-          },
-        ],
-      },
-    ]);
+          ],
+        },
+      ]),
+    );
 
-    expect(section.pages[0].content.fr).toBe('# Effects, en français');
-    expect(guideContent(section.pages[0], 'fr').isFallback).toBe(false);
-    expect(guideContent(section.pages[0], 'de').isFallback).toBe(true);
+    expect(at(section.pages, 0).content.fr).toBe('# Effects, en français');
+    expect(guideContent(at(section.pages, 0), 'fr').isFallback).toBe(false);
+    expect(guideContent(at(section.pages, 0), 'de').isFallback).toBe(true);
   });
 });

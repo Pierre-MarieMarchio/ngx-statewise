@@ -42,7 +42,9 @@ export class FakeBackend {
     if (unauthorized)
       return throwError(() => this.asErrorResponse(unauthorized));
 
-    const handler = requestsMapHandlers[method][url];
+    // A method the map does not carry has no urls to look in, which used to
+    // be an index into `undefined` rather than the 400 below.
+    const handler = requestsMapHandlers[method]?.[url];
 
     if (handler) {
       const response = handler();
@@ -270,18 +272,19 @@ export class TaskDB {
 
   update(taskId: string, data: Partial<Task>, user: User): Task | undefined {
     const index = this.tasks.findIndex((t) => t.id === taskId);
-    if (index === -1) return undefined;
-
     const existingTask = this.tasks[index];
+
+    if (!existingTask) return undefined;
     if (
       user.role !== 'admin' &&
       existingTask.organizationId !== user.organizationId
     )
       return undefined;
 
-    const updatedTask = {
+    const updatedTask: Task = {
       ...existingTask,
       ...data,
+      id: existingTask.id,
       updatedAt: new Date().toISOString(),
     };
 
@@ -291,9 +294,9 @@ export class TaskDB {
 
   delete(taskId: string, user: User): boolean {
     const index = this.tasks.findIndex((t) => t.id === taskId);
-    if (index === -1) return false;
-
     const task = this.tasks[index];
+
+    if (!task) return false;
     if (user.role !== 'admin' && task.organizationId !== user.organizationId)
       return false;
 
