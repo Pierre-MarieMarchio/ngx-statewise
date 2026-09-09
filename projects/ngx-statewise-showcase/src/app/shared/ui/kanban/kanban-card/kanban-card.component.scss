@@ -10,15 +10,15 @@
 }
 
 .indicator-high {
-  border-left-color: #f44336;
+  border-left-color: var(--priority-high);
 }
 
 .indicator-medium {
-  border-left-color: #2196f3;
+  border-left-color: var(--priority-medium);
 }
 
 .indicator-low {
-  border-left-color: #4caf50;
+  border-left-color: var(--priority-low);
 }
 
 .cdk-drag-animating {

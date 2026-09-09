@@ -20,4 +20,15 @@ body {
 
 :root {
   --nav-width: clamp(80px, 10vw, 110px);
+
+  /*
+   * One hue per priority, and the only place they are written. The kanban card
+   * takes them solid for its border, the details panel derives a translucent
+   * fill from the same value — before this, the two were separate literals in
+   * two systems, so one task showed one colour on its card and another in the
+   * panel.
+   */
+  --priority-low: rgb(52 211 153);
+  --priority-medium: rgb(96 165 250);
+  --priority-high: rgb(247 0 0);
 }
