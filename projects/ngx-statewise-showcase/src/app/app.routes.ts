@@ -9,7 +9,7 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./features/landing-page/landing-page.component').then(
+      import('./pages/landing/landing-page.component').then(
         (m) => m.LandingPageComponent,
       ),
     title: 'Ngx-Statewise',
@@ -18,7 +18,7 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () =>
-      import('./features/auth/pages/login-page.component').then(
+      import('./pages/login/login-page.component').then(
         (m) => m.LoginPageComponent,
       ),
     title: 'Ngx-Statewise',
@@ -27,7 +27,7 @@ export const routes: Routes = [
   {
     path: 'home',
     loadComponent: () =>
-      import('./features/dashboard/pages/dashboard-page/dashboard-page.component').then(
+      import('./pages/dashboard/dashboard-page.component').then(
         (m) => m.DashboardPageComponent,
       ),
     title: 'Ngx-Statewise',
@@ -36,8 +36,8 @@ export const routes: Routes = [
   {
     path: 'task',
     loadComponent: () =>
-      import('./features/project/pages/task-page/task-page.component').then(
-        (m) => m.TaskPageComponent,
+      import('./pages/board/board-page.component').then(
+        (m) => m.BoardPageComponent,
       ),
     title: 'Ngx-Statewise',
     canActivate: [loggedOutGuard],
@@ -45,8 +45,8 @@ export const routes: Routes = [
   {
     path: 'state',
     loadComponent: () =>
-      import('./features/inspection/pages/live-state-page/live-state-page.component').then(
-        (m) => m.LiveStatePageComponent,
+      import('./pages/inspection-live/inspection-live-page.component').then(
+        (m) => m.InspectionLivePageComponent,
       ),
     title: 'Ngx-Statewise',
     canActivate: [loggedOutGuard],
@@ -54,8 +54,8 @@ export const routes: Routes = [
   {
     path: 'history',
     loadComponent: () =>
-      import('./features/inspection/pages/history-page/history-page.component').then(
-        (m) => m.HistoryPageComponent,
+      import('./pages/inspection-history/inspection-history-page.component').then(
+        (m) => m.InspectionHistoryPageComponent,
       ),
     title: 'Ngx-Statewise',
     canActivate: [loggedOutGuard],

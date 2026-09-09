@@ -21,10 +21,10 @@ import {
 // engine recognise a misrouted dispatch of one of them.
 import { taskUpdater } from '@app/features/project/states/task/task.updater';
 import { noticeUpdater } from '@app/features/inspection/states';
-import { LiveStatePageComponent } from './live-state-page.component';
+import { InspectionLivePageComponent } from './inspection-live-page.component';
 
-describe('LiveStatePageComponent', () => {
-  let fixture: ComponentFixture<LiveStatePageComponent>;
+describe('InspectionLivePageComponent', () => {
+  let fixture: ComponentFixture<InspectionLivePageComponent>;
   let authManager: FakeAuthManager;
   let taskManager: FakeTaskManager;
   let projectManager: FakeProjectManager;
@@ -50,7 +50,7 @@ describe('LiveStatePageComponent', () => {
     projectManager = fakeProjectManager([sampleProject()]);
 
     await TestBed.configureTestingModule({
-      imports: [LiveStatePageComponent],
+      imports: [InspectionLivePageComponent],
       providers: [
         provideStatewise({ updaters: [noticeUpdater] }),
         { provide: AUTH_MANAGER, useValue: authManager },
@@ -59,7 +59,7 @@ describe('LiveStatePageComponent', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(LiveStatePageComponent);
+    fixture = TestBed.createComponent(InspectionLivePageComponent);
     fixture.detectChanges();
   });
 

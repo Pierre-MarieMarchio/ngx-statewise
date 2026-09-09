@@ -11,16 +11,16 @@ import { Task } from '@shared/app-common/models';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
 import { SidePanelComponent } from '@shared/ui/side-panel';
 import { DataStateComponent } from '@shared/ui/data-state';
-import { TaskDetailsComponent } from '../../components';
+import { TaskDetailsComponent } from '@app/features/project/components';
 import {
   TaskKanbanComponent,
   AllTaskListComponent,
   PersonalTaskListComponent,
   ProjectTaskListComponent,
-} from '../../components';
+} from '@app/features/project/components';
 
 @Component({
-  selector: 'app-task-page',
+  selector: 'app-board-page',
   imports: [
     SidePanelComponent,
     AllTaskListComponent,
@@ -32,14 +32,14 @@ import {
     ProjectTaskListComponent,
     TaskKanbanComponent,
   ],
-  templateUrl: './task-page.component.html',
-  styleUrl: './task-page.component.scss',
+  templateUrl: './board-page.component.html',
+  styleUrl: './board-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'page',
   },
 })
-export class TaskPageComponent {
+export class BoardPageComponent {
   @ViewChild('taskPanel') taskPanel!: SidePanelComponent;
 
   public readonly taskManager = inject(TASK_MANAGER);

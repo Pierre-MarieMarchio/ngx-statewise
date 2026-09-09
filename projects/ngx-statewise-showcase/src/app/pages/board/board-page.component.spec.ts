@@ -11,16 +11,16 @@ import {
   FakeTaskManager,
   sampleTask,
 } from '@testing/fake-managers';
-import { TaskPageComponent } from './task-page.component';
+import { BoardPageComponent } from './board-page.component';
 
-describe('TaskPageComponent', () => {
+describe('BoardPageComponent', () => {
   let taskManager: FakeTaskManager;
 
   const mount = async () => {
     taskManager = fakeTaskManager([sampleTask()]);
 
     await TestBed.configureTestingModule({
-      imports: [TaskPageComponent],
+      imports: [BoardPageComponent],
       providers: [
         { provide: AUTH_MANAGER, useValue: fakeAuthManager() },
         { provide: TASK_MANAGER, useValue: taskManager },
@@ -28,7 +28,7 @@ describe('TaskPageComponent', () => {
       ],
     }).compileComponents();
 
-    const fixture = TestBed.createComponent(TaskPageComponent);
+    const fixture = TestBed.createComponent(BoardPageComponent);
     fixture.detectChanges();
     return fixture;
   };

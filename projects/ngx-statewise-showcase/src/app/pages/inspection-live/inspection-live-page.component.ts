@@ -14,8 +14,11 @@ import {
 } from '@shared/app-common/tokens';
 import { ReportedErrors } from '@app/core/services';
 import { getAllTaskActions } from '@app/features/project/states/task/task.action';
-import { NoticeDemoComponent, TallyDemoComponent } from '../../components';
-import { NoticeState } from '../../states';
+import {
+  NoticeDemoComponent,
+  TallyDemoComponent,
+} from '@app/features/inspection/components';
+import { NoticeState } from '@app/features/inspection/states';
 
 /** One line of a readout: a label and the value read at render time. */
 export interface StateReading {
@@ -29,21 +32,21 @@ export interface StateReading {
  * which reads a snapshot and needs asking.
  */
 @Component({
-  selector: 'app-live-state-page',
+  selector: 'app-inspection-live-page',
   imports: [
     MatButtonModule,
     MatCardModule,
     NoticeDemoComponent,
     TallyDemoComponent,
   ],
-  templateUrl: './live-state-page.component.html',
-  styleUrl: './live-state-page.component.scss',
+  templateUrl: './inspection-live-page.component.html',
+  styleUrl: './inspection-live-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'page',
   },
 })
-export class LiveStatePageComponent {
+export class InspectionLivePageComponent {
   private readonly authManager = inject(AUTH_MANAGER);
   private readonly taskManager = inject(TASK_MANAGER);
   private readonly projectManager = inject(PROJECT_MANAGER);

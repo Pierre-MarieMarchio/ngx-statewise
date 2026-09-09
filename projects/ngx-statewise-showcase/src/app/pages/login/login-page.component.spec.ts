@@ -1,7 +1,7 @@
 import { provideRouter } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 import { fakeAuthManager, FakeAuthManager } from '@testing/fake-managers';
-import { AuthManager } from '../states';
+import { AuthManager } from '@app/features/auth/states';
 import { LoginPageComponent } from './login-page.component';
 
 describe('LoginPageComponent', () => {

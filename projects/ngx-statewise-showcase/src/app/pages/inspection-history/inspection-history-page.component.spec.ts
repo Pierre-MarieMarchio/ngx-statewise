@@ -9,13 +9,13 @@ import { fakeTaskManager } from '@testing/fake-managers';
 import { noticeActions, noticeUpdater } from '@app/features/inspection/states';
 import { tallyUpdater } from '@app/features/inspection/states';
 import {
-  HistoryPageComponent,
+  InspectionHistoryPageComponent,
   MAX_PAYLOAD_LENGTH,
   TRACKED_ACTION_TYPES,
-} from './history-page.component';
+} from './inspection-history-page.component';
 
-describe('HistoryPageComponent', () => {
-  let fixture: ComponentFixture<HistoryPageComponent>;
+describe('InspectionHistoryPageComponent', () => {
+  let fixture: ComponentFixture<InspectionHistoryPageComponent>;
   let outside: Statewise;
 
   const host = (): HTMLElement => fixture.nativeElement as HTMLElement;
@@ -40,7 +40,7 @@ describe('HistoryPageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HistoryPageComponent],
+      imports: [InspectionHistoryPageComponent],
       providers: [
         provideStatewise({
           updaters: [noticeUpdater],
@@ -54,7 +54,7 @@ describe('HistoryPageComponent', () => {
       injectStatewise(tallyUpdater),
     );
 
-    fixture = TestBed.createComponent(HistoryPageComponent);
+    fixture = TestBed.createComponent(InspectionHistoryPageComponent);
     fixture.detectChanges();
   });
 

@@ -42,16 +42,16 @@ export const TRACKED_ACTION_TYPES: TrackedActionType[] = [
 ];
 
 @Component({
-  selector: 'app-history-page',
+  selector: 'app-inspection-history-page',
   imports: [MatButtonModule, MatChipsModule, MatTableModule],
-  templateUrl: './history-page.component.html',
-  styleUrl: './history-page.component.scss',
+  templateUrl: './inspection-history-page.component.html',
+  styleUrl: './inspection-history-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'page',
   },
 })
-export class HistoryPageComponent {
+export class InspectionHistoryPageComponent {
   /**
    * Three dispatch origins, one history. The history is injected rather than
    * read off a handle, precisely because it is application-wide: no scope owns
