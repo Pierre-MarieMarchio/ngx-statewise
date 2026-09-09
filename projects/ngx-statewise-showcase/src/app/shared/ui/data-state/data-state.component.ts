@@ -42,4 +42,12 @@ export class DataStateComponent {
   public readonly message = computed(
     () => this.errorMessage() ?? `The ${this.label()} could not be loaded.`,
   );
+
+  /**
+   * What the live region reads while the bar is up. `role="progressbar"` is
+   * not a live region: the bar appearing tells a screen reader nothing.
+   */
+  public readonly progress = computed(() =>
+    this.loading() ? `Loading the ${this.label()}` : '',
+  );
 }

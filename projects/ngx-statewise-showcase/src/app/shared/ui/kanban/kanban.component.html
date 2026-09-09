@@ -29,9 +29,12 @@
           [cardType]="cardTypeFor()(item)"
           role="listitem"
           tabindex="0"
+          [attr.data-card-id]="item.id"
           [attr.aria-label]="labelFor()(item)"
           (keydown.arrowleft)="moveByKeyboard(item, column, -1)"
           (keydown.arrowright)="moveByKeyboard(item, column, 1)"
+          (keydown.arrowup)="reorderByKeyboard(item, column, -1)"
+          (keydown.arrowdown)="reorderByKeyboard(item, column, 1)"
         >
           <ng-container
             [ngTemplateOutlet]="cardBody()"
@@ -42,3 +45,10 @@
     </div>
   }
 </div>
+
+<!--
+  Where a keyboard move is read out. It is in the template rather than raised
+  on the spot, so the region exists before its text changes — a live region
+  inserted along with its content is announced by no screen reader reliably.
+-->
+<p class="visually-hidden" role="status">{{ announcement() }}</p>

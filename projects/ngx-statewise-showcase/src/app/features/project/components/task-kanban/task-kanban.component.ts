@@ -51,7 +51,7 @@ export class TaskKanbanComponent {
   public readonly cardTypeFor = (task: Task): string => task.priority;
 
   public readonly labelFor = (task: Task): string =>
-    `${task.title}, ${task.status}. Use the left and right arrow keys to move it between columns.`;
+    `${task.title}, ${task.status}. Use the left and right arrow keys to move it between columns, and the up and down arrow keys to reorder it.`;
 
   /**
    * One board per project, built once per change rather than once per project

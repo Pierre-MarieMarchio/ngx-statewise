@@ -2,15 +2,6 @@
   border-radius: 0.2rem !important;
 }
 
-.no-hover-button {
-  &:hover {
-    background-color: inherit !important;
-
-    .mat-mdc-button-focus-overlay {
-      opacity: 0 !important;
-    }
-  }
-}
 .mat-mdc-icon-button:hover .mat-mdc-button-persistent-ripple::before {
   opacity: 1 !important;
   background-color: transparent !important;

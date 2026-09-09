@@ -5,12 +5,17 @@ import {
 } from '@angular/cdk/drag-drop';
 import { NgTemplateOutlet } from '@angular/common';
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   contentChild,
+  ElementRef,
+  inject,
+  Injector,
   input,
   output,
+  signal,
   TemplateRef,
 } from '@angular/core';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -45,6 +50,9 @@ import type {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class KanbanComponent<Item extends KanbanCardData> {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
+
   public columns = input.required<readonly KanbanColumn<Item>[]>();
 
   /** Namespaces the drop-list ids, so two boards on one page stay apart. */
@@ -56,12 +64,26 @@ export class KanbanComponent<Item extends KanbanCardData> {
   /** What a screen reader reads on a card. */
   public labelFor = input.required<(item: Item) => string>();
 
+  /**
+   * Whether the caller keeps an order inside a column. Off, the up and down
+   * arrows do nothing and say nothing: this board reports a reorder, it never
+   * applies one, so announcing a move the caller drops would be a lie.
+   */
+  public reorderable = input(false);
+
   /** Named `kanbanCard` in the caller's content, and handed each item. */
   public readonly cardBody =
     contentChild.required<TemplateRef<{ $implicit: Item }>>('kanbanCard');
 
   public itemMoved = output<KanbanMove<Item>>();
   public columnReordered = output<KanbanReorder<Item>>();
+
+  /**
+   * What the live region reads out. A keyboard move changes nothing the eye
+   * can follow from the card that was pressed — the card is gone from where it
+   * was — so the result has to be said.
+   */
+  public readonly announcement = signal('');
 
   /** Every list of this board, which is what connects them to each other. */
   public readonly dropListIds = computed(() =>
@@ -99,7 +121,7 @@ export class KanbanComponent<Item extends KanbanCardData> {
     this.itemMoved.emit({ item: moved, from: from.id, to: to.id });
   }
 
-  /** The keyboard path, which the CDK does not provide. */
+  /** The keyboard path across columns, which the CDK does not provide. */
   public moveByKeyboard(
     item: Item,
     column: KanbanColumn<Item>,
@@ -112,9 +134,65 @@ export class KanbanComponent<Item extends KanbanCardData> {
     const destination = columns[target];
 
     if (!destination) {
+      this.announcement.set(
+        `Already in the ${offset < 0 ? 'first' : 'last'} column.`,
+      );
+
       return;
     }
 
     this.itemMoved.emit({ item, from: column.id, to: destination.id });
+    this.announcement.set(`Moved to ${destination.label}.`);
+    this.refocus(item.id);
+  }
+
+  /**
+   * The keyboard path inside one column. The drop already reports a reorder
+   * when a card lands back in the list it came from; this is the same report,
+   * without a mouse.
+   */
+  public reorderByKeyboard(
+    item: Item,
+    column: KanbanColumn<Item>,
+    offset: number,
+  ): void {
+    if (!this.reorderable()) {
+      return;
+    }
+
+    const items = [...column.items];
+    const from = items.findIndex((candidate) => candidate.id === item.id);
+    const to = from + offset;
+
+    if (from === -1 || to < 0 || to >= items.length) {
+      this.announcement.set(
+        `Already ${offset < 0 ? 'first' : 'last'} in ${column.label}.`,
+      );
+
+      return;
+    }
+
+    moveItemInArray(items, from, to);
+    this.columnReordered.emit({ columnId: column.id, items });
+    this.announcement.set(
+      `Moved to position ${String(to + 1)} of ${String(items.length)} in ${column.label}.`,
+    );
+    this.refocus(item.id);
+  }
+
+  /**
+   * Puts the focus back on the card that moved, once the caller has redrawn
+   * the board. Changing column destroys the card — the two columns are two
+   * `@for` blocks — so without this the focus falls to the document and a
+   * second press goes nowhere.
+   */
+  private refocus(itemId: string): void {
+    afterNextRender(
+      () =>
+        this.host.nativeElement
+          .querySelector<HTMLElement>(`[data-card-id="${itemId}"]`)
+          ?.focus(),
+      { injector: this.injector },
+    );
   }
 }

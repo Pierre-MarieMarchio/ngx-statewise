@@ -17,6 +17,8 @@
           </ng-container>
         }
 
+        <app-task-open-column (opened)="selectTask($event)" />
+
         <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
         <tr
           mat-row

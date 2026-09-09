@@ -4,6 +4,7 @@ import {
   FakeAuthSession,
   sampleTask,
 } from '@testing/fake-managers';
+import { openedSampleTask, openFirstRow } from '@testing/task-table';
 import { PersonalTaskListComponent } from './personal-task-list.component';
 import { AUTH_SESSION } from '@app/features/common';
 
@@ -63,11 +64,25 @@ describe('PersonalTaskListComponent', () => {
         ),
       ).map((cell) => cell.textContent?.trim());
 
-    expect(headers()).toEqual(['Title', 'Status', 'Priority', 'Organisation']);
+    expect(headers()).toEqual([
+      'Title',
+      'Status',
+      'Priority',
+      'Organisation',
+      'Open',
+    ]);
 
     authManager.user.set({ userId: 'user-1', role: 'member' });
     fixture.detectChanges();
 
-    expect(headers()).toEqual(['Title', 'Status', 'Priority']);
+    expect(headers()).toEqual(['Title', 'Status', 'Priority', 'Open']);
+  });
+
+  /**
+   * The row click is a mouse shortcut. This button is the path a keyboard has,
+   * and the shared column's spec holds the rest of its behaviour.
+   */
+  it('opens a task from a named button, once', async () => {
+    expect(openFirstRow(await mount())).toEqual(openedSampleTask('mine'));
   });
 });
