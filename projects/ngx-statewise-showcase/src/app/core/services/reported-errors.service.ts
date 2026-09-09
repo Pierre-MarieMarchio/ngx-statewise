@@ -1,4 +1,6 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
+import { refusalReason } from '../error-handling/refusal-reason';
 
 /** One failure the application chose to surface rather than swallow. */
 export interface ReportedError {
@@ -40,6 +42,30 @@ export class ReportedErrors {
   }
 }
 
+/**
+ * The sentence a failure gets in the panel.
+ *
+ * `HttpErrorResponse` **implements** `Error` without extending it, so an
+ * `instanceof Error` test never catches one and `String()` rendered every
+ * refused request as `[object Object]` — in the one panel whose whole job is
+ * naming what failed. It gets asked first, and its server's own words are
+ * preferred over the transport's sentence: "a project is already called
+ * \"HR Platform\"" says more than "Http failure response … 400 Bad Request".
+ */
 function messageOf(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+  if (error instanceof HttpErrorResponse) {
+    return refusalReason(error, error.message);
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  // Neither, and still worth reading: anything carrying a string `message` is
+  // saying what went wrong, and `String()` would throw that away as well.
+  const { message } = (error ?? {}) as { message?: unknown };
+
+  return typeof message === 'string' && message.length > 0
+    ? message
+    : String(error);
 }
