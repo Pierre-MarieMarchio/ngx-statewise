@@ -1,6 +1,11 @@
 import { Task } from '../../models';
 import { defineUpdater } from 'ngx-statewise';
-import { getAllTaskActions, taskReset, updateTaskActions } from './task.action';
+import {
+  createTaskActions,
+  getAllTaskActions,
+  taskReset,
+  updateTaskActions,
+} from './task.action';
 import { TaskState } from './task.state';
 
 /*
@@ -32,6 +37,8 @@ export const taskUpdater = defineUpdater(TaskState, (on) => {
     state.pendingWrites.set(new Map());
     state.isLoading.set(false);
     state.isError.set(false);
+    state.isCreating.set(false);
+    state.createError.set(null);
   });
 
   on(getAllTaskActions.request, (state) => {
@@ -75,6 +82,22 @@ export const taskUpdater = defineUpdater(TaskState, (on) => {
   on(updateTaskActions.success, (state, updatedTask) => {
     state.pendingWrites.update(without(updatedTask.id));
     state.tasks.update(carrying(updatedTask));
+  });
+
+  on(createTaskActions.request, (state) => {
+    state.isCreating.set(true);
+    state.createError.set(null);
+  });
+
+  /** The server answered with the task, so the list already holds the truth. */
+  on(createTaskActions.success, (state, task) => {
+    state.isCreating.set(false);
+    state.tasks.update((tasks) => [...tasks, task]);
+  });
+
+  on(createTaskActions.failure, (state, reason) => {
+    state.isCreating.set(false);
+    state.createError.set(reason);
   });
 
   on(updateTaskActions.failure, (state, taskId) => {

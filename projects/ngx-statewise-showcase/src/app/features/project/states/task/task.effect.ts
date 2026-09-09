@@ -2,8 +2,14 @@ import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { createEffect } from 'ngx-statewise';
 import { firstValueFrom } from 'rxjs';
 import { TaskRepositoryService } from '../../services';
-import { getAllTaskActions, taskReset, updateTaskActions } from './task.action';
+import {
+  createTaskActions,
+  getAllTaskActions,
+  taskReset,
+  updateTaskActions,
+} from './task.action';
 import { AUTH_SESSION } from '@app/features/common';
+import { refusalReason } from '@app/core/error-handling';
 
 @Injectable({
   providedIn: 'root',
@@ -72,5 +78,36 @@ export class TaskEffect {
       cancelOn: taskReset,
       mustAnswer: true,
     },
+  );
+
+  /**
+   * `'first'` rather than `'latest'` — see the project's create effect: a
+   * second click must not supersede a creation already on its way, leaving the
+   * first with nothing watching for its answer.
+   */
+  public readonly createTaskRequestEffect = createEffect(
+    createTaskActions.request,
+    async (draft) => {
+      const user = this.authManager.user();
+
+      if (!user) {
+        return createTaskActions.failure(
+          'No session, so nothing to create in.',
+        );
+      }
+
+      try {
+        const created = await firstValueFrom(
+          this.taskRepository.create(draft, user.userId),
+        );
+
+        return createTaskActions.success(created);
+      } catch (error) {
+        this.errorHandler.handleError(error);
+
+        return createTaskActions.failure(refusalReason(error));
+      }
+    },
+    { concurrency: 'first', cancelOn: taskReset, mustAnswer: true },
   );
 }

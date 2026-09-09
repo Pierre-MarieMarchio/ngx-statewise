@@ -3,7 +3,12 @@ import { Task } from '../../models';
 import { sampleTask } from '@testing/fake-managers';
 import { injectStatewise, type Statewise } from 'ngx-statewise';
 import { provideStatewiseTesting } from 'ngx-statewise/testing';
-import { getAllTaskActions, taskReset, updateTaskActions } from './task.action';
+import {
+  createTaskActions,
+  getAllTaskActions,
+  taskReset,
+  updateTaskActions,
+} from './task.action';
 import { TaskState } from './task.state';
 import { taskUpdater } from './task.updater';
 
@@ -126,6 +131,66 @@ describe('taskUpdater', () => {
       statewise.dispatch(updateTaskActions.success(moved(TODO, 'done')));
 
       expect(state.pendingWrites().size).toBe(1);
+    });
+  });
+
+  describe('creating a task', () => {
+    const DRAFT = {
+      projectId: 'project-1',
+      title: 'Wire the form',
+      status: 'todo',
+      priority: 'low',
+    } as const;
+
+    it('is creating, and no longer refused, while it runs', () => {
+      statewise.dispatch(createTaskActions.failure('a title is required'));
+
+      statewise.dispatch(createTaskActions.request(DRAFT));
+
+      expect(state.isCreating()).toBe(true);
+      expect(state.createError()).toBeNull();
+    });
+
+    it('joins the list on success, without a reload', () => {
+      statewise.dispatch(createTaskActions.request(DRAFT));
+      statewise.dispatch(
+        createTaskActions.success(sampleTask({ id: 'new', status: 'todo' })),
+      );
+
+      expect(state.tasks().map((task) => task.id)).toEqual(['a', 'b', 'new']);
+      expect(state.isCreating()).toBe(false);
+    });
+
+    it('keeps the reason it was refused, so a form can repeat it', () => {
+      statewise.dispatch(createTaskActions.request(DRAFT));
+      statewise.dispatch(
+        createTaskActions.failure('this project already has a task called "x"'),
+      );
+
+      expect(state.isCreating()).toBe(false);
+      expect(state.createError()).toBe(
+        'this project already has a task called "x"',
+      );
+    });
+
+    /** A creation never enters pendingWrites: it is pessimistic, so there is
+     * no optimistic card to put back. */
+    it('leaves the writes in flight alone', () => {
+      statewise.dispatch(createTaskActions.request(DRAFT));
+      expect(state.pendingWrites().size).toBe(0);
+
+      statewise.dispatch(createTaskActions.failure('refused'));
+      expect(state.pendingWrites().size).toBe(0);
+    });
+
+    it('leaves nothing behind on a reset', () => {
+      statewise.dispatch(createTaskActions.request(DRAFT));
+      statewise.dispatch(createTaskActions.failure('refused'));
+
+      statewise.dispatch(taskReset());
+
+      expect(state.isCreating()).toBe(false);
+      expect(state.createError()).toBeNull();
     });
   });
 });

@@ -2,8 +2,13 @@ import { computed, inject, Injectable } from '@angular/core';
 import { injectStatewise } from 'ngx-statewise';
 import { TaskState } from './task.state';
 import { taskUpdater } from './task.updater';
-import { getAllTaskActions, taskReset, updateTaskActions } from './task.action';
-import { STATUSES, Task, TaskStatus } from '../../models';
+import {
+  createTaskActions,
+  getAllTaskActions,
+  taskReset,
+  updateTaskActions,
+} from './task.action';
+import { STATUSES, Task, TaskDraft, TaskStatus } from '../../models';
 import { ITaskReload } from '@app/features/common';
 
 @Injectable({
@@ -24,6 +29,9 @@ export class TaskManager implements ITaskReload {
   public readonly isSaving = computed(
     () => this.taskStates.pendingWrites().size > 0,
   );
+
+  public readonly isCreating = this.taskStates.isCreating.asReadonly();
+  public readonly createError = this.taskStates.createError.asReadonly();
 
   public readonly taskCount = computed(() => this.tasks().length);
 
@@ -65,6 +73,11 @@ export class TaskManager implements ITaskReload {
 
   public update(task: Task): void {
     this.statewise.dispatch(updateTaskActions.request(task));
+  }
+
+  /** Not on the shared kernel's port — see ProjectManager.createProject. */
+  public createTask(draft: TaskDraft): Promise<void> {
+    return this.statewise.dispatchAsync(createTaskActions.request(draft));
   }
 
   public reset(): Promise<void> {
