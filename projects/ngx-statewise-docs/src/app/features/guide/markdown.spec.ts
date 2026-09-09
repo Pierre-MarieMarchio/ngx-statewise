@@ -1,5 +1,6 @@
 import { renderOptions as options } from '../../../testing/render-options';
 import { renderGuide, slugify } from './markdown';
+import { at } from '../../../testing/at';
 
 /** Stands in for `Location.prepareExternalUrl` under a subpath deployment. */
 const underSubpath = options({
@@ -65,8 +66,8 @@ describe('renderGuide', () => {
     const first = renderGuide('## Key notes', options());
     const second = renderGuide('## Key notes', options());
 
-    expect(first.headings[0].id).toBe('key-notes');
-    expect(second.headings[0].id).toBe('key-notes');
+    expect(at(first.headings, 0).id).toBe('key-notes');
+    expect(at(second.headings, 0).id).toBe('key-notes');
   });
 
   it('sends a site-absolute link through the base href and the locale', () => {

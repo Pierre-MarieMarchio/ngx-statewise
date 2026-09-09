@@ -164,14 +164,18 @@ export class GuidePageComponent {
               (a, b) => a.boundingClientRect.top - b.boundingClientRect.top,
             );
 
-          if (visible.length > 0) {
-            this.activeHeading.set(visible[visible.length - 1].target.id);
+          const lowest = visible.at(-1);
+
+          if (lowest) {
+            this.activeHeading.set(lowest.target.id);
             return;
           }
 
           // Above the first heading there is no current section; leaving the
           // marker where it was would point at one already left behind.
-          if (headings[0].getBoundingClientRect().top > top) {
+          const first = headings[0];
+
+          if (first && first.getBoundingClientRect().top > top) {
             this.activeHeading.set(null);
           }
         },

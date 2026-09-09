@@ -28,13 +28,17 @@ export function defineActionsGroup<
 }): ActionCreatorsGroup<Source, Events> {
   const creators: Record<string, unknown> = {};
 
-  for (const eventName of Object.keys(config.events) as (keyof Events &
-    string)[]) {
+  const events = Object.entries(config.events) as [
+    keyof Events & string,
+    PayloadDefinition,
+  ][];
+
+  for (const [eventName, payloadDefinition] of events) {
     const type = `${config.source.toUpperCase()}_${toScreamingSnakeCase(
       eventName,
     )}` as GroupActionType<Source, typeof eventName>;
 
-    creators[eventName] = createActionCreator(type, config.events[eventName]);
+    creators[eventName] = createActionCreator(type, payloadDefinition);
   }
 
   return creators as ActionCreatorsGroup<Source, Events>;

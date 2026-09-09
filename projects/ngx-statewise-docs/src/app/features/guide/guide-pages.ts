@@ -327,11 +327,11 @@ function translated(
  * first heading, which is the one thing every page has.
  */
 function name(body: string): string {
-  const heading = /^#\s+(.+)$/m.exec(body);
+  const title = /^#\s+(.+)$/m.exec(body)?.[1];
 
-  return heading === null
+  return title === undefined
     ? 'a guide page with no heading'
-    : `the guide page "${heading[1].trim()}"`;
+    : `the guide page "${title.trim()}"`;
 }
 
 function describe(page: GuidePage): string {

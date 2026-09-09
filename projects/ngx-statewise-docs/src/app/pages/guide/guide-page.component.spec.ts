@@ -9,6 +9,7 @@ import {
   type GuidePage,
 } from '../../features/guide/guide-pages';
 import { GuidePageComponent } from './guide-page.component';
+import { at } from '../../../testing/at';
 
 function configure(code: LocaleCode = 'en') {
   TestBed.resetTestingModule();
@@ -119,12 +120,12 @@ describe('GuidePageComponent', () => {
   });
 
   it('offers no previous link on the first page, and no next on the last', () => {
-    const first = mount(GUIDE_PAGES[0]).nativeElement as HTMLElement;
+    const first = mount(at(GUIDE_PAGES, 0)).nativeElement as HTMLElement;
 
     expect(first.querySelector('.pager__link--previous')).toBeNull();
     expect(first.querySelector('.pager__link--next')).not.toBeNull();
 
-    const last = mount(GUIDE_PAGES[GUIDE_PAGES.length - 1])
+    const last = mount(at(GUIDE_PAGES, GUIDE_PAGES.length - 1))
       .nativeElement as HTMLElement;
 
     expect(last.querySelector('.pager__link--previous')).not.toBeNull();

@@ -3,6 +3,7 @@ import { ActionHistory, ofType } from 'ngx-statewise';
 import { appConfig } from '@app/app.config';
 import { loginActions } from '@app/features/auth/states/auth/auth.action';
 import { AuthManager } from '@app/features/auth/states';
+import { at } from '@testing/at';
 
 const CREDENTIALS = { email: 'admin@admin', password: 'admin' };
 
@@ -33,7 +34,7 @@ describe('the action history, as the application configures it', () => {
       .filter((action) => action.type === ofType(loginActions.request));
 
     expect(recorded).toHaveLength(1);
-    expect(recorded[0].payload).toEqual({
+    expect(at(recorded, 0).payload).toEqual({
       email: CREDENTIALS.email,
       password: '[redacted]',
     });

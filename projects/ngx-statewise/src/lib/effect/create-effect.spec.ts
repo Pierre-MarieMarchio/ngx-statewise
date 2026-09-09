@@ -9,6 +9,7 @@ import { defineActionsGroup, emptyPayload, payload } from '../action';
 import { createEffect } from './create-effect';
 import type { EffectContext } from './effect-context';
 import { EffectRegistry } from './effect-registry';
+import { firstEntry } from '../../spec-helpers/first-entry';
 
 const actions = defineActionsGroup({
   source: 'created',
@@ -53,7 +54,7 @@ describe('createEffect', () => {
       });
     });
 
-    const [effect] = registry.triggeredBy(actions.withPayload.type);
+    const effect = firstEntry(registry.triggeredBy(actions.withPayload.type));
     void effect.run(actions.withPayload(7), liveRun);
 
     expect(received).toEqual([7]);
@@ -67,7 +68,7 @@ describe('createEffect', () => {
       });
     });
 
-    const [effect] = registry.triggeredBy(actions.withPayload.type);
+    const effect = firstEntry(registry.triggeredBy(actions.withPayload.type));
     void effect.run(actions.withPayload(7), liveRun);
 
     expect(received).toEqual([liveRun]);
@@ -85,7 +86,9 @@ describe('createEffect', () => {
       });
     });
 
-    const [effect] = registry.triggeredBy(actions.withoutPayload.type);
+    const effect = firstEntry(
+      registry.triggeredBy(actions.withoutPayload.type),
+    );
     void effect.run(actions.withoutPayload(), liveRun);
 
     expect(received).toEqual([liveRun]);
@@ -97,7 +100,7 @@ describe('createEffect', () => {
       createEffect(actions.withPayload, () => produced);
     });
 
-    const [effect] = registry.triggeredBy(actions.withPayload.type);
+    const effect = firstEntry(registry.triggeredBy(actions.withPayload.type));
 
     expect(effect.run(actions.withPayload(1), liveRun)).toBe(produced);
   });
@@ -117,7 +120,7 @@ describe('createEffect', () => {
         createEffect(actions.withPayload, () => undefined);
       });
 
-      const [effect] = registry.triggeredBy(actions.withPayload.type);
+      const effect = firstEntry(registry.triggeredBy(actions.withPayload.type));
 
       expect(effect.concurrency).toBe('parallel');
       expect(effect.cancelledBy).toEqual([]);
@@ -131,7 +134,7 @@ describe('createEffect', () => {
         });
       });
 
-      const [effect] = registry.triggeredBy(actions.withPayload.type);
+      const effect = firstEntry(registry.triggeredBy(actions.withPayload.type));
 
       expect(effect.mustAnswer).toBe(true);
     });
@@ -143,7 +146,7 @@ describe('createEffect', () => {
         });
       });
 
-      const [effect] = registry.triggeredBy(actions.withPayload.type);
+      const effect = firstEntry(registry.triggeredBy(actions.withPayload.type));
 
       expect(effect.concurrency).toBe('latest');
     });
@@ -153,7 +156,7 @@ describe('createEffect', () => {
         createEffect(actions.withPayload, () => undefined);
       });
 
-      const [effect] = registry.triggeredBy(actions.withPayload.type);
+      const effect = firstEntry(registry.triggeredBy(actions.withPayload.type));
 
       expect(effect.keyOf(actions.withPayload(1))).toBe(
         effect.keyOf(actions.withPayload(2)),
@@ -167,7 +170,7 @@ describe('createEffect', () => {
         });
       });
 
-      const [effect] = registry.triggeredBy(actions.withPayload.type);
+      const effect = firstEntry(registry.triggeredBy(actions.withPayload.type));
 
       expect(effect.keyOf(actions.withPayload(7))).toBe('task-7');
     });
@@ -182,8 +185,10 @@ describe('createEffect', () => {
         });
       });
 
-      const [single] = registry.triggeredBy(actions.withPayload.type);
-      const [several] = registry.triggeredBy(actions.withoutPayload.type);
+      const single = firstEntry(registry.triggeredBy(actions.withPayload.type));
+      const several = firstEntry(
+        registry.triggeredBy(actions.withoutPayload.type),
+      );
 
       expect(single.cancelledBy).toEqual([actions.cancelled.type]);
       expect(several.cancelledBy).toEqual([

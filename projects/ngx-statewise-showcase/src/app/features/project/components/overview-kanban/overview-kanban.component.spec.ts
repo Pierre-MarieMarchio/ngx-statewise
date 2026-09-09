@@ -6,6 +6,7 @@ import {
 } from '@testing/fake-managers';
 import { OverviewKanbanComponent } from './overview-kanban.component';
 import { TaskManager } from '@app/features/project/states/task/task.manager';
+import { at } from '@testing/at';
 
 const TASKS = [
   sampleTask({ id: 'a', status: 'todo' }),
@@ -77,12 +78,12 @@ describe('OverviewKanbanComponent', () => {
     const fixture = await mount();
 
     fixture.componentInstance.onTaskMoved({
-      item: TASKS[0],
+      item: at(TASKS, 0),
       from: 'todo',
       to: 'done',
     });
 
-    expect(taskManager.updates).toEqual([{ ...TASKS[0], status: 'done' }]);
+    expect(taskManager.updates).toEqual([{ ...at(TASKS, 0), status: 'done' }]);
   });
 
   /** A column id the board does not recognise is not a status to write. */
@@ -90,7 +91,7 @@ describe('OverviewKanbanComponent', () => {
     const fixture = await mount();
 
     fixture.componentInstance.onTaskMoved({
-      item: TASKS[0],
+      item: at(TASKS, 0),
       from: 'todo',
       to: 'nowhere',
     });

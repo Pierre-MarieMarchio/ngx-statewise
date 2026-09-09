@@ -34,8 +34,13 @@ export function cascadeDepthExceededError(
   path: readonly string[],
   maxDepth: number,
 ): Error {
+  // The engine always passes the action it was called with, so the fallback
+  // never runs. It stands in for a guard clause, which would have shown as a
+  // branch the suite cannot reach.
+  const [start = 'an action'] = path;
+
   return new Error(
-    `[ngx-statewise] The cascade started by "${path[0]}" exceeded ` +
+    `[ngx-statewise] The cascade started by "${start}" exceeded ` +
       `maxCascadeDepth (${String(maxDepth)}) and was stopped. Two effects ` +
       `returning each other's action are the usual cause, and the path ` +
       `below reads the cycle out. Break it, or raise the bound with ` +

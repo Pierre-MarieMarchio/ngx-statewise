@@ -21,6 +21,7 @@ import { AuthEffect } from './auth.effect';
 import { AuthState } from './auth.state';
 import { authUpdater } from './auth.updater';
 import { PROJECT_RELOAD, TASK_RELOAD } from '@app/features/common';
+import { at } from '@testing/at';
 
 const CLAIMS = {
   nameidentifier:
@@ -240,13 +241,13 @@ describe('AuthEffect', () => {
       );
       const second = statewise.dispatchAsync(loginActions.request(CREDENTIALS));
 
-      gates[1].next(new HttpResponse({ body: LOGGED_IN }));
-      gates[1].complete();
+      at(gates, 1).next(new HttpResponse({ body: LOGGED_IN }));
+      at(gates, 1).complete();
       await second;
-      gates[0].next(
+      at(gates, 0).next(
         new HttpResponse({ body: { ...LOGGED_IN, userName: 'user1' } }),
       );
-      gates[0].complete();
+      at(gates, 0).complete();
       await first;
 
       // The abandoned attempt answered last and was dropped.

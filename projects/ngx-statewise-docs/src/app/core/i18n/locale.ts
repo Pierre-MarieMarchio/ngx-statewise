@@ -31,7 +31,9 @@ export interface Locale {
  * not maintainable by one person, and the untranslated banner already says
  * so on every page. Only the interface is localised.
  */
-export const LOCALES: readonly Locale[] = [
+/* A non-empty tuple, so "the first one is the default" is something the type
+   guarantees rather than something this comment promises. */
+export const LOCALES: readonly [Locale, ...Locale[]] = [
   { code: 'en', label: 'English', short: 'EN', htmlLang: 'en' },
   { code: 'fr', label: 'Français', short: 'FR', htmlLang: 'fr' },
   {
