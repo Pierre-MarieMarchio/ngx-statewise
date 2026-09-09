@@ -65,7 +65,7 @@ describe('NavShellComponent', () => {
       fixture.nativeElement as HTMLElement
     ).querySelector<HTMLButtonElement>('button.footer-groupe-button');
 
-    expect(button?.querySelector('span')?.textContent?.trim()).toBe('logout');
+    expect(button?.querySelector('span')?.textContent?.trim()).toBe('Log out');
 
     button?.click();
 

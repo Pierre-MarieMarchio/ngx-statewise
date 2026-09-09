@@ -23,7 +23,12 @@ app-section-card {
   max-height: 60vh;
 }
 
-@media (max-width: 1080px) {
+/*
+ * The container, not the window: the rail takes 80 to 110 px before this box
+ * gets any, so the old `@media (max-width: 1080px)` fired at about 990 and
+ * encoded the rail's width in a number nobody would think to update.
+ */
+@container page (max-width: 1000px) {
   .dashboard-container {
     grid-template-columns: 1fr;
   }

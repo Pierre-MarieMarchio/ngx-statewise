@@ -1,5 +1,5 @@
 <div class="history-page-container">
-  <h1 class="history-page-header">HISTORY</h1>
+  <h1 class="history-page-header">History</h1>
   <p class="history-page-intro">
     The last dispatched actions, oldest first, recorded application-wide once
     <code>provideStatewise({{ '{' }} history {{ '}' }})</code> sets a limit.
@@ -10,15 +10,15 @@
 
   <div class="history-page-actions">
     <button class="primary-btn" mat-stroked-button (click)="raiseNotice()">
-      raise a notice
+      Raise a notice
     </button>
     <button class="primary-btn" mat-stroked-button (click)="incrementTally()">
-      increment the tally
+      Increment the tally
     </button>
     <button class="primary-btn" mat-stroked-button (click)="reloadTasks()">
-      reload the tasks
+      Reload the tasks
     </button>
-    <button mat-button (click)="refresh()">refresh</button>
+    <button mat-button (click)="refresh()">Refresh</button>
   </div>
 
   <!--
@@ -48,7 +48,7 @@
     @if (selectedType(); as selected) {
       <span>
         , filtered on <code data-readout="filter">{{ selected }}</code>
-        <button mat-button (click)="clearFilter()">clear filter</button>
+        <button mat-button (click)="clearFilter()">Clear the filter</button>
       </span>
     }
   </p>

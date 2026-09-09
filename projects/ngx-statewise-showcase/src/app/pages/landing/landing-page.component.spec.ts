@@ -34,6 +34,6 @@ describe('LandingPageComponent', () => {
       fixture.nativeElement as HTMLElement
     ).querySelector<HTMLAnchorElement>('a[href="/login"]');
 
-    expect(signIn?.textContent?.trim()).toBe('sign in');
+    expect(signIn?.textContent?.trim()).toBe('Sign in');
   });
 });

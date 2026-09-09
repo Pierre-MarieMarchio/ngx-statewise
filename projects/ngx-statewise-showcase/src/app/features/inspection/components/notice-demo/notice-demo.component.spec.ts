@@ -60,7 +60,7 @@ describe('NoticeDemoComponent', () => {
   it('clears the message without forgetting how many were raised', () => {
     click('injectStatewise()');
     click('injectStatewise(projectUpdater)');
-    click('clear');
+    click('Clear');
 
     expect(readout('message')).toBe('(none)');
     expect(readout('count')).toBe('2');
