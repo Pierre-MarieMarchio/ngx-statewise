@@ -1,6 +1,29 @@
 <app-side-panel #taskPanel>
   <div slot="view-content">
-    <h1 class="task-page-header">TASK</h1>
+    <div class="board-header">
+      <h1 class="task-page-header">TASK</h1>
+      <div class="board-header-actions">
+        <button
+          class="primary-btn"
+          mat-stroked-button
+          type="button"
+          (click)="openNewProject()"
+        >
+          <mat-icon>add</mat-icon>
+          New project
+        </button>
+        <button
+          class="primary-btn"
+          mat-stroked-button
+          type="button"
+          [disabled]="!projectManager.projects().length"
+          (click)="openNewTask()"
+        >
+          <mat-icon>add</mat-icon>
+          New task
+        </button>
+      </div>
+    </div>
 
     <app-data-state
       label="tasks"
@@ -59,9 +82,31 @@
     </mat-tab-group>
   </div>
 
-  <app-task-details
-    slot="panel-content"
-    [selectedTask]="selectedTask()"
-    (closed)="closeSideNav()"
-  />
+  <div slot="panel-content">
+    @switch (panel()) {
+      @case ('new-project') {
+        <app-project-form
+          [pending]="projectManager.isCreating()"
+          [refusal]="projectManager.createError()"
+          (submitted)="createProject($event)"
+          (cancelled)="closeSideNav()"
+        />
+      }
+      @case ('new-task') {
+        <app-task-form
+          [projects]="projectManager.projects()"
+          [pending]="taskManager.isCreating()"
+          [refusal]="taskManager.createError()"
+          (submitted)="createTask($event)"
+          (cancelled)="closeSideNav()"
+        />
+      }
+      @default {
+        <app-task-details
+          [selectedTask]="selectedTask()"
+          (closed)="closeSideNav()"
+        />
+      }
+    }
+  </div>
 </app-side-panel>

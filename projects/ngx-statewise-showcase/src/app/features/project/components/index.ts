@@ -5,3 +5,5 @@ export { TaskKanbanComponent } from './task-kanban/task-kanban.component';
 export { OverviewKanbanComponent } from './overview-kanban/overview-kanban.component';
 export { OverviewTaskListComponent } from './overview-task-list/overview-task-list.component';
 export { TaskDetailsComponent } from './task-details/task-details.component';
+export { ProjectFormComponent } from './project-form/project-form.component';
+export { TaskFormComponent } from './task-form/task-form.component';
