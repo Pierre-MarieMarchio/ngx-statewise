@@ -17,8 +17,23 @@ permissions:
   id-token: write # npm provenance
 
 jobs:
+  # The published peer range promises three Angular majors, and this workspace
+  # holds one. `npm run check` below proves nothing about the other two: it
+  # type-checks against the Angular in this lockfile. So the gate is here,
+  # ahead of the publish, and it costs three full installs per release — which
+  # is the right price for a range that would otherwise be a guess.
+  compat:
+    name: Angular compatibility
+    uses: ./.github/workflows/angular-compat.yml
+    permissions:
+      contents: read
+
   release:
     name: Release ${{ github.ref_name == 'main' && 'stable' || 'beta' }}
+    # Nothing is published unless all three majors answered. `fail-fast: false`
+    # in the called workflow means one break does not hide the other results,
+    # and a failure there skips this job outright.
+    needs: compat
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.release.outputs.version }}
@@ -77,6 +92,7 @@ jobs:
             echo "| Branch | \`${{ github.ref_name }}\` |"
             echo "| Channel | \`${{ github.ref_name == 'main' && 'latest' || 'beta' }}\` |"
             echo "| Version | \`$(node -p "require('./projects/ngx-statewise/package.json').version")\` |"
+            echo "| Angular compatibility | \`${{ needs.compat.result }}\` |"
             echo "| Outcome | ${{ job.status }} |"
           } >> "$GITHUB_STEP_SUMMARY"
 

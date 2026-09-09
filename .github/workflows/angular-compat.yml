@@ -8,14 +8,21 @@ name: Angular compatibility
 #
 # Not on pull requests, on purpose: no diff here changes what npm resolves for
 # Angular 20. What changes is the registry, which is a clock rather than an
-# event — so this runs weekly, and on demand before a release.
+# event — so this runs weekly, on demand, and as a gate the release workflow
+# calls before it publishes anything.
 on:
   schedule:
     - cron: '0 4 * * 1'
   workflow_dispatch:
+  # Called by release.yml, which will not publish unless this passes. Being
+  # one workflow rather than two copies is what keeps the matrix from drifting
+  # apart from the one a release actually verifies.
+  workflow_call:
 
+# Qualified by the calling workflow: under `workflow_call` this is the caller's
+# name, so a release gate and the weekly run never cancel one another.
 concurrency:
-  group: angular-compat-${{ github.ref }}
+  group: angular-compat-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
