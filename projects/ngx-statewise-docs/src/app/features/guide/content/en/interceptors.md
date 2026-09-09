@@ -121,9 +121,9 @@ thing: a clamp records something that did not happen, while a refusal records
 nothing.
 
 One thing a refusal does not undo. The runs this action was told to abandon,
-through the `cancelOn` field of [`EffectOptions`](/guide/api#exported-types) on
-an effect, are abandoned before any interceptor is asked. A refusal stops what
-the action would start, not what it was told to stop.
+through an effect's [`cancelOn`](/guide/effects#cancelon), are abandoned before
+any interceptor is asked. A refusal stops what the action would start, not what
+it was told to stop.
 
 ## Synchronous, and with no options
 
@@ -145,7 +145,8 @@ something calls a manager, which is what
 prescribes anyway.
 
 And it takes **no options**: no `concurrency`, no `cancelOn`, no `mustAnswer`,
-no `key`, no `abortSignal`. Those govern the runs of an effect, and an
+no `key`, no `abortSignal`. Those
+[govern the runs of an effect](/guide/effects#governing-the-runs), and an
 interceptor starts no run, so there is nothing to cancel, nothing to supersede,
 nothing to await.
 
