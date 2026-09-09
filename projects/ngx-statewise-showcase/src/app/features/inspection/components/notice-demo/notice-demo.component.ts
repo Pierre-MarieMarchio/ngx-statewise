@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { injectStatewise } from 'ngx-statewise';
-import { projectUpdater } from '@app/features/project/states/project/project.updater';
+import { tallyUpdater } from '../../states/tally/tally.updater';
 import { NoticeState } from '../../states/notice/notice.state';
 import { noticeActions } from '../../states/notice/notice.action';
 import { NoticeListenerService } from './notice-listener.service';
@@ -28,7 +28,7 @@ export class NoticeDemoComponent {
   public readonly listener = inject(NoticeListenerService);
 
   private readonly bareHandle = injectStatewise();
-  private readonly unrelatedHandle = injectStatewise(projectUpdater);
+  private readonly unrelatedHandle = injectStatewise(tallyUpdater);
 
   public raiseFromBareHandle(): void {
     this.bareHandle.dispatch(

@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { TaskListColumnItem } from '../../models';
 import { MatTableModule } from '@angular/material/table';
-import { Task } from '@shared/app-common/models';
+import { Task } from '../../models';
 import { AssignedTasksService } from '../../services';
 
 @Component({

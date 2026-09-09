@@ -53,7 +53,7 @@ export const USERS: User[] = [
  *
  * They happen to match today, and TypeScript's structural typing would let
  * either stand in for the other — which is exactly why the two are kept apart:
- * the state, the actions and the managers speak `@shared/app-common/models`,
+ * the state, the actions and the managers speak `@app/features/project/models`,
  * and the repository is the one place that crosses over. A real backend would
  * drift from the model within a release, and nothing here would notice.
  */

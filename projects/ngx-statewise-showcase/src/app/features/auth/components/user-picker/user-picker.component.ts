@@ -9,7 +9,7 @@ import {
   MatButtonToggleModule,
 } from '@angular/material/button-toggle';
 import { UserSwitchService } from '../../services';
-import { AUTH_MANAGER } from '@shared/app-common/tokens';
+import { AuthManager } from '@app/features/auth/states';
 
 /**
  * The toggle values double as the demo user names, so the group can be bound
@@ -28,7 +28,7 @@ const DEMO_CREDENTIALS = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserPickerComponent {
-  private readonly authManager = inject(AUTH_MANAGER);
+  private readonly authManager = inject(AuthManager);
   private readonly userSwitch = inject(UserSwitchService);
 
   public readonly currentUserName = computed(

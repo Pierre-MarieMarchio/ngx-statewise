@@ -6,13 +6,14 @@ import {
   input,
   output,
 } from '@angular/core';
-import { AUTH_MANAGER, PROJECT_MANAGER } from '@shared/app-common/tokens';
 import { TaskListColumnItem } from '../../models';
 import { TaskSelectionService } from '../../services';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTableModule } from '@angular/material/table';
-import { Task } from '@shared/app-common/models';
+import { Task } from '../../models';
+import { AUTH_SESSION } from '@app/features/common';
+import { ProjectManager } from '@app/features/project/states/project/project.manager';
 
 @Component({
   selector: 'app-project-task-list',
@@ -26,9 +27,9 @@ export class ProjectTaskListComponent {
   public tasks = input<Task[]>();
   public taskSelected = output<Task>();
 
-  public projectManager = inject(PROJECT_MANAGER);
+  public projectManager = inject(ProjectManager);
   private readonly selection = inject(TaskSelectionService);
-  private readonly authManager = inject(AUTH_MANAGER);
+  private readonly authManager = inject(AUTH_SESSION);
 
   public readonly columns = computed(() =>
     this.allColumns.filter(

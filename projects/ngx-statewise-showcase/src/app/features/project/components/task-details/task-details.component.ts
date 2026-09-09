@@ -12,7 +12,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
-import { Task, TaskPriority, TaskStatus } from '@shared/app-common/models';
+import { Task, TaskPriority, TaskStatus } from '../../models';
 
 @Component({
   selector: 'app-task-details',

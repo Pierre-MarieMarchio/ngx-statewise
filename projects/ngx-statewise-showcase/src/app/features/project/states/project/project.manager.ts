@@ -1,14 +1,14 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { injectStatewise } from 'ngx-statewise';
-import { IProjectManager } from '@shared/app-common/tokens';
 import { ProjectState } from './project.state';
 import { projectUpdater } from './project.updater';
 import { getAllProjectsActions, projectReset } from './project.action';
+import { IProjectReload } from '@app/features/common';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ProjectManager implements IProjectManager {
+export class ProjectManager implements IProjectReload {
   private readonly projectStates = inject(ProjectState);
   private readonly statewise = injectStatewise(projectUpdater);
 

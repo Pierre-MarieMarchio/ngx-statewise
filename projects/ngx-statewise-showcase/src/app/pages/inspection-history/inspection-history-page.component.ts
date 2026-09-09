@@ -14,11 +14,11 @@ import {
   ofType,
   type Action,
 } from 'ngx-statewise';
-import { TASK_MANAGER } from '@shared/app-common/tokens';
 import { noticeActions } from '@app/features/inspection/states';
 import { tallyActions, tallyUpdater } from '@app/features/inspection/states';
 import { getAllTaskActions } from '@app/features/project/states/task/task.action';
 import { getAllProjectsActions } from '@app/features/project/states/project/project.action';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 /** Beyond this, a payload is cut short: some of them carry whole collections. */
 export const MAX_PAYLOAD_LENGTH = 120;
@@ -60,7 +60,7 @@ export class InspectionHistoryPageComponent {
   private readonly history = inject(ActionHistory);
   private readonly bareHandle = injectStatewise();
   private readonly tallyHandle = injectStatewise(tallyUpdater);
-  private readonly taskManager = inject(TASK_MANAGER);
+  private readonly taskManager = inject(TaskManager);
 
   public readonly trackedTypes = TRACKED_ACTION_TYPES;
   public readonly displayedColumns = ['position', 'type', 'payload'];

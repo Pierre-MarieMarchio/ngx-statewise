@@ -6,15 +6,15 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { SidePanelComponent } from '@shared/ui/side-panel';
-import { Task } from '@shared/app-common/models';
+import { Task } from '@app/features/project/models';
 import { DataStateComponent } from '@shared/ui/data-state';
 import {
   OverviewKanbanComponent,
   OverviewTaskListComponent,
   TaskDetailsComponent,
 } from '@app/features/project/components';
-import { TASK_MANAGER } from '@shared/app-common/tokens';
 import { UserPickerComponent } from '@app/features/auth/components';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -36,7 +36,7 @@ import { UserPickerComponent } from '@app/features/auth/components';
 export class DashboardPageComponent {
   @ViewChild('dashboardPanel') dashboardPanel!: SidePanelComponent;
 
-  public readonly taskManager = inject(TASK_MANAGER);
+  public readonly taskManager = inject(TaskManager);
 
   public selectedTask = signal<Task | null>(null);
 

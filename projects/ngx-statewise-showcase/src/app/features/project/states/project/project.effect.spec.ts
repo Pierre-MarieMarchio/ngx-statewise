@@ -5,34 +5,34 @@ import {
   provideStatewise,
   type Statewise,
 } from 'ngx-statewise';
-import { AUTH_MANAGER } from '@shared/app-common/tokens';
-import { fakeAuthManager, FakeAuthManager } from '@testing/fake-managers';
+import { fakeAuthSession, FakeAuthSession } from '@testing/fake-managers';
 import { Project } from '../../models';
 import { ProjectRepositoryService } from '../../services';
 import { getAllProjectsActions } from './project.action';
 import { ProjectEffect } from './project.effect';
 import { ProjectState } from './project.state';
 import { projectUpdater } from './project.updater';
+import { AUTH_SESSION } from '@app/features/common';
 
 const PROJECTS: Project[] = [
   { id: 'project-1', title: 'Analytics Dashboard', color: 'orange' },
 ];
 
 describe('ProjectEffect', () => {
-  let authManager: FakeAuthManager;
+  let authManager: FakeAuthSession;
   let projectState: ProjectState;
   let statewise: Statewise;
   let source: Observable<Project[]>;
   let subscriptions: number;
 
   const setUp = (): void => {
-    authManager = fakeAuthManager();
+    authManager = fakeAuthSession();
     subscriptions = 0;
 
     TestBed.configureTestingModule({
       providers: [
         provideStatewise({ effects: [ProjectEffect] }),
-        { provide: AUTH_MANAGER, useValue: authManager },
+        { provide: AUTH_SESSION, useValue: authManager },
         {
           provide: ProjectRepositoryService,
           useValue: {

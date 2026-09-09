@@ -1,25 +1,38 @@
 import { TestBed } from '@angular/core/testing';
 import {
-  AUTH_MANAGER,
-  PROJECT_MANAGER,
-  TASK_MANAGER,
-} from '@shared/app-common/tokens';
-import {
   fakeAuthManager,
+  fakeAuthSession,
+  fakeProjectReload,
   fakeProjectManager,
   fakeTaskManager,
+  fakeTaskReload,
   sampleTask,
 } from '@testing/fake-managers';
 import { DashboardPageComponent } from './dashboard-page.component';
+import { AuthManager } from '@app/features/auth/states';
+import {
+  AUTH_SESSION,
+  PROJECT_RELOAD,
+  TASK_RELOAD,
+} from '@app/features/common';
+import { ProjectManager } from '@app/features/project/states/project/project.manager';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 describe('DashboardPageComponent', () => {
   const mount = async () => {
     await TestBed.configureTestingModule({
       imports: [DashboardPageComponent],
       providers: [
-        { provide: AUTH_MANAGER, useValue: fakeAuthManager() },
-        { provide: TASK_MANAGER, useValue: fakeTaskManager([sampleTask()]) },
-        { provide: PROJECT_MANAGER, useValue: fakeProjectManager() },
+        { provide: AuthManager, useValue: fakeAuthManager() },
+        // The lists this page mounts read the session through the kernel's
+        // port, not through the manager the page itself injects.
+        { provide: AUTH_SESSION, useValue: fakeAuthSession() },
+        // …and the user picker it mounts drives UserSwitchService, which
+        // waits on both reload ports.
+        { provide: TASK_RELOAD, useValue: fakeTaskReload() },
+        { provide: PROJECT_RELOAD, useValue: fakeProjectReload() },
+        { provide: TaskManager, useValue: fakeTaskManager([sampleTask()]) },
+        { provide: ProjectManager, useValue: fakeProjectManager() },
       ],
     }).compileComponents();
 

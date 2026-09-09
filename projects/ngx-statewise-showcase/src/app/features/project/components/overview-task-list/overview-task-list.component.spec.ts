@@ -1,27 +1,28 @@
 import { TestBed } from '@angular/core/testing';
-import { AUTH_MANAGER, TASK_MANAGER } from '@shared/app-common/tokens';
 import {
-  fakeAuthManager,
-  FakeAuthManager,
+  fakeAuthSession,
+  FakeAuthSession,
   fakeTaskManager,
   sampleTask,
   sampleUser,
 } from '@testing/fake-managers';
 import { OverviewTaskListComponent } from './overview-task-list.component';
+import { AUTH_SESSION } from '@app/features/common';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 const TASKS = [sampleTask(), sampleTask({ id: 'task-2' })];
 
 describe('OverviewTaskListComponent', () => {
-  let authManager: FakeAuthManager;
+  let authManager: FakeAuthSession;
 
   const mount = async () => {
-    authManager = fakeAuthManager();
+    authManager = fakeAuthSession();
 
     await TestBed.configureTestingModule({
       imports: [OverviewTaskListComponent],
       providers: [
-        { provide: AUTH_MANAGER, useValue: authManager },
-        { provide: TASK_MANAGER, useValue: fakeTaskManager(TASKS) },
+        { provide: AUTH_SESSION, useValue: authManager },
+        { provide: TaskManager, useValue: fakeTaskManager(TASKS) },
       ],
     }).compileComponents();
 

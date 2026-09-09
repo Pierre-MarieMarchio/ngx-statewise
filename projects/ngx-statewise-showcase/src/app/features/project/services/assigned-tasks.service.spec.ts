@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { AUTH_MANAGER } from '@shared/app-common/tokens';
 import {
-  fakeAuthManager,
-  FakeAuthManager,
+  fakeAuthSession,
+  FakeAuthSession,
   sampleTask,
   sampleUser,
 } from '@testing/fake-managers';
 import { AssignedTasksService } from './assigned-tasks.service';
+import { AUTH_SESSION } from '@app/features/common';
 
 const TASKS = [
   sampleTask({ id: 'mine', assignedUserIds: ['user-1'] }),
@@ -17,13 +17,13 @@ const TASKS = [
 
 describe('AssignedTasksService', () => {
   let assigned: AssignedTasksService;
-  let authManager: FakeAuthManager;
+  let authManager: FakeAuthSession;
 
   beforeEach(() => {
-    authManager = fakeAuthManager(sampleUser({ userId: 'user-1' }));
+    authManager = fakeAuthSession(sampleUser({ userId: 'user-1' }));
 
     TestBed.configureTestingModule({
-      providers: [{ provide: AUTH_MANAGER, useValue: authManager }],
+      providers: [{ provide: AUTH_SESSION, useValue: authManager }],
     });
 
     assigned = TestBed.inject(AssignedTasksService);

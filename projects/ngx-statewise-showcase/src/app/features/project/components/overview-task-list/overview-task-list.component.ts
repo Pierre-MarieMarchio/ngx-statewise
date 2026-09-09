@@ -5,11 +5,12 @@ import {
   computed,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { Task } from '@shared/app-common/models';
-import { AUTH_MANAGER, TASK_MANAGER } from '@shared/app-common/tokens';
+import { Task } from '../../models';
 import { TaskListColumnItem } from '../../models';
 import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
+import { AUTH_SESSION } from '@app/features/common';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 @Component({
   selector: 'app-overview-task-list',
@@ -21,8 +22,8 @@ import { MatCardModule } from '@angular/material/card';
 export class OverviewTaskListComponent {
   public taskSelected = output<Task>();
 
-  private readonly authManager = inject(AUTH_MANAGER);
-  private readonly taskManager = inject(TASK_MANAGER);
+  private readonly authManager = inject(AUTH_SESSION);
+  private readonly taskManager = inject(TaskManager);
 
   public tasks = this.taskManager.tasks;
   public readonly columns = computed(() =>

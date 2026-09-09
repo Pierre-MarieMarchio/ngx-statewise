@@ -1,14 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Project } from '@app/features/project/models';
-import { Task } from '@shared/app-common/models';
-import { AUTH_MANAGER, PROJECT_MANAGER } from '@shared/app-common/tokens';
+import { Task } from '../../models';
 import {
-  fakeAuthManager,
-  FakeAuthManager,
+  fakeAuthSession,
+  FakeAuthSession,
   fakeProjectManager,
   sampleUser,
 } from '@testing/fake-managers';
 import { ProjectTaskListComponent } from './project-task-list.component';
+import { AUTH_SESSION } from '@app/features/common';
+import { ProjectManager } from '@app/features/project/states/project/project.manager';
 
 const PROJECTS: Project[] = [
   { id: 'p-1', title: 'Analytics Dashboard', color: 'orange' },
@@ -39,7 +40,7 @@ const TASKS: Task[] = [
 
 describe('ProjectTaskListComponent', () => {
   let fixture: ComponentFixture<ProjectTaskListComponent>;
-  let authManager: FakeAuthManager;
+  let authManager: FakeAuthSession;
 
   const host = (): HTMLElement => fixture.nativeElement as HTMLElement;
 
@@ -49,13 +50,13 @@ describe('ProjectTaskListComponent', () => {
     );
 
   beforeEach(async () => {
-    authManager = fakeAuthManager(sampleUser({ role: 'admin' }));
+    authManager = fakeAuthSession(sampleUser({ role: 'admin' }));
 
     await TestBed.configureTestingModule({
       imports: [ProjectTaskListComponent],
       providers: [
-        { provide: PROJECT_MANAGER, useValue: fakeProjectManager(PROJECTS) },
-        { provide: AUTH_MANAGER, useValue: authManager },
+        { provide: ProjectManager, useValue: fakeProjectManager(PROJECTS) },
+        { provide: AUTH_SESSION, useValue: authManager },
       ],
     }).compileComponents();
 

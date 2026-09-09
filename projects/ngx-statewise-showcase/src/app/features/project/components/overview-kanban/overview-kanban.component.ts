@@ -6,13 +6,13 @@ import {
 } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { TaskBoardService, TaskSelectionService } from '../../services';
-import { Task } from '@shared/app-common/models';
-import { TASK_MANAGER } from '@shared/app-common/tokens';
+import { Task } from '../../models';
 import {
   KanbanComponent,
   type KanbanColumn,
   type KanbanMove,
 } from '@shared/ui/kanban';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 @Component({
   selector: 'app-overview-kanban',
@@ -22,7 +22,7 @@ import {
   styleUrl: './overview-kanban.component.scss',
 })
 export class OverviewKanbanComponent {
-  private readonly taskManager = inject(TASK_MANAGER);
+  private readonly taskManager = inject(TaskManager);
   private readonly board = inject(TaskBoardService);
   private readonly selection = inject(TaskSelectionService);
 

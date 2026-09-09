@@ -1,11 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideStatewise } from 'ngx-statewise';
 import {
-  AUTH_MANAGER,
-  PROJECT_MANAGER,
-  TASK_MANAGER,
-} from '@shared/app-common/tokens';
-import {
   fakeAuthManager,
   FakeAuthManager,
   fakeProjectManager,
@@ -22,6 +17,9 @@ import {
 import { taskUpdater } from '@app/features/project/states/task/task.updater';
 import { noticeUpdater } from '@app/features/inspection/states';
 import { InspectionLivePageComponent } from './inspection-live-page.component';
+import { AuthManager } from '@app/features/auth/states';
+import { ProjectManager } from '@app/features/project/states/project/project.manager';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 describe('InspectionLivePageComponent', () => {
   let fixture: ComponentFixture<InspectionLivePageComponent>;
@@ -53,9 +51,9 @@ describe('InspectionLivePageComponent', () => {
       imports: [InspectionLivePageComponent],
       providers: [
         provideStatewise({ updaters: [noticeUpdater] }),
-        { provide: AUTH_MANAGER, useValue: authManager },
-        { provide: TASK_MANAGER, useValue: taskManager },
-        { provide: PROJECT_MANAGER, useValue: projectManager },
+        { provide: AuthManager, useValue: authManager },
+        { provide: TaskManager, useValue: taskManager },
+        { provide: ProjectManager, useValue: projectManager },
       ],
     }).compileComponents();
 

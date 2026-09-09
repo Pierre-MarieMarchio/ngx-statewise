@@ -1,4 +1,4 @@
-import { Task } from '@shared/app-common/models';
+import { Task } from '../../models';
 import { defineUpdater } from 'ngx-statewise';
 import { getAllTaskActions, taskReset, updateTaskActions } from './task.action';
 import { TaskState } from './task.state';

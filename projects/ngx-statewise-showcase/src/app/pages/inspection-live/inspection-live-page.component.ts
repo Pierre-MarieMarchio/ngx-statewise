@@ -7,11 +7,6 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { injectStatewise } from 'ngx-statewise';
-import {
-  AUTH_MANAGER,
-  PROJECT_MANAGER,
-  TASK_MANAGER,
-} from '@shared/app-common/tokens';
 import { ReportedErrors } from '@app/core/services';
 import { getAllTaskActions } from '@app/features/project/states/task/task.action';
 import {
@@ -19,6 +14,9 @@ import {
   TallyDemoComponent,
 } from '@app/features/inspection/components';
 import { NoticeState } from '@app/features/inspection/states';
+import { AuthManager } from '@app/features/auth/states';
+import { ProjectManager } from '@app/features/project/states/project/project.manager';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 /** One line of a readout: a label and the value read at render time. */
 export interface StateReading {
@@ -47,9 +45,9 @@ export interface StateReading {
   },
 })
 export class InspectionLivePageComponent {
-  private readonly authManager = inject(AUTH_MANAGER);
-  private readonly taskManager = inject(TASK_MANAGER);
-  private readonly projectManager = inject(PROJECT_MANAGER);
+  private readonly authManager = inject(AuthManager);
+  private readonly taskManager = inject(TaskManager);
+  private readonly projectManager = inject(ProjectManager);
   private readonly noticeState = inject(NoticeState);
   private readonly reportedErrors = inject(ReportedErrors);
 

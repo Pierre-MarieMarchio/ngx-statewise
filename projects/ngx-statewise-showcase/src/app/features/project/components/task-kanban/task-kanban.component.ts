@@ -8,8 +8,7 @@ import {
 } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { Task } from '@shared/app-common/models';
-import { PROJECT_MANAGER } from '@shared/app-common/tokens';
+import { Task } from '../../models';
 import {
   KanbanComponent,
   type KanbanColumn,
@@ -17,6 +16,7 @@ import {
   type KanbanReorder,
 } from '@shared/ui/kanban';
 import { TaskBoardService, TaskSelectionService } from '../../services';
+import { ProjectManager } from '@app/features/project/states/project/project.manager';
 
 @Component({
   selector: 'app-task-kanban',
@@ -29,7 +29,7 @@ export class TaskKanbanComponent {
   public tasks = input<Task[]>();
   public taskChanged = output<Task>();
 
-  public readonly projectManager = inject(PROJECT_MANAGER);
+  public readonly projectManager = inject(ProjectManager);
   private readonly board = inject(TaskBoardService);
   private readonly selection = inject(TaskSelectionService);
 

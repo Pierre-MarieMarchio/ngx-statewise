@@ -1,17 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
-  AUTH_MANAGER,
-  PROJECT_MANAGER,
-  TASK_MANAGER,
-} from '@shared/app-common/tokens';
-import {
   fakeAuthManager,
   FakeAuthManager,
-  fakeProjectManager,
-  fakeTaskManager,
+  fakeProjectReload,
+  fakeTaskReload,
   sampleUser,
 } from '@testing/fake-managers';
 import { UserPickerComponent } from './user-picker.component';
+import { PROJECT_RELOAD, TASK_RELOAD } from '@app/features/common';
+import { AuthManager } from '@app/features/auth/states';
 
 describe('UserPickerComponent', () => {
   let fixture: ComponentFixture<UserPickerComponent>;
@@ -39,11 +36,11 @@ describe('UserPickerComponent', () => {
     await TestBed.configureTestingModule({
       imports: [UserPickerComponent],
       providers: [
-        { provide: AUTH_MANAGER, useValue: authManager },
+        { provide: AuthManager, useValue: authManager },
         // Switching user waits on both features before it lets go, so the
         // picker reaches them through the service that does the waiting.
-        { provide: TASK_MANAGER, useValue: fakeTaskManager() },
-        { provide: PROJECT_MANAGER, useValue: fakeProjectManager() },
+        { provide: TASK_RELOAD, useValue: fakeTaskReload() },
+        { provide: PROJECT_RELOAD, useValue: fakeProjectReload() },
       ],
     }).compileComponents();
 

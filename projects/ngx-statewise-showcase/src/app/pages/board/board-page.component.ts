@@ -7,8 +7,7 @@ import {
 } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
-import { Task } from '@shared/app-common/models';
-import { TASK_MANAGER } from '@shared/app-common/tokens';
+import { Task } from '@app/features/project/models';
 import { SidePanelComponent } from '@shared/ui/side-panel';
 import { DataStateComponent } from '@shared/ui/data-state';
 import { TaskDetailsComponent } from '@app/features/project/components';
@@ -18,6 +17,7 @@ import {
   PersonalTaskListComponent,
   ProjectTaskListComponent,
 } from '@app/features/project/components';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 @Component({
   selector: 'app-board-page',
@@ -42,7 +42,7 @@ import {
 export class BoardPageComponent {
   @ViewChild('taskPanel') taskPanel!: SidePanelComponent;
 
-  public readonly taskManager = inject(TASK_MANAGER);
+  public readonly taskManager = inject(TaskManager);
 
   public selectedTask = signal<Task | null>(null);
 

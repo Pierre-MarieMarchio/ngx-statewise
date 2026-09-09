@@ -1,10 +1,9 @@
 import { ErrorHandler } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { AUTH_MANAGER } from '@shared/app-common/tokens';
-import { Task } from '@shared/app-common/models';
+import { Task } from '../../models';
 import {
-  fakeAuthManager,
-  FakeAuthManager,
+  fakeAuthSession,
+  FakeAuthSession,
   sampleTask,
 } from '@testing/fake-managers';
 import { injectStatewise, type Statewise } from 'ngx-statewise';
@@ -15,6 +14,7 @@ import { getAllTaskActions, taskReset, updateTaskActions } from './task.action';
 import { TaskEffect } from './task.effect';
 import { TaskState } from './task.state';
 import { taskUpdater } from './task.updater';
+import { AUTH_SESSION } from '@app/features/common';
 
 const TODO = sampleTask({ id: 'a', status: 'todo' });
 const OTHER = sampleTask({ id: 'b', status: 'todo' });
@@ -42,7 +42,7 @@ function deferred<Value>(): Deferred<Value> {
 }
 
 describe('TaskEffect', () => {
-  let authManager: FakeAuthManager;
+  let authManager: FakeAuthSession;
   let statewise: Statewise;
   let state: TaskState;
   let reported: unknown[];
@@ -54,14 +54,14 @@ describe('TaskEffect', () => {
     state.tasks().find((task) => task.id === taskId)?.status;
 
   const setUp = (): void => {
-    authManager = fakeAuthManager();
+    authManager = fakeAuthSession();
     reported = [];
     updateCalls = [];
 
     TestBed.configureTestingModule({
       providers: [
         provideStatewiseTesting({ effects: [TaskEffect] }),
-        { provide: AUTH_MANAGER, useValue: authManager },
+        { provide: AUTH_SESSION, useValue: authManager },
         {
           provide: ErrorHandler,
           useValue: { handleError: (error: unknown) => reported.push(error) },

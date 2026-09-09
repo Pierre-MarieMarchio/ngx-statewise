@@ -1,16 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import {
-  AUTH_MANAGER,
-  PROJECT_MANAGER,
-  TASK_MANAGER,
-} from '@shared/app-common/tokens';
-import {
   fakeAuthManager,
   FakeAuthManager,
-  fakeProjectManager,
-  fakeTaskManager,
+  fakeProjectReload,
+  fakeTaskReload,
 } from '@testing/fake-managers';
 import { UserSwitchService } from './user-switch.service';
+import { PROJECT_RELOAD, TASK_RELOAD } from '@app/features/common';
+import { AuthManager } from '@app/features/auth/states';
 
 const CREDENTIALS = { email: 'user1@user', password: 'user1' };
 
@@ -43,18 +40,18 @@ describe('UserSwitchService', () => {
 
     TestBed.configureTestingModule({
       providers: [
-        { provide: AUTH_MANAGER, useValue: authManager },
+        { provide: AuthManager, useValue: authManager },
         {
-          provide: TASK_MANAGER,
+          provide: TASK_RELOAD,
           useValue: {
-            ...fakeTaskManager(),
+            ...fakeTaskReload(),
             reloaded: () => taskReload.promise,
           },
         },
         {
-          provide: PROJECT_MANAGER,
+          provide: PROJECT_RELOAD,
           useValue: {
-            ...fakeProjectManager(),
+            ...fakeProjectReload(),
             settled: () => projectReload.promise,
           },
         },
@@ -115,14 +112,14 @@ describe('UserSwitchService', () => {
     TestBed.configureTestingModule({
       providers: [
         {
-          provide: AUTH_MANAGER,
+          provide: AuthManager,
           useValue: {
             ...fakeAuthManager(),
             login: () => Promise.reject(new Error('refused')),
           },
         },
-        { provide: TASK_MANAGER, useValue: fakeTaskManager() },
-        { provide: PROJECT_MANAGER, useValue: fakeProjectManager() },
+        { provide: TASK_RELOAD, useValue: fakeTaskReload() },
+        { provide: PROJECT_RELOAD, useValue: fakeProjectReload() },
       ],
     });
     const failing = TestBed.inject(UserSwitchService);

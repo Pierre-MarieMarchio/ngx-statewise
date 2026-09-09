@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { TASK_MANAGER } from '@shared/app-common/tokens';
 import {
   fakeTaskManager,
   FakeTaskManager,
   sampleTask,
 } from '@testing/fake-managers';
 import { OverviewKanbanComponent } from './overview-kanban.component';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 const TASKS = [
   sampleTask({ id: 'a', status: 'todo' }),
@@ -27,7 +27,7 @@ describe('OverviewKanbanComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [OverviewKanbanComponent],
-      providers: [{ provide: TASK_MANAGER, useValue: taskManager }],
+      providers: [{ provide: TaskManager, useValue: taskManager }],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(OverviewKanbanComponent);

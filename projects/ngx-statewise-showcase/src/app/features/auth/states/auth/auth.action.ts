@@ -1,6 +1,6 @@
 import { defineActionsGroup, emptyPayload, payload } from 'ngx-statewise';
 import { LoginResponses, LoginSubmit } from '../../models';
-import { User } from '@shared/app-common/models';
+import { User } from '../../models';
 
 export const loginActions = defineActionsGroup({
   source: 'LOGIN',

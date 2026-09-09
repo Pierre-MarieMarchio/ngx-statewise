@@ -8,8 +8,8 @@ import {
 } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { TaskListColumnItem } from '@app/features/project/models';
-import { Task } from '@shared/app-common/models';
-import { AUTH_MANAGER } from '@shared/app-common/tokens';
+import { Task } from '../../models';
+import { AUTH_SESSION } from '@app/features/common';
 
 @Component({
   selector: 'app-all-task-list',
@@ -19,7 +19,7 @@ import { AUTH_MANAGER } from '@shared/app-common/tokens';
   styleUrl: './all-task-list.component.scss',
 })
 export class AllTaskListComponent {
-  private readonly authManager = inject(AUTH_MANAGER);
+  private readonly authManager = inject(AUTH_SESSION);
   public tasks = input<Task[]>();
   public taskSelected = output<Task>();
 

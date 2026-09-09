@@ -1,17 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import {
-  AUTH_MANAGER,
-  PROJECT_MANAGER,
-  TASK_MANAGER,
-} from '@shared/app-common/tokens';
-import {
   fakeAuthManager,
+  fakeAuthSession,
   fakeProjectManager,
   fakeTaskManager,
   FakeTaskManager,
   sampleTask,
 } from '@testing/fake-managers';
 import { BoardPageComponent } from './board-page.component';
+import { AuthManager } from '@app/features/auth/states';
+import { AUTH_SESSION } from '@app/features/common';
+import { ProjectManager } from '@app/features/project/states/project/project.manager';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 describe('BoardPageComponent', () => {
   let taskManager: FakeTaskManager;
@@ -22,9 +22,12 @@ describe('BoardPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [BoardPageComponent],
       providers: [
-        { provide: AUTH_MANAGER, useValue: fakeAuthManager() },
-        { provide: TASK_MANAGER, useValue: taskManager },
-        { provide: PROJECT_MANAGER, useValue: fakeProjectManager() },
+        { provide: AuthManager, useValue: fakeAuthManager() },
+        // The lists this page mounts read the session through the kernel's
+        // port, not through the manager the page itself injects.
+        { provide: AUTH_SESSION, useValue: fakeAuthSession() },
+        { provide: TaskManager, useValue: taskManager },
+        { provide: ProjectManager, useValue: fakeProjectManager() },
       ],
     }).compileComponents();
 

@@ -4,7 +4,6 @@ import {
   provideStatewise,
   type Statewise,
 } from 'ngx-statewise';
-import { TASK_MANAGER } from '@shared/app-common/tokens';
 import { fakeTaskManager } from '@testing/fake-managers';
 import { noticeActions, noticeUpdater } from '@app/features/inspection/states';
 import { tallyUpdater } from '@app/features/inspection/states';
@@ -13,6 +12,7 @@ import {
   MAX_PAYLOAD_LENGTH,
   TRACKED_ACTION_TYPES,
 } from './inspection-history-page.component';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 describe('InspectionHistoryPageComponent', () => {
   let fixture: ComponentFixture<InspectionHistoryPageComponent>;
@@ -46,7 +46,7 @@ describe('InspectionHistoryPageComponent', () => {
           updaters: [noticeUpdater],
           history: { limit: 50 },
         }),
-        { provide: TASK_MANAGER, useValue: fakeTaskManager() },
+        { provide: TaskManager, useValue: fakeTaskManager() },
       ],
     }).compileComponents();
 
