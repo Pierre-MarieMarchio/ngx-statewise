@@ -19,17 +19,25 @@ is about how the application is arranged.
 
 ```
 src/app/
-  app.routes.ts       the only file that reaches into pages/
-  core/               i18n, the site's own UI state, the site's constants
+  app.routes.ts                     the only file that reaches into pages/
+  core/                             i18n, the site's own UI state, its constants
   features/
-    guide/            its content, its metadata, its rendering, its search index
-    flow-demo/        the live ngx-statewise flow on the landing page
-  shared/ui/          icon
+    guide/                          content, metadata, rendering, search index
+    flow-demo/                      the live flow on the landing page
+      components/flow-demo/
+  shared/ui/
+    icon/
   pages/
-    shell/            the layout every route renders inside, and its search dialog
-    home/             the landing page
-    guide/            the component behind every /guide/<slug> route
+    shell/                          the layout every route renders inside
+      components/search-dialog/
+    home/                           the landing page
+    guide/                          every /guide/<slug> route
 ```
+
+A component lives in a folder carrying its name, and a feature groups its
+components under `components/` — the same shape as the showcase, and the reason
+adding a second component to a feature moves nothing. A page component sits
+directly in its page's folder, because there is only ever one of it.
 
 Same four layers as
 [the showcase](../ngx-statewise-showcase), because a reader who knows one
@@ -73,12 +81,16 @@ their table, because a second scheme beside it would be a second thing to keep
 true.
 
 A pattern there matches the import string, not a resolved path. That is why
-the cross-feature rule names each feature one by one: `../flow-demo/index`
-climbs out of `features/guide/` without ever writing the word `features`, and
-the shape that would catch it generically — `../!(..)/**` — matches nothing,
-because `no-restricted-imports` does not read extglob. A pattern that guards
-no import is worse than no pattern, so `npm run verify:docs` fails when that
-list and `app/features/` stop agreeing.
+the cross-feature rule names each feature one by one, and names it at any
+depth. `../flow-demo/index` climbs out of `features/guide/` without ever
+writing the word `features`, and how far it climbs depends on how deep the
+importing file sits — `../../../guide/guide-pages` from a component two folders
+down. A relative pattern pins the depth and lets the deeper file through, which
+is what happened when `components/<name>/` was introduced, so the sibling
+patterns are `**`-prefixed. The shape that would say it generically —
+`../!(..)/**` — matches nothing, because `no-restricted-imports` does not read
+extglob. A pattern that guards no import is worse than no pattern, so
+`npm run verify:docs` fails when that list and `app/features/` stop agreeing.
 
 ## Constraints that shape the code
 

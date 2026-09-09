@@ -8,13 +8,13 @@ import {
   viewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { LOCALE, uiStrings } from '../../../core/i18n';
-import { IconComponent } from '../../../shared/ui/icon/icon.component';
+import { LOCALE, uiStrings } from '../../../../core/i18n';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 import {
   buildSearchIndex,
   searchIndex,
   type SearchEntry,
-} from '../../../features/guide/search-index';
+} from '../../../../features/guide/search-index';
 
 /**
  * A command palette over the guide. The whole corpus is already in the bundle,

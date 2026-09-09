@@ -165,12 +165,21 @@ const DOCS_ZONES = [
 
 /**
  * The docs site writes every cross-layer import relatively, so these are the
- * relative forms — and, for a sibling feature, its bare name too. A pattern
- * matches the import string, not a resolved path: `../flow-demo/index` climbs
- * out of features/guide without ever writing the word `features`, and the
- * shape that would catch it generically — `../!(..)/**` — matches nothing,
- * because no-restricted-imports does not read extglob. `verify:docs` fails if
- * this list and app/features/ stop agreeing.
+ * relative forms — and, for a sibling feature, its bare name at any depth.
+ *
+ * A pattern matches the import string, not a resolved path. A sibling feature
+ * is reached by climbing out of this one, and how far it climbs depends on how
+ * deep the importing file sits: `../guide/guide-pages` from a feature's root,
+ * `../../../guide/guide-pages` from a component two folders down. A relative
+ * form pins that depth and lets the deeper file through — measured, after
+ * `components/<name>/` made one feature two levels deeper — so the sibling
+ * forms are `**`-prefixed. No legitimate path inside one feature carries
+ * another feature's name, which is what makes that safe.
+ *
+ * The shape that would say it generically — `../!(..)/**` — matches nothing:
+ * no-restricted-imports does not read extglob. So the features are named one
+ * by one, and `verify:docs` fails if this list and app/features/ stop
+ * agreeing.
  */
 const DOCS_GROUPS = {
   features: ['**/features/**'],
@@ -179,14 +188,14 @@ const DOCS_GROUPS = {
   guide: [
     '**/features/guide',
     '**/features/guide/**',
-    '../guide',
-    '../guide/**',
+    '**/guide',
+    '**/guide/**',
   ],
   flowDemo: [
     '**/features/flow-demo',
     '**/features/flow-demo/**',
-    '../flow-demo',
-    '../flow-demo/**',
+    '**/flow-demo',
+    '**/flow-demo/**',
   ],
 };
 

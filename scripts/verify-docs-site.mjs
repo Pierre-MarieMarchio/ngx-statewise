@@ -154,7 +154,19 @@ const features = readdirSync(join(app, 'features'), { withFileTypes: true })
   .sort();
 
 const eslintConfig = readFileSync(join(root, 'eslint.config.js'), 'utf8');
-const named = [...eslintConfig.matchAll(/^\s*'\.\.\/([a-z0-9-]+)',$/gm)]
+
+// Only the docs site's own table. The showcase declares its features in the
+// same file, and reading both would have this complain about the other
+// application's names.
+const docsGroups = /const DOCS_GROUPS = \{([\s\S]*?)\n\};/.exec(eslintConfig);
+
+if (docsGroups === null) {
+  fail('no DOCS_GROUPS block in eslint.config.js — this script is out of step');
+}
+
+const named = [
+  ...(docsGroups?.[1] ?? '').matchAll(/'\*\*\/features\/([a-z0-9-]+)'/g),
+]
   .map((match) => match[1])
   .sort();
 
@@ -164,7 +176,7 @@ const stale = named.filter((feature) => !features.includes(feature));
 if (unnamed.length > 0) {
   fail(
     `eslint.config.js does not name ${unnamed.map((f) => `features/${f}`).join(', ')} in the docs site's cross-feature rule, so nothing stops another feature importing it.\n` +
-      `  Add '../${unnamed[0]}' and '../${unnamed[0]}/**' to that rule's group.`,
+      `  Give it a group in DOCS_GROUPS — '**/features/${unnamed[0]}', '**/features/${unnamed[0]}/**', '**/${unnamed[0]}', '**/${unnamed[0]}/**' — and a row in DOCS_ZONES denying the others.`,
   );
 }
 
