@@ -5,6 +5,7 @@ A lightweight and intuitive state management library for Angular.
 ## Table of Contents
 
 - [Description](#description)
+- [Core Concept](#core-concept)
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Key Concepts](#key-concepts)
@@ -104,8 +105,8 @@ export const appConfig: ApplicationConfig = {
 
 | Option              | Type                              | Description                                                                                                                                   |
 | ------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `effects`           | `Type<unknown>[]`                 | Effect classes, instantiated eagerly so their effects are registered at startup.                                                              |
-| `updaters`          | `Updater<unknown>[]`              | Updaters available application-wide, whichever manager dispatches.                                                                            |
+| `effects`           | `readonly Type<unknown>[]`        | Effect classes, instantiated eagerly so their effects are registered at startup.                                                              |
+| `updaters`          | `readonly Updater<unknown>[]`     | Updaters available application-wide, whichever manager dispatches.                                                                            |
 | `history`           | `{ limit, redact? }`              | Records the last `limit` actions. Disabled by default; `limit` must be a positive integer. `redact` replaces an action before it is recorded. |
 | `misroutedDispatch` | `'throw' \| 'report' \| 'ignore'` | What a dispatch reaching the wrong manager does. Throws in development, reports to the `ErrorHandler` in production.                          |
 
@@ -123,11 +124,11 @@ Signals are the recommended approach as they automatically trigger component upd
 @Injectable({
   providedIn: 'root',
 })
-export class AuthStates {
+export class AuthState {
   public user = signal<User | null>(null);
   public isLoggedIn = signal(false);
   public isLoading = signal(false);
-  public asError = signal(false);
+  public isError = signal(false);
 }
 ```
 
@@ -139,12 +140,12 @@ You can still define state as regular properties if you prefer not to use signal
 @Injectable({
   providedIn: 'root',
 })
-export class AuthStates {
+export class AuthState {
   public user: User | null = null;
   public accessToken: string | null = null;
   public isLoggedIn = false;
   public isLoading = false;
-  public hasError = false;
+  public isError = false;
 }
 ```
 
@@ -235,15 +236,15 @@ For example:
 
 - Actions can be defined individually using `defineSingleAction` or as a group using `defineActionsGroup`, depending on the use case.
 
-- Action types are automatically generated in a consistent and predictable way:
+- Action types are generated from what you pass, and the two helpers do not treat it alike:
 
-  - For grouped actions, a source like `LOGIN` combined with an event like request produces `LOGIN_REQUEST`.
+  - `defineActionsGroup` upper-cases the source itself, so a source of `login` or of `LOGIN`, combined with an event like request, produces `LOGIN_REQUEST` either way.
 
-  - For single actions, a name like `LOGOUT` becomes `LOGOUT_ACTION`.
+  - `defineSingleAction` appends `_ACTION` to the name verbatim: `'LOGOUT'` becomes `LOGOUT_ACTION`, but `'logout'` becomes `logout_ACTION`. Pass it upper-case.
 
 - Action types are used as keys in updaters and effects, and they must match exactly.
 
-- The `ofType(action)` helper ensures correct and type-safe usage when wiring actions into updaters or effects.
+- The `ofType(action)` helper returns the generated action type as a string. Updaters and effects are wired with the creator itself, so this is for the places that need the string itself — comparing an action type inside the history's `redact`, for instance.
 
 - Grouping related actions improves clarity and structure, especially for common flows like `request / success / failure`.
 
@@ -256,10 +257,10 @@ An updater is declared with `defineUpdater`, outside of any class. It takes the 
 ```typescript
 import { defineUpdater } from 'ngx-statewise';
 
-export const authUpdater = defineUpdater(AuthStates, (on) => {
+export const authUpdater = defineUpdater(AuthState, (on) => {
   on(loginActions.request, (state) => {
     state.isLoading.set(true);
-    state.asError.set(false);
+    state.isError.set(false);
   });
 
   on(loginActions.success, (state, payload) => {
@@ -286,7 +287,7 @@ Handlers are fully inferred from the action creator, no annotation needed:
 - A handler must be synchronous. An `async` handler is a compile error, since state must be up to date before effects run.
 
 ```typescript
-defineUpdater(AuthStates, (on) => {
+defineUpdater(AuthState, (on) => {
   // ✅ payload is inferred as LoginResponse
   on(loginActions.success, (state, payload) => { ... });
 
@@ -393,7 +394,7 @@ The check costs a set lookup and only runs when no updater matched. An action cl
 
 ##### Development throws, production reports
 
-The detection always runs; only the reaction depends on the environment. Throwing on a user's machine would take down a running application over a state update that is merely missing, so production hands the same error to Angular's `ErrorHandler` and carries on: the dispatch resolves, the effects of the action still run, and whatever you plugged into `ErrorHandler` — a logger, Sentry — receives the report.
+The detection always runs; only the reaction depends on the environment. Throwing on a user's machine would take down a running application over a state update that is merely missing, so production hands the same error to Angular's `ErrorHandler` and carries on: the dispatch resolves without running anything of the action, neither the state update nor its effects, and whatever you plugged into `ErrorHandler` — a logger, Sentry — receives the report.
 
 Override it when you need to:
 
@@ -424,7 +425,7 @@ provideStatewise({ updaters: [authUpdater] });
 
 #### Key Notes
 
-- One action type can only be handled by a single updater within the same scope. A duplicate is reported at startup, not silently ignored.
+- One action type can only be handled by a single updater within the same scope. A duplicate always throws, never passes silently — at the `defineUpdater` call when one updater handles the same type twice, at `injectStatewise()` when two updaters of the same scope claim it, and at startup for the updaters given to `provideStatewise`.
 - Handlers mutate the state in place, typically through signals. They return nothing.
 - An action handled by no updater is perfectly valid: it merely triggers its effects.
 
@@ -677,7 +678,7 @@ An abandoned run is never held to the promise. A run superseded under `'latest'`
 
 - Avoid Infinite Loops: Be careful not to return the input action from the effect (e.g., avoid returning the same action that triggered the effect). This can lead to infinite loops of action dispatching.
 
-- Side Effects: Effects are designed for side effects like API calls, routing, or other asynchronous operations. They should not directly modify the state. That’s the role of Updaters.
+- Side Effects: Effects are designed for side effects like API calls, routing, or other asynchronous operations. They never write to the state an updater owns — that update is the updater's, and its role alone. A private signal held by the effect's own service is not that state: an effect is free to keep its own bookkeeping there.
 
 - Scope: An effect only runs for the manager owning the updater of its action. Dispatching that action through another manager runs neither the updater nor the effect.
 
@@ -700,7 +701,7 @@ import { injectStatewise } from 'ngx-statewise';
 
 @Injectable({ providedIn: 'root' })
 export class AuthManager {
-  private readonly authStates = inject(AuthStates);
+  private readonly authStates = inject(AuthState);
   private readonly statewise = injectStatewise(authUpdater);
 }
 ```
@@ -714,7 +715,7 @@ Managers expose state reactively to the components depending on it, so those com
 ```typescript
 @Injectable({ providedIn: 'root' })
 export class AuthManager {
-  private readonly authStates = inject(AuthStates);
+  private readonly authStates = inject(AuthState);
   private readonly statewise = injectStatewise(authUpdater);
 
   // State exposure: read-only signals
@@ -777,7 +778,7 @@ When several effects run for the same action, ngx-statewise waits for all of the
 ```typescript
 @Injectable({ providedIn: 'root' })
 export class AuthManager {
-  private readonly authStates = inject(AuthStates);
+  private readonly authStates = inject(AuthState);
   private readonly statewise = injectStatewise(authUpdater);
 
   // State exposure: read-only signals
@@ -867,7 +868,7 @@ TestBed.configureTestingModule({
 manager.refresh(); // calls statewise.dispatch(...)
 await drainEffects();
 
-expect(manager.tasks()).toHaveSize(3);
+expect(manager.tasks()).toHaveLength(3);
 ```
 
 ### Dispatching without attaching an updater
@@ -926,10 +927,10 @@ An updater class becomes a declaration:
 ```typescript
 // Before
 @Injectable({ providedIn: 'root' })
-export class AuthUpdator implements IUpdator<AuthStates> {
-  public readonly state = inject(AuthStates);
+export class AuthUpdator implements IUpdator<AuthState> {
+  public readonly state = inject(AuthState);
 
-  public readonly updators: UpdatorRegistry<AuthStates> = {
+  public readonly updators: UpdatorRegistry<AuthState> = {
     [ofType(loginActions.request)]: (state) => {
       state.isLoading.set(true);
     },
@@ -937,7 +938,7 @@ export class AuthUpdator implements IUpdator<AuthStates> {
 }
 
 // After
-export const authUpdater = defineUpdater(AuthStates, (on) => {
+export const authUpdater = defineUpdater(AuthState, (on) => {
   on(loginActions.request, (state) => {
     state.isLoading.set(true);
   });
