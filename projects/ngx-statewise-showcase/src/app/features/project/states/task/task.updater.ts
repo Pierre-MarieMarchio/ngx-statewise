@@ -3,6 +3,8 @@ import { defineUpdater, requestStatus } from 'ngx-statewise';
 import {
   createTaskActions,
   getAllTaskActions,
+  searchCleared,
+  searchTaskActions,
   taskReset,
   updateTaskActions,
 } from './task.action';
@@ -34,6 +36,9 @@ const without =
 export const taskUpdater = defineUpdater(TaskState, (on) => {
   on(taskReset, (state) => {
     state.tasks.set([]);
+    state.matches.set(null);
+    state.isSearching.set(false);
+    state.searchFailed.set(false);
     state.pendingWrites.set(new Map());
     state.isLoading.set(false);
     state.isError.set(false);
@@ -77,6 +82,28 @@ export const taskUpdater = defineUpdater(TaskState, (on) => {
   on(updateTaskActions.success, (state, updatedTask) => {
     state.pendingWrites.update(without(updatedTask.id));
     state.tasks.update(carrying(updatedTask));
+  });
+
+  /*
+   * The same helper the read flow uses, so `request` clearing the previous
+   * attempt's error is not something anyone has to remember here either.
+   */
+  requestStatus(on, searchTaskActions, {
+    loading: (state) => state.isSearching,
+    error: (state) => state.searchFailed,
+    onSuccess: (state, matches) => {
+      state.matches.set(matches);
+    },
+  });
+
+  /*
+   * An updater with no effect behind it: emptying the box is a decision, not a
+   * request. It also cancels a search in flight — see the effect's `cancelOn`.
+   */
+  on(searchCleared, (state) => {
+    state.matches.set(null);
+    state.isSearching.set(false);
+    state.searchFailed.set(false);
   });
 
   on(createTaskActions.request, (state) => {

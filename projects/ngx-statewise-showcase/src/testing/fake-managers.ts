@@ -166,9 +166,18 @@ export interface FakeTaskManager extends ITaskReload {
   isCreating: WritableSignal<boolean>;
   createError: WritableSignal<string | null>;
   readonly created: TaskDraft[];
+  isSearching: WritableSignal<boolean>;
+  searchFailed: WritableSignal<boolean>;
+  matches: WritableSignal<Task[] | null>;
+  readonly isFiltered: ReturnType<typeof computed<boolean>>;
+  readonly visibleTasks: ReturnType<typeof computed<Task[]>>;
+  readonly queries: string[];
+  readonly searchClears: number[];
   getAllAsync(): Promise<void>;
   update(task: Task): void;
   createTask(draft: TaskDraft): Promise<void>;
+  search(query: string): void;
+  clearSearch(): void;
 }
 
 export const fakeTaskManager = (
@@ -176,8 +185,11 @@ export const fakeTaskManager = (
 ): FakeTaskManager => {
   const updates: Task[] = [];
   const created: TaskDraft[] = [];
+  const queries: string[] = [];
+  const searchClears: number[] = [];
 
   const tasksSignal = signal(tasks);
+  const matches = signal<Task[] | null>(null);
 
   return {
     tasks: tasksSignal,
@@ -197,6 +209,19 @@ export const fakeTaskManager = (
     ),
     updates,
     created,
+    queries,
+    searchClears,
+    matches,
+    isSearching: signal(false),
+    searchFailed: signal(false),
+    isFiltered: computed(() => matches() !== null),
+    visibleTasks: computed(() => matches() ?? tasksSignal()),
+    search: (query: string) => {
+      queries.push(query);
+    },
+    clearSearch: () => {
+      searchClears.push(searchClears.length + 1);
+    },
     isCreating: signal(false),
     createError: signal<string | null>(null),
     createTask: (draft: TaskDraft) => {

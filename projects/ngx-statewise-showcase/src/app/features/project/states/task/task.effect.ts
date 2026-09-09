@@ -5,6 +5,8 @@ import { TaskRepositoryService } from '../../services';
 import {
   createTaskActions,
   getAllTaskActions,
+  searchCleared,
+  searchTaskActions,
   taskReset,
   updateTaskActions,
 } from './task.action';
@@ -76,6 +78,52 @@ export class TaskEffect {
       concurrency: 'latest',
       key: (task) => task.id,
       cancelOn: taskReset,
+      mustAnswer: true,
+    },
+  );
+
+  /**
+   * The one effect in this application that reads `abortSignal`, and the reason
+   * the search exists at all.
+   *
+   * Three effects here declare `concurrency: 'latest'` around an awaited
+   * promise. That policy drops a superseded answer before it reaches an
+   * updater, which is enough to keep the state right — but the request itself
+   * runs to completion. Handing the signal on is what actually stops it, and
+   * until this effect no one did.
+   *
+   * `aborted` is read a second time, in the catch. A run superseded by the next
+   * keystroke rejects here, and reporting that to `ErrorHandler` would fill the
+   * failures panel with the ordinary business of typing. So an abandoned run
+   * answers quietly; only a real failure is reported.
+   *
+   * `cancelOn` takes a list: a reset means there is nothing left to search, and
+   * emptying the box means no answer is wanted either.
+   */
+  public readonly searchTasksRequestEffect = createEffect(
+    searchTaskActions.request,
+    async (query, { abortSignal }) => {
+      const user = this.authManager.user();
+
+      if (!user) {
+        return searchTaskActions.failure();
+      }
+
+      try {
+        return searchTaskActions.success(
+          await this.taskRepository.search(query, user.userId, abortSignal),
+        );
+      } catch (error) {
+        if (!abortSignal.aborted) {
+          this.errorHandler.handleError(error);
+        }
+
+        return searchTaskActions.failure();
+      }
+    },
+    {
+      concurrency: 'latest',
+      cancelOn: [taskReset, searchCleared],
       mustAnswer: true,
     },
   );

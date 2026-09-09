@@ -17,6 +17,17 @@ export class TaskState {
    */
   public pendingWrites = signal<Map<string, Task>>(new Map());
 
+  /**
+   * What the last search answered, and `null` when there is no search.
+   *
+   * `null` rather than an empty array on purpose: "nobody searched" and "the
+   * search matched nothing" are two different screens, and only one of them
+   * should say so.
+   */
+  public matches = signal<Task[] | null>(null);
+  public isSearching = signal(false);
+  public searchFailed = signal(false);
+
   /** One creation at a time — see ProjectState for why a flag suffices. */
   public isCreating = signal(false);
 

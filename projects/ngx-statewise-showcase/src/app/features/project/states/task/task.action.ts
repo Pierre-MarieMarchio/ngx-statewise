@@ -40,4 +40,21 @@ export const createTaskActions = defineActionsGroup({
   },
 });
 
+/**
+ * A filtered search, asked of the server rather than computed here — which is
+ * what makes it the case `concurrency: 'latest'` is for: two keystrokes put two
+ * requests in flight, and only the last one's answer is wanted.
+ */
+export const searchTaskActions = defineActionsGroup({
+  source: 'SEARCH_TASK',
+  events: {
+    request: payload<string>(),
+    success: payload<Task[]>(),
+    failure: emptyPayload,
+  },
+});
+
+/** Emptying the box: there is no search any more, so no answer is wanted. */
+export const searchCleared = defineSingleAction('SEARCH_CLEARED', emptyPayload);
+
 export const taskReset = defineSingleAction('TASK_RESET', emptyPayload);

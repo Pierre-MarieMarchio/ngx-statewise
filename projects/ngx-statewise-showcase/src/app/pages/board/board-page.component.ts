@@ -16,6 +16,7 @@ import {
   ProjectTaskListComponent,
   TaskFormComponent,
   TaskKanbanComponent,
+  TaskSearchComponent,
   TaskTableComponent,
 } from '@app/features/project/components';
 import { ProjectDraft, TaskDraft } from '@app/features/project/models';
@@ -35,6 +36,7 @@ import { ProjectManager } from '@app/features/project/states/project/project.man
     ProjectTaskListComponent,
     TaskFormComponent,
     TaskKanbanComponent,
+    TaskSearchComponent,
     TaskTableComponent,
   ],
   templateUrl: './board-page.component.html',

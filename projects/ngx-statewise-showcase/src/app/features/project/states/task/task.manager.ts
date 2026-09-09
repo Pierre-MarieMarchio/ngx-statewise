@@ -5,6 +5,8 @@ import { taskUpdater } from './task.updater';
 import {
   createTaskActions,
   getAllTaskActions,
+  searchCleared,
+  searchTaskActions,
   taskReset,
   updateTaskActions,
 } from './task.action';
@@ -32,6 +34,23 @@ export class TaskManager implements ITaskReload {
 
   public readonly isCreating = this.taskStates.isCreating.asReadonly();
   public readonly createError = this.taskStates.createError.asReadonly();
+
+  public readonly isSearching = this.taskStates.isSearching.asReadonly();
+  public readonly searchFailed = this.taskStates.searchFailed.asReadonly();
+
+  /** Whether a search is on, which is not the same as whether it matched. */
+  public readonly isFiltered = computed(
+    () => this.taskStates.matches() !== null,
+  );
+
+  /**
+   * What the views show: the matches while a search is on, the whole list
+   * otherwise. Derived from two states rather than stored, so nothing has to
+   * remember to put the full list back when the box is emptied.
+   */
+  public readonly visibleTasks = computed(
+    () => this.taskStates.matches() ?? this.tasks(),
+  );
 
   public readonly taskCount = computed(() => this.tasks().length);
 
@@ -69,6 +88,19 @@ export class TaskManager implements ITaskReload {
 
   public getAllAsync(): Promise<void> {
     return this.statewise.dispatchAsync(getAllTaskActions.request());
+  }
+
+  /**
+   * Asks the server. The debounce is the caller's — how long to wait for a
+   * typist to stop is a question about a keyboard, not about state.
+   */
+  public search(query: string): void {
+    this.statewise.dispatch(searchTaskActions.request(query));
+  }
+
+  /** Drops the filter, and cancels a search still in flight. */
+  public clearSearch(): void {
+    this.statewise.dispatch(searchCleared());
   }
 
   public update(task: Task): void {

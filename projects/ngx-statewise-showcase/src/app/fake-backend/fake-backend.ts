@@ -45,6 +45,7 @@ export class FakeBackend {
       },
       GET: {
         'http://localhost/api/Task': () => this.handleGetAllTask(),
+        'http://localhost/api/Task/search': () => this.handleSearchTask(),
         'http://localhost/api/Project': () => this.handleGetAllProject(),
       },
       PATCH: {
@@ -127,6 +128,34 @@ export class FakeBackend {
     if ('error' in asking) return asking.error;
 
     return this.respondSuccess(this.taskDB.findByUserOrganization(asking.user));
+  }
+
+  /**
+   * A filtered search, answered by the server rather than the client.
+   *
+   * It exists so the showcase has one endpoint worth cancelling: two keystrokes
+   * put two of these in flight, and the interceptor's 200 ms of latency is
+   * enough for the first to still be running when the second starts.
+   */
+  private handleSearchTask(): HttpResponse<unknown> {
+    const asking = this.requestingUser();
+
+    if ('error' in asking) return asking.error;
+
+    const query = (this.request.params.get('q') ?? '').trim().toLowerCase();
+    const visible = this.taskDB.findByUserOrganization(asking.user);
+
+    // An empty query matches everything, which is what "no filter" looks like
+    // to a server. The client decides not to ask in that case.
+    if (query === '') return this.respondSuccess(visible);
+
+    return this.respondSuccess(
+      visible.filter(
+        (task) =>
+          task.title.toLowerCase().includes(query) ||
+          (task.description ?? '').toLowerCase().includes(query),
+      ),
+    );
   }
 
   private handleUpdateTask(): HttpResponse<unknown> {
