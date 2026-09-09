@@ -168,7 +168,9 @@ const named = [
   ...(docsGroups?.[1] ?? '').matchAll(/'\*\*\/features\/([a-z0-9-]+)'/g),
 ]
   .map((match) => match[1])
-  .sort();
+  // Compared as strings on purpose, rather than through the default sort's
+  // string conversion of whatever it was handed.
+  .sort((left, right) => left.localeCompare(right));
 
 const unnamed = features.filter((feature) => !named.includes(feature));
 const stale = named.filter((feature) => !features.includes(feature));

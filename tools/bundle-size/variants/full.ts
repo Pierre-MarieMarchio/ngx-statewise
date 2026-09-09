@@ -8,5 +8,10 @@ import * as statewise from 'ngx-statewise';
  * runtime for the expression below to be answerable.
  */
 export function subject(): string {
-  return Object.keys(statewise).sort().join(' ');
+  // `localeCompare` rather than the default sort: the default compares the
+  // string forms of whatever it is given, which is only accidentally right for
+  // strings — and this list decides what a measured bundle contains.
+  return Object.keys(statewise)
+    .sort((left, right) => left.localeCompare(right))
+    .join(' ');
 }
