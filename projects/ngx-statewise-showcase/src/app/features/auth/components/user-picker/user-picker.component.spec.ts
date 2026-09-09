@@ -11,10 +11,10 @@ import {
   fakeTaskManager,
   sampleUser,
 } from '@testing/fake-managers';
-import { DashboardUserPickerComponent } from './dashboard-user-picker.component';
+import { UserPickerComponent } from './user-picker.component';
 
-describe('DashboardUserPickerComponent', () => {
-  let fixture: ComponentFixture<DashboardUserPickerComponent>;
+describe('UserPickerComponent', () => {
+  let fixture: ComponentFixture<UserPickerComponent>;
   let authManager: FakeAuthManager;
 
   const host = (): HTMLElement => fixture.nativeElement as HTMLElement;
@@ -37,7 +37,7 @@ describe('DashboardUserPickerComponent', () => {
     authManager = fakeAuthManager(sampleUser({ userName: 'admin' }));
 
     await TestBed.configureTestingModule({
-      imports: [DashboardUserPickerComponent],
+      imports: [UserPickerComponent],
       providers: [
         { provide: AUTH_MANAGER, useValue: authManager },
         // Switching user waits on both features before it lets go, so the
@@ -47,7 +47,7 @@ describe('DashboardUserPickerComponent', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(DashboardUserPickerComponent);
+    fixture = TestBed.createComponent(UserPickerComponent);
     fixture.detectChanges();
   });
 

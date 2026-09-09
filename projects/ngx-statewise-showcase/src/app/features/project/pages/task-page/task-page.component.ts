@@ -11,7 +11,7 @@ import { Task } from '@shared/app-common/models';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
 import { SidePanelComponent } from '@shared/ui/side-panel';
 import { DataStateComponent } from '@shared/ui/data-state';
-import { TaskDetailsComponent } from '@shared/app-common/components';
+import { TaskDetailsComponent } from '../../components';
 import {
   TaskKanbanComponent,
   AllTaskListComponent,

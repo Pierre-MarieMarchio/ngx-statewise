@@ -5,26 +5,26 @@ import {
   ViewChild,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import {
-  DashboardKanbanComponent,
-  DashboardTaskListComponent,
-} from '../../components';
 import { SidePanelComponent } from '@shared/ui/side-panel';
 import { Task } from '@shared/app-common/models';
 import { DataStateComponent } from '@shared/ui/data-state';
-import { TaskDetailsComponent } from '@shared/app-common/components';
+import {
+  OverviewKanbanComponent,
+  OverviewTaskListComponent,
+  TaskDetailsComponent,
+} from '@app/features/project/components';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
-import { DashboardUserPickerComponent } from '../../components/dashboard-user-picker/dashboard-user-picker.component';
+import { UserPickerComponent } from '@app/features/auth/components';
 
 @Component({
   selector: 'app-dashboard-page',
   imports: [
-    DashboardKanbanComponent,
+    OverviewKanbanComponent,
     DataStateComponent,
     SidePanelComponent,
     TaskDetailsComponent,
-    DashboardTaskListComponent,
-    DashboardUserPickerComponent,
+    OverviewTaskListComponent,
+    UserPickerComponent,
   ],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',

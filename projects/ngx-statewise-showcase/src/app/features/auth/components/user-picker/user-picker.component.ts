@@ -8,7 +8,7 @@ import {
   MatButtonToggleChange,
   MatButtonToggleModule,
 } from '@angular/material/button-toggle';
-import { UserSwitchService } from '@app/features/auth/services';
+import { UserSwitchService } from '../../services';
 import { AUTH_MANAGER } from '@shared/app-common/tokens';
 
 /**
@@ -22,12 +22,12 @@ const DEMO_CREDENTIALS = {
 };
 
 @Component({
-  selector: 'app-dashboard-user-picker',
+  selector: 'app-user-picker',
   imports: [MatButtonToggleModule],
-  templateUrl: './dashboard-user-picker.component.html',
+  templateUrl: './user-picker.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardUserPickerComponent {
+export class UserPickerComponent {
   private readonly authManager = inject(AUTH_MANAGER);
   private readonly userSwitch = inject(UserSwitchService);
 

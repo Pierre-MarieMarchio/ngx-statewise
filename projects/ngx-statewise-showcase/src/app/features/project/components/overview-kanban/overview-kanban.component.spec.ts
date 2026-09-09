@@ -5,7 +5,7 @@ import {
   FakeTaskManager,
   sampleTask,
 } from '@testing/fake-managers';
-import { DashboardKanbanComponent } from './dashboard-kanban.component';
+import { OverviewKanbanComponent } from './overview-kanban.component';
 
 const TASKS = [
   sampleTask({ id: 'a', status: 'todo' }),
@@ -19,18 +19,18 @@ const TASKS = [
  * here is the adapting: which columns the tasks fall into, and what a move
  * means for the manager.
  */
-describe('DashboardKanbanComponent', () => {
+describe('OverviewKanbanComponent', () => {
   let taskManager: FakeTaskManager;
 
   const mount = async () => {
     taskManager = fakeTaskManager(TASKS);
 
     await TestBed.configureTestingModule({
-      imports: [DashboardKanbanComponent],
+      imports: [OverviewKanbanComponent],
       providers: [{ provide: TASK_MANAGER, useValue: taskManager }],
     }).compileComponents();
 
-    const fixture = TestBed.createComponent(DashboardKanbanComponent);
+    const fixture = TestBed.createComponent(OverviewKanbanComponent);
     fixture.detectChanges();
 
     return fixture;

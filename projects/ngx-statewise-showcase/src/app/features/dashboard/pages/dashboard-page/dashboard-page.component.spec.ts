@@ -32,9 +32,9 @@ describe('DashboardPageComponent', () => {
     const fixture = await mount();
     const host = fixture.nativeElement as HTMLElement;
 
-    expect(host.querySelector('app-dashboard-task-list')).not.toBeNull();
-    expect(host.querySelector('app-dashboard-kanban')).not.toBeNull();
-    expect(host.querySelector('app-dashboard-user-picker')).not.toBeNull();
+    expect(host.querySelector('app-overview-task-list')).not.toBeNull();
+    expect(host.querySelector('app-overview-kanban')).not.toBeNull();
+    expect(host.querySelector('app-user-picker')).not.toBeNull();
   });
 
   it('opens the panel on the task it was given and closes it again', async () => {

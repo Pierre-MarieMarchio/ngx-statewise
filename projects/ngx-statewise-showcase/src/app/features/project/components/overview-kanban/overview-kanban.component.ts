@@ -5,10 +5,7 @@ import {
   inject,
 } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
-import {
-  TaskBoardService,
-  TaskSelectionService,
-} from '@app/features/project/services';
+import { TaskBoardService, TaskSelectionService } from '../../services';
 import { Task } from '@shared/app-common/models';
 import { TASK_MANAGER } from '@shared/app-common/tokens';
 import {
@@ -18,13 +15,13 @@ import {
 } from '@shared/ui/kanban';
 
 @Component({
-  selector: 'app-dashboard-kanban',
+  selector: 'app-overview-kanban',
   imports: [KanbanComponent, MatCardModule],
-  templateUrl: './dashboard-kanban.component.html',
+  templateUrl: './overview-kanban.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './dashboard-kanban.component.scss',
+  styleUrl: './overview-kanban.component.scss',
 })
-export class DashboardKanbanComponent {
+export class OverviewKanbanComponent {
   private readonly taskManager = inject(TASK_MANAGER);
   private readonly board = inject(TaskBoardService);
   private readonly selection = inject(TaskSelectionService);

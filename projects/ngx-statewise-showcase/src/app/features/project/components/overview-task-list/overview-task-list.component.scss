@@ -1,4 +1,4 @@
-.dashboard-task-list-container {
+.overview-task-list-container {
   height: 100%;
   min-height: 20rem;
   padding: 1rem;
@@ -7,12 +7,12 @@
   flex-direction: column;
   background-color: transparent;
 
-  .dashboard-task-list-scroll {
+  .overview-task-list-scroll {
     flex: 1;
     overflow-y: auto;
   }
 
-  .dashboard-task-list-title {
+  .overview-task-list-title {
     box-sizing: border-box;
     background-color: rgba(96, 165, 250, 0.25);
     padding: 0.5rem;

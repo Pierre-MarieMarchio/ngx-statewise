@@ -7,25 +7,25 @@ import {
   sampleTask,
   sampleUser,
 } from '@testing/fake-managers';
-import { DashboardTaskListComponent } from './dashboard-task-list.component';
+import { OverviewTaskListComponent } from './overview-task-list.component';
 
 const TASKS = [sampleTask(), sampleTask({ id: 'task-2' })];
 
-describe('DashboardTaskListComponent', () => {
+describe('OverviewTaskListComponent', () => {
   let authManager: FakeAuthManager;
 
   const mount = async () => {
     authManager = fakeAuthManager();
 
     await TestBed.configureTestingModule({
-      imports: [DashboardTaskListComponent],
+      imports: [OverviewTaskListComponent],
       providers: [
         { provide: AUTH_MANAGER, useValue: authManager },
         { provide: TASK_MANAGER, useValue: fakeTaskManager(TASKS) },
       ],
     }).compileComponents();
 
-    const fixture = TestBed.createComponent(DashboardTaskListComponent);
+    const fixture = TestBed.createComponent(OverviewTaskListComponent);
     fixture.detectChanges();
     return fixture;
   };

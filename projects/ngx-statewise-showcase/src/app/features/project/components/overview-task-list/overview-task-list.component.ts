@@ -7,18 +7,18 @@ import {
 } from '@angular/core';
 import { Task } from '@shared/app-common/models';
 import { AUTH_MANAGER, TASK_MANAGER } from '@shared/app-common/tokens';
-import { DashboardTaskListColumnItem } from '../../models';
+import { TaskListColumnItem } from '../../models';
 import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 
 @Component({
-  selector: 'app-dashboard-task-list',
+  selector: 'app-overview-task-list',
   imports: [MatTableModule, MatCardModule],
-  templateUrl: './dashboard-task-list.component.html',
+  templateUrl: './overview-task-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './dashboard-task-list.component.scss',
+  styleUrl: './overview-task-list.component.scss',
 })
-export class DashboardTaskListComponent {
+export class OverviewTaskListComponent {
   public taskSelected = output<Task>();
 
   private readonly authManager = inject(AUTH_MANAGER);
@@ -35,7 +35,7 @@ export class DashboardTaskListComponent {
     this.columns().map((col) => col.columnDef),
   );
 
-  private readonly allColumns: DashboardTaskListColumnItem[] = [
+  private readonly allColumns: TaskListColumnItem[] = [
     {
       columnDef: 'title',
       header: 'Title',
