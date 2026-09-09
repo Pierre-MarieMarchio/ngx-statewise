@@ -12,6 +12,5 @@ export interface IProjectManager {
   getAll(): void;
   /** Settles once every effect this manager started is over. */
   settled(): Promise<void>;
-  getAllAsync(): Promise<void>;
   reset(): Promise<void>;
 }

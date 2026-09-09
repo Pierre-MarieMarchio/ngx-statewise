@@ -20,5 +20,4 @@ body {
 
 :root {
   --nav-width: clamp(80px, 10vw, 110px);
-  --hauteur-restante: calc(100vh - var(--nav-width));
 }
