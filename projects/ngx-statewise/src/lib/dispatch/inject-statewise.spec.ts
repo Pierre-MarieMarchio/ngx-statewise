@@ -63,8 +63,15 @@ describe('injectStatewise', () => {
     TestBed.resetTestingModule();
   });
 
+  /**
+   * Named in the message on purpose: `inject` would refuse here too, but its
+   * error blames `inject()`, which says nothing about what the caller wrote.
+   * Matching only on "injection context" passed with the assertion removed.
+   */
   it('refuses to run outside an injection context', () => {
-    expect(() => injectStatewise()).toThrow(/injection context/i);
+    expect(() => injectStatewise()).toThrow(
+      /injectStatewise\(\).*injection context/is,
+    );
   });
 
   it('returns a usable handle even without updater', () => {
