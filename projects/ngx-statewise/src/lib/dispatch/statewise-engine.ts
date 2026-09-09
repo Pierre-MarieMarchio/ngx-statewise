@@ -10,6 +10,7 @@ import { unansweredEffectError } from '../effect/unanswered-effect';
 import { isUpdaterActionTypeDeclared } from '../updater/declared-action-types';
 import type { StateBoundHandler } from '../updater/updater-definition';
 import { ActionHistory } from './action-history';
+import { cascadeDepthExceededError, MAX_CASCADE_DEPTH } from './cascade-depth';
 import type { DispatchScope } from './dispatch-scope';
 import { GlobalUpdaterRegistry } from './global-updater-registry';
 import {
@@ -34,13 +35,29 @@ export class StatewiseEngine {
     private readonly errorHandler: ErrorHandler,
     @Inject(MISROUTED_DISPATCH_REACTION)
     private readonly misroutedDispatch: MisroutedDispatchReaction,
+    @Inject(MAX_CASCADE_DEPTH) private readonly maxCascadeDepth: number,
   ) {}
 
   /**
    * An updater failure is a programming error and escapes synchronously, so it
    * surfaces at the call site instead of being buried in a rejected promise.
+   *
+   * `path` is the chain of action types that led here, and is internal: a
+   * caller dispatches an action, never a cascade.
    */
-  public execute(action: Action, scope: DispatchScope): Promise<void> {
+  public execute(
+    action: Action,
+    scope: DispatchScope,
+    path: readonly string[] = [],
+  ): Promise<void> {
+    const cascade = [...path, action.type];
+
+    // Raised before anything is applied, so an action the bound refuses
+    // leaves no trace: no state update, no history entry, no effect started.
+    if (cascade.length > this.maxCascadeDepth) {
+      throw cascadeDepthExceededError(cascade, this.maxCascadeDepth);
+    }
+
     const handler = this.resolveHandler(action.type, scope);
 
     if (this.isMisrouted(action.type, handler)) {
@@ -54,7 +71,7 @@ export class StatewiseEngine {
     handler?.apply(action.payload);
     this.actionHistory.record(action);
 
-    return this.runEffects(action, scope);
+    return this.runEffects(action, scope, cascade);
   }
 
   public waitForEffect(
@@ -111,13 +128,17 @@ export class StatewiseEngine {
     this.errorHandler.handleError(misroutedActionError(actionType));
   }
 
-  private runEffects(action: Action, scope: DispatchScope): Promise<void> {
+  private runEffects(
+    action: Action,
+    scope: DispatchScope,
+    cascade: readonly string[],
+  ): Promise<void> {
     this.abandonRunsCancelledBy(action.type, scope);
 
     return settleAll(
       this.effects
         .triggeredBy(action.type)
-        .map((effect) => this.runEffect(effect, action, scope)),
+        .map((effect) => this.runEffect(effect, action, scope, cascade)),
     );
   }
 
@@ -138,6 +159,7 @@ export class StatewiseEngine {
     effect: RegisteredEffect,
     action: Action,
     scope: DispatchScope,
+    cascade: readonly string[],
   ): Promise<void> {
     const run = this.runningEffects.start(effect, scope, effect.keyOf(action));
 
@@ -150,7 +172,7 @@ export class StatewiseEngine {
     return this.pendingEffects.track(
       scope,
       action.type,
-      this.completeRun(effect, action, scope, run),
+      this.completeRun(effect, action, scope, run, cascade),
     );
   }
 
@@ -164,6 +186,7 @@ export class StatewiseEngine {
     action: Action,
     scope: DispatchScope,
     run: EffectRun,
+    cascade: readonly string[],
   ): Promise<void> {
     try {
       const actions = await resolveEffectOutcome(
@@ -184,7 +207,9 @@ export class StatewiseEngine {
         throw unansweredEffectError(action.type);
       }
 
-      await settleAll(actions.map((next) => this.executeSafely(next, scope)));
+      await settleAll(
+        actions.map((next) => this.executeSafely(next, scope, cascade)),
+      );
     } catch (error) {
       // Nobody awaits the answer of a run we deliberately abandoned, so its
       // failure is not the caller's to handle either.
@@ -199,9 +224,13 @@ export class StatewiseEngine {
   }
 
   /** Keeps a failing cascaded action from cancelling the actions beside it. */
-  private executeSafely(action: Action, scope: DispatchScope): Promise<void> {
+  private executeSafely(
+    action: Action,
+    scope: DispatchScope,
+    cascade: readonly string[],
+  ): Promise<void> {
     try {
-      return this.execute(action, scope);
+      return this.execute(action, scope, cascade);
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- rethrowing the caught value untouched
       return Promise.reject(error);
