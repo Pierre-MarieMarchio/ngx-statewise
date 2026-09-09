@@ -65,13 +65,29 @@ Worth stating plainly, because the gaps are the reason the check is cheap:
 - **Standalone only.** No `NgModule`-based consumer, no SSR, no
   `platform-server`.
 
+## When it runs
+
+- **Weekly**, on a schedule. The registry is what changes, not the diff.
+- **On demand**, by `workflow_dispatch`.
+- **Before every publish.** `release.yml` calls this workflow and its `release`
+  job declares `needs: compat`, so nothing reaches npm unless all three majors
+  answered. That is three full installs per release, and it is the right price
+  for a range that would otherwise be a guess: `npm run check` type-checks
+  against the Angular in this lockfile and proves nothing about the other two.
+
+It is one workflow rather than two copies of the matrix, on purpose — two
+copies drift, and the one a release verifies is the one that would drift
+unnoticed.
+
 ## Why it is not in `ci.yml`
 
 Nothing in a pull request changes what npm resolves for Angular 20. Running
 this on every PR would spend three installs to re-answer a question the diff
 did not ask. What _does_ change is the registry: a patch release of a
 supported major can break the package without a single commit here. That is a
-clock, not an event — so it runs weekly, and on demand before a release.
+clock, not an event.
 
 A failure is not automatically a bug to fix. Tightening the declared range and
-saying why is an equally valid answer.
+saying why is an equally valid answer — and since a failure now blocks the
+publish, that answer has to be given before the release goes out rather than
+after.
