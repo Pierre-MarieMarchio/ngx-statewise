@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Task } from '../models';
+import { Task, TaskDraft } from '../models';
 
 @Injectable({
   providedIn: 'root',
@@ -16,8 +16,9 @@ export class TaskRepositoryService {
     return this.http.get<Task[]>(this.API_BASE_URL, { params });
   }
 
-  create(task: Task): Observable<Task> {
-    return this.http.post<Task>(this.API_BASE_URL, task);
+  create(draft: TaskDraft, userId: string): Observable<Task> {
+    const params = this.buildAccessParams(userId);
+    return this.http.post<Task>(this.API_BASE_URL, draft, { params });
   }
 
   update(

@@ -15,8 +15,11 @@ import {
   TaskKanbanComponent,
   AllTaskListComponent,
   PersonalTaskListComponent,
+  ProjectFormComponent,
   ProjectTaskListComponent,
+  TaskFormComponent,
 } from '@app/features/project/components';
+import { ProjectDraft, TaskDraft } from '@app/features/project/models';
 import { TaskManager } from '@app/features/project/states/task/task.manager';
 import { ProjectManager } from '@app/features/project/states/project/project.manager';
 
@@ -30,7 +33,9 @@ import { ProjectManager } from '@app/features/project/states/project/project.man
     MatIconModule,
     MatTabsModule,
     PersonalTaskListComponent,
+    ProjectFormComponent,
     ProjectTaskListComponent,
+    TaskFormComponent,
     TaskKanbanComponent,
   ],
   templateUrl: './board-page.component.html',
@@ -53,8 +58,43 @@ export class BoardPageComponent {
 
   public selectedTask = signal<Task | null>(null);
 
+  /**
+   * What the one side panel is showing. Details and the two forms share it
+   * rather than each bringing a panel of its own, so opening one closes
+   * whatever was there — which is what a single panel means.
+   */
+  public readonly panel = signal<'task' | 'new-project' | 'new-task'>('task');
+
   public closeSideNav(): void {
     this.taskPanel.close();
+  }
+
+  public openNewProject(): void {
+    this.panel.set('new-project');
+    this.taskPanel.open();
+  }
+
+  public openNewTask(): void {
+    this.panel.set('new-task');
+    this.taskPanel.open();
+  }
+
+  public async createProject(draft: ProjectDraft): Promise<void> {
+    await this.projectManager.createProject(draft);
+
+    // Kept open on a refusal, so the reason stays on screen beside the field
+    // that caused it.
+    if (this.projectManager.createError() === null) {
+      this.closeSideNav();
+    }
+  }
+
+  public async createTask(draft: TaskDraft): Promise<void> {
+    await this.taskManager.createTask(draft);
+
+    if (this.taskManager.createError() === null) {
+      this.closeSideNav();
+    }
   }
 
   public toggleSideNav(): void {
@@ -63,6 +103,7 @@ export class BoardPageComponent {
 
   public selectTask(task: Task): void {
     this.selectedTask.set(task);
+    this.panel.set('task');
     this.taskPanel.open();
   }
 

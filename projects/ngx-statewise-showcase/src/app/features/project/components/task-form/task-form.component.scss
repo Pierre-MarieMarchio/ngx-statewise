@@ -1,0 +1,21 @@
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.task-form-title {
+  margin: 0;
+}
+
+.task-form-refusal {
+  margin: 0;
+  color: var(--mat-sys-error);
+}
+
+.task-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

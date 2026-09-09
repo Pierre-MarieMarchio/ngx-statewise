@@ -7,6 +7,20 @@ import { Observable, of, throwError } from 'rxjs';
 
 import { Project, PROJECT, Task, TASKS, User, USERS } from './db.data';
 
+/*
+ * The rows a stand-in server keeps.
+ *
+ * `new FakeBackend(...)` runs once per request, so a copy taken in a DB's field
+ * initialiser forgot every write the moment it answered — a created task was
+ * gone by the next reload, and a status change only looked like it stuck
+ * because the updater had applied it optimistically. These live as long as the
+ * tab, which is what a server looks like from here. The constants in
+ * `db.data.ts` stay untouched, so a page reload starts the demo over.
+ */
+const USER_ROWS: User[] = [...USERS];
+const TASK_ROWS: Task[] = [...TASKS];
+const PROJECT_ROWS: Project[] = [...PROJECT];
+
 type RequestHandlers = Record<
   string,
   Record<string, () => HttpResponse<unknown>>
@@ -26,6 +40,8 @@ export class FakeBackend {
         'http://localhost/api/Auth/logout': () => this.handleLogout(),
         'http://localhost/api/Auth/Authenticate': () =>
           this.handleAuthenticate(),
+        'http://localhost/api/Project': () => this.handleCreateProject(),
+        'http://localhost/api/Task': () => this.handleCreateTask(),
       },
       GET: {
         'http://localhost/api/Task': () => this.handleGetAllTask(),
@@ -106,42 +122,187 @@ export class FakeBackend {
   }
 
   private handleGetAllTask(): HttpResponse<unknown> {
-    const userId = this.request.params.get('userId');
+    const asking = this.requestingUser();
 
-    if (!userId) return this.respond400Error('userId is missing');
-    const user = this.usersDB.findByUserId(userId);
+    if ('error' in asking) return asking.error;
 
-    if (!user) return this.respond400Error('user does not exist');
-    const tasks = this.taskDB.findByUserOrganization(user);
-
-    return this.respondSuccess(tasks);
+    return this.respondSuccess(this.taskDB.findByUserOrganization(asking.user));
   }
 
   private handleUpdateTask(): HttpResponse<unknown> {
     const { body } = this.request;
-    const userId = this.request.params.get('userId');
     const taskId = this.request.params.get('taskId');
+    const asking = this.requestingUser();
 
-    if (!userId) return this.respond400Error('userId is missing');
+    if ('error' in asking) return asking.error;
+    if (!body) return this.respond400Error();
+    if (!taskId) return this.respond400Error('taskId is missing');
+
+    /*
+     * One rule a drag can actually break, which is what the rollback needed.
+     *
+     * Every handler used to answer 200 to anything a signed-in user could ask,
+     * so `pendingWrites` keeping the version it replaced — the care that lets a
+     * failure restore its own card and leave the others where the user dropped
+     * them — had no path a click could reach. Six of the nine tasks in the
+     * fixture carry nobody, so dragging one to Done finds this straight away.
+     *
+     * Checked before the write, so a refusal leaves the row untouched.
+     */
+    const existing = this.taskDB.findByIdForUser(taskId, asking.user);
+
+    if (
+      (body as Partial<Task>).status === 'done' &&
+      existing &&
+      (existing.assignedUserIds ?? []).length === 0
+    ) {
+      return this.respond400Error(
+        'assign someone to this task before marking it done',
+      );
+    }
+
+    // Unchecked, this answered 200 with an empty body for a task the caller
+    // may not touch, and the success action then travelled without a payload.
+    const updated = this.taskDB.update(taskId, body, asking.user);
+
+    if (!updated)
+      return this.respond400Error('no such task in your organisation');
+
+    return this.respondSuccess(updated);
+  }
+
+  /**
+   * A server that refuses.
+   *
+   * Everything the showcase does most carefully — the optimistic rollback,
+   * `isError` on both domains, the two "Try again" buttons — had no path a
+   * click could reach, because every handler answered 200 to anything a
+   * signed-in user could ask. A creation is the one place a refusal is
+   * ordinary: a blank title, or a name already taken.
+   */
+  private handleCreateProject(): HttpResponse<unknown> {
+    const user = this.requestingUser();
+
+    if ('error' in user) return user.error;
+
+    const { title, color } = (this.request.body ?? {}) as Record<
+      string,
+      unknown
+    >;
+    const refusal = this.refuseTitle(title);
+
+    if (refusal) return refusal;
+    if (typeof color !== 'string')
+      return this.respond400Error('a colour is required');
+
+    const trimmed = (title as string).trim();
+
+    if (
+      this.projectDB
+        .findByUserOrganization(user.user)
+        .some(
+          (project) => project.title.toLowerCase() === trimmed.toLowerCase(),
+        )
+    ) {
+      return this.respond400Error(`a project is already called "${trimmed}"`);
+    }
+
+    return this.respondSuccess(
+      this.projectDB.create(
+        {
+          id: `project-${String(Date.now())}`,
+          title: trimmed,
+          color,
+          organizationId: user.user.organizationId,
+        } as Project,
+        user.user,
+      ),
+    );
+  }
+
+  private handleCreateTask(): HttpResponse<unknown> {
+    const user = this.requestingUser();
+
+    if ('error' in user) return user.error;
+
+    const body = (this.request.body ?? {}) as Record<string, unknown>;
+    const refusal = this.refuseTitle(body['title']);
+
+    if (refusal) return refusal;
+
+    const projectId = body['projectId'];
+
+    if (typeof projectId !== 'string') {
+      return this.respond400Error('a project is required');
+    }
+    if (!this.projectDB.findByIdForUser(projectId, user.user)) {
+      return this.respond400Error('no such project in your organisation');
+    }
+
+    const trimmed = (body['title'] as string).trim();
+
+    if (
+      this.taskDB
+        .findByProjectIdForUser(projectId, user.user)
+        .some((task) => task.title.toLowerCase() === trimmed.toLowerCase())
+    ) {
+      return this.respond400Error(
+        `this project already has a task called "${trimmed}"`,
+      );
+    }
+
+    const now = new Date().toISOString();
+
+    return this.respondSuccess(
+      this.taskDB.create(
+        {
+          ...body,
+          id: `task-${String(Date.now())}`,
+          title: trimmed,
+          projectId,
+          organizationId: user.user.organizationId,
+          createdAt: now,
+          updatedAt: now,
+        } as Task,
+        user.user,
+      ),
+    );
+  }
+
+  /** Blank counts as missing: a title of spaces names nothing. */
+  private refuseTitle(title: unknown): HttpResponse<unknown> | null {
+    if (typeof title !== 'string' || title.trim().length === 0) {
+      return this.respond400Error('a title is required');
+    }
+
+    return null;
+  }
+
+  /**
+   * Who is asking, or the refusal to hand back instead. Four handlers repeated
+   * these two checks and their two sentences.
+   */
+  private requestingUser():
+    { readonly user: User } | { readonly error: HttpResponse<unknown> } {
+    const userId = this.request.params.get('userId');
+
+    if (!userId) return { error: this.respond400Error('userId is missing') };
+
     const user = this.usersDB.findByUserId(userId);
 
-    if (!user) return this.respond400Error('user does not exist');
-    if (!body) return this.respond400Error();
+    if (!user) return { error: this.respond400Error('user does not exist') };
 
-    const res = this.taskDB.update(taskId!, body, user);
-    return this.respondSuccess(res);
+    return { user };
   }
 
   private handleGetAllProject(): HttpResponse<unknown> {
-    const userId = this.request.params.get('userId');
+    const asking = this.requestingUser();
 
-    if (!userId) return this.respond400Error('userId is missing');
-    const user = this.usersDB.findByUserId(userId);
+    if ('error' in asking) return asking.error;
 
-    if (!user) return this.respond400Error('user does not exist');
-    const projects = this.projectDB.findByUserOrganization(user);
-
-    return this.respondSuccess(projects);
+    return this.respondSuccess(
+      this.projectDB.findByUserOrganization(asking.user),
+    );
   }
 
   private respondSuccess(body: unknown): HttpResponse<unknown> {
@@ -192,7 +353,9 @@ export class FakeBackend {
   private asErrorResponse(response: HttpResponse<unknown>): HttpErrorResponse {
     return new HttpErrorResponse({
       status: response.status,
-      statusText: response.statusText ?? 'Bad Request',
+      // `statusText` defaults to 'OK' and is never null, so the `??` that used
+      // to sit here was dead and every error carried statusText: 'OK'.
+      statusText: response.status >= 500 ? 'Server Error' : 'Bad Request',
       error: response.body,
       url: this.request.url,
     });
@@ -207,7 +370,7 @@ export class FakeBackend {
 }
 
 class UsersDB {
-  private readonly users: User[] = [...USERS];
+  private readonly users = USER_ROWS;
 
   findByUsernameAndPassword(email: string, password: string) {
     return this.users.find(
@@ -234,7 +397,7 @@ class UsersDB {
 }
 
 export class TaskDB {
-  private tasks: Task[] = [...TASKS];
+  private readonly tasks = TASK_ROWS;
 
   findByIdForUser(taskId: string, user: User): Task | undefined {
     const task = this.tasks.find((t) => t.id === taskId);
@@ -306,7 +469,14 @@ export class TaskDB {
 }
 
 export class ProjectDB {
-  private readonly project: Project[] = [...PROJECT];
+  private readonly project = PROJECT_ROWS;
+
+  create(project: Project, user: User): Project | undefined {
+    if (user.role !== 'admin' && project.organizationId !== user.organizationId)
+      return undefined;
+    this.project.push(project);
+    return project;
+  }
 
   findByIdForUser(ProjectId: string, user: User): Project | undefined {
     const task = this.project.find((t) => t.id === ProjectId);

@@ -1,4 +1,4 @@
-import { Task } from '../../models';
+import { Task, TaskDraft } from '../../models';
 import {
   defineActionsGroup,
   defineSingleAction,
@@ -26,6 +26,16 @@ export const updateTaskActions = defineActionsGroup({
      * every write in flight, and reverting on it took down the cards the
      * server had never refused.
      */
+    failure: payload<string>(),
+  },
+});
+
+/** Pessimistic, and carrying the server's sentence — see createProjectActions. */
+export const createTaskActions = defineActionsGroup({
+  source: 'CREATE_TASK',
+  events: {
+    request: payload<TaskDraft>(),
+    success: payload<Task>(),
     failure: payload<string>(),
   },
 });

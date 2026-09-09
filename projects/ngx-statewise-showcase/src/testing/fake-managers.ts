@@ -8,8 +8,10 @@ import {
 } from '@app/features/common';
 import {
   Project,
+  ProjectDraft,
   STATUSES,
   Task,
+  TaskDraft,
   TaskStatus,
 } from '@app/features/project/models';
 
@@ -161,14 +163,19 @@ export interface FakeTaskManager extends ITaskReload {
     typeof computed<Record<TaskStatus, number>>
   >;
   readonly updates: Task[];
+  isCreating: WritableSignal<boolean>;
+  createError: WritableSignal<string | null>;
+  readonly created: TaskDraft[];
   getAllAsync(): Promise<void>;
   update(task: Task): void;
+  createTask(draft: TaskDraft): Promise<void>;
 }
 
 export const fakeTaskManager = (
   tasks: Task[] = [sampleTask()],
 ): FakeTaskManager => {
   const updates: Task[] = [];
+  const created: TaskDraft[] = [];
 
   const tasksSignal = signal(tasks);
 
@@ -189,6 +196,14 @@ export const fakeTaskManager = (
       ),
     ),
     updates,
+    created,
+    isCreating: signal(false),
+    createError: signal<string | null>(null),
+    createTask: (draft: TaskDraft) => {
+      created.push(draft);
+
+      return Promise.resolve();
+    },
     getAll: () => undefined,
     getAllAsync: () => Promise.resolve(),
     reloaded: () => Promise.resolve(),
@@ -205,6 +220,10 @@ export interface FakeProjectManager extends IProjectReload {
   isLoading: WritableSignal<boolean>;
   readonly projectCount: ReturnType<typeof computed<number>>;
   readonly calls: string[];
+  isCreating: WritableSignal<boolean>;
+  createError: WritableSignal<string | null>;
+  readonly created: ProjectDraft[];
+  createProject(draft: ProjectDraft): Promise<void>;
 }
 
 export const fakeProjectManager = (
@@ -212,6 +231,7 @@ export const fakeProjectManager = (
 ): FakeProjectManager => {
   const projectsSignal = signal(projects);
   const calls: string[] = [];
+  const created: ProjectDraft[] = [];
 
   return {
     projects: projectsSignal,
@@ -219,6 +239,14 @@ export const fakeProjectManager = (
     isLoading: signal(false),
     projectCount: computed(() => projectsSignal().length),
     calls,
+    created,
+    isCreating: signal(false),
+    createError: signal<string | null>(null),
+    createProject: (draft: ProjectDraft) => {
+      created.push(draft);
+
+      return Promise.resolve();
+    },
     getAll: () => {
       calls.push('getAll');
     },

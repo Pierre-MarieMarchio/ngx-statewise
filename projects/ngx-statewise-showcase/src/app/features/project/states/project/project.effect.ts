@@ -1,9 +1,14 @@
 import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { createEffect } from 'ngx-statewise';
 import { catchError, map, of } from 'rxjs';
-import { getAllProjectsActions, projectReset } from './project.action';
+import {
+  createProjectActions,
+  getAllProjectsActions,
+  projectReset,
+} from './project.action';
 import { ProjectRepositoryService } from '../../services';
 import { AUTH_SESSION } from '@app/features/common';
+import { refusalReason } from '@app/core/error-handling';
 
 @Injectable({
   providedIn: 'root',
@@ -47,5 +52,34 @@ export class ProjectEffect {
      * ran dry, and that would leave `isLoading` set with nothing to clear it.
      */
     { concurrency: 'latest', cancelOn: projectReset, mustAnswer: true },
+  );
+
+  /**
+   * `'first'` rather than `'latest'`: a second click on a create button must
+   * not supersede the creation already in flight, or the first one lands on the
+   * server with nothing left watching for its answer. The form disables itself
+   * on `isCreating`, and this is what holds if it is clicked anyway.
+   */
+  public readonly createProjectRequestEffect = createEffect(
+    createProjectActions.request,
+    (draft) => {
+      const user = this.authManager.user();
+
+      if (!user) {
+        return createProjectActions.failure(
+          'No session, so nothing to create in.',
+        );
+      }
+
+      return this.projectRepository.create(draft, user.userId).pipe(
+        map((project) => createProjectActions.success(project)),
+        catchError((error: unknown) => {
+          this.errorHandler.handleError(error);
+
+          return of(createProjectActions.failure(refusalReason(error)));
+        }),
+      );
+    },
+    { concurrency: 'first', cancelOn: projectReset, mustAnswer: true },
   );
 }

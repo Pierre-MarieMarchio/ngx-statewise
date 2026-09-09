@@ -2,7 +2,11 @@ import { TestBed } from '@angular/core/testing';
 import { injectStatewise, type Statewise } from 'ngx-statewise';
 import { provideStatewiseTesting } from 'ngx-statewise/testing';
 import { sampleProject } from '@testing/fake-managers';
-import { getAllProjectsActions, projectReset } from './project.action';
+import {
+  createProjectActions,
+  getAllProjectsActions,
+  projectReset,
+} from './project.action';
 import { ProjectState } from './project.state';
 import { projectUpdater } from './project.updater';
 
@@ -81,5 +85,67 @@ describe('projectUpdater', () => {
     expect(state.projects()).toEqual([]);
     expect(state.isLoading()).toBe(false);
     expect(state.isError()).toBe(false);
+  });
+
+  describe('creating a project', () => {
+    const DRAFT = { title: 'Analytics', color: 'orange' } as const;
+
+    it('is creating, and no longer refused, while it runs', () => {
+      statewise.dispatch(createProjectActions.failure('a title is required'));
+
+      statewise.dispatch(createProjectActions.request(DRAFT));
+
+      expect(state.isCreating()).toBe(true);
+      expect(state.createError()).toBeNull();
+    });
+
+    /**
+     * The server answered with the project, so the list already holds the
+     * truth: waiting for a reload would blank the board it was created from.
+     */
+    it('joins the list on success, without a reload', () => {
+      statewise.dispatch(getAllProjectsActions.success(PROJECTS));
+
+      statewise.dispatch(createProjectActions.request(DRAFT));
+      statewise.dispatch(
+        createProjectActions.success({ ...sampleProject(), id: 'new' }),
+      );
+
+      expect(state.projects().map((project) => project.id)).toEqual([
+        'project-1',
+        'new',
+      ]);
+      expect(state.isCreating()).toBe(false);
+    });
+
+    it('keeps the reason it was refused, so a form can repeat it', () => {
+      statewise.dispatch(createProjectActions.request(DRAFT));
+      statewise.dispatch(
+        createProjectActions.failure('a project is already called "Analytics"'),
+      );
+
+      expect(state.isCreating()).toBe(false);
+      expect(state.createError()).toBe(
+        'a project is already called "Analytics"',
+      );
+    });
+
+    it('clears the refusal when the form tries again', () => {
+      statewise.dispatch(createProjectActions.failure('a title is required'));
+
+      statewise.dispatch(createProjectActions.request(DRAFT));
+
+      expect(state.createError()).toBeNull();
+    });
+
+    it('leaves nothing behind on a reset', () => {
+      statewise.dispatch(createProjectActions.request(DRAFT));
+      statewise.dispatch(createProjectActions.failure('refused'));
+
+      statewise.dispatch(projectReset());
+
+      expect(state.isCreating()).toBe(false);
+      expect(state.createError()).toBeNull();
+    });
   });
 });

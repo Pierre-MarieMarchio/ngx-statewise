@@ -110,4 +110,62 @@ describe('BoardPageComponent', () => {
 
     expect(taskManager.updates).toEqual([changed]);
   });
+
+  /**
+   * One panel, three things to show. Opening a form has to displace the
+   * details, and picking a task has to displace the form — otherwise a single
+   * panel is only a single panel by accident.
+   */
+  describe('the one side panel', () => {
+    it('shows the task details by default', async () => {
+      const fixture = await mount();
+      const host = fixture.nativeElement as HTMLElement;
+
+      expect(host.querySelector('app-task-details')).not.toBeNull();
+      expect(host.querySelector('app-project-form')).toBeNull();
+      expect(host.querySelector('app-task-form')).toBeNull();
+    });
+
+    it('gives it over to the project form, and takes it back', async () => {
+      const fixture = await mount();
+      const host = fixture.nativeElement as HTMLElement;
+
+      fixture.componentInstance.openNewProject();
+      fixture.detectChanges();
+
+      expect(host.querySelector('app-project-form')).not.toBeNull();
+      expect(host.querySelector('app-task-details')).toBeNull();
+
+      fixture.componentInstance.selectTask(sampleTask());
+      fixture.detectChanges();
+
+      expect(host.querySelector('app-task-details')).not.toBeNull();
+      expect(host.querySelector('app-project-form')).toBeNull();
+    });
+
+    it('gives it over to the task form', async () => {
+      const fixture = await mount();
+      const host = fixture.nativeElement as HTMLElement;
+
+      fixture.componentInstance.openNewTask();
+      fixture.detectChanges();
+
+      expect(host.querySelector('app-task-form')).not.toBeNull();
+      expect(host.querySelector('app-task-details')).toBeNull();
+    });
+
+    it('holds the new-task button while there is no project to put one in', async () => {
+      const fixture = await mount();
+      projectManager.projects.set([]);
+      fixture.detectChanges();
+
+      const buttons = Array.from(
+        (
+          fixture.nativeElement as HTMLElement
+        ).querySelectorAll<HTMLButtonElement>('.board-header-actions button'),
+      );
+
+      expect(buttons.map((button) => button.disabled)).toEqual([false, true]);
+    });
+  });
 });
