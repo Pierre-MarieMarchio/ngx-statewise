@@ -6,13 +6,16 @@ import {
   input,
   output,
 } from '@angular/core';
-import { TaskListColumnItem } from '../../models';
-import { TaskSelectionService } from '../../services';
+import { TaskColumnsService, TaskSelectionService } from '../../services';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTableModule } from '@angular/material/table';
-import { Task } from '../../models';
-import { AUTH_SESSION } from '@app/features/common';
+import { Project, Task } from '../../models';
+
+interface ProjectTasks {
+  readonly project: Project;
+  readonly tasks: readonly Task[];
+}
 import { ProjectManager } from '@app/features/project/states/project/project.manager';
 
 @Component({
@@ -29,50 +32,24 @@ export class ProjectTaskListComponent {
 
   public projectManager = inject(ProjectManager);
   private readonly selection = inject(TaskSelectionService);
-  private readonly authManager = inject(AUTH_SESSION);
+  private readonly taskColumns = inject(TaskColumnsService);
 
-  public readonly columns = computed(() =>
-    this.allColumns.filter(
-      (col) =>
-        !col.requiredRole || col.requiredRole === this.authManager.user()?.role,
-    ),
-  );
-  public readonly displayedColumns = computed(() =>
-    this.columns().map((col) => col.columnDef),
-  );
+  public readonly columns = this.taskColumns.cappedColumns;
+  public readonly displayedColumns = this.taskColumns.displayedColumns;
 
-  private readonly allColumns: TaskListColumnItem[] = [
-    {
-      columnDef: 'title',
-      header: 'Title',
-      cell: (element: Task) => `${element.title}`,
-    },
-    {
-      columnDef: 'status',
-      header: 'Status',
-      cell: (element: Task) => `${element.status}`,
-      maxWidth: '200px',
-    },
-    {
-      columnDef: 'priority',
-      header: 'Priority',
-      cell: (element: Task) => `${element.priority}`,
-      maxWidth: '200px',
-    },
-    {
-      columnDef: 'organisation',
-      header: 'Organisation',
-      cell: (element: Task) => `${element.organizationId}`,
-      maxWidth: '200px',
-      requiredRole: 'admin',
-    },
-  ];
+  /**
+   * One group per project, built once per change. The template used to call a
+   * method twice for every project on every change detection — once to read
+   * `.length`, once for the table — each call filtering the whole list again.
+   */
+  public readonly groups = computed<readonly ProjectTasks[]>(() =>
+    this.projectManager.projects().map((project) => ({
+      project,
+      tasks: this.selection.ofProject(this.tasks(), project.id),
+    })),
+  );
 
   public selectTask(task: Task) {
     this.taskSelected.emit(task);
-  }
-
-  public getFilteredTasks(projectId: string): Task[] {
-    return this.selection.ofProject(this.tasks(), projectId);
   }
 }

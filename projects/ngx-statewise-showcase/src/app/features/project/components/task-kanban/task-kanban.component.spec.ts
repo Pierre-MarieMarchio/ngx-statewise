@@ -35,6 +35,15 @@ const TASKS = [
  * here is the adapting: one board per project, and what a move means for the
  * page above.
  */
+/** The boards are keyed by project now, so a spec picks the one it means. */
+const columnsOf = (
+  fixture: { componentInstance: TaskKanbanComponent },
+  projectId: string,
+) =>
+  fixture.componentInstance
+    .boards()
+    .find((board) => board.project.id === projectId)?.columns ?? [];
+
 describe('TaskKanbanComponent', () => {
   const mount = async () => {
     await TestBed.configureTestingModule({
@@ -64,9 +73,10 @@ describe('TaskKanbanComponent', () => {
     const fixture = await mount();
 
     expect(
-      fixture.componentInstance
-        .columnsOf('project-1')
-        .map((column) => [column.id, column.items.map((task) => task.id)]),
+      columnsOf(fixture, 'project-1').map((column) => [
+        column.id,
+        column.items.map((task) => task.id),
+      ]),
     ).toEqual([
       ['todo', ['a', 'a2']],
       ['in-progress', []],
@@ -127,8 +137,7 @@ describe('TaskKanbanComponent', () => {
       fixture: { componentInstance: TaskKanbanComponent },
       projectId: string,
     ): string[] =>
-      fixture.componentInstance
-        .columnsOf(projectId)
+      columnsOf(fixture, projectId)
         .find((column) => column.id === 'todo')
         ?.items.map((task) => task.id) ?? [];
 

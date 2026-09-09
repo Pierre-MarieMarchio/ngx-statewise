@@ -74,9 +74,12 @@ describe('ProjectTaskListComponent', () => {
   it('keeps only the tasks of the project it lists', () => {
     const component = fixture.componentInstance;
 
-    expect(component.getFilteredTasks('p-1').map((task) => task.id)).toEqual([
-      't-1',
-    ]);
+    expect(
+      component
+        .groups()
+        .find((group) => group.project.id === 'p-1')
+        ?.tasks.map((task) => task.id),
+    ).toEqual(['t-1']);
   });
 
   it('shows the organisation column to an admin', () => {

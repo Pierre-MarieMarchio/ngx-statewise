@@ -3,13 +3,13 @@ import { sampleTask } from '@testing/fake-managers';
 import { TaskDetailsComponent } from './task-details.component';
 
 describe('TaskDetailsComponent', () => {
-  const mount = async () => {
+  const mount = async (task = sampleTask()) => {
     await TestBed.configureTestingModule({
       imports: [TaskDetailsComponent],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(TaskDetailsComponent);
-    fixture.componentRef.setInput('selectedTask', sampleTask());
+    fixture.componentRef.setInput('selectedTask', task);
     fixture.detectChanges();
     return fixture;
   };
@@ -35,12 +35,25 @@ describe('TaskDetailsComponent', () => {
     expect(closed).toEqual(['closed']);
   });
 
-  it('reports an overdue due date only while the task is not done', async () => {
-    const fixture = await mount();
-    const component = fixture.componentInstance;
+  /**
+   * Whether a date is late is the presentation service's rule, and its own spec
+   * covers it. What belongs here is that the panel shows it: the warning marks
+   * an overdue task and stays away once it is done.
+   */
+  it('marks an overdue due date, and stops once the task is done', async () => {
+    const fixture = await mount(sampleTask({ dueDate: '2020-01-01' }));
+    const host = () => fixture.nativeElement as HTMLElement;
 
-    expect(component.isDueDateOverdue('2020-01-01', 'todo')).toBe(true);
-    expect(component.isDueDateOverdue('2020-01-01', 'done')).toBe(false);
-    expect(component.isDueDateOverdue(undefined, 'todo')).toBe(false);
+    expect(host().querySelector('.warning-icon')).not.toBeNull();
+    expect(host().querySelector('.due-date-content.overdue')).not.toBeNull();
+
+    fixture.componentRef.setInput(
+      'selectedTask',
+      sampleTask({ dueDate: '2020-01-01', status: 'done' }),
+    );
+    fixture.detectChanges();
+
+    expect(host().querySelector('.warning-icon')).toBeNull();
+    expect(host().querySelector('.due-date-content.overdue')).toBeNull();
   });
 });
