@@ -89,6 +89,25 @@ export default tseslint.config(
     extends: [...angular.configs.templateRecommended],
   },
 
+  // The compatibility fixture. Not type-aware on purpose: `ngx-statewise`
+  // resolves there only through the root tsconfig's mapping to `dist/`, which
+  // does not exist yet when `check` reaches the lint step. Its type-check is a
+  // step of its own, after the library is built — see `typecheck:tools`.
+  {
+    files: ['tools/**/*.ts'],
+    extends: [
+      eslint.configs.recommended,
+      ...tseslint.configs.recommended,
+      ...angular.configs.tsRecommended,
+    ],
+    processor: angular.processInlineTemplates,
+  },
+
+  {
+    files: ['tools/**/*.html'],
+    extends: [...angular.configs.templateRecommended],
+  },
+
   // Last: switches off every rule Prettier already decides.
   prettier,
 );

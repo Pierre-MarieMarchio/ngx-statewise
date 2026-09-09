@@ -29,7 +29,9 @@ export const loginActions = defineActionsGroup({
 
 // The state update — synchronous, and the only place state changes
 export const authUpdater = defineUpdater(AuthState, (on) => {
-  on(loginActions.request, (state) => state.isLoading.set(true));
+  on(loginActions.request, (state) => {
+    state.isLoading.set(true);
+  });
   on(loginActions.success, (state, user) => {
     state.user.set(user);
     state.isLoading.set(false);
@@ -84,7 +86,7 @@ effect runs, and `dispatchAsync` awaits the entire chain.
 ```bash
 npm install
 npm start          # serve the showcase
-npm run check      # format, lint, tests with coverage, build everything
+npm run check      # format, lint, library and showcase tests, build everything
 ```
 
 `npm run check` is what a commit is expected to pass.

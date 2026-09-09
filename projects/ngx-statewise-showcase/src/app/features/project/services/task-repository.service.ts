@@ -17,18 +17,6 @@ export class TaskRepositoryService {
     return this.http.get<Task[]>(this.API_BASE_URL, { params });
   }
 
-  getById(taskId: string, user: User): Observable<Task> {
-    let params = this.buildAccessParams(user);
-    params = params.set('taskId', taskId);
-    return this.http.get<Task>(`${this.API_BASE_URL}`, { params });
-  }
-
-  getByProjectId(projectId: string, user: User): Observable<Task[]> {
-    let params = this.buildAccessParams(user);
-    params = params.set('projectId', projectId);
-    return this.http.get<Task[]>(this.API_BASE_URL, { params });
-  }
-
   create(task: Task): Observable<Task> {
     return this.http.post<Task>(this.API_BASE_URL, task);
   }

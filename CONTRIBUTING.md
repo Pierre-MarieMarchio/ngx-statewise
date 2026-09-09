@@ -54,16 +54,28 @@ Nothing reaches `next` or `main` without having passed it.
 
 | Commit                                                                      | Effect on the version |
 | --------------------------------------------------------------------------- | --------------------- |
-| `fix: …`                                                                    | patch                 |
+| any type + a `BREAKING CHANGE:` footer                                      | major                 |
 | `feat: …`                                                                   | minor                 |
-| any type + `!`, or a `BREAKING CHANGE:` footer                              | major                 |
-| `docs:`, `test:`, `chore:`, `refactor:`, `style:`, `ci:`, `build:`, `perf:` | none                  |
+| `fix: …`                                                                    | patch                 |
+| `docs:`, `test:`, `chore:`, `refactor:`, `style:`, `ci:`, `build:`, `perf:` | patch                 |
 
-A breaking change needs the footer, not just the `!`, if you want the migration
-note to reach the changelog:
+Two things about that table are easy to misread, and both decide a release:
+
+- **No type means "no release".** There is no such row, and there cannot be: the
+  preset starts every commit at patch and only ever lowers that level. A release
+  built from nothing but `chore:` and `docs:` still ships a patch — the changelog
+  says `Version bump only for package ngx-statewise`, as it already has three
+  times. Nothing here holds a version back; the commits only decide how far it
+  moves.
+- **A `!` in the header does nothing at all.** The preset's header pattern leaves
+  no room for it, so `feat(effect)!: …` matches nothing and the commit is parsed
+  with no type at all: it loses even the minor its `feat` would have earned and
+  falls back to the baseline patch. Only the footer produces a major.
+
+So a breaking change is the footer, and the header stays a plain type:
 
 ```
-feat(effect)!: run an effect only for the manager owning its action
+feat(effect): run an effect only for the manager owning its action
 
 BREAKING CHANGE: an effect registered for an action type owned by an updater no
 longer runs when that action is dispatched through another manager.
