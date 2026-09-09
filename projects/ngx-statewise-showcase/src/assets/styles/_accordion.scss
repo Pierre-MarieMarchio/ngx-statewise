@@ -5,17 +5,17 @@
 }
 
 .tag-orange {
-  background-color: rgba(251, 146, 60, 0.25);
+  background-color: var(--project-orange);
 }
 .tag-green {
-  background-color: rgba(52, 211, 153, 0.25);
+  background-color: var(--project-green);
 }
 .tag-blue {
-  background-color: rgba(96, 165, 250, 0.25);
+  background-color: var(--project-blue);
 }
 .tag-purple {
-  background-color: rgba(167, 139, 250, 0.25);
+  background-color: var(--project-purple);
 }
 .tag-pink {
-  background-color: rgba(244, 114, 182, 0.25);
+  background-color: var(--project-pink);
 }

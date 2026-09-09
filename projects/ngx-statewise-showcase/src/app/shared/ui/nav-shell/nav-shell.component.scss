@@ -5,7 +5,7 @@
   justify-content: space-between;
   width: var(--nav-width);
   height: 100vh;
-  border-right: 1px solid #232125;
+  border-right: 1px solid var(--rail-border);
   overflow-y: auto;
   overflow-x: auto;
 
@@ -49,7 +49,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: #746e7c;
+      color: var(--color-secondary);
       position: relative;
       transition:
         color 0.3s ease,
@@ -67,7 +67,7 @@
       }
 
       &.active-link {
-        color: var(--Icon-active);
+        color: var(--icon-active);
 
         &::before {
           width: 3px;

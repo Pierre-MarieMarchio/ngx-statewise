@@ -1,0 +1,53 @@
+/**
+ * Every colour this application means something by, named once.
+ *
+ * The point is not to remove duplication — it is to separate **meanings** that
+ * had collided into one literal. `rgba(96, 165, 250, 0.25)` was written in four
+ * sheets to say four different things: "in progress", "medium priority", "the
+ * blue project", and "a dashboard section's heading". One value, four meanings,
+ * so any visual change to one moved the other three.
+ *
+ * Several tokens below still hold the same value. That is deliberate and it is
+ * the whole gain: the intentions are apart now, so one can change without
+ * dragging the others along. Nothing here changes a pixel — the values are
+ * exactly the ones the literals held.
+ */
+:root {
+  /* ---- Status: how far along a task is. ---- */
+  --status-todo: rgba(103, 104, 105, 0.062);
+  --status-in-progress: rgba(96, 165, 250, 0.25);
+  --status-done: rgba(52, 211, 153, 0.25);
+
+  /*
+   * ---- Priority: how urgent it is. ----
+   * A scale of its own, on purpose. Two of these are today the same literal as
+   * a status above, which is exactly why "in progress" and "medium priority"
+   * are indistinguishable on screen.
+   */
+  --priority-low: rgb(52 211 153);
+  --priority-medium: rgb(96 165 250);
+  --priority-high: rgb(247 0 0);
+
+  /*
+   * A task past its due date. A second red, from Material 2, beside
+   * `--priority-high` — the same urgency in two hues. Named so the two can be
+   * reconciled in one place.
+   */
+  --priority-overdue: #f44336;
+
+  /* ---- Projects: the five colours a project may carry. ---- */
+  --project-orange: rgba(251, 146, 60, 0.25);
+  --project-green: rgba(52, 211, 153, 0.25);
+  --project-blue: rgba(96, 165, 250, 0.25);
+  --project-purple: rgba(167, 139, 250, 0.25);
+  --project-pink: rgba(244, 114, 182, 0.25);
+
+  /*
+   * ---- Chrome: what the application paints about itself. ----
+   * The band over a dashboard section, and the rule down the left of the
+   * details panel's description — an indigo that appears nowhere else in the
+   * application, named so that it can be argued about rather than inherited.
+   */
+  --section-band: rgba(96, 165, 250, 0.25);
+  --detail-accent: #667eea;
+}

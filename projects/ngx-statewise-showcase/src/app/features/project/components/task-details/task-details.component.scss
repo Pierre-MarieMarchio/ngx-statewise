@@ -46,15 +46,15 @@
       }
 
       &.status-todo {
-        background-color: rgba(103, 104, 105, 0.062);
+        background-color: var(--status-todo);
       }
 
       &.status-in-progress {
-        background-color: rgba(96, 165, 250, 0.25);
+        background-color: var(--status-in-progress);
       }
 
       &.status-done {
-        background-color: rgba(52, 211, 153, 0.25);
+        background-color: var(--status-done);
       }
 
       &.priority-low {
@@ -111,7 +111,7 @@
             color: var(--color-secondary);
 
             &.overdue {
-              color: #f44336;
+              color: var(--priority-overdue);
             }
           }
 
@@ -124,7 +124,7 @@
         .description-content {
           padding: 1rem;
           border-radius: 0.5rem;
-          border-left: 4px solid #667eea;
+          border-left: 4px solid var(--detail-accent);
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
           background-color: var(--mat-sys-surface);
 
@@ -146,11 +146,11 @@
           background-color: var(--mat-sys-surface);
 
           &.overdue {
-            color: #f44336;
-            border-left: 4px solid #f44336;
+            color: var(--priority-overdue);
+            border-left: 4px solid var(--priority-overdue);
 
             .warning-icon {
-              color: #f44336;
+              color: var(--priority-overdue);
             }
           }
         }
