@@ -139,6 +139,80 @@ function rejectedInterceptorShapes(): void {
   );
 }
 
+/**
+ * Never called either. Fifteen plumbing types left the barrel in this change,
+ * and this is what says a consumer never had to write one: every declaration
+ * below compiles with no type annotation naming them, in the exact places they
+ * would have been needed — a definition held in a constant, a creator held in a
+ * constant, the `on` collector held in a constant, an effect handler held in a
+ * constant.
+ */
+function inferredWithoutPlumbingTypes(): void {
+  // `PayloadDefinition`, `ValuePayloadFn` and `EmptyPayloadFn` would go here.
+  const withValue = payload<number>();
+  const withNothing = emptyPayload;
+
+  // `CreatorFromDefinition` and `ActionCreatorsGroup` would go here.
+  const inferred = defineActionsGroup({
+    source: 'Inferred',
+    events: { assigned: withValue, cleared: withNothing },
+  });
+
+  // `GroupActionType` would go here — and the literal survives, which is the
+  // whole reason the type exists.
+  const groupType: 'INFERRED_ASSIGNED' = inferred.assigned.type;
+
+  // `PayloadActionCreator` and `EmptyActionCreator` would go here.
+  const creator = inferred.assigned;
+  const emptyCreator = inferred.cleared;
+
+  // `ActionWithPayload` and `EmptyAction` would go here.
+  const carrying = creator(1);
+  const bare = emptyCreator();
+  const carriedPayload: number = carrying.payload;
+  const bareType: string = bare.type;
+
+  // `SingleActionType` and `ActionCreator` would go here.
+  const single = defineSingleAction('INFERRED_SINGLE', (raw: string) =>
+    Number(raw),
+  );
+  const singleType: 'INFERRED_SINGLE_ACTION' = single.type;
+  const singlePayload: number = single('2').payload;
+
+  // `On` would go here, and `StateUpdate` on the handler it collects.
+  const updater = defineUpdater(TYPED_STATE, (on) => {
+    const declare = on;
+    // `undefined`, not `void`: the collector wants a handler that returns
+    // nothing, and an extracted arrow loses the contextual typing an inline
+    // one gets. `undefined` is a language keyword, not a library type, so this
+    // is still a declaration written without `StateUpdate`.
+    const update = (state: TypedState, value: number): undefined => {
+      state.value = value;
+    };
+
+    declare(inferred.assigned, update);
+    declare(inferred.cleared, (state) => {
+      state.value = 0;
+    });
+  });
+
+  // `EffectHandler` and `ResolvedActions` would go here.
+  const handle = (value: number) => inferred.assigned(value + 1);
+
+  createEffect(inferred.assigned, handle);
+
+  // Read once each, so the compiler is what checks them and the linter has
+  // nothing left unused.
+  expect([
+    groupType,
+    carriedPayload,
+    bareType,
+    singleType,
+    singlePayload,
+    updater.handlers.size,
+  ]).toHaveLength(6);
+}
+
 describe('public API types', () => {
   it('preserves action payload and updater handler types', () => {
     const updater = defineUpdater(TYPED_STATE, (on) => {
@@ -170,5 +244,14 @@ describe('public API types', () => {
 
   it('rejects malformed interceptor declarations', () => {
     expect(rejectedInterceptorShapes).toBeInstanceOf(Function);
+  });
+
+  /**
+   * The rule that selected what stays exported: a type stays if a consumer has
+   * to write it to annotate a declaration they cannot leave inferred. None of
+   * the fifteen removed here met it, and this is the proof.
+   */
+  it('infers every declaration without the plumbing types', () => {
+    expect(inferredWithoutPlumbingTypes).toBeInstanceOf(Function);
   });
 });
