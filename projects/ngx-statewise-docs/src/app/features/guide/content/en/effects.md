@@ -148,6 +148,12 @@ A registration lives as long as the injector that created it. An effect class
 scoped to a component or to a lazy route is unregistered when that injector is
 destroyed, so instantiating it again never piles up a second copy.
 
+Such a class needs nothing but itself: `createEffect` injects the registry from
+wherever it is called, and finds the root one. Do **not** add a second
+`provideStatewise()` to that route — it would provide a registry of its own,
+which no dispatch reaches. The library now refuses it
+([Getting started](/guide/getting-started)).
+
 `createEffect` returns an `EffectRef` for the rarer case where you need to stop
 earlier:
 

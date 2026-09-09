@@ -10,6 +10,28 @@ function effectWith(
   return registeredEffect(() => undefined, { concurrency, cancelledBy });
 }
 
+/**
+ * The groups this effect holds in this scope, read from inside the instance.
+ *
+ * A retention invariant has no observable surface — every behaviour is the
+ * same whether or not an empty group is dropped — so the only assertion that
+ * can hold it is one that knows the shape of the class it tests.
+ */
+function groupsOf(
+  running: RunningEffects,
+  effect: RegisteredEffect,
+  scope: object,
+): ReadonlyMap<string, unknown> | undefined {
+  const internals = running as unknown as {
+    readonly groups: WeakMap<
+      RegisteredEffect,
+      WeakMap<object, Map<string, unknown>>
+    >;
+  };
+
+  return internals.groups.get(effect)?.get(scope);
+}
+
 describe('RunningEffects', () => {
   const scope = {};
   const otherScope = {};
@@ -145,6 +167,23 @@ describe('RunningEffects', () => {
       expect(one?.abortSignal.aborted).toBe(false);
       expect(two?.abortSignal.aborted).toBe(false);
     });
+  });
+
+  /**
+   * What the purge buys, and what no behavioural assertion can see: an effect
+   * keyed by entity must not keep one empty group per entity it has ever seen.
+   * Two keys are used because one would leave the group of the single key
+   * indistinguishable from the absence of any group at all.
+   */
+  it('drops the group of a key once its last run is over', () => {
+    const effect = effectWith('latest');
+    const one = running.start(effect, scope, 'task-1');
+    const two = running.start(effect, scope, 'task-2');
+
+    one?.finish();
+    two?.finish();
+
+    expect(groupsOf(running, effect, scope)?.size).toBe(0);
   });
 
   describe('cancel', () => {

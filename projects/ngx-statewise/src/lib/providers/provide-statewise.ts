@@ -1,4 +1,5 @@
 import {
+  ErrorHandler,
   inject,
   Injector,
   isDevMode,
@@ -32,6 +33,13 @@ import { InterceptorRegistry } from '../interceptor/interceptor-registry';
 import { RunningEffects } from '../effect/running-effects';
 import { indexUpdaters, resolveUpdaters } from '../updater/resolve-updaters';
 import type { Updater } from '../updater/updater-definition';
+import {
+  defaultDuplicateProviderReaction,
+  DUPLICATE_PROVIDER_REACTION,
+  guardSingleProvider,
+  STATEWISE_PROVIDED,
+  type DuplicateProviderReaction,
+} from './duplicate-provider';
 
 /** How many of the last dispatched actions are kept, and in what shape. */
 export interface StatewiseHistoryOptions {
@@ -74,7 +82,14 @@ export interface StatewiseConfig {
   readonly maxCascadeDepth?: number;
 }
 
-/** Wires the execution engine, the effects and the global updaters. */
+/**
+ * Wires the execution engine, the effects and the global updaters.
+ *
+ * Call it once, at the application root. A second call in a child injector —
+ * the providers of a lazy route, typically — builds a second engine with its
+ * own effect registry, which no dispatch of the application reaches; the
+ * initializer below refuses that rather than letting it detach in silence.
+ */
 export function provideStatewise(
   config: StatewiseConfig = {},
 ): EnvironmentProviders {
@@ -103,8 +118,23 @@ export function provideStatewise(
         config.misroutedDispatch ??
         defaultMisroutedDispatchReaction(isDevMode()),
     },
+    { provide: STATEWISE_PROVIDED, useValue: true },
+    {
+      provide: DUPLICATE_PROVIDER_REACTION,
+      useFactory: (): DuplicateProviderReaction =>
+        defaultDuplicateProviderReaction(isDevMode()),
+    },
     ...effects,
     provideEnvironmentInitializer(() => {
+      // Asked before anything is wired, so a call that is not going to be
+      // reachable does not first instantiate the effect classes of a registry
+      // nothing will read.
+      guardSingleProvider(
+        inject(STATEWISE_PROVIDED, { optional: true, skipSelf: true }),
+        inject(DUPLICATE_PROVIDER_REACTION),
+        inject(ErrorHandler),
+      );
+
       const injector = inject(Injector);
       const globalUpdaters = inject(GlobalUpdaterRegistry);
 

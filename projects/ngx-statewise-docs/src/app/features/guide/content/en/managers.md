@@ -64,12 +64,12 @@ public readonly user = this.authStates.user.asReadonly();
 
 The handle returned by `injectStatewise` is the whole dispatch API.
 
-| Member                  | Returns         | What it does                                                         |
-| ----------------------- | --------------- | -------------------------------------------------------------------- |
-| `dispatch(action)`      | `void`          | Starts the action without waiting for it.                            |
-| `dispatchAsync(action)` | `Promise<void>` | Resolves once the whole cascade started by the action is over.       |
-| `waitForEffect(action)` | `Promise<void>` | Waits for the effects **this manager** started for that action type. |
-| `waitForAllEffects()`   | `Promise<void>` | Waits for every effect **this manager** started.                     |
+| Member                  | Returns         | What it does                                                                                       |
+| ----------------------- | --------------- | -------------------------------------------------------------------------------------------------- |
+| `dispatch(action)`      | `void`          | Starts the action without waiting for it.                                                          |
+| `dispatchAsync(action)` | `Promise<void>` | Resolves once the whole cascade started by the action is over, across manager boundaries included. |
+| `waitForEffect(action)` | `Promise<void>` | Waits for the effects **this manager** started for that action type.                               |
+| `waitForAllEffects()`   | `Promise<void>` | Waits for every effect **this manager** started.                                                   |
 
 `waitForEffect` takes an action creator or an action, never a raw string, so a
 typo in a type is a compile error:
@@ -98,6 +98,81 @@ next thing has to wait:
 ```typescript
 await this.statewise.dispatchAsync(loginActions.request(credentials));
 ```
+
+### Crossing a feature boundary
+
+An effect must not return another feature's action; it calls that feature's
+manager instead ([Updaters](/guide/updaters)). That call dispatches on the
+other manager's own scope, which is a different tree of promises — and yet the
+cascade still has to be one thing, or the sentence above is false the moment a
+login reloads two other features.
+
+So the rule, and it is worth reading twice:
+
+> A dispatch a **synchronous** effect handler emits belongs to the cascade of
+> that handler. Past an `await`, hand the promise back instead.
+
+```typescript prefer title="auth.effect.ts"
+public readonly loginSuccessEffect = createEffect(loginActions.success, () => {
+  // Synchronous: both reloads are part of the login cascade, and the
+  // dispatchAsync that started it resolves only once they are over.
+  this.projectManager.getAll();
+  this.taskManager.getAll();
+});
+```
+
+```typescript avoid title="auth.effect.ts"
+public readonly loginSuccessEffect = createEffect(
+  loginActions.success,
+  async () => {
+    await this.audit.record('login');
+    // Past the await, and therefore no longer attributable to this handler:
+    // the login cascade settles without waiting for these two.
+    this.projectManager.getAll();
+    this.taskManager.getAll();
+  },
+);
+```
+
+The fix for the second form is to await what the managers hand back:
+
+```typescript prefer title="auth.effect.ts"
+public readonly loginSuccessEffect = createEffect(
+  loginActions.success,
+  async () => {
+    await this.audit.record('login');
+
+    await Promise.all([
+      this.projectManager.getAllAsync(),
+      this.taskManager.getAllAsync(),
+    ]);
+  },
+);
+```
+
+The limit is not an oversight, and it will not move: past an `await` there is
+no asynchronous context left to read the open cascade from — `AsyncLocalStorage`
+does not exist in a browser, and zone.js is excluded by construction for a
+library that must work zoneless. It falls where it costs least, because an
+`await` has necessarily handed the handler a promise it can pass on.
+
+#### Which form a manager exposes
+
+A manager method that other features call from an effect should return
+`Promise<void>`, not `void`:
+
+```typescript title="task.manager.ts"
+/** Preferred: usable from a synchronous handler and from an async one. */
+public getAllAsync(): Promise<void> {
+  return this.statewise.dispatchAsync(getAllTaskActions.request());
+}
+```
+
+Both forms preserve the cascade when called synchronously, so `void` is not
+wrong there. But only the promise-returning one still works past an `await`,
+and a caller cannot tell from a `void` signature that it has silently stopped
+covering the cascade. Expose the promise, and let a caller with nothing to wait
+for ignore it.
 
 ### Errors
 
@@ -155,5 +230,8 @@ protected async submit(): Promise<void> {
 - Expose `asReadonly()` signals and named methods. Never the writable signal,
   never the raw handle.
 - `dispatchAsync` when something waits on the outcome, `dispatch` otherwise.
+- A dispatch emitted synchronously by an effect handler joins that handler's
+  cascade. Past an `await`, hand the promise back.
+- A manager method other features call returns `Promise<void>`.
 
 Next: [Testing](/guide/testing).

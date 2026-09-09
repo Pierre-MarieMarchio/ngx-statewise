@@ -137,7 +137,9 @@ call with no updater at all.
 
 - Two managers dispatch the same action type concurrently without sharing state
   or observation.
-- `dispatchAsync` awaits the whole cascade, nested effects included.
+- `dispatchAsync` awaits the whole cascade, nested effects included — and, for
+  a dispatch a synchronous effect handler emitted, across a manager boundary
+  too. See [Crossing a feature boundary](/guide/managers).
 - An unexpected failure is no longer swallowed.
 - A misrouted dispatch is reported instead of silently skipped.
 - An effect is unregistered with the injector that registered it, so a

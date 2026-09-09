@@ -49,6 +49,19 @@ export const appConfig: ApplicationConfig = {
 Every option is optional. Calling `provideStatewise()` with nothing is valid
 and is the right starting point.
 
+> [!IMPORTANT]
+> Call it **once**, at the application root. It provides its own effect
+> registry, so a second call in a child injector — the providers of a lazy
+> route, typically — builds a second engine that no dispatch of the
+> application reaches. The effects declared with it never run, while their
+> updaters still apply, which makes the action look like it worked.
+>
+> The library refuses that rather than letting it happen quietly: a second call
+> throws in development and reports to Angular's `ErrorHandler` in production,
+> the same rule as a misrouted dispatch. An effect class scoped to a lazy route
+> or to a component needs no second call — `createEffect()` registers into the
+> root registry from wherever it is injected.
+
 | Option              | Type                              | Default       |
 | ------------------- | --------------------------------- | ------------- |
 | `effects`           | `readonly Type<unknown>[]`        | none          |
