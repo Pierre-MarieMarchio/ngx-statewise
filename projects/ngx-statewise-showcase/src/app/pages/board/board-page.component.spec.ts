@@ -3,6 +3,7 @@ import {
   fakeAuthManager,
   fakeAuthSession,
   fakeProjectManager,
+  FakeProjectManager,
   fakeTaskManager,
   FakeTaskManager,
   sampleTask,
@@ -15,9 +16,11 @@ import { TaskManager } from '@app/features/project/states/task/task.manager';
 
 describe('BoardPageComponent', () => {
   let taskManager: FakeTaskManager;
+  let projectManager: FakeProjectManager;
 
   const mount = async () => {
     taskManager = fakeTaskManager([sampleTask()]);
+    projectManager = fakeProjectManager();
 
     await TestBed.configureTestingModule({
       imports: [BoardPageComponent],
@@ -27,7 +30,7 @@ describe('BoardPageComponent', () => {
         // port, not through the manager the page itself injects.
         { provide: AUTH_SESSION, useValue: fakeAuthSession() },
         { provide: TaskManager, useValue: taskManager },
-        { provide: ProjectManager, useValue: fakeProjectManager() },
+        { provide: ProjectManager, useValue: projectManager },
       ],
     }).compileComponents();
 
@@ -51,6 +54,36 @@ describe('BoardPageComponent', () => {
       'person My Tasks',
       'construction Projects',
     ]);
+  });
+
+  /**
+   * Two of the four tabs group by project, so a project load that failed has to
+   * be visible here. It used to be neither shown nor clearable.
+   */
+  it('reports a failed project load, apart from the tasks', async () => {
+    const fixture = await mount();
+    projectManager.isError.set(true);
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+
+    expect(
+      Array.from(host.querySelectorAll('.data-state-error-message')).map(
+        (message) => message.textContent?.trim(),
+      ),
+    ).toEqual(['The projects could not be loaded.']);
+  });
+
+  it('asks the project manager to reload from its own alert', async () => {
+    const fixture = await mount();
+    projectManager.isError.set(true);
+    fixture.detectChanges();
+
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('.data-state-error button')
+      ?.click();
+
+    expect(projectManager.calls).toEqual(['getAll']);
   });
 
   it('opens the panel on the task it was given', async () => {

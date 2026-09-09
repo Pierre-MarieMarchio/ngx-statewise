@@ -45,6 +45,22 @@ describe('authUpdater', () => {
       expect(state.isError()).toBe(false);
     });
 
+    /**
+     * Nothing asserted this, and the login page reads it: dropping the
+     * `isLoading.set(false)` here left the form spinning for good after a
+     * successful sign-in.
+     */
+    it('stops loading and opens the session when it succeeds', () => {
+      statewise.dispatch(loginActions.request(CREDENTIALS));
+
+      statewise.dispatch(loginActions.success(LOGGED_IN));
+
+      expect(state.isLoading()).toBe(false);
+      expect(state.isLoggedIn()).toBe(true);
+      expect(state.isError()).toBe(false);
+      expect(state.user()?.userId).toBe(LOGGED_IN.userId);
+    });
+
     it('reports a refusal so a view can show it', () => {
       statewise.dispatch(loginActions.request(CREDENTIALS));
       statewise.dispatch(loginActions.failure());

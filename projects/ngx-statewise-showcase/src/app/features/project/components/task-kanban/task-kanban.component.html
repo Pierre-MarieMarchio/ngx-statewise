@@ -1,5 +1,5 @@
 <div class="kanban-task-container">
-  @if (!projectManager.projects()?.length) {
+  @if (!projectManager.projects().length) {
     <p class="empty-state">No project, so no board to draw.</p>
   } @else {
     <mat-accordion class="project-accordion" displayMode="flat" multi>

@@ -7,17 +7,11 @@ import { Task, TaskStatus } from '../models';
  */
 @Injectable({ providedIn: 'root' })
 export class TaskSelectionService {
-  public inStatus(
-    tasks: readonly Task[] | null | undefined,
-    status: TaskStatus,
-  ): Task[] {
-    return (tasks ?? []).filter((task) => task.status === status);
+  public inStatus(tasks: readonly Task[], status: TaskStatus): Task[] {
+    return tasks.filter((task) => task.status === status);
   }
 
-  public ofProject(
-    tasks: readonly Task[] | null | undefined,
-    projectId: string,
-  ): Task[] {
-    return (tasks ?? []).filter((task) => task.projectId === projectId);
+  public ofProject(tasks: readonly Task[], projectId: string): Task[] {
+    return tasks.filter((task) => task.projectId === projectId);
   }
 }

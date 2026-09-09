@@ -115,6 +115,25 @@ describe('TaskEffect', () => {
       expect(state.isError()).toBe(true);
     });
 
+    /**
+     * A reset means there is no list left to fill. Without `cancelOn`, the
+     * reload in flight answers after it and puts the whole list back, so the
+     * reset is undone by a request that predates it.
+     */
+    it('abandons a reload in flight when the list is reset', async () => {
+      const gate = deferred<Task[]>();
+      getAllAnswers = () => gate.source;
+      setUp();
+
+      const abandoned = statewise.dispatchAsync(getAllTaskActions.request());
+
+      await statewise.dispatchAsync(taskReset());
+      gate.answer([TODO, OTHER]);
+      await abandoned;
+
+      expect(state.tasks()).toEqual([]);
+    });
+
     it('reports the cause of a refusal and marks the state failed', async () => {
       const failure = new Error('unreachable');
       getAllAnswers = () => throwError(() => failure);
@@ -252,6 +271,16 @@ describe('TaskEffect', () => {
 
       expect(statusOf('a')).toBe('done');
       expect(statusOf('b')).toBe('in-progress');
+
+      /*
+       * The statuses alone prove nothing here: the updater moves the card on
+       * `request`, so both read the same whether the first write was abandoned
+       * or not. Its pending entry is what tells them apart — an abandoned run
+       * answers nothing, so nothing ever closes it, and the board would report
+       * itself saving for good.
+       */
+      expect(state.pendingWrites().size).toBe(0);
+      expect(updateCalls.map((task) => task.id)).toEqual(['a', 'b']);
     });
 
     it('abandons a write in flight when the list is reset', async () => {
