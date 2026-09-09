@@ -8,7 +8,7 @@ import {
   isThemeChoice,
   type Theme,
   type ThemeChoice,
-} from './theme';
+} from '../models/theme.model';
 
 /**
  * The three places the theme lives outside Angular: `localStorage`, the

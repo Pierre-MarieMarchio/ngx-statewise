@@ -7,6 +7,11 @@
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,
+    /* Reading past the end of an array, or off a map with a key that is not
+       there, hands back `undefined`. Without this, the fake backend's handler
+       map typed a two-level index as always present and a DELETE would have
+       thrown a TypeError on the second level. */
+    "noUncheckedIndexedAccess": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,

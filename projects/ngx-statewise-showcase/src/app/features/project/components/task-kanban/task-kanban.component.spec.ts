@@ -7,6 +7,7 @@ import {
 } from '@testing/fake-managers';
 import { TaskKanbanComponent } from './task-kanban.component';
 import { ProjectManager } from '@app/features/project/states/project/project.manager';
+import { at } from '@testing/at';
 
 const PROJECTS = [
   sampleProject(),
@@ -108,12 +109,12 @@ describe('TaskKanbanComponent', () => {
     );
 
     fixture.componentInstance.onTaskMoved({
-      item: TASKS[0],
+      item: at(TASKS, 0),
       from: 'todo',
       to: 'in-progress',
     });
 
-    expect(changed).toEqual([{ ...TASKS[0], status: 'in-progress' }]);
+    expect(changed).toEqual([{ ...at(TASKS, 0), status: 'in-progress' }]);
   });
 
   it('reports nothing for a column it cannot read as a status', async () => {
@@ -124,7 +125,7 @@ describe('TaskKanbanComponent', () => {
     );
 
     fixture.componentInstance.onTaskMoved({
-      item: TASKS[0],
+      item: at(TASKS, 0),
       from: 'todo',
       to: 'nowhere',
     });
@@ -148,7 +149,7 @@ describe('TaskKanbanComponent', () => {
 
       fixture.componentInstance.onColumnReordered({
         columnId: 'todo',
-        items: [TASKS[1], TASKS[0]],
+        items: [at(TASKS, 1), at(TASKS, 0)],
       });
       fixture.detectChanges();
 
@@ -160,7 +161,7 @@ describe('TaskKanbanComponent', () => {
 
       fixture.componentInstance.onColumnReordered({
         columnId: 'todo',
-        items: [TASKS[1], TASKS[0]],
+        items: [at(TASKS, 1), at(TASKS, 0)],
       });
       fixture.detectChanges();
 

@@ -128,7 +128,7 @@ function headingsOf(page: GuidePage, code: LocaleCode): IndexedHeading[] {
 
   for (const [position, match] of matches.entries()) {
     // Strip the inline markup a heading may carry: `code`, **bold**.
-    const text = match[2].replace(/[`*_]/g, '');
+    const text = (match[2] ?? '').replace(/[`*_]/g, '');
     const base = slugify(text);
     const seen = used.get(base) ?? 0;
     used.set(base, seen + 1);
