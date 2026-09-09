@@ -12,15 +12,13 @@ export class AssignedTasksService {
   private readonly authManager = inject(AUTH_SESSION);
 
   /** The tasks assigned to whoever is signed in, none when nobody is. */
-  public ofCurrentUser(tasks: readonly Task[] | null | undefined): Task[] {
+  public ofCurrentUser(tasks: readonly Task[]): Task[] {
     const userId = this.authManager.user()?.userId;
 
     if (userId === undefined) {
       return [];
     }
 
-    return (tasks ?? []).filter((task) =>
-      task.assignedUserIds?.includes(userId),
-    );
+    return tasks.filter((task) => task.assignedUserIds?.includes(userId));
   }
 }

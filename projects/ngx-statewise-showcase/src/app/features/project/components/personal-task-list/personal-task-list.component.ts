@@ -20,7 +20,7 @@ import { AssignedTasksService } from '../../services';
   styleUrl: './personal-task-list.component.scss',
 })
 export class PersonalTaskListComponent implements OnInit {
-  public allTasks = input<Task[]>();
+  public allTasks = input.required<Task[]>();
   public taskSelected = output<Task>();
   private readonly assigned = inject(AssignedTasksService);
 

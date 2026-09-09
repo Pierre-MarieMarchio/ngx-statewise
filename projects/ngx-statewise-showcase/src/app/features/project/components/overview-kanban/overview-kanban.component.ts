@@ -34,7 +34,7 @@ export class OverviewKanbanComponent {
   public tasks = this.taskManager.tasks;
 
   /** Nothing to lay out on a board, so the card says so instead. */
-  public readonly isEmpty = computed(() => (this.tasks() ?? []).length === 0);
+  public readonly isEmpty = computed(() => this.tasks().length === 0);
 
   public readonly columns = computed<readonly KanbanColumn<Task>[]>(() =>
     this.board.columns.map((status) => ({

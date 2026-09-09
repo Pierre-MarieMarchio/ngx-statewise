@@ -29,9 +29,9 @@ describe('TaskSelectionService', () => {
     ).toEqual(['a', 'b']);
   });
 
-  /** The managers report `null` before their first answer. */
-  it('answers an empty list for nothing at all', () => {
-    expect(selection.inStatus(null, 'todo')).toEqual([]);
-    expect(selection.ofProject(undefined, 'project-1')).toEqual([]);
+  /** Both managers start empty, so this is the state before a first answer. */
+  it('answers an empty list for an empty one', () => {
+    expect(selection.inStatus([], 'todo')).toEqual([]);
+    expect(selection.ofProject([], 'project-1')).toEqual([]);
   });
 });

@@ -14,12 +14,12 @@ describe('ProjectManager', () => {
     });
 
     state = TestBed.inject(ProjectState);
-    state.projects.set(null);
+    state.projects.set([]);
     manager = TestBed.inject(ProjectManager);
   });
 
-  it('counts nothing while the projects have not been loaded', () => {
-    expect(manager.projects()).toBeNull();
+  it('counts nothing while the projects are empty', () => {
+    expect(manager.projects()).toEqual([]);
     expect(manager.projectCount()).toBe(0);
   });
 
@@ -36,7 +36,7 @@ describe('ProjectManager', () => {
     state.projects.set([sampleProject()]);
     expect(manager.projectCount()).toBe(1);
 
-    state.projects.set(null);
+    state.projects.set([]);
     expect(manager.projectCount()).toBe(0);
   });
 });
