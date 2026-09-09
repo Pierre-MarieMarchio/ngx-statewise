@@ -1,0 +1,24 @@
+{
+  "name": "ngx-statewise-compat-consumer",
+  "version": "0.0.0",
+  "description": "Throwaway application that installs the packed ngx-statewise and compiles against one Angular major.",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@angular/common": "{{ANGULAR}}",
+    "@angular/compiler": "{{ANGULAR}}",
+    "@angular/core": "{{ANGULAR}}",
+    "@angular/platform-browser": "{{ANGULAR}}",
+    "ngx-statewise": "{{PACKAGE}}",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "{{ANGULAR}}",
+    "@angular/cli": "{{ANGULAR}}",
+    "@angular/compiler-cli": "{{ANGULAR}}",
+    "jsdom": "^30.0.1",
+    "typescript": "{{TYPESCRIPT}}",
+    "vitest": "{{VITEST}}"
+  }
+}

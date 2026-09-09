@@ -1,0 +1,28 @@
+@if (loading()) {
+  <mat-progress-bar
+    class="data-state-progress"
+    mode="indeterminate"
+    [attr.aria-label]="'Loading the ' + label()"
+  />
+}
+
+@if (error()) {
+  <!-- role="alert" so a screen reader is told without having to go looking. -->
+  <div class="data-state-error" role="alert">
+    <mat-icon class="data-state-error-icon" aria-hidden="true"
+      >error_outline</mat-icon
+    >
+    <span class="data-state-error-message">{{ message() }}</span>
+
+    @if (retryable()) {
+      <button
+        class="primary-btn"
+        mat-stroked-button
+        type="button"
+        (click)="retried.emit()"
+      >
+        Try again
+      </button>
+    }
+  </div>
+}

@@ -1,0 +1,10 @@
+/**
+ * What a list shows in place of itself when there is nothing to show. Shared
+ * rather than repeated, since every list in the showcase needs one.
+ */
+.empty-state {
+  margin: 0;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+}

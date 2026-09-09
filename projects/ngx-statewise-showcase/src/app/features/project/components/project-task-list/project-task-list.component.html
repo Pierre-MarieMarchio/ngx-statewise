@@ -1,0 +1,53 @@
+<div class="project-task-list-container">
+  @if (!projectManager.projects()?.length) {
+    <p class="empty-state">No project to group the tasks by.</p>
+  } @else {
+    <mat-accordion displayMode="flat" multi>
+      @for (project of projectManager.projects(); track project.id) {
+        <mat-expansion-panel
+          togglePosition="before"
+          class="project-task-list-expansion-panel"
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title [class]="'tag-' + project.color">
+              {{ project.title }}</mat-panel-title
+            >
+          </mat-expansion-panel-header>
+
+          @if (!getFilteredTasks(project.id).length) {
+            <p class="empty-state">No task in this project.</p>
+          } @else {
+            <table mat-table [dataSource]="getFilteredTasks(project.id)">
+              @for (column of columns(); track column) {
+                <ng-container [matColumnDef]="column.columnDef">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    [style.width]="column.maxWidth"
+                  >
+                    {{ column.header }}
+                  </th>
+                  <td
+                    mat-cell
+                    *matCellDef="let row"
+                    [style.width]="column.maxWidth"
+                  >
+                    {{ column.cell(row) }}
+                  </td>
+                </ng-container>
+              }
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+              <tr
+                mat-row
+                class="clickable-row"
+                (click)="selectTask(item)"
+                *matRowDef="let item; columns: displayedColumns()"
+              ></tr>
+            </table>
+          }
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  }
+</div>

@@ -1,5 +1,5 @@
-import type { CalloutLabels } from '../app/guide/callout';
-import type { RenderGuideOptions } from '../app/guide/markdown';
+import type { CalloutLabels } from '../app/features/guide/callout';
+import type { RenderGuideOptions } from '../app/features/guide/markdown';
 
 export const TEST_CALLOUT_LABELS: CalloutLabels = {
   note: 'Note',

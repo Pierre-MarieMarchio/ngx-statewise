@@ -1,0 +1,44 @@
+<mat-grid-list
+  class="kanban-headers"
+  [cols]="columns().length"
+  gutterSize="1rem"
+  rowHeight="2rem"
+>
+  @for (column of columns(); track column.id) {
+    <mat-grid-tile class="kanban-column-header">
+      <h3>{{ column.label }}</h3>
+    </mat-grid-tile>
+  }
+</mat-grid-list>
+
+<div class="kanban-body">
+  @for (column of columns(); track column.id) {
+    <div
+      class="kanban-column"
+      cdkDropList
+      role="list"
+      [attr.aria-label]="column.label + ' items'"
+      [id]="dropListId(column.id)"
+      [cdkDropListData]="column"
+      [cdkDropListConnectedTo]="dropListIds()"
+      (cdkDropListDropped)="onDrop($event)"
+    >
+      @for (item of column.items; track item.id) {
+        <app-kanban-card
+          [data]="item"
+          [cardType]="cardTypeFor()(item)"
+          role="listitem"
+          tabindex="0"
+          [attr.aria-label]="labelFor()(item)"
+          (keydown.arrowleft)="moveByKeyboard(item, column, -1)"
+          (keydown.arrowright)="moveByKeyboard(item, column, 1)"
+        >
+          <ng-container
+            [ngTemplateOutlet]="cardBody()"
+            [ngTemplateOutletContext]="{ $implicit: item }"
+          />
+        </app-kanban-card>
+      }
+    </div>
+  }
+</div>

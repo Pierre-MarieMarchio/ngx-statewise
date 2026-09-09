@@ -12,8 +12,8 @@ import {
 } from '@angular/router';
 import { provideStatewise } from 'ngx-statewise';
 import { routes } from './app.routes';
-import { FlowDemoEffect, flowDemoUpdater } from './flow-demo';
-import { DocsUiEffect, DocsUiManager, docsUiUpdater } from './ui-state';
+import { FlowDemoEffect, flowDemoUpdater } from './features/flow-demo';
+import { DocsUiEffect, DocsUiManager, docsUiUpdater } from './core/ui-state';
 
 /**
  * No `provideZoneChangeDetection` and no `zone.js` polyfill: the application is

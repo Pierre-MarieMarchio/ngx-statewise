@@ -7,19 +7,20 @@ import {
   logoutActions,
 } from './auth.action';
 import { authUpdater } from './auth.updater';
-import { IAuthManager } from '@shared/app-common/tokens';
 import { LoginSubmit } from '../../models';
+import { IAuthSession } from '@app/features/common';
 
 @Injectable({
   providedIn: 'root',
 })
-export class AuthManager implements IAuthManager {
+export class AuthManager implements IAuthSession {
   private readonly authStates = inject(AuthState);
   private readonly statewise = injectStatewise(authUpdater);
 
   public readonly user = this.authStates.user.asReadonly();
   public readonly isLoggedIn = this.authStates.isLoggedIn.asReadonly();
   public readonly isLoading = this.authStates.isLoading.asReadonly();
+  public readonly isError = this.authStates.isError.asReadonly();
 
   /** Derived rather than stored: the role lives in the user, nowhere else. */
   public readonly isAdmin = computed(() => this.user()?.role === 'admin');

@@ -1,10 +1,9 @@
 import { provideRouter } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
-import { AUTH_MANAGER } from '@shared/app-common/tokens';
 import { fakeAuthManager } from '@testing/fake-managers';
 import { AppComponent } from './app.component';
-import { ThemeService } from './shared/reusable/dark-mode/theme.service';
-import { Theme } from './shared/reusable/dark-mode/theme.enum';
+import { AuthManager } from './features/auth/states/auth/auth.manager';
+import { Theme, ThemeService } from './shared/ui/theme-toggle';
 
 describe('AppComponent', () => {
   let previousBodyClass: string;
@@ -22,7 +21,7 @@ describe('AppComponent', () => {
       imports: [AppComponent],
       providers: [
         provideRouter([]),
-        { provide: AUTH_MANAGER, useValue: fakeAuthManager() },
+        { provide: AuthManager, useValue: fakeAuthManager() },
       ],
     }).compileComponents();
 
@@ -35,7 +34,7 @@ describe('AppComponent', () => {
     const fixture = await mount();
     const host = fixture.nativeElement as HTMLElement;
 
-    expect(host.querySelector('app-navigation')).not.toBeNull();
+    expect(host.querySelector('app-nav-shell')).not.toBeNull();
     expect(fixture.componentInstance.navigationItems.length).toBeGreaterThan(0);
   });
 

@@ -1,6 +1,8 @@
 import { InjectionToken } from '@angular/core';
 
 import {
+  createEffect,
+  createInterceptor,
   defineActionsGroup,
   defineSingleAction,
   defineUpdater,
@@ -48,6 +50,95 @@ function rejectedDispatchShapes(ref: Statewise): void {
   typedActions.cleared(1);
 }
 
+/**
+ * Never called either: `createEffect` needs an injection context, and what is
+ * under test here is what the compiler accepts, not what runs.
+ */
+function rejectedEffectShapes(): void {
+  createEffect(typedActions.assigned, (value, { abortSignal }) => {
+    const target: number = value;
+
+    return abortSignal.aborted
+      ? typedActions.cleared()
+      : typedActions.assigned(target);
+  });
+
+  createEffect(typedActions.cleared, (_none, { abortSignal }) =>
+    abortSignal.aborted ? undefined : typedActions.cleared(),
+  );
+
+  createEffect(typedActions.assigned, () => undefined, {
+    concurrency: 'latest',
+    key: (value) => String(value),
+    cancelOn: [typedActions.cleared],
+    mustAnswer: true,
+  });
+
+  // An action with no payload takes every option but the key.
+  createEffect(typedActions.cleared, () => undefined, {
+    concurrency: 'first',
+    cancelOn: typedActions.assigned,
+    mustAnswer: true,
+  });
+
+  createEffect(typedActions.assigned, () => undefined, {
+    // @ts-expect-error the promise to answer is a flag, not a predicate
+    mustAnswer: () => true,
+  });
+
+  createEffect(typedActions.assigned, () => undefined, {
+    // @ts-expect-error only the three declared policies exist
+    concurrency: 'switchMap',
+  });
+
+  createEffect(typedActions.assigned, () => undefined, {
+    // @ts-expect-error a concurrency key is a string
+    key: (value) => value,
+  });
+
+  createEffect(typedActions.cleared, () => undefined, {
+    // @ts-expect-error an action with no payload has nothing to key runs by
+    key: () => 'only',
+  });
+
+  // @ts-expect-error a handler cannot require a payload its action never carries
+  createEffect(typedActions.cleared, (_value: number) => undefined);
+}
+
+/**
+ * Never called either, for the same reason: `createInterceptor` needs an
+ * injection context, and what is under test is what the compiler accepts.
+ */
+function rejectedInterceptorShapes(): void {
+  createInterceptor(typedActions.assigned, (value) => {
+    const target: number = value;
+
+    return target > 0;
+  });
+
+  // Returning nothing is a grant, so an observing interceptor compiles.
+  createInterceptor(typedActions.cleared, () => undefined);
+  createInterceptor(typedActions.assigned, () => {
+    // Deliberately silent: this interceptor only looks at what passes.
+  });
+
+  // @ts-expect-error a handler cannot require a payload its action never carries
+  createInterceptor(typedActions.cleared, (_value: number) => undefined);
+
+  // @ts-expect-error a verdict is synchronous: it cannot arrive in a Promise
+  createInterceptor(typedActions.assigned, () => Promise.resolve(true));
+
+  // @ts-expect-error a numeric payload cannot become a string
+  createInterceptor(typedActions.assigned, (_value: string) => true);
+
+  createInterceptor(
+    typedActions.assigned,
+    () => true,
+    // @ts-expect-error an interceptor has no run to govern, so it takes no options
+    { concurrency: 'latest' },
+  );
+}
+
 describe('public API types', () => {
   it('preserves action payload and updater handler types', () => {
     const updater = defineUpdater(TYPED_STATE, (on) => {
@@ -71,5 +162,13 @@ describe('public API types', () => {
 
   it('rejects malformed actions at the Statewise boundary', () => {
     expect(rejectedDispatchShapes).toBeInstanceOf(Function);
+  });
+
+  it('rejects malformed effect declarations', () => {
+    expect(rejectedEffectShapes).toBeInstanceOf(Function);
+  });
+
+  it('rejects malformed interceptor declarations', () => {
+    expect(rejectedInterceptorShapes).toBeInstanceOf(Function);
   });
 });

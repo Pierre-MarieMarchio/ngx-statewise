@@ -39,13 +39,4 @@ export class AuthRepositoryService {
     );
     return response;
   }
-
-  public test(): Observable<HttpResponse<null>> {
-    const response = this.http.get<null>(
-      `${this.API_BASE_URL}/Auth/test-cookie`,
-
-      { observe: 'response', withCredentials: true },
-    );
-    return response;
-  }
 }

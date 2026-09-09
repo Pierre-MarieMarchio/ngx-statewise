@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import {
   authenticateActions,
@@ -7,29 +7,37 @@ import {
 } from './auth.action';
 import { Router } from '@angular/router';
 import { createEffect } from 'ngx-statewise';
-import { TokenService } from '@app/core/services/token.service';
 import {
   AuthRepositoryService,
   AuthTokenService,
   AuthTokenHelperService,
   AuthNotificationService,
 } from '../../services';
-import { TASK_MANAGER } from '@shared/app-common/tokens/task-manager/task-manager.token';
-import { PROJECT_MANAGER } from '@shared/app-common/tokens';
+import { PROJECT_RELOAD, TASK_RELOAD } from '@app/features/common';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthEffect {
-  private readonly projectManager = inject(PROJECT_MANAGER);
-  private readonly taskManager = inject(TASK_MANAGER);
+  private readonly projectManager = inject(PROJECT_RELOAD);
+  private readonly taskManager = inject(TASK_RELOAD);
   private readonly authRepository = inject(AuthRepositoryService);
   private readonly authToken = inject(AuthTokenService);
   private readonly authTokenHelper = inject(AuthTokenHelperService);
   private readonly router = inject(Router);
   private readonly notification = inject(AuthNotificationService);
-  private readonly tokenFactory = inject(TokenService);
+  private readonly errorHandler = inject(ErrorHandler);
 
+  /**
+   * One session at a time, and it is the newest attempt that wins.
+   *
+   * Two paths reach this effect: the login form, where a second submit is a
+   * double click and used to produce two navigations and two reloads, and the
+   * dashboard user picker, where a second click is a deliberate switch to
+   * another user. `'first'` would fix the double click by ignoring the switch,
+   * which is the wrong answer for the picker — so the earlier attempt is
+   * abandoned instead, and only the last one reaches the state.
+   */
   public readonly loginRequestEffect = createEffect(
     loginActions.request,
     async (payload) => {
@@ -41,13 +49,13 @@ export class AuthEffect {
         }
 
         this.authToken.setAccessToken(res.body.accessToken);
-        this.authToken.setRefreshToken(this.tokenFactory.generateFakeJWT());
 
         return loginActions.success(res.body);
       } catch {
         return loginActions.failure();
       }
     },
+    { concurrency: 'latest', mustAnswer: true },
   );
 
   public readonly loginSuccessEffect = createEffect(
@@ -70,11 +78,6 @@ export class AuthEffect {
     authenticateActions.request,
     async () => {
       const accessToken = this.authToken.getAccessToken();
-      const refreshToken = this.authToken.getRefreshToken();
-
-      if (!refreshToken) {
-        return authenticateActions.failure();
-      }
 
       if (accessToken) {
         const decoded = this.authTokenHelper.decode(accessToken);
@@ -100,10 +103,16 @@ export class AuthEffect {
             )
           : authenticateActions.failure();
       } catch (error) {
-        console.error('Authentication error:', error);
+        this.errorHandler.handleError(error);
         return authenticateActions.failure();
       }
     },
+    /**
+     * One renewal at a time. Now that the access-token interceptor is reached,
+     * several requests failing with 401 together would each ask for a refresh,
+     * and each successful one reloads the tasks and the projects.
+     */
+    { concurrency: 'first', mustAnswer: true },
   );
 
   public readonly authenticateFailureEffect = createEffect(
@@ -113,8 +122,10 @@ export class AuthEffect {
         this.notification.AuthenticateFailure();
       }
 
-      const refreshToken = this.authToken.getRefreshToken();
-      if (!refreshToken) {
+      // An access token we could not renew is a session that is over, so it
+      // is cleared properly. Without one this is a visitor who never had a
+      // session, and there is nothing to undo.
+      if (!this.authToken.getAccessToken()) {
         return;
       }
 
@@ -143,17 +154,17 @@ export class AuthEffect {
 
         return logoutActions.success();
       } catch (error) {
-        console.error('Authentication error:', error);
+        this.errorHandler.handleError(error);
         return logoutActions.failure();
       }
     },
+    { mustAnswer: true },
   );
 
   public readonly logoutSuccessEffect = createEffect(
     logoutActions.success,
     () => {
       this.authToken.clearAccessToken();
-      this.authToken.clearRefreshToken();
 
       this.router.navigate(['/']);
     },

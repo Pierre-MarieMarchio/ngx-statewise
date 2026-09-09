@@ -11,24 +11,13 @@ export class AuthTokenService extends LocalStorageService {
     this.setItem(environment.ACCESS_TOKEN_KEY, value);
   }
 
-  public getAccessToken(): string {
-    return this.getItem(environment.ACCESS_TOKEN_KEY) as string;
+  /** `null` when there is none, which is what a cold start looks like. */
+  public getAccessToken(): string | null {
+    return (this.getItem(environment.ACCESS_TOKEN_KEY) as string) ?? null;
   }
 
   public clearAccessToken(): void {
     this.removeItem(environment.ACCESS_TOKEN_KEY);
-  }
-
-  public setRefreshToken(value: string): void {
-    this.setItem(environment.REFRESH_TOKEN_KEY, value);
-  }
-
-  public getRefreshToken(): string {
-    return this.getItem(environment.REFRESH_TOKEN_KEY) as string;
-  }
-
-  public clearRefreshToken(): void {
-    this.removeItem(environment.REFRESH_TOKEN_KEY);
   }
 
   public setNewAccessTokenFromResponse(

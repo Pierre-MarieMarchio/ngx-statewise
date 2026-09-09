@@ -1,0 +1,11 @@
+<mat-button-toggle-group
+  name="UserSelection"
+  aria-label="Signed-in user"
+  [disabled]="isSwitching()"
+  [value]="currentUserName()"
+  (change)="onSelectionChange($event)"
+>
+  <mat-button-toggle value="admin">Admin</mat-button-toggle>
+  <mat-button-toggle value="user1">User 1</mat-button-toggle>
+  <mat-button-toggle value="user2">User 2</mat-button-toggle>
+</mat-button-toggle-group>
