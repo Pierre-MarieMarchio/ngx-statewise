@@ -42,6 +42,7 @@ export const taskUpdater = defineUpdater(TaskState, (on) => {
     state.pendingWrites.set(new Map());
     state.isLoading.set(false);
     state.isError.set(false);
+    state.saveError.set(null);
     state.isCreating.set(false);
     state.createError.set(null);
   });
@@ -66,7 +67,7 @@ export const taskUpdater = defineUpdater(TaskState, (on) => {
    * should restore.
    */
   on(updateTaskActions.request, (state, task) => {
-    state.isError.set(false);
+    state.saveError.set(null);
 
     const replaced = state.tasks().find((existing) => existing.id === task.id);
 
@@ -122,8 +123,8 @@ export const taskUpdater = defineUpdater(TaskState, (on) => {
     state.createError.set(reason);
   });
 
-  on(updateTaskActions.failure, (state, taskId) => {
-    state.isError.set(true);
+  on(updateTaskActions.failure, (state, { taskId, reason }) => {
+    state.saveError.set(reason);
 
     const replaced = state.pendingWrites().get(taskId);
     state.pendingWrites.update(without(taskId));

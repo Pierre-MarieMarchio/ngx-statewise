@@ -12,6 +12,16 @@
       [retryable]="true"
       (retried)="taskManager.getAll()"
     />
+    <!--
+      A refused write, in the server's own words. Not retryable: what to do
+      about "assign someone before marking it done" is to assign someone, not
+      to send the same write again.
+    -->
+    <app-data-state
+      label="save"
+      [error]="taskManager.saveError() !== null"
+      [errorMessage]="taskManager.saveError() ?? ''"
+    />
     <div class="dashboard-container">
       <app-overview-task-list (taskSelected)="selectTask($event)" />
       <app-overview-kanban />

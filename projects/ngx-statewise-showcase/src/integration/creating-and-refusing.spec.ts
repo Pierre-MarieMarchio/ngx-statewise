@@ -152,8 +152,12 @@ describe('a server that refuses', () => {
       const after = tasks.tasks().find((task) => task.id === unassigned.id);
 
       expect(after?.status).toBe(before);
-      expect(tasks.isError()).toBe(true);
       expect(tasks.isSaving()).toBe(false);
+      // The server's own sentence, not a banner about a list that loaded fine.
+      expect(tasks.saveError()).toBe(
+        'assign someone to this task before marking it done',
+      );
+      expect(tasks.isError()).toBe(false);
     });
 
     it('accepts the same move once somebody is assigned', async () => {

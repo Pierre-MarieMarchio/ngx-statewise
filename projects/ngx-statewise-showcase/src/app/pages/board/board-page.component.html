@@ -39,6 +39,17 @@
       [retryable]="true"
       (retried)="projectManager.getAll()"
     />
+    <!--
+      A refused write, in the server's own words. Not retryable: what to do
+      about "assign someone before marking it done" is to assign someone, not
+      to send the same write again.
+    -->
+    <app-data-state
+      label="save"
+      [error]="taskManager.saveError() !== null"
+      [errorMessage]="taskManager.saveError() ?? ''"
+    />
+
     <app-task-search
       class="board-search"
       [searching]="taskManager.isSearching()"

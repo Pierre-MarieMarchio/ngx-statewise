@@ -32,6 +32,9 @@ export class TaskManager implements ITaskReload {
     () => this.taskStates.pendingWrites().size > 0,
   );
 
+  /** Why the last write was refused, in the server's own words. */
+  public readonly saveError = this.taskStates.saveError.asReadonly();
+
   public readonly isCreating = this.taskStates.isCreating.asReadonly();
   public readonly createError = this.taskStates.createError.asReadonly();
 

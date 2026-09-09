@@ -68,10 +68,18 @@ export class TaskEffect {
           );
           return updateTaskActions.success(response);
         }
-        return updateTaskActions.failure(task.id);
+
+        return updateTaskActions.failure({
+          taskId: task.id,
+          reason: 'No session, so nothing to write to.',
+        });
       } catch (error) {
         this.errorHandler.handleError(error);
-        return updateTaskActions.failure(task.id);
+
+        return updateTaskActions.failure({
+          taskId: task.id,
+          reason: refusalReason(error),
+        });
       }
     },
     {

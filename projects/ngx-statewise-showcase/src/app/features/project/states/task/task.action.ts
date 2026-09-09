@@ -21,12 +21,17 @@ export const updateTaskActions = defineActionsGroup({
     request: payload<Task>(),
     success: payload<Task>(),
     /**
-     * The id of the task whose write failed. A failure has to say which card
-     * it concerns: a payload-less one left the updater with a single flag for
-     * every write in flight, and reverting on it took down the cards the
-     * server had never refused.
+     * Which card the write was for, and what the server said about it.
+     *
+     * The id, because a failure has to say which card it concerns: a
+     * payload-less one left the updater with a single flag for every write in
+     * flight, and reverting on it took down the cards the server had never
+     * refused. The reason, because "assign someone to this task before
+     * marking it done" is a sentence only the server can write, and a banner
+     * reading "the tasks could not be loaded" was answering a question
+     * nobody had asked.
      */
-    failure: payload<string>(),
+    failure: payload<{ readonly taskId: string; readonly reason: string }>(),
   },
 });
 

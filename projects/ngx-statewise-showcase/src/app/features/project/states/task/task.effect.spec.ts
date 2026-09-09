@@ -185,7 +185,9 @@ describe('TaskEffect', () => {
       );
 
       expect(statusOf('a')).toBe('todo');
-      expect(state.isError()).toBe(true);
+      // A plain `Error` carries no sentence, so the fallback travels.
+      expect(state.saveError()).toBe('The server refused the request.');
+      expect(state.isError()).toBe(false);
       expect(reported).toEqual([failure]);
     });
 

@@ -190,6 +190,7 @@ export interface FakeTaskManager extends ITaskReload {
     typeof computed<Record<TaskStatus, number>>
   >;
   readonly updates: Task[];
+  saveError: WritableSignal<string | null>;
   isCreating: WritableSignal<boolean>;
   createError: WritableSignal<string | null>;
   readonly created: TaskDraft[];
@@ -223,6 +224,7 @@ export const fakeTaskManager = (
     isError: signal(false),
     isLoading: signal(false),
     isSaving: signal(false),
+    saveError: signal<string | null>(null),
     taskCount: computed(() => tasksSignal()?.length ?? 0),
     countByStatus: computed(() =>
       STATUSES.reduce(
