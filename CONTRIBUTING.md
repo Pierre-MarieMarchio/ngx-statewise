@@ -115,6 +115,32 @@ The showcase is tested but deliberately outside the gate.
 > already orders this correctly. Never rebuild the library while `npm start` is
 > serving — restart the serve instead.
 
+### What CI adds that `npm run check` cannot
+
+A pull request also faces **SonarCloud**, and nothing local reports it. The scan
+runs in [`ci.yml`](.github/workflows/ci.yml) straight after `npm run check`, on
+the coverage that command has just written —
+[`sonar-project.properties`](sonar-project.properties) says what it reads and
+what it leaves out.
+
+The condition that catches people is **duplication: more than 3% of the new
+lines fails the gate**. Copying one template block into four sibling components
+is enough — 19.6% once, on four copies of a single `matColumnDef`. Specs are
+indexed as tests rather than as sources, so a fixture arranged the same way in
+four files does not count against it; production markup and code do.
+
+What is left on an open pull request, named file by file:
+
+```bash
+curl -s "https://sonarcloud.io/api/measures/component_tree?component=Pierre-MarieMarchio_ngx-statewise&pullRequest=<n>&metricKeys=new_duplicated_lines_density,new_lines&ps=200"
+```
+
+A run with no `SONAR_TOKEN` skips the scan rather than failing it, because that
+is what a pull request from a fork looks like and the contributor cannot fix it.
+The consequence is worth knowing: the gate is a required check, so a fork's
+pull request cannot go green on its own. A maintainer has to push the branch to
+this repository and open the pull request from there.
+
 ## Adding a page to the guide
 
 The guide is at
@@ -216,11 +242,24 @@ Merging into `next` or `main` runs `.github/workflows/release.yml`, which:
 
 1. runs `npm run check` and stops there if it fails — nothing is tagged or published;
 2. refuses to continue if the branch moved since the run started;
-3. computes the version, writes `projects/ngx-statewise/CHANGELOG.md`, commits and tags;
-4. rebuilds the library so the published bundle carries the new version;
-5. publishes to npm with [provenance](https://docs.npmjs.com/generating-provenance-statements), under the `beta` or `latest` dist-tag;
-6. creates the GitHub release;
-7. on `main`, opens the back-merge pull requests.
+3. cuts a `release/…` branch. A required status check applies to a direct push
+   as much as to a merge, and the workflow's token has write access rather than
+   admin, so the version commit cannot reach `main` or `next` any other way;
+4. computes the version, writes `projects/ngx-statewise/CHANGELOG.md`, commits and tags;
+5. rebuilds the library so the published bundle carries the new version, and
+   writes the same version into the site's `LIBRARY_VERSION` so both travel in
+   the release commit — without that step `verify:claims` fails on the very
+   next run, on `main` and on the back-merge pull request;
+6. publishes to npm with [provenance](https://docs.npmjs.com/generating-provenance-statements), under the `beta` or `latest` dist-tag;
+7. creates the GitHub release;
+8. opens a pull request for the version commit and merges it once the checks
+   that branch requires have passed. The tag and the package exist by then, so
+   a pull request that will not merge is a conflict to land by hand rather than
+   a release to redo — and the step says so and fails, instead of leaving the
+   run green with the commit still floating;
+9. on `main`, deploys the documentation site — after the publish, never before,
+   so the site cannot state a version npm does not have;
+10. on `main`, opens the back-merge pull requests.
 
 ### Why `next` exists
 
@@ -250,25 +289,82 @@ gh api -X PATCH repos/:owner/:repo \
   -F allow_squash_merge=false -F allow_rebase_merge=false \
   -F allow_merge_commit=true -F delete_branch_on_merge=true
 
-# A pull request and a green CI run for main, next and dev.
-for branch in main next dev; do
+# A green CI run and a passing quality gate on main, next and dev. `main`
+# matters most of the three: it is the branch that publishes.
+#
+# `strict` — "the branch must be up to date with the base" — is true only on
+# main, where the two pull requests that arrive (next, and the release
+# workflow's own) are up to date by construction. It has to be false on next
+# and dev, because the back-merge pull request runs the other way: its head is
+# main, and every commit that lands on dev meanwhile leaves it BEHIND. The
+# button GitHub then offers would merge dev into main, which protection
+# refuses — so the back-merge would sit there, and the branches would drift
+# apart exactly as this workflow exists to prevent.
+for branch in next dev; do
   gh api -X PUT "repos/:owner/:repo/branches/$branch/protection" \
     --input - <<JSON
   {
-    "required_status_checks": { "strict": true, "contexts": ["Validate workspace"] },
+    "required_status_checks": {
+      "strict": false,
+      "contexts": ["Validate workspace", "SonarCloud Code Analysis"]
+    },
     "enforce_admins": false,
     "required_pull_request_reviews": null,
     "restrictions": null,
     "allow_force_pushes": false,
-    "allow_deletions": false
+    "allow_deletions": false,
+    "required_conversation_resolution": true
   }
 JSON
 done
+
+gh api -X PUT "repos/:owner/:repo/branches/main/protection" --input - <<JSON
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ["Validate workspace", "SonarCloud Code Analysis"]
+  },
+  "enforce_admins": false,
+  "required_pull_request_reviews": null,
+  "restrictions": null,
+  "allow_force_pushes": false,
+  "allow_deletions": false,
+  "required_conversation_resolution": true
+}
+JSON
 ```
 
 Without the first command, a squash merge is one click away and it breaks
 versioning without any error. Without the second, a direct push to `main`
 publishes to npm.
+
+The second command is also why the release workflow builds its version commit
+on a `release/…` branch: those checks bind the release automation exactly as
+they bind you, and GitHub's own Actions app cannot be given a bypass on a
+personal repository — that is an organization-only setting. Nothing is exempt,
+which is the point.
+
+### The four things `gh` cannot set
+
+Each is a switch somewhere else, and each one silently changes what a green
+run means.
+
+1. **`SONAR_TOKEN`, as an Actions secret.** Generated under _My Account →
+   Security_ on SonarCloud. `gh secret set SONAR_TOKEN`.
+2. **`SONAR_TOKEN` again, as a Dependabot secret.** Dependabot's runs read a
+   separate store, and a pull request of its own that cannot reach SonarCloud
+   never gets the check that `dev` requires — so it sits blocked forever.
+   `gh secret set SONAR_TOKEN --app dependabot`.
+3. **SonarCloud's Automatic Analysis, off.** _Administration → Analysis
+   Method_ on the project. It and the CI scanner are exclusive: while it is
+   on, the scan in `ci.yml` is refused. It is also what makes the coverage
+   worth having — Automatic Analysis reads the repository without the build,
+   so it could never see an lcov file and judged the library's 100% coverage
+   as no coverage at all.
+4. **Pages, served from GitHub Actions.** `deploy-docs.yml` turns this on by
+   itself the first time it runs, through `configure-pages` with
+   `enablement: true`. If that ever fails, it is _Settings → Pages → Source:
+   GitHub Actions_.
 
 ## Reporting
 
