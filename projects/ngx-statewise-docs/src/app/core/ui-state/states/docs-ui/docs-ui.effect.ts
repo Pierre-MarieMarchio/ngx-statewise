@@ -2,8 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { createEffect } from 'ngx-statewise';
 import { themeActions } from './docs-ui.action';
 import { DocsUiState } from './docs-ui.state';
-import { resolveTheme } from '../../resolve-theme';
-import { ThemeEnvironment } from '../../theme-environment.service';
+import { resolveTheme } from '../../utils/theme.utils';
+import { ThemeEnvironment } from '../../services/theme-environment.service';
 
 /**
  * Effects run after the updater, so both of these read the choice it has just
