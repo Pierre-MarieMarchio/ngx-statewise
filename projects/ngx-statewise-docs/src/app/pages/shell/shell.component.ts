@@ -31,7 +31,7 @@ import {
   THEME_CHOICES,
   type ThemeChoice,
 } from '../../core/ui-state';
-import { SearchDialogComponent } from './search/search-dialog.component';
+import { SearchDialogComponent } from './components/search-dialog/search-dialog.component';
 import { IconComponent } from '../../shared/ui/icon/icon.component';
 
 /** Marks the head elements this component owns, so it can replace its own. */
