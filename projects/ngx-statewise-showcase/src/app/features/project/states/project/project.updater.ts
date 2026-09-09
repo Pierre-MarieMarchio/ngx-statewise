@@ -4,13 +4,14 @@ import { getAllProjectsActions, projectReset } from './project.action';
 
 export const projectUpdater = defineUpdater(ProjectState, (on) => {
   on(projectReset, (state) => {
-    state.projects.set(null);
+    state.projects.set([]);
     state.isLoading.set(false);
     state.isError.set(false);
   });
 
   on(getAllProjectsActions.request, (state) => {
     state.isLoading.set(true);
+    state.isError.set(false);
   });
 
   on(getAllProjectsActions.success, (state, projects) => {

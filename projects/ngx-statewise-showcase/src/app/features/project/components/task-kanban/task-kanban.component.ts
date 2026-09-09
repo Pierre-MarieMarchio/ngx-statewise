@@ -26,7 +26,7 @@ import { ProjectManager } from '@app/features/project/states/project/project.man
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskKanbanComponent {
-  public tasks = input<Task[]>();
+  public tasks = input.required<Task[]>();
   public taskChanged = output<Task>();
 
   public readonly projectManager = inject(ProjectManager);
@@ -40,7 +40,7 @@ export class TaskKanbanComponent {
    * change. Moving a card between columns goes through the manager instead,
    * and the updater applies it optimistically.
    */
-  private readonly orderedTasks = linkedSignal(() => this.tasks() ?? []);
+  private readonly orderedTasks = linkedSignal(() => this.tasks());
 
   public readonly cardTypeFor = (task: Task): string => task.priority;
 

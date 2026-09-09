@@ -20,7 +20,7 @@ import { AUTH_SESSION } from '@app/features/common';
 })
 export class AllTaskListComponent {
   private readonly authManager = inject(AUTH_SESSION);
-  public tasks = input<Task[]>();
+  public tasks = input.required<Task[]>();
   public taskSelected = output<Task>();
 
   public readonly columns = computed(() =>

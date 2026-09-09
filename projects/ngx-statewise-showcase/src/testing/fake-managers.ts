@@ -152,7 +152,7 @@ export const fakeAuthManager = (
 };
 
 export interface FakeTaskManager extends ITaskReload {
-  tasks: WritableSignal<Task[] | null>;
+  tasks: WritableSignal<Task[]>;
   isError: WritableSignal<boolean>;
   isLoading: WritableSignal<boolean>;
   isSaving: WritableSignal<boolean>;
@@ -166,7 +166,7 @@ export interface FakeTaskManager extends ITaskReload {
 }
 
 export const fakeTaskManager = (
-  tasks: Task[] | null = [sampleTask()],
+  tasks: Task[] = [sampleTask()],
 ): FakeTaskManager => {
   const updates: Task[] = [];
 
@@ -182,9 +182,8 @@ export const fakeTaskManager = (
       STATUSES.reduce(
         (counts, status) => ({
           ...counts,
-          [status]: (tasksSignal() ?? []).filter(
-            (task) => task.status === status,
-          ).length,
+          [status]: tasksSignal().filter((task) => task.status === status)
+            .length,
         }),
         {} as Record<TaskStatus, number>,
       ),
@@ -201,23 +200,28 @@ export const fakeTaskManager = (
 };
 
 export interface FakeProjectManager extends IProjectReload {
-  projects: WritableSignal<Project[] | null>;
+  projects: WritableSignal<Project[]>;
   isError: WritableSignal<boolean>;
   isLoading: WritableSignal<boolean>;
   readonly projectCount: ReturnType<typeof computed<number>>;
+  readonly calls: string[];
 }
 
 export const fakeProjectManager = (
-  projects: Project[] | null = [sampleProject()],
+  projects: Project[] = [sampleProject()],
 ): FakeProjectManager => {
   const projectsSignal = signal(projects);
+  const calls: string[] = [];
 
   return {
     projects: projectsSignal,
     isError: signal(false),
     isLoading: signal(false),
-    projectCount: computed(() => projectsSignal()?.length ?? 0),
-    getAll: () => undefined,
+    projectCount: computed(() => projectsSignal().length),
+    calls,
+    getAll: () => {
+      calls.push('getAll');
+    },
     settled: () => Promise.resolve(),
     reset: () => Promise.resolve(),
   };

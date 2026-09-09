@@ -1,11 +1,11 @@
 <mat-card class="overview-task-list-container">
   <div><h2 class="overview-task-list-title">ALL TASK</h2></div>
 
-  @if (!tasks()?.length) {
+  @if (!tasks().length) {
     <p class="empty-state">No task to show.</p>
   } @else {
     <div class="overview-task-list-scroll">
-      <table mat-table [dataSource]="tasks() ?? []">
+      <table mat-table [dataSource]="tasks()">
         @for (column of columns(); track column) {
           <ng-container [matColumnDef]="column.columnDef">
             <th mat-header-cell *matHeaderCellDef>

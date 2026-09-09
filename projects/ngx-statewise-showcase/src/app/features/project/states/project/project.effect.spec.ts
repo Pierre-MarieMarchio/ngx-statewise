@@ -96,7 +96,7 @@ describe('ProjectEffect', () => {
     await statewise.dispatchAsync(getAllProjectsActions.request());
 
     expect(projectState.isError()).toBe(true);
-    expect(projectState.projects()).toBeNull();
+    expect(projectState.projects()).toEqual([]);
   });
 
   /**
@@ -115,7 +115,7 @@ describe('ProjectEffect', () => {
 
     // Reported, not repaired: settling the state stays the application's job,
     // through a failure action of its own.
-    expect(projectState.projects()).toBeNull();
+    expect(projectState.projects()).toEqual([]);
     expect(projectState.isLoading()).toBe(true);
   });
 

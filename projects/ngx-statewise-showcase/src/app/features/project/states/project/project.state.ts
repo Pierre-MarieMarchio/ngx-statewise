@@ -5,7 +5,7 @@ import { Project } from '../../models';
   providedIn: 'root',
 })
 export class ProjectState {
-  public projects = signal<Project[] | null>(null);
+  public projects = signal<Project[]>([]);
   public isLoading = signal(false);
   public isError = signal(false);
 }

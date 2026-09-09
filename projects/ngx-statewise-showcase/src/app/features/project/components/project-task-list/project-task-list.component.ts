@@ -24,7 +24,7 @@ import { ProjectManager } from '@app/features/project/states/project/project.man
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectTaskListComponent {
-  public tasks = input<Task[]>();
+  public tasks = input.required<Task[]>();
   public taskSelected = output<Task>();
 
   public projectManager = inject(ProjectManager);

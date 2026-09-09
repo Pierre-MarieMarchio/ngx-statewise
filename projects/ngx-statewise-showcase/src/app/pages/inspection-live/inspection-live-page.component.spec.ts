@@ -116,7 +116,7 @@ describe('InspectionLivePageComponent', () => {
   it('follows the project count', () => {
     expect(reading('projects', 'projectCount')).toBe('1');
 
-    projectManager.projects.set(null);
+    projectManager.projects.set([]);
     fixture.detectChanges();
 
     expect(reading('projects', 'projectCount')).toBe('0');

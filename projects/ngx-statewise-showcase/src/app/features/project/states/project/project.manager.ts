@@ -16,7 +16,7 @@ export class ProjectManager implements IProjectReload {
   public readonly isError = this.projectStates.isError.asReadonly();
   public readonly isLoading = this.projectStates.isLoading.asReadonly();
 
-  public readonly projectCount = computed(() => this.projects()?.length ?? 0);
+  public readonly projectCount = computed(() => this.projects().length);
 
   /**
    * Resolves once every effect this manager started has settled, whichever

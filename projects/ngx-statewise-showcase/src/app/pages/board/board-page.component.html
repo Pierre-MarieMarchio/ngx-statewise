@@ -9,6 +9,13 @@
       [retryable]="true"
       (retried)="taskManager.getAll()"
     />
+    <app-data-state
+      label="projects"
+      [loading]="projectManager.isLoading()"
+      [error]="projectManager.isError()"
+      [retryable]="true"
+      (retried)="projectManager.getAll()"
+    />
     <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
       <mat-tab>
         <ng-template mat-tab-label>
@@ -16,7 +23,7 @@
           Kanban
         </ng-template>
         <app-task-kanban
-          [tasks]="taskManager.tasks() ?? []"
+          [tasks]="taskManager.tasks()"
           (taskChanged)="onTaskChanged($event)"
       /></mat-tab>
       <mat-tab>
@@ -26,7 +33,7 @@
         </ng-template>
         <app-all-task-list
           (taskSelected)="selectTask($event)"
-          [tasks]="taskManager.tasks() ?? []"
+          [tasks]="taskManager.tasks()"
         />
       </mat-tab>
       <mat-tab>
@@ -36,7 +43,7 @@
         </ng-template>
         <app-personal-task-list
           (taskSelected)="selectTask($event)"
-          [allTasks]="taskManager.tasks() ?? []"
+          [allTasks]="taskManager.tasks()"
         />
       </mat-tab>
       <mat-tab>
@@ -46,7 +53,7 @@
         </ng-template>
         <app-project-task-list
           (taskSelected)="selectTask($event)"
-          [tasks]="taskManager.tasks() ?? []"
+          [tasks]="taskManager.tasks()"
         />
       </mat-tab>
     </mat-tab-group>
