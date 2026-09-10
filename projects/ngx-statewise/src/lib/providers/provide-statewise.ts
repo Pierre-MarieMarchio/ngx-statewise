@@ -68,10 +68,16 @@ export interface StatewiseConfig {
    */
   readonly interceptors?: readonly Type<unknown>[];
   /**
-   * Updaters reachable from whichever manager dispatches, `injectStatewise()`
-   * with no updater at all included. They answer the action types no manager
-   * claims: a scoped updater always wins over a global one, so a type already
-   * owned by a manager never reaches these.
+   * Updaters answering the action types no manager claims.
+   *
+   * A fallback rather than an addition. The engine reads a scoped updater
+   * first and only comes here when none matched, so an updater listed here
+   * never fires for a type a manager already owns. Give a global updater
+   * action types of its own; one sharing a type with a manager's updater
+   * silently never runs.
+   *
+   * Reachable from whichever manager dispatches, `injectStatewise()` with no
+   * updater at all included.
    */
   readonly updaters?: readonly Updater<unknown>[];
   /** Action history, disabled unless configured. */

@@ -30,8 +30,10 @@ workspace, then navigate" is a chain of those actions rather than a tree of
 callbacks.
 
 > [!WARNING]
-> Never return the action that triggered the effect. It produces an infinite
-> cascade, and nothing stops it for you.
+> Never return the action that triggered the effect. Each run dispatches it
+> again. The cascade bound stops the loop at 50 actions and raises the path it
+> took, so what you get is an error naming the cycle rather than a dead tab.
+> The bound is a backstop. The cycle is still the bug.
 
 ## Defining an effect
 

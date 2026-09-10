@@ -75,14 +75,23 @@ on(loginActions.request, (state) => {
 });
 ```
 
-Two other mistakes the compiler catches for you:
+The payload is the other thing you cannot get wrong. An action carrying nothing
+gives the handler no second parameter, so asking for one does not compile:
 
-```typescript
-// The action carries no payload, so there is no second parameter to take.
-on(logoutAction, (state, payload) => { ... });
+```typescript avoid title="auth.updater.ts"
+on(logoutAction, (state, payload) => {
+  state.user.set(null);
+});
+```
 
-// The action carries a LoginResponse, and `session` is typed as one.
-on(loginActions.success, (state, session) => { ... });
+And where there is a payload, its type comes from the creator. `session` below
+is a `LoginResponse` because that is what `loginActions.success` carries, and
+nothing had to say so:
+
+```typescript prefer title="auth.updater.ts"
+on(loginActions.success, (state, session) => {
+  state.user.set(session.user);
+});
 ```
 
 ## Attaching updaters

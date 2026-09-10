@@ -181,8 +181,8 @@ export const DOORS: readonly Door[] = [
       'pt-BR': 'Entender o fluxo',
     },
     text: {
-      en: 'The five steps every change goes through, and the two consequences.',
-      fr: 'Les cinq étapes de chaque changement, et les deux conséquences.',
+      en: 'The order every change goes through, and the two consequences.',
+      fr: 'L’ordre que suit chaque changement, et les deux conséquences.',
       es: 'Los cinco pasos por los que pasa cada cambio, y las dos consecuencias.',
       de: 'Die fünf Schritte, die jede Änderung durchläuft, und die zwei Folgen.',
       'pt-BR':

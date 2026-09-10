@@ -29,17 +29,20 @@ apparatus than you want, this is the gap it is built for.
 
 ## The flow
 
-Five steps, always in this order.
+Always in this order.
 
 1. **An action carries the intent**, and its payload. Nothing happens until one
    is dispatched.
 2. **A manager dispatches it.** The manager is the object your components hold,
    and it dispatches within its own scope.
-3. **An updater writes the state**, synchronously. It is the only place state
+3. **Any interceptor is asked**, and may refuse the action. Most flows declare
+   none. A refusal ends the dispatch here and nothing below it runs. See
+   [Interceptors](/guide/interceptors).
+4. **An updater writes the state**, synchronously. It is the only place state
    changes, and it finishes before anything else runs.
-4. **Effects run**, on state that is already up to date: API calls, navigation,
+5. **Effects run**, on state that is already up to date: API calls, navigation,
    logging.
-5. **Effects may return further actions**, which start the same cycle again.
+6. **Effects may return further actions**, which start the same cycle again.
 
 An effect that returns an action starts a cascade. A login action updates the
 state, its effect calls the API, and the action it returns updates the state

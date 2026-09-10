@@ -167,8 +167,9 @@ its own run. What it returns is executed in the same dispatch, and awaited by
 | an `Observable` of either      | Its **first** emission only, then dropped. |
 
 > [!WARNING]
-> Never return the action that triggered the effect. It produces an infinite
-> cascade, and nothing stops it for you.
+> Never return the action that triggered the effect. Each run dispatches it
+> again, and the loop ends only when
+> [`maxCascadeDepth`](/guide/api#providestatewise) stops it.
 
 `options` governs the runs of the effect. Left out, every run goes on side by
 side, which is what the engine has always done.
