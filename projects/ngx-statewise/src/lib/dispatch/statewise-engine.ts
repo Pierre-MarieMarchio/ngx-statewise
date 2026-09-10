@@ -344,12 +344,19 @@ export class StatewiseEngine {
     scope: DispatchScope,
     cascade: readonly string[],
   ): Promise<void> {
+    // `execute` is not `async`: an updater or an interceptor failure escapes it
+    // synchronously, by design. Only that throw is caught here — the promise it
+    // returns is handed on untouched, and settles where the cascade waits.
+    let running: Promise<void>;
+
     try {
-      return this.execute(action, scope, cascade);
+      running = this.execute(action, scope, cascade);
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- rethrowing the caught value untouched
       return Promise.reject(error);
     }
+
+    return running;
   }
 }
 

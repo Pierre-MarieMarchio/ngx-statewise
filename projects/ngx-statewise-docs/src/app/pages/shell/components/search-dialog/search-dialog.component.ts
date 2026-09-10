@@ -126,4 +126,17 @@ export class SearchDialogComponent {
       this.close();
     }
   }
+
+  /**
+   * The keyboard's way out, and the same dismissal the backdrop click is.
+   * `showModal` answers Escape on its own; the fallback in `open` above only
+   * sets the open attribute, and there nothing would close the palette without
+   * a pointer.
+   */
+  protected onDialogKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.close();
+    }
+  }
 }

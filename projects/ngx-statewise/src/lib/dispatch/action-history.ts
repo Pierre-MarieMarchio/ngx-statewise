@@ -52,7 +52,7 @@ export interface HistoryEntry {
 /** The last dispatched actions, oldest first. Disabled unless configured. */
 @Injectable()
 export class ActionHistory {
-  private entries: HistoryEntry[] = [];
+  private readonly entries: HistoryEntry[] = [];
 
   public constructor(
     @Inject(ACTION_HISTORY_LIMIT) private readonly limit: number,
