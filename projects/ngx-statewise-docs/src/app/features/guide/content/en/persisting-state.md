@@ -71,9 +71,9 @@ export const settingsUpdater = defineUpdater(SettingsStates, (on) => {
 
 ## Reading back
 
-Restoring is a dispatch. Give it its own action so the updater treats it as
-what it is — a change coming from outside — and so it can differ from a user
-change if it ever needs to:
+Restoring is a dispatch. Give it its own action so the updater treats it as a
+change coming from outside, and so it can differ from a user change if it ever
+needs to:
 
 ```typescript title="settings.updater.ts"
 on(settingsActions.restored, (state, settings) => {
@@ -135,8 +135,8 @@ write. Storage is a side effect; effects are where side effects go.
 ## Server-side rendering
 
 `localStorage` does not exist while the page is being prerendered. Keep the
-access inside the service — as above — and guard it there, so nothing else has
-to know:
+access inside the service, as above, and guard it there so nothing else has to
+know:
 
 ```typescript title="settings.storage.ts"
 private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));

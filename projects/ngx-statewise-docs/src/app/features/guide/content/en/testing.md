@@ -67,8 +67,8 @@ it('loads the tasks', async () => {
 > [!IMPORTANT]
 > List the effect class in `effects`. `createEffect` registers itself in the
 > injection context of the class declaring it, so a class nobody instantiates
-> registers nothing — and the test then passes for the wrong reason, because
-> the action does nothing at all.
+> registers nothing. The test then passes for the wrong reason, because the
+> action does nothing at all.
 
 ## Letting a fire-and-forget dispatch settle
 
@@ -88,11 +88,11 @@ expect(manager.items()).toHaveLength(3);
 > to an unrelated observer. Assert on the state, or await `dispatchAsync` when
 > you want the failure.
 
-## Asserting the order, not the result
+## Asserting the order
 
 The library's one guarantee is that the state is written before the effect
-runs. That is worth a test of its own, and it is written by reading the state
-between the dispatch and the settle rather than by waiting:
+runs. That is worth a test of its own. Write it by reading the state between
+the dispatch and the settle, rather than by waiting:
 
 ```typescript title="task.effect.spec.ts"
 it('leaves the state written before the effect runs', async () => {
@@ -173,7 +173,7 @@ it('marks the task done once the server agrees', async () => {
 });
 ```
 
-When the actions themselves are what you are testing — a cascade, an ordering —
+When the actions themselves are what you are testing, a cascade or an ordering,
 read them from the history, which `provideStatewiseTesting` enables for you:
 
 ```typescript title="task.effect.spec.ts"
@@ -267,8 +267,8 @@ TestBed.configureTestingModule({
 ```
 
 Reach for it when the effect is the subject. Prefer attaching the real updater
-otherwise — a test that dispatches into a scope owning nothing proves less than
-it looks.
+otherwise, since a test that dispatches into a scope owning nothing proves less
+than it looks.
 
 ## Declaring updaters inside tests
 
@@ -296,8 +296,8 @@ Prefer `strict: false` when you only want the check off. It is scoped to one
 ## Key notes
 
 - `provideStatewiseTesting` instead of `provideStatewise`, and list the effect
-  and interceptor classes the test needs — a class nobody instantiates
-  registers nothing.
+  and interceptor classes the test needs. A class nobody instantiates registers
+  nothing.
 - `await drainEffects()` after a `dispatch`, `await` the promise after a
   `dispatchAsync`. Never a `setTimeout`.
 - Assert on the state the manager exposes. Read the history only when the

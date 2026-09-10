@@ -26,7 +26,7 @@ Components re-render when they read a value, and there is nothing to
 unsubscribe.
 
 **Cascades you can await.** `dispatchAsync` resolves when the whole chain is
-over — nested effects included, and other features' managers included when a
+over. That includes nested effects, and other features' managers when a
 synchronous handler called them:
 
 ```typescript
@@ -47,9 +47,9 @@ dispatch aimed at the wrong manager throws in development and reaches your
 file, no module, no store to register a slice with.
 
 **And a fair amount to write, for yours.** This is the claim to be careful
-with, so it is measured rather than felt — on [this repository's own
-showcase](/guide/showcase),
-and re-measured by `npm run check`, so these numbers cannot rot:
+with, so it is measured rather than felt. The figures below come from [this
+repository's own showcase](/guide/showcase), and `npm run check` re-measures
+them, so they cannot rot:
 
 | What                                                      | Measured           |
 | --------------------------------------------------------- | ------------------ |
@@ -93,8 +93,8 @@ application is mostly derivations of derivations, you will miss it.
 
 **You react to streams rather than to intent.** If websockets or long-lived
 observables drive your state more than your users do, an Observable-first
-library suits you better. An effect reads one emission and stops listening —
-that is a deliberate limit, not an oversight.
+library suits you better. An effect reads one emission and stops listening.
+That limit is deliberate.
 
 **You want a store, or a devtools timeline.** There is no central object to
 inspect and no extension to plug in. The action history reads back what was
@@ -103,16 +103,16 @@ cover stepping through it.
 
 **Your features call each other past an `await`.** A dispatch a _synchronous_
 effect handler emits joins the cascade, whichever manager it went through.
-Past an `await` it cannot — there is no asynchronous context to read in a
-browser — so you pass the manager's promise on yourself. That is one line, and
-it is a line you have to know about; if crossing feature boundaries mid-effect
+Past an `await` it cannot, because there is no asynchronous context to read in
+a browser, so you pass the manager's promise on yourself. That is one line, and
+it is a line you have to know about. If crossing feature boundaries mid-effect
 is your normal shape, a central store never asks the question.
 [The rule, and both forms](/guide/managers).
 
 ## What it weighs
 
 Measured through `ng build --configuration production`, as the delta against
-the same application built without the library at all — reproduce it with
+the same application built without the library at all. Reproduce it with
 `npm run measure:size`:
 
 | What you import         | Adds, gzipped |

@@ -45,16 +45,16 @@ and is the right starting point.
 
 > [!IMPORTANT]
 > Call it **once**, at the application root. It provides its own effect
-> registry, so a second call in a child injector — the providers of a lazy
-> route, typically — builds a second engine that no dispatch of the
-> application reaches. The effects declared with it never run, while their
-> updaters still apply, which makes the action look like it worked.
+> registry. A second call in a child injector, typically the providers of a
+> lazy route, builds a second engine that no dispatch of the application
+> reaches. The effects declared with it never run, while their updaters still
+> apply, which makes the action look like it worked.
 >
 > The library refuses that rather than letting it happen quietly: a second call
 > throws in development and reports to Angular's `ErrorHandler` in production,
 > the same rule as a misrouted dispatch. An effect class scoped to a lazy route
-> or to a component needs no second call — `createEffect()` registers into the
-> root registry from wherever it is injected.
+> or to a component needs no second call, because `createEffect()` registers
+> into the root registry from wherever it is injected.
 
 | Option              | Type                              | Default       |
 | ------------------- | --------------------------------- | ------------- |
@@ -67,7 +67,7 @@ and is the right starting point.
 
 `effects` are instantiated at startup. An effect class that is never listed
 here and never injected anywhere registers nothing, and its handler will not
-run — that is the most common reason a first effect appears dead.
+run. That is the most common reason a first effect appears dead.
 
 `updaters` are reachable from whichever manager dispatches, including
 `injectStatewise()` with no updater at all. A scoped updater always wins over a
@@ -82,8 +82,8 @@ every call site. `effects` still accepts one, so nothing has to move. See
 [Interceptors](/guide/interceptors).
 
 `history` records the last `limit` actions, for reading back through
-`ActionHistory`. It is off unless you ask for it, and `redact` rewrites an
-action before it is recorded — which is how a password stays out of the log.
+`ActionHistory`. It is off unless you ask for it. `redact` rewrites an action
+before it is recorded, which is how a password stays out of the log.
 
 Each entry carries the action, the cascade path that led to it, and when it was
 recorded, so a chain of actions reads as a sequence rather than as N unrelated
@@ -102,7 +102,7 @@ the heap.
 `misroutedDispatch` decides what happens when an action reaches a manager that
 does not own its updater. It throws in development and reports to Angular's
 `ErrorHandler` in production. Set it explicitly only if you have a reason to
-disagree — see
+disagree. See
 [development throws, production reports](/guide/updaters#development-throws-production-reports).
 
 ## Your first feature

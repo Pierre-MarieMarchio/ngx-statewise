@@ -10,7 +10,7 @@ summary:
 
 # Cancelling a request
 
-What to do when a second request starts before the first has come back — a
+What to do when a second request starts before the first has come back: a
 search box, a fast-clicking user, a route change.
 
 An effect is a one-shot piece of work rather than a stream you can switch, so
@@ -127,7 +127,7 @@ export class SearchEffect {
 ```
 
 That last comment is the whole recipe. Reading `attempt` at the top of the
-effect is safe precisely because the updater finished first — the same
+effect is safe precisely because the updater finished first, which is the
 guarantee the rest of the library is built on.
 
 ## Actually stopping the request

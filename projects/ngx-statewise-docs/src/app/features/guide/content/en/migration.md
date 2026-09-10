@@ -15,7 +15,7 @@ wiring and four behaviours did.
 
 Action creators are untouched. `defineActionsGroup`, `defineSingleAction`,
 `payload`, `emptyPayload` and `ofType` work as before, and the generated action
-strings are identical — so the parts of your application that only build and
+strings are identical, so the parts of your application that only build and
 match actions need no edit at all.
 
 ## What was renamed
@@ -113,7 +113,7 @@ See
 
 **An effect runs only for the manager owning its action's updater.**
 Registration is still application-wide; visibility now follows the updater. A
-misrouted dispatch runs nothing at all — neither the updater nor the effects.
+misrouted dispatch runs nothing at all, neither the updater nor the effects.
 Actions no updater claims keep running their effects everywhere. See
 [scope](/guide/effects#scope).
 
@@ -135,9 +135,9 @@ you read `action.type`. See [`HistoryEntry`](/guide/api#actionhistory).
 
 - Two managers dispatch the same action type concurrently without sharing state
   or observation.
-- `dispatchAsync` awaits the whole cascade, nested effects included — and, for
-  a dispatch a synchronous effect handler emitted, across a manager boundary
-  too. See [Crossing a feature boundary](/guide/managers).
+- `dispatchAsync` awaits the whole cascade, nested effects included, and
+  across a manager boundary too for a dispatch a synchronous effect handler
+  emitted. See [Crossing a feature boundary](/guide/managers).
 - An unexpected failure is no longer swallowed.
 - A misrouted dispatch is reported instead of silently skipped.
 - An effect is unregistered with the injector that registered it, so a

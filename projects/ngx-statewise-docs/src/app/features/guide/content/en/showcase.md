@@ -104,7 +104,7 @@ keeps that step visible in the action history.
 `projectManager` and `taskManager` are not imported. They arrive as
 `PROJECT_RELOAD` and `TASK_RELOAD`, two injection tokens aliased onto the real
 managers with `useExisting` in `app.config.ts`, so `features/auth` reloads
-tasks without importing `features/project` — which the import law forbids.
+tasks without importing `features/project`, which the import law forbids.
 
 ## Task board
 
@@ -147,7 +147,7 @@ included.
 **A global updater.** `noticeUpdater` is registered through
 `provideStatewise({ updaters })` rather than by a manager. Nothing claims
 `NOTICE_RAISED`, which is the condition for a global updater to answer, so any
-handle reaches it — including `injectStatewise()` with no updater at all. See
+handle reaches it, `injectStatewise()` with no updater at all included. See
 [attaching updaters](/guide/updaters#attaching-updaters).
 
 **Plain-property state.** `TallyState` holds two numbers and no signal, which

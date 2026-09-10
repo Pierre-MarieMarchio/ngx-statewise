@@ -53,9 +53,9 @@ carries a `number`, so `step` is one: the handler's parameter is inferred from
 the action creator. An action carrying nothing gives the handler one parameter
 typed `undefined`, and leaving it out is the usual form.
 
-Only `false` refuses. Returning nothing — which is what a handler with no
-return statement does — lets the action through, so an interceptor that only
-wants to look at what passes reads the same as one that decides. A verdict is
+Only `false` refuses. Returning nothing lets the action through, and that is
+what a handler with no return statement does, so an interceptor that only wants
+to look at what passes reads the same as one that decides. A verdict is
 `boolean | void`, and nothing widens it: returning the payload, or a count, is
 a compile error rather than a truthy pass.
 

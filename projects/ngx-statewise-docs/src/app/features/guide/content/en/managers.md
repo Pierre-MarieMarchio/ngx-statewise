@@ -74,7 +74,7 @@ await this.statewise.waitForEffect(loginActions.request);
 
 Observation is scoped like dispatch: two managers awaiting the same action type
 never wait for each other. The action history is application-wide, so it is
-injected rather than read from the handle — `inject(ActionHistory).snapshot()`.
+injected rather than read from the handle: `inject(ActionHistory).snapshot()`.
 
 ### Which dispatch to use
 
@@ -85,9 +85,9 @@ waiting. Use it when nothing depends on the outcome:
 this.statewise.dispatch(logoutAction());
 ```
 
-`dispatchAsync` resolves once every effect triggered by the action, and every
-action those effects returned, has completed — recursively. Use it when the
-next thing has to wait:
+`dispatchAsync` resolves once every effect triggered by the action has
+completed, and every action those effects returned, recursively. Use it when
+the next thing has to wait:
 
 ```typescript
 await this.statewise.dispatchAsync(loginActions.request(credentials));
@@ -97,7 +97,7 @@ await this.statewise.dispatchAsync(loginActions.request(credentials));
 
 An effect must not return another feature's action; it calls that feature's
 manager instead ([Updaters](/guide/updaters)). That call dispatches on the
-other manager's own scope, which is a different tree of promises — and yet the
+other manager's own scope, which is a different tree of promises. And yet the
 cascade still has to be one thing, or the sentence above is false the moment a
 login reloads two other features.
 
@@ -144,8 +144,8 @@ public readonly loginSuccessEffect = createEffect(
 );
 ```
 
-The limit is not an oversight, and it will not move: past an `await` there is
-no asynchronous context left to read the open cascade from — `AsyncLocalStorage`
+The limit is deliberate, and it will not move. Past an `await` there is
+no asynchronous context left to read the open cascade from. `AsyncLocalStorage`
 does not exist in a browser, and zone.js is excluded by construction for a
 library that must work zoneless. It falls where it costs least, because an
 `await` has necessarily handed the handler a promise it can pass on.

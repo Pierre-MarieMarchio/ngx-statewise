@@ -162,7 +162,7 @@ public readonly loginSuccessEffect = createEffect(loginActions.success, () => {
 
 That call leaves this scope's tree of promises, so it used to leave the cascade
 with it: `await login()` settled while both reloads were still in flight.
-It no longer does — a dispatch a **synchronous** handler emits is adopted back
+It no longer does. A dispatch a **synchronous** handler emits is adopted back
 into the cascade of that handler, whichever manager it went through. Past an
 `await` it is not, and the manager's promise is what covers it there. The rule
 and both forms are in [Managers](/guide/managers).
@@ -261,7 +261,7 @@ runs, so it can overrule one if it has a reason to.
 > [!NOTE]
 > It is optional, and it is deliberately not the answer to everything. A flow
 > whose rollback point is per entity, or whose failure has to reconcile an
-> optimistic write, is still three handlers written out — and it should be.
+> optimistic write, is still three handlers written out, and it should be.
 > That is logic, not boilerplate. [The showcase](/guide/showcase#task-board)
 > keeps both shapes side by side in one updater, for exactly that reason.
 
@@ -275,9 +275,10 @@ put one entity back.
 ## Key notes
 
 - One action type, one updater, within the same scope. A duplicate always
-  throws, never passes silently — at the `defineUpdater` call when one updater
-  handles the same type twice, at `injectStatewise()` when two updaters of one
-  scope claim it, and at startup for the updaters given to `provideStatewise`.
+  throws, never passes silently. It throws at the `defineUpdater` call when one
+  updater handles the same type twice, at `injectStatewise()` when two updaters
+  of one scope claim it, and at startup for the updaters given to
+  `provideStatewise`.
 - Handlers write the state in place, usually through signals, and return
   nothing.
 - An action no updater handles is valid: it triggers its effects and nothing

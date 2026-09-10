@@ -10,8 +10,8 @@ summary:
 
 # Effects
 
-The asynchronous half of a feature: API calls, navigation, storage, logging —
-everything that is not a state change.
+The asynchronous half of a feature. API calls, navigation, storage, logging:
+everything a state change is not.
 
 Effects always run **after** the updater, so they never read stale state. The
 library enforces the sequence action → updater → effect. An
@@ -71,7 +71,7 @@ decides what happens next:
 
 Return an observable for a one-shot asynchronous operation. The library reads
 its first emission and stops listening. An observable that completes without
-emitting — `EMPTY`, for instance — counts as returning nothing.
+emitting, `EMPTY` for instance, counts as returning nothing.
 
 ```typescript title="user.effect.ts"
 @Injectable({ providedIn: 'root' })
@@ -115,7 +115,7 @@ provideStatewise({
 });
 ```
 
-Without the declaration, dispatching the action does nothing at all — and
+Without the declaration, dispatching the action does nothing at all, and
 nothing warns you. It is the first thing to check when an effect looks dead.
 
 Call `createEffect` in an injection context: a field initialiser, or the
@@ -137,8 +137,9 @@ taskManager.dispatch(authActions.loaded()); // misrouted: nothing runs
 ```
 
 An action type that no updater claims has no owner, so its effects run for
-every manager — that is an effect-only action, valid everywhere. An updater
-declared globally belongs to every scope, so its effects run everywhere too.
+every manager. That is an effect-only action, and it is valid everywhere. An
+updater declared globally belongs to every scope, so its effects run everywhere
+too.
 
 ### Lifecycle
 
@@ -148,7 +149,7 @@ destroyed, so instantiating it again never piles up a second copy.
 
 Such a class needs nothing but itself: `createEffect` injects the registry from
 wherever it is called, and finds the root one. Do **not** add a second
-`provideStatewise()` to that route — it would provide a registry of its own,
+`provideStatewise()` to that route. It would provide a registry of its own,
 which no dispatch reaches. The library now refuses it
 ([Getting started](/guide/getting-started)).
 
