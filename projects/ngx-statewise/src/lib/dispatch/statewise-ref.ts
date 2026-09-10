@@ -17,7 +17,7 @@ export interface ActionIdentity {
  * is scoped to this handle: what it dispatches, and the effects it observes.
  *
  * The action history is deliberately absent. It is application-wide, so a
- * scoped handle is the wrong place to read it from — inject `ActionHistory`.
+ * scoped handle is the wrong place to read it from. Inject `ActionHistory`.
  */
 export interface Statewise {
   dispatch(action: Action): void;

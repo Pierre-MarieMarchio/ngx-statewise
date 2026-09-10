@@ -4,7 +4,7 @@ import { InjectionToken } from '@angular/core';
  * What the engine does when a dispatch reaches a scope that does not own the
  * updater of its action type.
  *
- * The detection itself always runs — it costs a set lookup, and only when no
+ * The detection itself always runs. It costs a set lookup, and only when no
  * updater matched. Only the reaction changes: development throws, so the
  * mistake is impossible to miss, while production reports and carries on,
  * because breaking a running application over it would be worse than the

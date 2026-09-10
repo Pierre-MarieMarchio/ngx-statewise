@@ -1,7 +1,7 @@
 /**
  * Declares an action without data.
  *
- * @returns `undefined` — the marker for actions carrying no payload.
+ * @returns `undefined`, the marker for actions carrying no payload.
  */
 export type EmptyPayloadFn = () => undefined;
 

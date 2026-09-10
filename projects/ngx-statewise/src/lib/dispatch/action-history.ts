@@ -37,7 +37,7 @@ export interface HistoryEntry {
    * A single dispatch reads as one entry; a cascade of three reads as three
    * whose paths extend each other. This is the field that tells two concurrent
    * dispatches of one action type apart, and the engine has always computed it
-   * — it is what the cascade-bound error prints.
+   * It is the same path the cascade-bound error prints.
    */
   readonly cascade: readonly string[];
   /**
@@ -85,13 +85,13 @@ export class ActionHistory {
  * An envelope of the history's own, frozen: an entry already handed out cannot
  * be rewritten through the array `snapshot` returns, and recording no longer
  * hands the very object the engine is executing. The path is copied for the
- * same reason — the engine goes on building on its own array.
+ * same reason: the engine goes on building on its own array.
  *
  * The payload keeps its identity, deliberately. Copying it would require
  * knowing how, and a `Date`, a `Map` or a class instance does not survive a
  * naive clone. The cost is stated in the guide: a payload the application
  * mutates afterwards changes what the history shows of the past, so do not
- * mutate one — and use `redact` for what should not be kept at all.
+ * mutate one. Use `redact` for what should not be kept at all.
  */
 function entryOf(action: Action, cascade: readonly string[]): HistoryEntry {
   return Object.freeze({

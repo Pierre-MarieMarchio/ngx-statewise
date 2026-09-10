@@ -64,7 +64,7 @@ export class StatewiseEngine {
    * A field rather than an argument threaded through, because what reaches
    * the engine is a call from a third-party manager, and a manager knows
    * nothing of the cascade that called it. Synchronous by nature: past an
-   * `await` no asynchronous context survives here — `AsyncLocalStorage` does
+   * `await` no asynchronous context survives here. `AsyncLocalStorage` does
    * not exist in a browser, and zone.js is excluded by construction.
    */
   private openCascade: OpenCascade | undefined;
@@ -73,7 +73,7 @@ export class StatewiseEngine {
    * An updater failure is a programming error and escapes synchronously, so it
    * surfaces at the call site instead of being buried in a rejected promise.
    * An interceptor failure is the same kind of error, and escapes the same
-   * way — being synchronous is what lets it.
+   * way, which being synchronous is what allows.
    *
    * `path` is the chain of action types that led here, and is internal: a
    * caller dispatches an action, never a cascade.
@@ -191,7 +191,7 @@ export class StatewiseEngine {
    * Whether the dispatch reached a scope that owns nothing of this action.
    *
    * An action type claimed by an updater this scope cannot resolve belongs to
-   * another manager. A type no updater claims belongs to every scope — that is
+   * another manager. A type no updater claims belongs to every scope, and that is
    * an effect-only action, and it stays valid everywhere.
    *
    * `'ignore'` opts out of the whole notion, which is what a test suite
@@ -345,7 +345,7 @@ export class StatewiseEngine {
     cascade: readonly string[],
   ): Promise<void> {
     // `execute` is not `async`: an updater or an interceptor failure escapes it
-    // synchronously, by design. Being `async` here is the whole mechanism —
+    // synchronously, by design. Being `async` here is the whole mechanism:
     // that throw becomes the rejection the branch beside it settles against,
     // and the promise `execute` returns is adopted untouched.
     return this.execute(action, scope, cascade);

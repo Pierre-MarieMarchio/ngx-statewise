@@ -5,8 +5,8 @@
 export interface EffectContext {
   /**
    * Aborted when this run is superseded by a newer one, or cancelled through
-   * `cancelOn`. Hand it to whatever accepts one — `fetch`, an abort-aware
-   * client — so the work actually stops instead of merely being ignored.
+   * `cancelOn`. Hand it to whatever accepts one, `fetch` or an abort-aware
+   * client, so the work actually stops instead of merely being ignored.
    *
    * Named in full rather than `signal`, deliberately: in a signals-first
    * library, an unqualified `signal` reads as an Angular one.

@@ -11,8 +11,8 @@ import type {
  * Handler asked before the updater of its action is applied. It receives the
  * action payload when there is one, and answers whether the action may go on.
  *
- * Only `false` refuses. Returning nothing — which is what a handler with no
- * return statement does — lets the action through, so an interceptor that
+ * Only `false` refuses. Returning nothing lets the action through, and that is
+ * what a handler with no return statement does, so an interceptor that
  * only wants to look at what passes reads the same as one that decides.
  *
  * It is synchronous, deliberately, and takes no context. An `async` handler
