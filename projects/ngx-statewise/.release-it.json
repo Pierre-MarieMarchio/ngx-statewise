@@ -6,6 +6,7 @@
     "commitMessage": "chore(release): ngx-statewise@${version}",
     "requireBranch": ["main", "next", "release/*"],
     "requireCleanWorkingDir": true,
+    "requireUpstream": false,
     "push": true
   },
   "npm": {

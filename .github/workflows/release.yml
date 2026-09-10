@@ -87,6 +87,12 @@ jobs:
       # the road every other change takes instead: a branch, a pull request,
       # and the same green run. `release/*` is in `requireBranch`, so release-it
       # still refuses to run from anywhere else.
+      #
+      # This branch has no upstream, by design: it is created here and exists
+      # nowhere else until release-it pushes it, which it does with
+      # `--set-upstream` on its own. `requireUpstream` is therefore false in
+      # .release-it.json — the check would reject the branch this step exists
+      # to make.
       - name: Cut a branch for the version commit
         run: git switch -c "$RELEASE_BRANCH"
         env:
