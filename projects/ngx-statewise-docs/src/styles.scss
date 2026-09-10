@@ -3,8 +3,13 @@
 @use './assets/themes';
 @use './assets/tokens';
 
+/* Thin, neutral scrollbars alongside the box model: the sidebar and the table
+   of contents both scroll, and the platform default draws a heavy bar right
+   down the reading edge. */
 * {
   box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
 }
 
 /* Deliberately not `scroll-behavior: smooth` on `html`: it would also smooth
@@ -61,13 +66,6 @@ main:focus {
 
 ::selection {
   background-color: color-mix(in srgb, var(--link) 24%, transparent);
-}
-
-/* Thin, neutral scrollbars: the sidebar and the table of contents both scroll,
-   and the platform default draws a heavy bar right down the reading edge. */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-strong) transparent;
 }
 
 *::-webkit-scrollbar {

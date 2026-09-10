@@ -4,6 +4,7 @@ import {
   output,
   ChangeDetectionStrategy,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { ThemeToggleComponent } from '@shared/ui/theme-toggle';
@@ -25,7 +26,12 @@ import { NavigationItem } from './navigation-item.model';
  */
 @Component({
   selector: 'app-nav-shell',
-  imports: [ThemeToggleComponent, MatIconModule, RouterModule],
+  imports: [
+    ThemeToggleComponent,
+    MatIconModule,
+    NgTemplateOutlet,
+    RouterModule,
+  ],
   templateUrl: './nav-shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './nav-shell.component.scss',

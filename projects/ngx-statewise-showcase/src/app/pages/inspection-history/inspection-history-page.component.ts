@@ -14,8 +14,11 @@ import {
   ofType,
   type HistoryEntry,
 } from 'ngx-statewise';
-import { noticeActions } from '@app/features/inspection/states';
-import { tallyActions, tallyUpdater } from '@app/features/inspection/states';
+import {
+  noticeActions,
+  tallyActions,
+  tallyUpdater,
+} from '@app/features/inspection/states';
 import { getAllTaskActions } from '@app/features/project/states/task/task.action';
 import { getAllProjectsActions } from '@app/features/project/states/project/project.action';
 import { TaskManager } from '@app/features/project/states/task/task.manager';

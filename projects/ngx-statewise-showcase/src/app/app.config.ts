@@ -21,8 +21,12 @@ import {
   AuthManager,
   withoutCredentials,
 } from './features/auth/states';
-import { TaskEffect, TaskManager } from './features/project/states';
-import { ProjectEffect, ProjectManager } from './features/project/states';
+import {
+  ProjectEffect,
+  ProjectManager,
+  TaskEffect,
+  TaskManager,
+} from './features/project/states';
 import { noticeUpdater, TallyGuard } from './features/inspection/states';
 import { AUTH_SESSION, PROJECT_RELOAD, TASK_RELOAD } from './features/common';
 import { provideTeamDirectory } from './pages/team-directory.provider';

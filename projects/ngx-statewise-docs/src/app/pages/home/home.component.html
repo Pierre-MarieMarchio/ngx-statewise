@@ -6,10 +6,12 @@
 -->
 <section class="hero">
   <h1 class="hero__title">
+    <span class="visually-hidden">ngx-statewise</span>
     <img
       class="hero__logo"
       src="landing-page-logo.png"
-      alt="ngx-statewise"
+      alt=""
+      aria-hidden="true"
       width="800"
       height="520"
     />
@@ -162,10 +164,14 @@
   <ul class="doors__list" role="list">
     @for (door of doors; track door.title.en) {
       <li>
+        <ng-template #doorBody>
+          <span class="doors__door-title">{{ door.title[locale.code] }}</span>
+          <span class="doors__door-text">{{ door.text[locale.code] }}</span>
+        </ng-template>
+
         @if (doorLink(door); as link) {
           <a class="doors__door" [routerLink]="link">
-            <span class="doors__door-title">{{ door.title[locale.code] }}</span>
-            <span class="doors__door-text">{{ door.text[locale.code] }}</span>
+            <ng-container [ngTemplateOutlet]="doorBody" />
           </a>
         } @else {
           <a
@@ -174,8 +180,7 @@
             target="_blank"
             rel="noreferrer"
           >
-            <span class="doors__door-title">{{ door.title[locale.code] }}</span>
-            <span class="doors__door-text">{{ door.text[locale.code] }}</span>
+            <ng-container [ngTemplateOutlet]="doorBody" />
           </a>
         }
       </li>
