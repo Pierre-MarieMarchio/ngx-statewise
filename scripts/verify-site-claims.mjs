@@ -119,10 +119,10 @@ const exported = [...declarations.matchAll(/^export (?:type )?\{([^}]*)\};/gm)]
   .filter((name) => name.length > 0);
 
 // A type by convention: capitalised, not one of the classes, not `ɵ`-prefixed.
-const CLASSES = ['ActionHistory'];
+const CLASSES = new Set(['ActionHistory']);
 const committedTypes = exported.filter(
   (name) =>
-    /^[A-Z]/.test(name) && !name.includes(' as ɵ') && !CLASSES.includes(name),
+    /^[A-Z]/.test(name) && !name.includes(' as ɵ') && !CLASSES.has(name),
 );
 
 // --- what the "Why" page admits it costs ------------------------------------

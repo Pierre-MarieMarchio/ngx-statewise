@@ -20,7 +20,7 @@ export interface SearchEntry {
 }
 
 const FENCE = /```[\s\S]*?```/g;
-const HEADING = /^(#{2,3}) +(.+?)\s*$/gm;
+const HEADING = /^(#{2,3}) +(\S[^\n]*)$/gm;
 
 /**
  * Everything a reader can jump to: every page, and every section of every
@@ -100,12 +100,12 @@ function score(entry: SearchEntry, needle: string): number {
     return 60;
   }
 
+  if (!entry.search.includes(needle)) {
+    return 0;
+  }
+
   // A page entry is a better destination than one of its sections.
-  return entry.search.includes(needle)
-    ? entry.fragment === undefined
-      ? 30
-      : 20
-    : 0;
+  return entry.fragment === undefined ? 30 : 20;
 }
 
 interface IndexedHeading {
@@ -128,7 +128,7 @@ function headingsOf(page: GuidePage, code: LocaleCode): IndexedHeading[] {
 
   for (const [position, match] of matches.entries()) {
     // Strip the inline markup a heading may carry: `code`, **bold**.
-    const text = (match[2] ?? '').replace(/[`*_]/g, '');
+    const text = (match[2] ?? '').trim().replace(/[`*_]/g, '');
     const base = slugify(text);
     const seen = used.get(base) ?? 0;
     used.set(base, seen + 1);

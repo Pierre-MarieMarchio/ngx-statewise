@@ -103,11 +103,11 @@ function kb(bytes) {
 }
 
 function main() {
-  const args = process.argv.slice(2);
-  const keep = args.includes('--keep');
-  const asJson = args.includes('--json');
+  const args = new Set(process.argv.slice(2));
+  const keep = args.has('--keep');
+  const asJson = args.has('--json');
 
-  if (!args.includes('--skip-build')) {
+  if (!args.has('--skip-build')) {
     run('npm', ['run', 'build:library'], REPO);
   }
 

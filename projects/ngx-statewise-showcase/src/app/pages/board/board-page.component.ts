@@ -9,21 +9,20 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { Task } from '@app/features/project/models';
 import { SidePanelComponent } from '@shared/ui/side-panel';
 import { DataStateComponent } from '@shared/ui/data-state';
-import { TaskDetailsComponent } from '@app/features/project/components';
 import {
   PersonalTaskListComponent,
   ProjectFormComponent,
   ProjectPickerComponent,
+  TaskDetailsComponent,
   TaskFormComponent,
   TaskKanbanComponent,
   TaskSearchComponent,
   TaskTableComponent,
 } from '@app/features/project/components';
 import { CurrentProjectService } from '@app/features/project/services';
-import { ProjectDraft, TaskDraft } from '@app/features/project/models';
+import { ProjectDraft, Task, TaskDraft } from '@app/features/project/models';
 import { ConfirmPanelComponent } from '@shared/ui/confirm-panel';
 import { TaskManager } from '@app/features/project/states/task/task.manager';
 import { ProjectManager } from '@app/features/project/states/project/project.manager';

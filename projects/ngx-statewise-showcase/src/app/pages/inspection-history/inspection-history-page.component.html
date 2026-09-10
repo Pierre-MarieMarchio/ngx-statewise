@@ -84,11 +84,11 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
 
-  <div role="status">
+  <output class="history-page-readout">
     @if (rows().length === 0) {
       <p class="history-page-empty" data-readout="empty">
         Nothing read yet. Dispatch something, or press refresh.
       </p>
     }
-  </div>
+  </output>
 </div>

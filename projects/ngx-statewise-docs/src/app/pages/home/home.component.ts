@@ -5,6 +5,7 @@ import {
   effect,
   inject,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { Meta, Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { FlowDemoComponent, FlowDemoManager } from '../../features/flow-demo';
@@ -15,7 +16,7 @@ import { COMPARISON, DOORS, NOT_FOR, type Door } from './landing-content';
 
 @Component({
   selector: 'docs-home',
-  imports: [FlowDemoComponent, RouterLink],
+  imports: [FlowDemoComponent, NgTemplateOutlet, RouterLink],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
