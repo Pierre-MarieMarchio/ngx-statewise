@@ -339,7 +339,7 @@ function translated(
  * first heading, which is the one thing every page has.
  */
 function name(body: string): string {
-  const title = /^#[^\S\n]+(.+)$/m.exec(body)?.[1];
+  const title = /^#[^\S\n]+(\S.*)$/m.exec(body)?.[1];
 
   return title === undefined
     ? 'a guide page with no heading'

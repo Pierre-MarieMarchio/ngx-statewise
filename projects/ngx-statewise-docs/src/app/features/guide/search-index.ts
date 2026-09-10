@@ -20,7 +20,7 @@ export interface SearchEntry {
 }
 
 const FENCE = /```[\s\S]*?```/g;
-const HEADING = /^(#{2,3}) +([^\n]+)$/gm;
+const HEADING = /^(#{2,3}) +(\S[^\n]*)$/gm;
 
 /**
  * Everything a reader can jump to: every page, and every section of every

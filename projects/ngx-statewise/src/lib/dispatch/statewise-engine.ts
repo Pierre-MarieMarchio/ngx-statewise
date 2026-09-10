@@ -339,24 +339,16 @@ export class StatewiseEngine {
   }
 
   /** Keeps a failing cascaded action from cancelling the actions beside it. */
-  private executeSafely(
+  private async executeSafely(
     action: Action,
     scope: DispatchScope,
     cascade: readonly string[],
   ): Promise<void> {
     // `execute` is not `async`: an updater or an interceptor failure escapes it
-    // synchronously, by design. Only that throw is caught here — the promise it
-    // returns is handed on untouched, and settles where the cascade waits.
-    let running: Promise<void>;
-
-    try {
-      running = this.execute(action, scope, cascade);
-    } catch (error) {
-      // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- rethrowing the caught value untouched
-      return Promise.reject(error);
-    }
-
-    return running;
+    // synchronously, by design. Being `async` here is the whole mechanism —
+    // that throw becomes the rejection the branch beside it settles against,
+    // and the promise `execute` returns is adopted untouched.
+    return this.execute(action, scope, cascade);
   }
 }
 

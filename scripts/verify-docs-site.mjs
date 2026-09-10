@@ -38,9 +38,9 @@ const locale = readFileSync(
   join(guide, '..', '..', 'core', 'i18n', 'locale.ts'),
   'utf8',
 );
-const codes = [
-  ...locale.matchAll(/^[^\S\n]*(?:\{[^\S\n]*)?code: '([^']+)'/gm),
-].map((match) => match[1]);
+// Only the entries: nothing else in locale.ts spells `code:` with a quoted
+// value after it, so the literal needs no anchor and no indentation to skip.
+const codes = [...locale.matchAll(/code: '([^']+)'/g)].map((match) => match[1]);
 
 if (codes.length === 0) {
   fail('no locales found in i18n/locale.ts — this script is out of step');
@@ -130,7 +130,7 @@ for (const name of pagesOf(defaultCode)) {
     continue;
   }
 
-  const slug = /^slug:[ \t]*(.*)$/m.exec(block[1]);
+  const slug = /^slug:[ \t]*(\S.*)$/m.exec(block[1]);
 
   if (slug === null) {
     fail(`content/${defaultCode}/${name}.md declares no slug`);
