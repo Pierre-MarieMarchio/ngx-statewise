@@ -81,8 +81,8 @@ export class GuidePageComponent {
    * repository content compiled into the bundle, never user input, so the
    * value is trusted here rather than rendered without its anchors.
    */
-  protected readonly html = computed(() =>
-    this.sanitizer.bypassSecurityTrustHtml(this.rendered().html),
+  protected readonly html = computed(
+    () => this.sanitizer.bypassSecurityTrustHtml(this.rendered().html), // NOSONAR — answered in the paragraph above
   );
 
   /** The heading currently under the top of the viewport, if any. */
@@ -130,6 +130,23 @@ export class GuidePageComponent {
       this.meta.updateTag({
         name: 'description',
         content: page.summary[code],
+      });
+    });
+
+    // The delegation the rendered markdown needs, registered rather than
+    // declared: the article is a container, and a `(click)` on it in the
+    // template reads as a mouse-only handler on something that is not a
+    // control. What it actually serves are the links and copy buttons inside
+    // the injected markup, and both of those the keyboard already activates.
+    afterRenderEffect((onCleanup) => {
+      const root = this.body().nativeElement;
+      const onClick = (event: Event): void => {
+        this.onContentClick(event as MouseEvent);
+      };
+
+      root.addEventListener('click', onClick);
+      onCleanup(() => {
+        root.removeEventListener('click', onClick);
       });
     });
 
@@ -199,7 +216,7 @@ export class GuidePageComponent {
    * The guide's links and copy buttons come out of markdown as plain markup,
    * so there is no component to bind to. The page listens once, here.
    */
-  protected onContentClick(event: MouseEvent): void {
+  private onContentClick(event: MouseEvent): void {
     const target = event.target as Element | null;
     const copy = target?.closest('[data-copy-code]');
 
