@@ -91,9 +91,6 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = defineGuideSections([
     title: {
       en: 'Overview',
       fr: 'Vue d’ensemble',
-      es: 'Visión general',
-      de: 'Überblick',
-      'pt-BR': 'Visão geral',
     },
     pages: [introductionEn, whyEn, gettingStartedEn],
   },
@@ -101,9 +98,6 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = defineGuideSections([
     title: {
       en: 'Key concepts',
       fr: 'Concepts clés',
-      es: 'Conceptos clave',
-      de: 'Kernkonzepte',
-      'pt-BR': 'Conceitos-chave',
     },
     pages: [
       statesEn,
@@ -118,9 +112,6 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = defineGuideSections([
     title: {
       en: 'Guides',
       fr: 'Guides',
-      es: 'Guías',
-      de: 'Anleitungen',
-      'pt-BR': 'Guias',
     },
     pages: [testingEn, migrationEn],
   },
@@ -128,9 +119,6 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = defineGuideSections([
     title: {
       en: 'Recipes',
       fr: 'Recettes',
-      es: 'Recetas',
-      de: 'Rezepte',
-      'pt-BR': 'Receitas',
     },
     pages: [
       cancellingRequestsEn,
@@ -143,9 +131,6 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = defineGuideSections([
     title: {
       en: 'Reference',
       fr: 'Référence',
-      es: 'Referencia',
-      de: 'Referenz',
-      'pt-BR': 'Referência',
     },
     pages: [apiEn],
   },

@@ -3,15 +3,9 @@ slug: optimistic-updates
 title:
   en: Optimistic updates
   fr: Mise à jour optimiste
-  es: Actualización optimista
-  de: Optimistische Aktualisierung
-  pt-BR: Atualização otimista
 summary:
   en: Writing before the server agrees, and putting it back if it does not.
   fr: Écrire avant l’accord du serveur, et revenir en arrière sinon.
-  es: Escribir antes de que el servidor acepte, y deshacerlo si no.
-  de: Schreiben, bevor der Server zustimmt, und zurücknehmen, wenn nicht.
-  pt-BR: Escrever antes de o servidor concordar, e desfazer se não.
 ---
 
 # Optimistic updates

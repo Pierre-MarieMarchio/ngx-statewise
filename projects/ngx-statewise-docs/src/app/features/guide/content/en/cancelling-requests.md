@@ -3,15 +3,9 @@ slug: cancelling-requests
 title:
   en: Cancelling a request
   fr: Annuler une requête
-  es: Cancelar una petición
-  de: Eine Anfrage abbrechen
-  pt-BR: Cancelar uma requisição
 summary:
   en: Letting the last request win when two are in flight.
   fr: Laisser gagner la dernière requête quand deux sont en vol.
-  es: Dejar ganar a la última petición cuando hay dos en vuelo.
-  de: Die letzte Anfrage gewinnen lassen, wenn zwei unterwegs sind.
-  pt-BR: Deixar a última requisição vencer quando há duas em voo.
 ---
 
 # Cancelling a request

@@ -157,15 +157,9 @@ slug: interceptors
 title:
   en: Interceptors
   fr: Interceptors
-  es: Interceptors
-  de: Interceptors
-  pt-BR: Interceptors
 summary:
   en: Asking before an updater applies.
   fr: Demander avant qu'un updater s'applique.
-  es: Preguntar antes de que un updater se aplique.
-  de: Fragen, bevor ein Updater greift.
-  pt-BR: Perguntar antes de um updater se aplicar.
 ---
 
 # Interceptors
@@ -173,10 +167,10 @@ summary:
 The first heading repeats the English title, and a spec holds you to it.
 ```
 
-The title and the summary are needed in all five locales because the interface
-is translated even though the guide is not: they are what the sidebar, the
-landing page's contents and the browser tab show. The prose itself stays in
-English, with the banner every page carries.
+The title and the summary are needed in both locales because the interface is
+translated even though the guide is not: they are what the sidebar, the landing
+page's contents and the browser tab show. The prose itself stays in English,
+with the banner every page carries.
 
 A value runs to the end of its line, so a colon inside a summary needs no
 quoting. Only `slug`, `title` and `summary` are read; anything else in the
@@ -213,7 +207,7 @@ between pages are absolute, `](/guide/effects#scope)`, never bare anchors.
 
 Nothing about a page is checked by eye:
 
-- a missing title or summary in any locale, a slug that could not be a URL
+- a missing title or summary in either locale, a slug that could not be a URL
   segment, or two pages claiming one slug **fails the prerender and every
   spec** — the metadata is read while the module loads;
 - an import you forgot to place in a section is an unused binding, so

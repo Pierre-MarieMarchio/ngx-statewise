@@ -3,15 +3,9 @@ slug: persisting-state
 title:
   en: Persisting state
   fr: Persister l’état
-  es: Persistir el estado
-  de: State speichern
-  pt-BR: Persistir o estado
 summary:
   en: Storage in an effect, restoring through an action.
   fr: Le stockage dans un effect, la restauration par une action.
-  es: El almacenamiento en un effect, la restauración por una action.
-  de: Speichern in einem Effect, Wiederherstellen über eine Action.
-  pt-BR: O armazenamento em um effect, a restauração por uma action.
 ---
 
 # Persisting state
