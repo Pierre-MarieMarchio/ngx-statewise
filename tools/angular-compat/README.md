@@ -15,7 +15,7 @@ it into a measurement.
 `verify.mjs <major>` builds the library, packs `dist/ngx-statewise` into the
 same tarball `npm publish` would upload, then installs that tarball into a
 throwaway application outside the repository and asks _that_ application's
-Angular CLI — the requested major's own CLI — to build it ahead of time and
+Angular CLI, which is the requested major's own, to build it ahead of time and
 run its specs.
 
 ```bash
@@ -33,7 +33,7 @@ row to the `MAJORS` table and a value to the workflow matrix.
 ## What this verifies
 
 - **The published artifact, not the sources.** The tarball is what is tested,
-  through its `exports` map — both entry points, `ngx-statewise` and
+  through its `exports` map, so both entry points: `ngx-statewise` and
   `ngx-statewise/testing`.
 - **Peer resolution.** `npm install` applies the declared peer range itself, so
   a range that cannot be satisfied fails before anything compiles.
@@ -57,8 +57,8 @@ Worth stating plainly, because the gaps are the reason the check is cheap:
   runs. Passing on 20.3.30 is not a statement about 20.0.0.
 - **jsdom on Node, no browser.** No real-browser run, and no Karma.
 - **Zoneless only.** The fixture bootstraps with
-  `provideZonelessChangeDetection()`. A Zone.js application — still the common
-  shape on Angular 20 — is not exercised.
+  `provideZonelessChangeDetection()`. A Zone.js application is not exercised,
+  and that is still the common shape on Angular 20.
 - **One Node version.** The one in `.nvmrc`, not each major's own supported
   floor. This is deliberate: the package declares no `engines` field, and the
   peer range is about Angular, not about Node.
@@ -75,7 +75,7 @@ Worth stating plainly, because the gaps are the reason the check is cheap:
   for a range that would otherwise be a guess: `npm run check` type-checks
   against the Angular in this lockfile and proves nothing about the other two.
 
-It is one workflow rather than two copies of the matrix, on purpose — two
+It is one workflow rather than two copies of the matrix, on purpose. Two
 copies drift, and the one a release verifies is the one that would drift
 unnoticed.
 
@@ -88,6 +88,5 @@ supported major can break the package without a single commit here. That is a
 clock, not an event.
 
 A failure is not automatically a bug to fix. Tightening the declared range and
-saying why is an equally valid answer — and since a failure now blocks the
-publish, that answer has to be given before the release goes out rather than
-after.
+saying why is an equally valid answer. Since a failure now blocks the publish,
+that answer has to be given before the release goes out rather than after.

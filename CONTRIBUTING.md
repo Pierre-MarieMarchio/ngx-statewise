@@ -30,7 +30,7 @@ feature ──PR──▶ dev ──PR──▶ next ──PR──▶ main
 
 `main` never diverges: pushing a release to it opens a back-merge pull request
 into both `dev` and `next` automatically. Merge those, or the branches keep
-releasing from a version that no longer matches `main` — which is exactly how
+releasing from a version that no longer matches `main`. That is exactly how
 `next` once ended up two commits behind stable.
 
 ## A change, end to end
@@ -63,9 +63,9 @@ Two things about that table are easy to misread, and both decide a release:
 
 - **No type means "no release".** There is no such row, and there cannot be: the
   preset starts every commit at patch and only ever lowers that level. A release
-  built from nothing but `chore:` and `docs:` still ships a patch — the changelog
-  says `Version bump only for package ngx-statewise`, as it already has three
-  times. Nothing here holds a version back; the commits only decide how far it
+  built from nothing but `chore:` and `docs:` still ships a patch, and the
+  changelog says `Version bump only for package ngx-statewise`, as it already
+  has three times. Nothing here holds a version back; the commits only decide how far it
   moves.
 - **A `!` in the header does nothing at all.** The preset's header pattern leaves
   no room for it, so `feat(effect)!: …` matches nothing and the commit is parsed
@@ -114,19 +114,19 @@ The showcase is tested but deliberately outside the gate.
 > The showcase resolves `ngx-statewise` to `dist/`, not to the sources, so
 > `npm run build:library` has to run before serving or testing it. `npm run check`
 > already orders this correctly. Never rebuild the library while `npm start` is
-> serving — restart the serve instead.
+> serving. Restart the serve instead.
 
 ### What CI adds that `npm run check` cannot
 
 A pull request also faces **SonarCloud**, and nothing local reports it. The scan
 runs in [`ci.yml`](.github/workflows/ci.yml) straight after `npm run check`, on
-the coverage that command has just written —
+the coverage that command has just written.
 [`sonar-project.properties`](sonar-project.properties) says what it reads and
 what it leaves out.
 
 The condition that catches people is **duplication: more than 3% of the new
 lines fails the gate**. Copying one template block into four sibling components
-is enough — 19.6% once, on four copies of a single `matColumnDef`. Specs are
+is enough: 19.6% once, on four copies of a single `matColumnDef`. Specs are
 indexed as tests rather than as sources, so a fixture arranged the same way in
 four files does not count against it; production markup and code do.
 
@@ -178,9 +178,9 @@ quoting. Only `slug`, `title` and `summary` are read; anything else in the
 block is an error rather than a silently ignored line.
 
 **2. Place it** in
-[`guide-pages.ts`](projects/ngx-statewise-docs/src/app/features/guide/guide-pages.ts) —
-an import, and the identifier in the section it belongs to, at the position it
-should be read at:
+[`guide-pages.ts`](projects/ngx-statewise-docs/src/app/features/guide/guide-pages.ts).
+It takes an import, and the identifier in the section it belongs to, at the
+position it should be read at:
 
 ```typescript
 import interceptorsEn from './content/en/interceptors.md';
@@ -210,7 +210,7 @@ Nothing about a page is checked by eye:
 
 - a missing title or summary in either locale, a slug that could not be a URL
   segment, or two pages claiming one slug **fails the prerender and every
-  spec** — the metadata is read while the module loads;
+  spec**, because the metadata is read while the module loads;
 - an import you forgot to place in a section is an unused binding, so
   **`npm run lint`** refuses it;
 - a markdown file no one imported, or a slug that disagrees with its filename,
@@ -235,7 +235,7 @@ type that needs no signature of its own. Names prefixed with `ɵ` are skipped,
 since both the README and the page say they are outside the contract.
 
 To translate a page's prose rather than add one, put the translation at
-`content/<locale>/<slug>.md` — body only, no metadata block — and give the
+`content/<locale>/<slug>.md`, body only and no metadata block, then give the
 registry the object form: `{ source: effectsEn, translations: { fr: effectsFr } }`.
 
 ## Releasing
@@ -250,7 +250,7 @@ gh pr create --base main --head next  # then merge → publishes the stable
 
 Merging into `next` or `main` runs `.github/workflows/release.yml`, which:
 
-1. runs `npm run check` and stops there if it fails — nothing is tagged or published;
+1. runs `npm run check` and stops there if it fails, so nothing is tagged or published;
 2. refuses to continue if the branch moved since the run started;
 3. cuts a `release/…` branch. A required status check applies to a direct push
    as much as to a merge, and the workflow's token has write access rather than
@@ -258,17 +258,17 @@ Merging into `next` or `main` runs `.github/workflows/release.yml`, which:
 4. computes the version, writes `projects/ngx-statewise/CHANGELOG.md`, commits and tags;
 5. rebuilds the library so the published bundle carries the new version, and
    writes the same version into the site's `LIBRARY_VERSION` so both travel in
-   the release commit — without that step `verify:claims` fails on the very
-   next run, on `main` and on the back-merge pull request;
+   the release commit. Without that step `verify:claims` fails on the very next
+   run, on `main` and on the back-merge pull request;
 6. publishes to npm with [provenance](https://docs.npmjs.com/generating-provenance-statements), under the `beta` or `latest` dist-tag;
 7. creates the GitHub release;
 8. opens a pull request for the version commit and merges it once the checks
    that branch requires have passed. The tag and the package exist by then, so
    a pull request that will not merge is a conflict to land by hand rather than
-   a release to redo — and the step says so and fails, instead of leaving the
-   run green with the commit still floating;
-9. on `main`, deploys the documentation site — after the publish, never before,
-   so the site cannot state a version npm does not have;
+   a release to redo. The step says so and fails, instead of leaving the run
+   green with the commit still floating;
+9. on `main`, deploys the documentation site, after the publish and never
+   before, so the site cannot state a version npm does not have;
 10. on `main`, opens the back-merge pull requests.
 
 ### Why `next` exists
@@ -294,7 +294,7 @@ Add `-- --dry-run` to see what it would do without touching anything.
 Set once, with the `gh` CLI:
 
 ```bash
-# Merge commits only — this is what protects the BREAKING CHANGE footers.
+# Merge commits only. This is what protects the BREAKING CHANGE footers.
 gh api -X PATCH repos/:owner/:repo \
   -F allow_squash_merge=false -F allow_rebase_merge=false \
   -F allow_merge_commit=true -F delete_branch_on_merge=true
@@ -302,13 +302,13 @@ gh api -X PATCH repos/:owner/:repo \
 # A green CI run and a passing quality gate on main, next and dev. `main`
 # matters most of the three: it is the branch that publishes.
 #
-# `strict` — "the branch must be up to date with the base" — is true only on
-# main, where the two pull requests that arrive (next, and the release
+# `strict`, meaning "the branch must be up to date with the base", is true
+# only on main, where the two pull requests that arrive (next, and the release
 # workflow's own) are up to date by construction. It has to be false on next
 # and dev, because the back-merge pull request runs the other way: its head is
 # main, and every commit that lands on dev meanwhile leaves it BEHIND. The
 # button GitHub then offers would merge dev into main, which protection
-# refuses — so the back-merge would sit there, and the branches would drift
+# refuses, so the back-merge would sit there and the branches would drift
 # apart exactly as this workflow exists to prevent.
 for branch in next dev; do
   gh api -X PUT "repos/:owner/:repo/branches/$branch/protection" \
@@ -351,8 +351,8 @@ publishes to npm.
 The second command is also why the release workflow builds its version commit
 on a `release/…` branch: those checks bind the release automation exactly as
 they bind you, and GitHub's own Actions app cannot be given a bypass on a
-personal repository — that is an organization-only setting. Nothing is exempt,
-which is the point.
+personal repository, which is an organization-only setting. Nothing is exempt,
+and that is the point.
 
 ### The four things `gh` cannot set
 
@@ -363,14 +363,14 @@ run means.
    Security_ on SonarCloud. `gh secret set SONAR_TOKEN`.
 2. **`SONAR_TOKEN` again, as a Dependabot secret.** Dependabot's runs read a
    separate store, and a pull request of its own that cannot reach SonarCloud
-   never gets the check that `dev` requires — so it sits blocked forever.
+   never gets the check that `dev` requires, so it sits blocked forever.
    `gh secret set SONAR_TOKEN --app dependabot`.
 3. **SonarCloud's Automatic Analysis, off.** _Administration → Analysis
    Method_ on the project. It and the CI scanner are exclusive: while it is
-   on, the scan in `ci.yml` is refused. It is also what makes the coverage
-   worth having — Automatic Analysis reads the repository without the build,
-   so it could never see an lcov file and judged the library's 100% coverage
-   as no coverage at all.
+   on, the scan in `ci.yml` is refused. Turning it off is also what makes the
+   coverage worth having: Automatic Analysis reads the repository without the
+   build, so it could never see an lcov file and judged the library's 100%
+   coverage as no coverage at all.
 4. **Pages, served from GitHub Actions.** `deploy-docs.yml` turns this on by
    itself the first time it runs, through `configure-pages` with
    `enablement: true`. If that ever fails, it is _Settings → Pages → Source:
@@ -379,5 +379,5 @@ run means.
 ## Reporting
 
 Bugs and features go through the [issue templates](.github/ISSUE_TEMPLATE).
-Security reports go to [SECURITY.md](SECURITY.md) instead — not to a public
+Security reports go to [SECURITY.md](SECURITY.md) instead, never to a public
 issue.
