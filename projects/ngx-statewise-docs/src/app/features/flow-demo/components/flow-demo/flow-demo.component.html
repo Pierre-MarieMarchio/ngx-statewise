@@ -52,7 +52,7 @@
         </span>
       </p>
 
-      <ol class="cycle__stations" role="list">
+      <ol class="cycle__stations">
         <li
           class="cycle__station cycle__station--first"
           [class.cycle__station--passed]="demo.hasRun()"
@@ -113,7 +113,7 @@
 
       <div class="readout__panel">
         <p class="readout__title">{{ text().demoJournalTitle }}</p>
-        <ol class="readout__journal" role="list">
+        <ol class="readout__journal">
           @for (entry of demo.journal(); track $index) {
             <li class="readout__entry">
               <code>{{ entry.type }}</code>

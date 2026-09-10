@@ -24,7 +24,7 @@
 
     @if (query().length > 0) {
       @if (results().length > 0) {
-        <ul class="palette__results" role="list">
+        <ul class="palette__results">
           @for (entry of results(); track entry.slug + (entry.fragment ?? '')) {
             <li>
               <button

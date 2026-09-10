@@ -100,7 +100,12 @@
   margin: 0;
   padding: var(--space-2);
   overflow-y: auto;
+  /* An empty marker string rather than `none`: Safari drops list semantics from
+     a list whose marker is `none`, which is what a redundant `role="list"` used
+     to have to put back. Every engine that never had the bug honours the string
+     too, so the role is no longer carrying anything. */
   list-style: none;
+  list-style-type: '';
 }
 
 .palette__result {

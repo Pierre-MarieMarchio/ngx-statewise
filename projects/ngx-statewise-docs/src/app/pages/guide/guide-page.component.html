@@ -77,7 +77,7 @@
 @if (headings().length > 0) {
   <aside class="toc" [attr.aria-label]="text().onThisPage">
     <p class="toc__title">{{ text().onThisPage }}</p>
-    <ul class="toc__list" role="list">
+    <ul class="toc__list">
       @for (heading of headings(); track heading.id) {
         <li class="toc__item" [class.toc__item--nested]="heading.depth > 2">
           <a
