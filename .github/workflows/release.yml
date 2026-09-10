@@ -202,8 +202,11 @@ jobs:
   docs:
     name: Documentation site
     needs: release
-    # `next` publishes a beta; the site documents what `latest` installs.
-    if: github.ref_name == 'main'
+    # Both branches, because both publish something installable and the site
+    # states the version it documents. Without this on `next`, a beta would
+    # leave the site behind: the version commit's own push is skipped by the
+    # `chore(release):` guard in deploy-docs.yml, so nothing else would carry
+    # the new number to the site.
     uses: ./.github/workflows/deploy-docs.yml
     with:
       after-release: true
