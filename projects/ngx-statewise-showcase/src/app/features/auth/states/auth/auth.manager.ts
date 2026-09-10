@@ -1,43 +1,45 @@
 import { computed, inject, Injectable } from '@angular/core';
-import { dispatch, dispatchAsync, registerLocalUpdator } from 'ngx-statewise';
+import { injectStatewise } from 'ngx-statewise';
 import { AuthState } from './auth.state';
 import {
   authenticateActions,
   loginActions,
   logoutActions,
 } from './auth.action';
-import { AuthUpdator } from './auth.updator';
-import { IAuthManager } from '@shared/app-common/tokens';
+import { authUpdater } from './auth.updater';
 import { LoginSubmit } from '../../models';
+import { IAuthSession } from '@app/features/common';
 
 @Injectable({
   providedIn: 'root',
 })
-export class AuthManager implements IAuthManager {
+export class AuthManager implements IAuthSession {
   private readonly authStates = inject(AuthState);
-  private readonly authUpdator = inject(AuthUpdator);
+  private readonly statewise = injectStatewise(authUpdater);
 
-  constructor() {
-    registerLocalUpdator(this, this.authUpdator);
-  }
+  public readonly user = this.authStates.user.asReadonly();
+  public readonly isLoggedIn = this.authStates.isLoggedIn.asReadonly();
+  public readonly isLoading = this.authStates.isLoading.asReadonly();
+  public readonly isError = this.authStates.isError.asReadonly();
 
-  public readonly user = computed(() => this.authStates.user());
-  public readonly isLoggedIn = computed(() => this.authStates.isLoggedIn());
-  public readonly isLoading = computed(() => this.authStates.isLoading());
+  /**
+   * The organisation's members. Read outside auth through a port another
+   * feature declares, never by importing this manager.
+   */
+  public readonly members = this.authStates.members.asReadonly();
 
-  public async login(credential: LoginSubmit): Promise<void> {
-    await dispatchAsync(loginActions.request(credential), this);
+  /** Derived rather than stored: the role lives in the user, nowhere else. */
+  public readonly isAdmin = computed(() => this.user()?.role === 'admin');
+
+  public login(credential: LoginSubmit): Promise<void> {
+    return this.statewise.dispatchAsync(loginActions.request(credential));
   }
 
   public authenticate(): Promise<void> {
-    return dispatchAsync(authenticateActions.request(), this);
-  }
-
-  public authenticateT(): void {
-    dispatch(authenticateActions.request(), this);
+    return this.statewise.dispatchAsync(authenticateActions.request());
   }
 
   public logout(): void {
-    dispatch(logoutActions.request(), this);
+    this.statewise.dispatch(logoutActions.request());
   }
 }

@@ -1,0 +1,11 @@
+<app-data-state
+  label="session"
+  [loading]="authManager.isLoading()"
+  [error]="authManager.isError()"
+  errorMessage="Those credentials were refused. Check them and try again."
+/>
+
+<app-login-form
+  [pending]="authManager.isLoading()"
+  (formSubmit)="onFormSubmit($event)"
+/>

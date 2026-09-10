@@ -14,14 +14,6 @@ export class AuthNotificationService {
   public horizontalPosition: MatSnackBarHorizontalPosition = 'end';
   public verticalPosition: MatSnackBarVerticalPosition = 'bottom';
 
-  loginSuccess() {
-    this.snackBar.open('Login successful', 'Close', {
-      duration: 3000,
-      horizontalPosition: this.horizontalPosition,
-      verticalPosition: this.verticalPosition,
-    });
-  }
-
   loginFailure() {
     this.snackBar.open('Login failed', 'Close', {
       duration: 3000,

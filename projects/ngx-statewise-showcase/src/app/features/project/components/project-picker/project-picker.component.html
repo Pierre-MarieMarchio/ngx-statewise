@@ -1,0 +1,59 @@
+<div class="project-picker">
+  @if (!projectManager.projects().length) {
+    <p class="empty-state">No project yet. Create one to put a task in it.</p>
+  } @else {
+    <ul class="project-picker-list">
+      <!--
+        The way back to all of them. It is a row like the others rather than a
+        "clear" button somewhere else, because unchoosing is choosing.
+      -->
+      <li>
+        <button
+          type="button"
+          class="project-picker-row"
+          [class.is-current]="projectManager.selectedProjectId() === null"
+          [attr.aria-current]="
+            projectManager.selectedProjectId() === null ? 'true' : null
+          "
+          (click)="choose(null)"
+        >
+          <span class="project-picker-name">All projects</span>
+          <span class="project-picker-counts">{{ counted(total()) }}</span>
+        </button>
+      </li>
+
+      @for (row of rows(); track row.project.id) {
+        <li>
+          <button
+            type="button"
+            class="project-picker-row"
+            [class.is-current]="
+              projectManager.selectedProjectId() === row.project.id
+            "
+            [attr.aria-current]="
+              projectManager.selectedProjectId() === row.project.id
+                ? 'true'
+                : null
+            "
+            (click)="choose(row.project.id)"
+          >
+            <span
+              class="project-picker-tag"
+              [class]="'tag-' + row.project.color"
+              aria-hidden="true"
+            ></span>
+            <span class="project-picker-name">{{ row.project.title }}</span>
+            <span class="project-picker-counts">
+              {{ counted(row.total) }} — {{ row.counts.todo }} to do,
+              {{ row.counts['in-progress'] }} in progress,
+              {{ row.counts.done }} done
+            </span>
+            <mat-icon class="project-picker-go" aria-hidden="true"
+              >chevron_right</mat-icon
+            >
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</div>

@@ -2,8 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { User } from '@shared/app-common/models/auth-user.model';
-import { Project } from '../models';
+import { Project, ProjectDraft } from '../models';
 
 @Injectable({
   providedIn: 'root',
@@ -12,14 +11,31 @@ export class ProjectRepositoryService {
   private readonly http = inject(HttpClient);
   private readonly API_BASE_URL = `${environment.API_BASE_URL}/Project`;
 
-  getAll(user: User): Observable<Project[]> {
-    const params = this.buildAccessParams(user);
+  getAll(userId: string): Observable<Project[]> {
+    const params = this.buildAccessParams(userId);
     return this.http.get<Project[]>(this.API_BASE_URL, { params });
   }
 
-  private buildAccessParams(user: User): HttpParams {
+  create(draft: ProjectDraft, userId: string): Observable<Project> {
+    const params = this.buildAccessParams(userId);
+    return this.http.post<Project>(this.API_BASE_URL, draft, { params });
+  }
+
+  update(project: Project, userId: string): Observable<Project> {
+    const params = this.buildAccessParams(userId).set('projectId', project.id);
+
+    return this.http.patch<Project>(this.API_BASE_URL, project, { params });
+  }
+
+  delete(projectId: string, userId: string): Observable<unknown> {
+    const params = this.buildAccessParams(userId).set('projectId', projectId);
+
+    return this.http.delete(this.API_BASE_URL, { params });
+  }
+
+  private buildAccessParams(userId: string): HttpParams {
     let params = new HttpParams();
-    params = params.set('userId', user.userId);
+    params = params.set('userId', userId);
     return params;
   }
 }

@@ -1,0 +1,25 @@
+# Prettier already honours .gitignore, so most build output needs no entry
+# here. Two things still do: files git tracks but no one writes by hand, and
+# generated directories .gitignore only covers in part.
+
+# --- Tracked, but generated: formatting them would fight the tool that writes them
+package-lock.json
+CHANGELOG.md
+projects/*/CHANGELOG.md
+
+# --- Generated directories .gitignore does not cover in full
+# .gitignore only lists /.angular/cache, and nothing for the nx cache lerna brings
+.angular
+.nx
+
+# --- Build and tool output, also gitignored: kept explicit so an invocation
+# passing --ignore-path (which drops .gitignore) still skips them
+dist
+out-tsc
+bazel-out
+tmp
+coverage
+node_modules
+
+# --- Agent worktrees: another session's checkout, not this project's source
+.claude

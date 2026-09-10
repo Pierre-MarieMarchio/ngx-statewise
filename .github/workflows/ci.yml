@@ -1,0 +1,83 @@
+name: CI
+
+# The gate a change is expected to pass, run where it can still be fixed:
+# on the pull request, and again on dev once it lands.
+on:
+  pull_request:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Validate workspace
+    runs-on: ubuntu-latest
+
+    env:
+      # Whether this run can reach SonarCloud at all. A pull request from a
+      # fork and a Dependabot pull request both run without repository
+      # secrets, so the answer is no for reasons the contributor cannot fix.
+      # Reading it here rather than in the step is what keeps the token itself
+      # out of every other step's environment, install scripts included.
+      HAS_SONAR_TOKEN: ${{ secrets.SONAR_TOKEN != '' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          # Sonar dates an issue by the commit that introduced it, which it
+          # reads from the blame. A shallow clone has no blame, so every line
+          # in the repository would look new on every run.
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      # `--ignore-scripts`: no dependency here needs a lifecycle script to
+      # build, and the only one the workspace declares is husky, which
+      # installs git hooks a runner has no use for.
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Check formatting, lint, tests, coverage and builds
+        run: npm run check
+
+      # After the check, never beside it: the scan reports the coverage that
+      # `test:coverage` just wrote, and a scan of a run that failed halfway
+      # would post a coverage drop that is an artefact of the failure rather
+      # than a fact about the code.
+      #
+      # What this replaces is SonarCloud's Automatic Analysis, which reads the
+      # repository without the build and so could not see coverage at all.
+      # The two are exclusive — Automatic Analysis has to be off in the
+      # project's settings, or this is refused. See sonar-project.properties.
+      - name: Analyse with SonarCloud
+        if: env.HAS_SONAR_TOKEN == 'true'
+        # Pinned to the commit rather than to the tag: a tag is a pointer its
+        # owner can move, and this is the one action here that is not
+        # GitHub's own. Dependabot reads the trailing comment and bumps both.
+        uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+
+      - name: Say why the analysis was skipped
+        if: env.HAS_SONAR_TOKEN != 'true'
+        run: |
+          {
+            echo "## SonarCloud"
+            echo
+            echo "Skipped: this run has no \`SONAR_TOKEN\`, which is what a"
+            echo "pull request from a fork and a Dependabot pull request both"
+            echo "look like. The quality gate is reported on runs that do."
+          } >> "$GITHUB_STEP_SUMMARY"

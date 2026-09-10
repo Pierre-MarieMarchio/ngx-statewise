@@ -1,5 +1,9 @@
 <div class="content">
-  <app-navigation  [navigationitems]="navigationItems" />
+  <app-nav-shell
+    [navigationItems]="navigationItems"
+    [isLoggedIn]="auth.isLoggedIn()"
+    (logout)="auth.logout()"
+  />
   <div class="nav-content">
     <router-outlet />
   </div>

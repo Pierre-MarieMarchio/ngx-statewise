@@ -1,0 +1,94 @@
+<div class="history-page-container">
+  <h1 class="history-page-header">History</h1>
+  <p class="history-page-intro">
+    The last dispatched actions, oldest first, recorded application-wide once
+    <code>provideStatewise({{ '{' }} history {{ '}' }})</code> sets a limit.
+    <code>recordedActions()</code> hands back a snapshot, so this table shows
+    what the last read saw. Payloads are kept verbatim, credentials and tokens
+    included, and only shortened here for reading.
+  </p>
+
+  <div class="history-page-actions">
+    <button class="primary-btn" mat-stroked-button (click)="raiseNotice()">
+      Raise a notice
+    </button>
+    <button class="primary-btn" mat-stroked-button (click)="incrementTally()">
+      Increment the tally
+    </button>
+    <button class="primary-btn" mat-stroked-button (click)="reloadTasks()">
+      Reload the tasks
+    </button>
+    <button mat-button (click)="refresh()">Refresh</button>
+  </div>
+
+  <!--
+    The listbox owns the selection, and says so through `change`. A `(click)`
+    on the option never fired under a keyboard: `MatChipAction` calls
+    `preventDefault()` on ENTER and SPACE, which also removes the click the
+    browser would have synthesised.
+  -->
+  <mat-chip-listbox
+    class="history-page-counts"
+    aria-label="Filter by action"
+    [value]="selectedType()"
+    (change)="filterBy($event.value)"
+  >
+    @for (tracked of counts(); track tracked.type) {
+      <mat-chip-option
+        [value]="tracked.type"
+        [attr.data-tracked]="tracked.type"
+      >
+        {{ tracked.label }} — {{ tracked.count }}
+      </mat-chip-option>
+    }
+  </mat-chip-listbox>
+
+  <p class="history-page-summary" aria-live="polite">
+    <span data-readout="total">{{ total() }}</span> recorded
+    @if (selectedType(); as selected) {
+      <span>
+        , filtered on <code data-readout="filter">{{ selected }}</code>
+        <button mat-button (click)="clearFilter()">Clear the filter</button>
+      </span>
+    }
+  </p>
+
+  <table mat-table [dataSource]="rows()" class="history-page-table">
+    <ng-container matColumnDef="position">
+      <th mat-header-cell *matHeaderCellDef>#</th>
+      <td mat-cell *matCellDef="let row">{{ row.position }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="type">
+      <th mat-header-cell *matHeaderCellDef>Action</th>
+      <td mat-cell *matCellDef="let row">
+        <code>{{ row.type }}</code>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="cascade">
+      <th mat-header-cell *matHeaderCellDef>Cascade</th>
+      <td mat-cell *matCellDef="let row">
+        <code>{{ row.cascade }}</code>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="payload">
+      <th mat-header-cell *matHeaderCellDef>Payload</th>
+      <td mat-cell *matCellDef="let row" class="history-page-payload">
+        {{ row.payload }}
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+
+  <output class="history-page-readout">
+    @if (rows().length === 0) {
+      <p class="history-page-empty" data-readout="empty">
+        Nothing read yet. Dispatch something, or press refresh.
+      </p>
+    }
+  </output>
+</div>

@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthManager } from '../states';
 
-export const loggedOutGuard: CanActivateFn = (route, state) => {
+export const loggedOutGuard: CanActivateFn = () => {
   const authManager = inject(AuthManager);
   const router = inject(Router);
 

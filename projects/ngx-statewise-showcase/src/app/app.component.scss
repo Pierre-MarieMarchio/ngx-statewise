@@ -4,13 +4,48 @@
   width: 100%;
 }
 
+/*
+ * A page starts at the top of the area it is given.
+ *
+ * `align-items: center` and `justify-content: center` centred every page in
+ * the viewport, which meant two behaviours out of one rule: a short page
+ * floated in the middle of the screen, and a long one sat against the top with
+ * its heading half a screen from where the short page had put it.
+ *
+ * `container-type: inline-size` names this box for the layouts inside it. The
+ * one media query in the application measured the window, and the window is
+ * not what a page is laid out in. The rail takes 80 to 110 px off it first,
+ * so a rule written for 1080 fired at about 990. A container query asks the
+ * box itself, and the rail's width stops being a number to keep in step.
+ */
 .nav-content {
   box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-grow: 1;
   width: calc(100% - var(--nav-width));
   overflow-y: auto;
   overflow-x: auto;
+  container-type: inline-size;
+  container-name: page;
+}
+
+/*
+ * Under a phone's width the rail lies down: five destinations across the
+ * bottom, where a thumb is, and the whole width back for the board, which is
+ * the one thing on this screen that has never had enough of it. A drawer would
+ * have hidden the navigation behind a gesture and added a focus trap for five
+ * links; a narrow rail would have gone on charging 20% of a 390 px screen for
+ * what a bar can carry in 56 px of height.
+ */
+@media (max-width: 600px) {
+  .content {
+    flex-direction: column;
+    max-height: none;
+    min-height: 100vh;
+  }
+
+  .nav-content {
+    width: 100%;
+    /* The bar is fixed, so the page keeps its own last screenful readable. */
+    padding-bottom: 4rem;
+  }
 }

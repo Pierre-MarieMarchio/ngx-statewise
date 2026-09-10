@@ -1,0 +1,216 @@
+<!--
+  The mark is the counterweight, not the opening: the header already carries
+  the name, and stacking the lockup above the argument pushed the argument
+  down while leaving half the row empty. Here it holds the right of the hero
+  and the sentence gets the left, which is the half a reader starts on.
+-->
+<section class="hero">
+  <h1 class="hero__title">
+    <span class="visually-hidden">ngx-statewise</span>
+    <img
+      class="hero__logo"
+      src="landing-page-logo.png"
+      alt=""
+      aria-hidden="true"
+      width="800"
+      height="520"
+    />
+  </h1>
+
+  <div class="hero__lead">
+    <p class="hero__subtitle">{{ text().homeSubtitle }}</p>
+
+    <p class="hero__thesis">{{ text().homeThesis }}</p>
+
+    <p class="hero__tagline">{{ text().homeTagline }}</p>
+
+    <div class="hero__actions">
+      <a
+        class="button button--primary"
+        [routerLink]="pageLink('getting-started')"
+      >
+        {{ text().homeGetStarted }}
+      </a>
+      <a class="button" [routerLink]="pageLink('introduction')">
+        {{ text().homeReadTheGuide }}
+      </a>
+      <code class="hero__install">npm install ngx-statewise</code>
+    </div>
+
+    <p class="hero__size">{{ sizeSentence() }}</p>
+  </div>
+</section>
+
+<docs-flow-demo class="landing__demo" />
+
+<!--
+  The same three stations, in the same order and the same colours, as the code
+  you would write. The effect panel lights while the effect above it is
+  running, so the drawing, the code and the state are one thing.
+-->
+<section class="shape" aria-labelledby="shape-title">
+  <h2 class="shape__title" id="shape-title">{{ text().homeShapeTitle }}</h2>
+
+  <ol class="shape__steps">
+    <li class="shape__step shape__step--sync">
+      <p class="shape__step-name">{{ text().homeFlowAction }}</p>
+      <div class="code-block">
+        <pre
+          class="code-block__pre"
+        ><code>export const loginActions = defineActionsGroup(&#123;
+  source: 'LOGIN',
+  events: &#123;
+    request: payload&lt;Credentials&gt;(),
+    success: payload&lt;Session&gt;(),
+    failure: emptyPayload,
+  &#125;,
+&#125;);</code></pre>
+      </div>
+    </li>
+
+    <li class="shape__step shape__step--sync">
+      <p class="shape__step-name">{{ text().homeFlowUpdater }}</p>
+      <div class="code-block">
+        <pre
+          class="code-block__pre"
+        ><code>export const authUpdater = defineUpdater(AuthState, (on) =&gt; &#123;
+  on(loginActions.request, (state) =&gt; &#123;
+    state.isLoading.set(true);
+  &#125;);
+
+  on(loginActions.success, (state, session) =&gt; &#123;
+    state.user.set(session.user);
+    state.isLoading.set(false);
+  &#125;);
+&#125;);</code></pre>
+      </div>
+    </li>
+
+    <li
+      class="shape__step shape__step--async"
+      [class.shape__step--running]="demo.station() === 'effect'"
+    >
+      <p class="shape__step-name">{{ text().homeFlowEffect }}</p>
+      <div class="code-block">
+        <pre
+          class="code-block__pre"
+        ><code>public readonly loginEffect = createEffect(
+  loginActions.request,
+  async (credentials) =&gt; &#123;
+    const session = await this.auth.login(credentials);
+    return loginActions.success(session);
+  &#125;,
+);</code></pre>
+      </div>
+    </li>
+  </ol>
+
+  <p class="shape__note">{{ text().homeShapeNote }}</p>
+</section>
+
+<section class="compare" aria-labelledby="compare-title">
+  <h2 class="compare__title" id="compare-title">
+    {{ text().homeCompareTitle }}
+  </h2>
+
+  <!--
+    A fieldset, not a region: the section around it is already a landmark with
+    this name, and two landmarks sharing one name cannot be told apart. It is
+    the element `role="group"` was standing in for, and it is not a landmark.
+    The tabindex is what a keyboard needs to scroll it.
+  -->
+  <fieldset
+    class="compare__scroll"
+    tabindex="0"
+    [attr.aria-label]="text().homeCompareTitle"
+  >
+    <table class="compare__table">
+      <thead>
+        <tr>
+          <th scope="col"></th>
+          <th scope="col">{{ text().homeCompareByHand }}</th>
+          <th scope="col">{{ text().homeCompareWith }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of comparison; track row.axis.en) {
+          <tr>
+            <th scope="row">{{ row.axis[locale.code] }}</th>
+            <td>{{ row.byHand[locale.code] }}</td>
+            <td class="compare__ours">{{ row.withLibrary[locale.code] }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </fieldset>
+</section>
+
+<section class="not-for" aria-labelledby="not-for-title">
+  <h2 class="not-for__title" id="not-for-title">
+    {{ text().homeNotForTitle }}
+  </h2>
+  <p class="not-for__lead">{{ text().homeNotForLead }}</p>
+
+  <ul class="not-for__list">
+    @for (reason of notFor; track reason.en) {
+      <li class="not-for__item">{{ reason[locale.code] }}</li>
+    }
+  </ul>
+</section>
+
+<section class="doors" aria-labelledby="doors-title">
+  <h2 class="doors__title" id="doors-title">{{ text().homeDoorsTitle }}</h2>
+
+  <ul class="doors__list">
+    @for (door of doors; track door.title.en) {
+      <li>
+        <ng-template #doorBody>
+          <span class="doors__door-title">{{ door.title[locale.code] }}</span>
+          <span class="doors__door-text">{{ door.text[locale.code] }}</span>
+        </ng-template>
+
+        @if (doorLink(door); as link) {
+          <a class="doors__door" [routerLink]="link">
+            <ng-container [ngTemplateOutlet]="doorBody" />
+          </a>
+        } @else {
+          <a
+            class="doors__door"
+            [href]="door.href"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <ng-container [ngTemplateOutlet]="doorBody" />
+          </a>
+        }
+      </li>
+    }
+  </ul>
+</section>
+
+<section class="contents" aria-labelledby="contents-title">
+  <h2 class="contents__title" id="contents-title">
+    {{ text().homeContentsTitle }}
+  </h2>
+  @for (section of sections; track section.title.en) {
+    <div class="contents__section">
+      <h3 class="contents__section-title">
+        {{ section.title[locale.code] }}
+      </h3>
+      <ul class="contents__list">
+        @for (page of section.pages; track page.slug) {
+          <li>
+            <a class="contents__link" [routerLink]="pageLink(page.slug)">
+              <span class="contents__link-title">
+                {{ page.title[locale.code] }}
+              </span>
+              <span class="contents__link-summary">
+                {{ page.summary[locale.code] }}
+              </span>
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</section>

@@ -1,0 +1,155 @@
+/* The native <dialog> gives focus trapping, Escape and the backdrop; only the
+   look and the entrance are ours. */
+.dialog {
+  width: min(36rem, calc(100vw - 2rem));
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  /* Sits high rather than centred: the results grow downwards, and a centred
+     dialog would jump as they do. */
+  position: fixed;
+  inset: 0;
+  margin-top: 12vh;
+  margin-inline: auto;
+
+  &::backdrop {
+    background-color: rgb(0 0 0 / 45%);
+    backdrop-filter: blur(2px);
+    animation: backdrop-in var(--duration-fast) var(--ease-out) both;
+  }
+
+  &[open] .palette {
+    animation: palette-in var(--duration-normal) var(--ease-emphasised) both;
+  }
+}
+
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes palette-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.99);
+  }
+}
+
+.palette {
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background-color: var(--surface-raised);
+  box-shadow: var(--shadow-raised);
+}
+
+.palette__field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 3rem;
+  padding: 0 var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.palette__icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: none;
+  color: var(--text-faint);
+}
+
+.palette__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--text-strong);
+  font: inherit;
+  font-size: var(--text-md);
+
+  &:focus {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: var(--text-faint);
+  }
+
+  /* The browser's own clear button duplicates Escape and breaks the layout. */
+  &::-webkit-search-cancel-button {
+    display: none;
+  }
+}
+
+.palette__hint {
+  flex: none;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-faint);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+}
+
+.palette__results {
+  max-height: min(24rem, 60vh);
+  margin: 0;
+  padding: var(--space-2);
+  overflow-y: auto;
+  /* An empty marker string rather than `none`: Safari drops list semantics from
+     a list whose marker is `none`, which is what a redundant `role="list"` used
+     to have to put back. Every engine that never had the bug honours the string
+     too, so the role is no longer carrying anything. */
+  list-style: none;
+  list-style-type: '';
+}
+
+.palette__result {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  /* No transition: the active row follows the arrow keys, and easing it makes
+     holding a key feel like lag. */
+}
+
+.palette__result--active {
+  background-color: var(--surface-hover);
+
+  .palette__result-title {
+    color: var(--mark);
+  }
+}
+
+.palette__result-title {
+  color: var(--text-strong);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+}
+
+.palette__result-context {
+  margin-left: auto;
+  flex: none;
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+}
+
+.palette__empty {
+  margin: 0;
+  padding: var(--space-5) var(--space-4);
+  color: var(--text-faint);
+  font-size: var(--text-base);
+  text-align: center;
+}

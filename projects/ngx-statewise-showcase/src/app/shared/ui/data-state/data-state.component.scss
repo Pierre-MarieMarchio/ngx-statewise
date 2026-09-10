@@ -1,0 +1,15 @@
+.data-state-progress {
+  display: block;
+}
+
+/* The frame itself is `.error-notice`, shared with the forms in the panel. */
+
+.data-state-error-icon {
+  flex: 0 0 auto;
+  color: var(--mat-sys-error);
+}
+
+.data-state-error-message {
+  flex: 1 1 auto;
+  min-width: 12rem;
+}

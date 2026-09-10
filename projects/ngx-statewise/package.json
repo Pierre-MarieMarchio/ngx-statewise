@@ -1,14 +1,20 @@
 {
   "name": "ngx-statewise",
-  "version": "0.6.4-beta.1",
-  "description": "A lightweight and intuitive state management for Angular. Simpler than NgRx, more structured than DIY.",
+  "version": "0.6.4",
+  "description": "State management for Angular, built on signals. An action says what happened, an updater applies it synchronously, an effect does the asynchronous work.",
   "peerDependencies": {
-    "@angular/common": "^19.2.0 || ^20.0.0",
-    "@angular/core": "^19.2.0 || ^20.0.0"
+    "@angular/core": "^20.0.0 || ^21.0.0 || ^22.0.0",
+    "rxjs": "^7.4.0"
+  },
+  "author": "Pierre-Marie Marchio (https://github.com/Pierre-MarieMarchio)",
+  "homepage": "https://pierre-mariemarchio.github.io/ngx-statewise/",
+  "bugs": {
+    "url": "https://github.com/Pierre-MarieMarchio/ngx-statewise/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Pierre-MarieMarchio/ngx-statewise"
+    "url": "git+https://github.com/Pierre-MarieMarchio/ngx-statewise.git",
+    "directory": "projects/ngx-statewise"
   },
   "keywords": [
     "angular",
@@ -25,10 +31,8 @@
     "reactivity",
     "rxjs",
     "observable",
-    "lightweight",
     "modular",
     "scalable",
-    "intuitive",
     "clean-architecture",
     "ngrx",
     "ngxs",
@@ -58,5 +62,9 @@
   "dependencies": {
     "tslib": "^2.3.0"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "devDependencies": {
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.6"
+  }
 }

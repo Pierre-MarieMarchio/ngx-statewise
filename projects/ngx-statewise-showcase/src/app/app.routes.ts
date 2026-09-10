@@ -1,40 +1,67 @@
 import { Routes } from '@angular/router';
-import { LandingPageComponent } from './features/landing-page/landing-page.component';
-import { LoginPageComponent } from './features/auth/pages/login-page.component';
-import { DashboardPageComponent } from './features/dashboard/pages';
-import { TaskPageComponent } from './features/task/pages';
 import { loggedInGuard, loggedOutGuard } from './features/auth/guards';
-import { ProjectsPageComponent } from './features/project/pages';
 
+/**
+ * Every page is loaded on navigation: keeping them eager put the whole
+ * application, Angular Material included, in the initial bundle.
+ *
+ * Each one names itself in the document title. They all read `Ngx-Statewise`
+ * before, so a tab, a bookmark and a history entry told you nothing about
+ * where you were.
+ */
 export const routes: Routes = [
   {
     path: '',
-    component: LandingPageComponent,
+    loadComponent: () =>
+      import('./pages/landing/landing-page.component').then(
+        (m) => m.LandingPageComponent,
+      ),
     title: 'Ngx-Statewise',
     canActivate: [loggedInGuard],
   },
   {
     path: 'login',
-    component: LoginPageComponent,
-    title: 'Ngx-Statewise',
+    loadComponent: () =>
+      import('./pages/login/login-page.component').then(
+        (m) => m.LoginPageComponent,
+      ),
+    title: 'Ngx-Statewise — Sign in',
     canActivate: [loggedInGuard],
   },
   {
     path: 'home',
-    component: DashboardPageComponent,
-    title: 'Ngx-Statewise',
+    loadComponent: () =>
+      import('./pages/dashboard/dashboard-page.component').then(
+        (m) => m.DashboardPageComponent,
+      ),
+    title: 'Ngx-Statewise — Dashboard',
     canActivate: [loggedOutGuard],
   },
   {
     path: 'task',
-    component: TaskPageComponent,
-    title: 'Ngx-Statewise',
+    loadComponent: () =>
+      import('./pages/board/board-page.component').then(
+        (m) => m.BoardPageComponent,
+      ),
+    title: 'Ngx-Statewise — Tasks',
     canActivate: [loggedOutGuard],
   },
   {
-    path: 'project',
-    component: ProjectsPageComponent,
-    title: 'Ngx-Statewise',
+    path: 'state',
+    loadComponent: () =>
+      import('./pages/inspection-live/inspection-live-page.component').then(
+        (m) => m.InspectionLivePageComponent,
+      ),
+    title: 'Ngx-Statewise — State',
+    canActivate: [loggedOutGuard],
+  },
+  {
+    path: 'history',
+    loadComponent: () =>
+      import('./pages/inspection-history/inspection-history-page.component').then(
+        (m) => m.InspectionHistoryPageComponent,
+      ),
+    title: 'Ngx-Statewise — History',
     canActivate: [loggedOutGuard],
   },
 ];

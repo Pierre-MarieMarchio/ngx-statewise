@@ -3,5 +3,6 @@
   "dest": "../../dist/ngx-statewise",
   "lib": {
     "entryFile": "src/public-api.ts"
-  }
+  },
+  "assets": ["LICENSE", "CHANGELOG.md"]
 }

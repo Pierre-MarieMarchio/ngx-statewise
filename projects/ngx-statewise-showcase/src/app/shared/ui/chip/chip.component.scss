@@ -1,0 +1,29 @@
+:host {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: 0.15rem var(--space-2);
+  border-radius: 1rem;
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+
+.chip-icon {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  font-size: 1rem;
+}
+
+.chip-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

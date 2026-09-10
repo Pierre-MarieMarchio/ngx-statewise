@@ -1,3 +1,9 @@
+/*
+ * A row is not interactive: its one action is the button in the last cell. So
+ * it gets the hover tint that helps an eye follow a line across, and neither a
+ * pointer cursor nor press feedback, both of which would promise a click that
+ * nothing answers.
+ */
 .mat-mdc-row.mdc-data-table__row {
   background-color: var(--mat-sys-background);
   color: var(--color-secondary);
@@ -6,14 +12,12 @@
     color: var(--mat-sys-on-background);
     background-color: var(--mat-table-row-item-hover-state-layer-color);
   }
+}
 
-  &:active {
-    color: var(--mat-sys-on-background);
-    background-color: var(--mat-table-row-item-hover-state-layer-color);
-  }
-  
-
-  &.clickable-row {
-    cursor: pointer;
-  }
+/* The action column carries a button, not content: it takes what it needs. */
+.mat-mdc-header-cell.open-cell,
+.mat-mdc-cell.open-cell {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
 }

@@ -1,6 +1,6 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, EMPTY, from, switchMap, throwError } from 'rxjs';
+import { catchError, from, switchMap, throwError } from 'rxjs';
 import { AuthTokenService } from '../services';
 import { AuthManager } from '../states';
 
@@ -32,10 +32,12 @@ export const accessTokenInterceptor: HttpInterceptorFn = (req, next) => {
               },
             });
             return next(newReq);
-          })
+          }),
         );
       }
-      return EMPTY;
-    })
+      // Anything else belongs to the caller: swallowing it left the effect
+      // with an empty source and the state with nothing to report.
+      return throwError(() => err);
+    }),
   );
 };

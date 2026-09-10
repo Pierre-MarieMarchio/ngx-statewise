@@ -1,0 +1,62 @@
+/* <output> carries the status role natively, and is inline by default. */
+.history-page-readout {
+  display: block;
+}
+
+.history-page-container {
+  padding: 0 2rem 2rem;
+  max-width: 70rem;
+}
+
+.history-page-header {
+  margin-bottom: 0;
+}
+
+.history-page-intro {
+  margin-top: 0;
+  max-width: 55rem;
+  line-height: 1.5;
+  opacity: 0.75;
+}
+
+.history-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.history-page-counts {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.history-page-summary {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.history-page-table {
+  width: 100%;
+
+  code {
+    font-size: 0.8rem;
+  }
+}
+
+.history-page-payload {
+  max-width: 28rem;
+  overflow-wrap: anywhere;
+  font-family: monospace;
+  font-size: 0.75rem;
+}
+
+.history-page-empty {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+button {
+  cursor: pointer;
+}

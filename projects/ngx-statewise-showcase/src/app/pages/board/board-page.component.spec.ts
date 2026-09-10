@@ -1,0 +1,450 @@
+import { TestBed } from '@angular/core/testing';
+import {
+  fakeAuthManager,
+  fakeAuthSession,
+  fakeProjectManager,
+  FakeProjectManager,
+  fakeTaskManager,
+  FakeTaskManager,
+  fakeTeamDirectory,
+  sampleProject,
+  sampleTask,
+} from '@testing/fake-managers';
+import { BoardPageComponent } from './board-page.component';
+import { AuthManager } from '@app/features/auth/states';
+import { AUTH_SESSION } from '@app/features/common';
+import { TEAM_DIRECTORY } from '@app/features/project/ports';
+import { ProjectManager } from '@app/features/project/states/project/project.manager';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
+
+describe('BoardPageComponent', () => {
+  let taskManager: FakeTaskManager;
+  let projectManager: FakeProjectManager;
+
+  const mount = async () => {
+    taskManager = fakeTaskManager([
+      sampleTask(),
+      sampleTask({ id: 'elsewhere', projectId: 'project-2' }),
+    ]);
+    projectManager = fakeProjectManager([
+      sampleProject(),
+      sampleProject({ id: 'project-2', title: 'Customer Portal' }),
+    ]);
+
+    await TestBed.configureTestingModule({
+      imports: [BoardPageComponent],
+      providers: [
+        { provide: AuthManager, useValue: fakeAuthManager() },
+        // The lists this page mounts read the session through the kernel's
+        // port, not through the manager the page itself injects.
+        { provide: AUTH_SESSION, useValue: fakeAuthSession() },
+        { provide: TaskManager, useValue: taskManager },
+        { provide: ProjectManager, useValue: projectManager },
+        // The details panel names its assignees through the port
+        // `features/project` declares and the composition answers.
+        { provide: TEAM_DIRECTORY, useValue: fakeTeamDirectory() },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(BoardPageComponent);
+    fixture.detectChanges();
+    return fixture;
+  };
+
+  /**
+   * The page narrows to one project, and every tab narrows with it. A lens,
+   * not a fourth list. With none chosen it goes on showing all of them.
+   */
+  describe('the project the page is looking at', () => {
+    it('shows every task until one is chosen', async () => {
+      const fixture = await mount();
+
+      expect(fixture.componentInstance.currentProject.taskCount()).toBe(2);
+    });
+
+    it('narrows to the project the selector names', async () => {
+      const fixture = await mount();
+
+      projectManager.selectProject('project-2');
+      fixture.detectChanges();
+
+      expect(
+        fixture.componentInstance.currentProject.tasks().map((task) => task.id),
+      ).toEqual(['elsewhere']);
+    });
+
+    /*
+     * The choosing itself is the picker's, and its own spec presses the row.
+     * What belongs here is what the page does about it, asserted through the
+     * method the template binds, because a tab body Material has not attached
+     * yet holds no row to press.
+     */
+    it('brings the board into view once a project is chosen', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+
+      component.selectedTab.set(3);
+      component.onProjectChosen();
+
+      expect(component.selectedTab()).toBe(0);
+    });
+  });
+
+  it('offers one tab per task view', async () => {
+    const fixture = await mount();
+
+    expect(
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          '.mat-mdc-tab .mdc-tab__text-label',
+        ),
+      ).map((label) => label.textContent?.replace(/\s+/g, ' ').trim()),
+    ).toEqual([
+      'view_kanban Kanban',
+      'view_list All Tasks',
+      'person My Tasks',
+      'construction Projects',
+    ]);
+  });
+
+  /**
+   * Two of the four tabs group by project, so a project load that failed has to
+   * be visible here. It used to be neither shown nor clearable.
+   */
+  it('reports a failed project load, apart from the tasks', async () => {
+    const fixture = await mount();
+    projectManager.isError.set(true);
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+
+    expect(
+      Array.from(host.querySelectorAll('.data-state-error-message')).map(
+        (message) => message.textContent?.trim(),
+      ),
+    ).toEqual(['The projects could not be loaded.']);
+  });
+
+  it('asks the project manager to reload from its own alert', async () => {
+    const fixture = await mount();
+    projectManager.isError.set(true);
+    fixture.detectChanges();
+
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('.data-state-error button')
+      ?.click();
+
+    expect(projectManager.calls).toEqual(['getAll']);
+  });
+
+  it('opens the panel on the task it was given', async () => {
+    const fixture = await mount();
+    const component = fixture.componentInstance;
+
+    component.selectTask(sampleTask());
+    fixture.detectChanges();
+
+    expect(component.selectedTask()?.id).toBe('task-1');
+    expect(component.panelOpen()).toBe(true);
+
+    component.closeSideNav();
+    fixture.detectChanges();
+
+    expect(component.panelOpen()).toBe(false);
+  });
+
+  /**
+   * The panel used to hold a snapshot, so a card that moved, or one the
+   * server refused and the rollback put back, went on being shown the way it
+   * had been when it was clicked.
+   */
+  describe('what the panel is looking at', () => {
+    it('follows the task as the state has it', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+
+      component.selectTask(sampleTask());
+      taskManager.tasks.set([sampleTask({ status: 'done' })]);
+
+      expect(component.selectedTask()?.status).toBe('done');
+    });
+
+    it('shows nothing once the task is gone', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+
+      component.selectTask(sampleTask());
+      taskManager.tasks.set([]);
+
+      expect(component.selectedTask()).toBeNull();
+    });
+  });
+
+  it('forwards a changed task to the manager', async () => {
+    const fixture = await mount();
+    const changed = sampleTask({ id: 'moved', status: 'done' });
+
+    fixture.componentInstance.onTaskChanged(changed);
+
+    expect(taskManager.updates).toEqual([changed]);
+  });
+
+  /**
+   * The one write in this application carrying more than one field: the draft
+   * is merged onto the version the state holds, so what `pendingWrites` keeps
+   * is the exact row a refusal has to put back.
+   */
+  describe('saving an edited task', () => {
+    it('merges the draft onto the task the state holds', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+
+      component.selectTask(sampleTask());
+      component.saveTask({
+        projectId: 'project-1',
+        title: 'Renamed',
+        description: '',
+        status: 'in-progress',
+        priority: 'low',
+        dueDate: '',
+        assignedUserIds: ['user-2'],
+      });
+
+      expect(taskManager.updates).toEqual([
+        {
+          ...sampleTask(),
+          title: 'Renamed',
+          description: '',
+          status: 'in-progress',
+          priority: 'low',
+          dueDate: '',
+          assignedUserIds: ['user-2'],
+        },
+      ]);
+      expect(component.panel()).toBe('task');
+    });
+
+    it('has nothing to save when nothing is selected', async () => {
+      const fixture = await mount();
+
+      fixture.componentInstance.saveTask({
+        projectId: 'project-1',
+        title: 'Renamed',
+        status: 'todo',
+        priority: 'low',
+      });
+
+      expect(taskManager.updates).toEqual([]);
+    });
+  });
+
+  describe('renaming and removing the current project', () => {
+    it('merges the draft onto the project the state holds, and shuts', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+      projectManager.selectProject('project-1');
+
+      await component.saveProject({ title: 'Renamed', color: 'pink' });
+
+      expect(projectManager.updated).toEqual([
+        { ...sampleProject(), title: 'Renamed', color: 'pink' },
+      ]);
+      expect(component.panelOpen()).toBe(false);
+    });
+
+    /** Kept open on a refusal, so the reason stays beside the field. */
+    it('stays open when the rename is refused', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+      projectManager.selectProject('project-1');
+      projectManager.saveError.set('a project is already called "x"');
+
+      component.openEditProject();
+      await component.saveProject({ title: 'Taken', color: 'pink' });
+
+      expect(component.panelOpen()).toBe(true);
+      expect(component.panel()).toBe('edit-project');
+    });
+
+    it('has nothing to rename or remove while none is chosen', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+
+      await component.saveProject({ title: 'Renamed', color: 'pink' });
+      await component.confirmDeleteProject();
+
+      expect(projectManager.updated).toEqual([]);
+      expect(projectManager.deleted).toEqual([]);
+    });
+
+    it('removes the chosen one and shuts the panel', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+      projectManager.selectProject('project-1');
+
+      component.openDeleteProject();
+      await component.confirmDeleteProject();
+
+      expect(projectManager.deleted).toEqual(['project-1']);
+      expect(component.panelOpen()).toBe(false);
+    });
+
+    /**
+     * The refusal with a way out: the server will not remove a project that
+     * still holds tasks, so the panel stays open saying so.
+     */
+    it('stays open on the refusal, with the project still there', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+      projectManager.selectProject('project-1');
+      projectManager.saveError.set('this project still holds 3 tasks');
+
+      component.openDeleteProject();
+      await component.confirmDeleteProject();
+
+      expect(component.panel()).toBe('delete-project');
+      expect(component.panelOpen()).toBe(true);
+    });
+  });
+
+  describe('removing a task', () => {
+    it('removes the selected one, and shuts a panel with nothing left in it', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+
+      component.selectTask(sampleTask());
+      component.openDeleteTask();
+      expect(component.panel()).toBe('delete-task');
+
+      await component.confirmDeleteTask();
+
+      expect(taskManager.deleted).toEqual(['task-1']);
+      expect(component.selectedTask()).toBeNull();
+      expect(component.panelOpen()).toBe(false);
+      expect(component.panel()).toBe('task');
+    });
+
+    it('stays open when the removal is refused', async () => {
+      const fixture = await mount();
+      const component = fixture.componentInstance;
+      taskManager.saveError.set('no such task in your organisation');
+
+      component.selectTask(sampleTask());
+      component.openDeleteTask();
+      await component.confirmDeleteTask();
+
+      expect(component.panel()).toBe('delete-task');
+      expect(component.selectedTask()?.id).toBe('task-1');
+    });
+
+    it('has nothing to remove while nothing is selected', async () => {
+      const fixture = await mount();
+
+      await fixture.componentInstance.confirmDeleteTask();
+
+      expect(taskManager.deleted).toEqual([]);
+    });
+  });
+
+  /**
+   * One panel, four things to show. Opening a form has to displace the
+   * details, and picking a task has to displace the form. Otherwise a single
+   * panel is only a single panel by accident.
+   */
+  describe('the one side panel', () => {
+    it('shows the task details by default', async () => {
+      const fixture = await mount();
+      const host = fixture.nativeElement as HTMLElement;
+
+      expect(host.querySelector('app-task-details')).not.toBeNull();
+      expect(host.querySelector('app-project-form')).toBeNull();
+      expect(host.querySelector('app-task-form')).toBeNull();
+    });
+
+    it('gives it over to the project form, and takes it back', async () => {
+      const fixture = await mount();
+      const host = fixture.nativeElement as HTMLElement;
+
+      fixture.componentInstance.openNewProject();
+      fixture.detectChanges();
+
+      expect(host.querySelector('app-project-form')).not.toBeNull();
+      expect(host.querySelector('app-task-details')).toBeNull();
+
+      fixture.componentInstance.selectTask(sampleTask());
+      fixture.detectChanges();
+
+      expect(host.querySelector('app-task-details')).not.toBeNull();
+      expect(host.querySelector('app-project-form')).toBeNull();
+    });
+
+    it('gives it over to the task form', async () => {
+      const fixture = await mount();
+      const host = fixture.nativeElement as HTMLElement;
+
+      fixture.componentInstance.openNewTask();
+      fixture.detectChanges();
+
+      expect(host.querySelector('app-task-form')).not.toBeNull();
+      expect(host.querySelector('app-task-details')).toBeNull();
+    });
+
+    it('gives it over to the edit form, on the selected task', async () => {
+      const fixture = await mount();
+      const host = fixture.nativeElement as HTMLElement;
+
+      fixture.componentInstance.selectTask(sampleTask());
+      fixture.detectChanges();
+
+      host.querySelector<HTMLButtonElement>('.edit-btn')?.click();
+      fixture.detectChanges();
+
+      expect(host.querySelector('app-task-form')).not.toBeNull();
+      expect(host.querySelector('app-task-details')).toBeNull();
+      expect(host.querySelector('.panel-form-title')?.textContent?.trim()).toBe(
+        'Edit task',
+      );
+    });
+
+    /**
+     * Two of the four act on the project the selector names, and one needs a
+     * project to put a task in. Only "New project" is always available.
+     */
+    it('holds every button that has nothing to act on', async () => {
+      const fixture = await mount();
+      const disabled = () =>
+        Array.from(
+          (
+            fixture.nativeElement as HTMLElement
+          ).querySelectorAll<HTMLButtonElement>('.board-header-actions button'),
+        ).map((button) => [button.textContent?.trim(), button.disabled]);
+
+      expect(disabled()).toEqual([
+        ['add New project', false],
+        ['add New task', false],
+        ['edit Edit project', true],
+        ['delete Delete project', true],
+      ]);
+
+      projectManager.selectProject('project-1');
+      fixture.detectChanges();
+
+      expect(disabled()).toEqual([
+        ['add New project', false],
+        ['add New task', false],
+        ['edit Edit project', false],
+        ['delete Delete project', false],
+      ]);
+
+      projectManager.projects.set([]);
+      fixture.detectChanges();
+
+      expect(disabled()).toEqual([
+        ['add New project', false],
+        ['add New task', true],
+        ['edit Edit project', true],
+        ['delete Delete project', true],
+      ]);
+    });
+  });
+});

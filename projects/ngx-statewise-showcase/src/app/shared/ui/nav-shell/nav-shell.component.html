@@ -1,0 +1,66 @@
+<div class="side-nav-container">
+  <nav class="side-nav-content" aria-label="Main">
+    <!-- The name goes on the link; the image is decorative beside it. -->
+    <a
+      class="side-nav-logo"
+      [routerLink]="''"
+      aria-label="Ngx-Statewise, back to home"
+    >
+      <img class="side-nav-logo-img" src="icon-logo.png" alt="" />
+    </a>
+    @if (isLoggedIn()) {
+      <ul class="side-nav-items">
+        @for (item of navigationItems(); track item.label) {
+          <li>
+            <ng-template #itemBody>
+              <mat-icon class="nav-icon" aria-hidden="true">
+                {{ item.icon }}
+              </mat-icon>
+              <span>{{ item.label }}</span>
+            </ng-template>
+
+            @if (item.href) {
+              <!-- Leaves the application, so a plain link and a new tab. -->
+              <a
+                class="nav-groupe-icon color-secondary"
+                [href]="item.href"
+                target="_blank"
+                rel="noopener"
+              >
+                <ng-container [ngTemplateOutlet]="itemBody" />
+              </a>
+            } @else {
+              <a
+                class="nav-groupe-icon color-secondary"
+                [routerLink]="item.route"
+                routerLinkActive="active-link"
+              >
+                <ng-container [ngTemplateOutlet]="itemBody" />
+              </a>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </nav>
+  <div class="footer-toggles">
+    @if (isLoggedIn()) {
+      <!--
+        One button carrying both the icon and the word, laid out like a
+        navigation link. The word used to sit outside the button: it named
+        nothing, and clicking it did nothing.
+      -->
+      <button
+        type="button"
+        class="footer-groupe-button color-secondary"
+        (click)="logout.emit()"
+      >
+        <mat-icon class="footer-icon color-secondary" aria-hidden="true">
+          logout
+        </mat-icon>
+        <span>Log out</span>
+      </button>
+    }
+    <app-theme-toggle />
+  </div>
+</div>

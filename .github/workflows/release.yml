@@ -1,0 +1,253 @@
+name: Release
+
+# next publishes a beta, main publishes a stable. Both are driven by the
+# conventional-commit history since the last tag, by release-it.
+on:
+  push:
+    branches: [next, main]
+  workflow_dispatch:
+
+# Never cancel a run that may already have published: queue instead.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+# Read-only by default, so a job that needs to write says which write it needs
+# and nothing inherits one it never uses. Only `release` publishes.
+permissions:
+  contents: read
+
+jobs:
+  # The published peer range promises three Angular majors, and this workspace
+  # holds one. `npm run check` below proves nothing about the other two: it
+  # type-checks against the Angular in this lockfile. So the gate is here,
+  # ahead of the publish, and it costs three full installs per release — which
+  # is the right price for a range that would otherwise be a guess.
+  compat:
+    name: Angular compatibility
+    uses: ./.github/workflows/angular-compat.yml
+    permissions:
+      contents: read
+
+  release:
+    name: Release ${{ github.ref_name == 'main' && 'stable' || 'beta' }}
+    # Nothing is published unless all three majors answered. `fail-fast: false`
+    # in the called workflow means one break does not hide the other results,
+    # and a failure there skips this job outright.
+    needs: compat
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+
+    permissions:
+      contents: write # the version commit, the tag and the GitHub release
+      id-token: write # npm provenance
+      pull-requests: write # how that commit reaches a protected branch
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          # release-it reads the whole history to decide the version.
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+          # Writes the .npmrc that picks up NODE_AUTH_TOKEN below.
+          registry-url: 'https://registry.npmjs.org'
+
+      # `--ignore-scripts`: no dependency here needs a lifecycle script to
+      # build, and the only one the workspace declares is husky, which
+      # installs git hooks a runner has no use for.
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Validate workspace
+        run: npm run check
+
+      - name: Fail if the checkout is behind the branch
+        run: |
+          git fetch origin "${{ github.ref_name }}"
+          if [ "$(git rev-list --count HEAD..FETCH_HEAD)" != "0" ]; then
+            echo "::error::${{ github.ref_name }} moved since this run started. Re-run once it settles."
+            exit 1
+          fi
+
+      - name: Configure Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      # A required status check applies to a direct push as much as to a merge,
+      # and the token this run holds has write access, not admin — so it cannot
+      # push the version commit to a protected branch at all. The commit takes
+      # the road every other change takes instead: a branch, a pull request,
+      # and the same green run. `release/*` is in `requireBranch`, so release-it
+      # still refuses to run from anywhere else.
+      - name: Cut a branch for the version commit
+        run: git switch -c "$RELEASE_BRANCH"
+        env:
+          RELEASE_BRANCH: release/${{ github.ref_name }}-${{ github.run_id }}
+
+      # Pushes the branch and the tag, publishes to npm, creates the GitHub
+      # release. Only the version commit's arrival on ${{ github.ref_name }} is
+      # left, and the step below does that.
+      - name: Version, tag, publish and release
+        id: release
+        run: npm run ${{ github.ref_name == 'main' && 'release:stable' || 'release:beta' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # The provenance attestation the id-token permission above pays for.
+          NPM_CONFIG_PROVENANCE: true
+
+      # The tag and the package are already published at this point, which is
+      # the one thing this ordering costs: a pull request that cannot merge
+      # leaves a version npm has and the branch does not. That is a conflict to
+      # resolve, not a release to redo — the commit exists and is tagged — and
+      # it is why this step fails loudly rather than leaving the run green.
+      - name: Merge the version commit into ${{ github.ref_name }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_BRANCH: release/${{ github.ref_name }}-${{ github.run_id }}
+          BASE: ${{ github.ref_name }}
+        run: |
+          version=$(node -p "require('./projects/ngx-statewise/package.json').version")
+
+          {
+            printf 'Published as `ngx-statewise@%s`. The tag and the npm package\n' "$version"
+            printf 'already exist; this is the commit that made them, arriving on `%s`\n' "$BASE"
+            printf 'through the checks that branch requires.\n\n'
+            printf '**Merge with a merge commit, never a squash.** Opened and merged by the\n'
+            printf 'release workflow — if it is still open, that run failed at this step.\n'
+          } > "$RUNNER_TEMP/release-pr.md"
+
+          url=$(gh pr create --base "$BASE" --head "$RELEASE_BRANCH" \
+            --title "chore(release): ngx-statewise@$version" \
+            --body-file "$RUNNER_TEMP/release-pr.md")
+          echo "Opened $url" >> "$GITHUB_STEP_SUMMARY"
+
+          # `mergeStateStatus` cannot tell a check that is still running from
+          # one that failed — both read BLOCKED — so the wait is on the checks
+          # themselves. `gh pr checks` exits 8 while any is pending, 0 when all
+          # have passed, and non-zero otherwise. Fifteen minutes is several
+          # times the longest run this workspace has had.
+          for _ in $(seq 1 60); do
+            if [ "$(gh pr view "$url" --json state --jq .state)" = "MERGED" ]; then
+              echo "Merged $url" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+
+            if [ "$(gh pr view "$url" --json mergeStateStatus --jq .mergeStateStatus)" = "DIRTY" ]; then
+              echo "::error::$url conflicts with $BASE. ngx-statewise@$version is on npm; land that commit by hand."
+              exit 1
+            fi
+
+            gh pr checks "$url" > /dev/null 2>&1 && checks=0 || checks=$?
+
+            if [ "$checks" = "0" ]; then
+              gh pr merge "$url" --merge --delete-branch || true
+            elif [ "$checks" != "8" ]; then
+              echo "::error::$url has a failing check. ngx-statewise@$version is on npm; fix it and merge by hand."
+              exit 1
+            fi
+
+            sleep 15
+          done
+
+          echo "::error::$url did not merge within fifteen minutes. ngx-statewise@$version is on npm; land that commit on $BASE by hand."
+          exit 1
+
+      - name: Summarise the run
+        if: always()
+        run: |
+          {
+            echo "## Release"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Branch | \`${{ github.ref_name }}\` |"
+            echo "| Channel | \`${{ github.ref_name == 'main' && 'latest' || 'beta' }}\` |"
+            echo "| Version | \`$(node -p "require('./projects/ngx-statewise/package.json').version")\` |"
+            echo "| Angular compatibility | \`${{ needs.compat.result }}\` |"
+            echo "| Outcome | ${{ job.status }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # The site states the version it documents and `verify:claims` fails when it
+  # disagrees with the manifest, so the release commit carries both — see the
+  # `after:bump` hook in projects/ngx-statewise/.release-it.json. Deploying
+  # from here rather than from the push that commit makes is what keeps the
+  # site behind npm rather than ahead of it: a publish that failed deploys
+  # nothing, and readers are never sent to a version they cannot install.
+  docs:
+    name: Documentation site
+    needs: release
+    # `next` publishes a beta; the site documents what `latest` installs.
+    if: github.ref_name == 'main'
+    uses: ./.github/workflows/deploy-docs.yml
+    with:
+      after-release: true
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+  back-merge:
+    name: Back-merge main
+    needs: release
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    # A release commit pushed with GITHUB_TOKEN does not trigger workflows, so
+    # this cannot live in a `push: main` workflow of its own — it has to hang
+    # off the run that created the commit.
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [dev, next]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Open a back-merge pull request into ${{ matrix.target }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          git fetch --quiet origin "$TARGET" main
+
+          if [ "$(git rev-list --count "origin/$TARGET..origin/main")" = "0" ]; then
+            echo "\`$TARGET\` already contains \`main\`, nothing to back-merge." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          open=$(gh pr list --base "$TARGET" --head main --state open --json number --jq 'length')
+          if [ "$open" != "0" ]; then
+            echo "A back-merge pull request into \`$TARGET\` is already open." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          {
+            printf 'The release on `main` bumped the version and wrote the changelog. Those\n'
+            printf 'commits have to come back, or this branch keeps releasing from a version\n'
+            printf 'that no longer matches `main`.\n\n'
+            printf '**Merge this with a merge commit, never a squash** — squashing rewrites the\n'
+            printf '`BREAKING CHANGE` footers that drive the next version.\n\n'
+            printf 'On `next` a conflict on `package.json` or `CHANGELOG.md` is expected, since it\n'
+            printf 'still carries the prerelease version. Resolve in favour of `main`.\n'
+          } > body.md
+
+          url=$(gh pr create --base "$TARGET" --head main \
+            --title "chore: back-merge main into $TARGET" \
+            --body-file body.md)
+          echo "Opened $url" >> "$GITHUB_STEP_SUMMARY"

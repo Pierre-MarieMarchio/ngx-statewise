@@ -1,0 +1,246 @@
+<app-side-panel [(opened)]="panelOpen">
+  <div slot="view-content">
+    <div class="board-header">
+      <h1 class="task-page-header">Tasks</h1>
+
+      <!--
+        The current project, in the title rather than in the rail: the rail
+        names the five places this application has, and which project one is
+        looking at is not a sixth place. It is what this page is about.
+      -->
+      <mat-form-field
+        class="board-project"
+        subscriptSizing="dynamic"
+        appearance="outline"
+      >
+        <mat-label>Project</mat-label>
+        <mat-select
+          aria-label="The project every tab of this page is showing"
+          [value]="projectManager.selectedProjectId() ?? allProjects"
+          (valueChange)="onProjectPicked($event)"
+        >
+          <mat-option [value]="allProjects">All projects</mat-option>
+          @for (project of projectManager.projects(); track project.id) {
+            <mat-option [value]="project.id">{{ project.title }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <div class="board-header-actions">
+        <button
+          class="primary-btn"
+          mat-stroked-button
+          type="button"
+          (click)="openNewProject()"
+        >
+          <mat-icon>add</mat-icon>
+          New project
+        </button>
+        <button
+          class="primary-btn"
+          mat-stroked-button
+          type="button"
+          [disabled]="!projectManager.projects().length"
+          (click)="openNewTask()"
+        >
+          <mat-icon>add</mat-icon>
+          New task
+        </button>
+
+        <!--
+          Both act on the project the selector names, so both are held while it
+          names all of them: there is no "all projects" to rename. They come
+          after the two that make something, which is the order they are
+          reached for in.
+        -->
+        <button
+          class="primary-btn"
+          mat-stroked-button
+          type="button"
+          [disabled]="projectManager.selectedProject() === null"
+          (click)="openEditProject()"
+        >
+          <mat-icon>edit</mat-icon>
+          Edit project
+        </button>
+        <button
+          class="primary-btn"
+          mat-stroked-button
+          type="button"
+          [disabled]="projectManager.selectedProject() === null"
+          (click)="openDeleteProject()"
+        >
+          <mat-icon>delete</mat-icon>
+          Delete project
+        </button>
+      </div>
+    </div>
+
+    <app-data-state
+      label="tasks"
+      [loading]="taskManager.isLoading() || taskManager.isSaving()"
+      [error]="taskManager.isError()"
+      [retryable]="true"
+      (retried)="taskManager.getAll()"
+    />
+    <app-data-state
+      label="projects"
+      [loading]="projectManager.isLoading()"
+      [error]="projectManager.isError()"
+      [retryable]="true"
+      (retried)="projectManager.getAll()"
+    />
+    <!--
+      A refused write, in the server's own words. Not retryable: what to do
+      about "assign someone before marking it done" is to assign someone, not
+      to send the same write again.
+    -->
+    <app-data-state
+      label="save"
+      [error]="taskManager.saveError() !== null"
+      [errorMessage]="taskManager.saveError() ?? ''"
+    />
+
+    <app-task-search
+      class="board-search"
+      [searching]="taskManager.isSearching()"
+      (queried)="taskManager.search($event)"
+      (cleared)="taskManager.clearSearch()"
+    />
+
+    <mat-tab-group
+      mat-stretch-tabs="false"
+      mat-align-tabs="start"
+      [(selectedIndex)]="selectedTab"
+    >
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">view_kanban</mat-icon>
+          Kanban
+        </ng-template>
+        <app-task-kanban
+          [tasks]="currentProject.tasks()"
+          (taskChanged)="onTaskChanged($event)"
+      /></mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">view_list</mat-icon>
+          All Tasks
+        </ng-template>
+        <div class="tab-body">
+          <app-task-table
+            [tasks]="currentProject.tasks()"
+            (taskSelected)="selectTask($event)"
+          />
+        </div>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">person</mat-icon>
+          My Tasks
+        </ng-template>
+        <div class="tab-body">
+          <app-personal-task-list
+            (taskSelected)="selectTask($event)"
+            [allTasks]="currentProject.tasks()"
+          />
+        </div>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">construction</mat-icon>
+          Projects
+        </ng-template>
+        <!--
+          The whole list, not the current project's: the counts have to go on
+          saying what is in the projects nobody chose.
+        -->
+        <app-project-picker
+          [tasks]="taskManager.visibleTasks()"
+          (chosen)="onProjectChosen()"
+        />
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+
+  <div slot="panel-content">
+    @switch (panel()) {
+      @case ('new-project') {
+        <app-project-form
+          [pending]="projectManager.isCreating()"
+          [refusal]="projectManager.createError()"
+          (submitted)="createProject($event)"
+          (cancelled)="closeSideNav()"
+        />
+      }
+      @case ('new-task') {
+        <app-task-form
+          [projects]="projectManager.projects()"
+          [pending]="taskManager.isCreating()"
+          [refusal]="taskManager.createError()"
+          (submitted)="createTask($event)"
+          (cancelled)="closeSideNav()"
+        />
+      }
+      @case ('edit-task') {
+        <app-task-form
+          [task]="selectedTask()"
+          [projects]="projectManager.projects()"
+          [pending]="taskManager.isSaving()"
+          (submitted)="saveTask($event)"
+          (cancelled)="panel.set('task')"
+        />
+      }
+      @case ('edit-project') {
+        <app-project-form
+          [project]="projectManager.selectedProject()"
+          [pending]="projectManager.isSaving()"
+          [refusal]="projectManager.saveError()"
+          (submitted)="saveProject($event)"
+          (cancelled)="closeSideNav()"
+        />
+      }
+      @case ('delete-project') {
+        <app-confirm-panel
+          heading="Delete project"
+          [question]="
+            'Delete ' +
+            (projectManager.selectedProject()?.title ?? '') +
+            '? A project that still holds tasks cannot be deleted.'
+          "
+          confirmLabel="Delete project"
+          pendingLabel="Deleting…"
+          [pending]="projectManager.isSaving()"
+          [refusal]="projectManager.saveError()"
+          (confirmed)="confirmDeleteProject()"
+          (cancelled)="closeSideNav()"
+        />
+      }
+      @case ('delete-task') {
+        <app-confirm-panel
+          heading="Delete task"
+          [question]="
+            'Delete ' +
+            (selectedTask()?.title ?? '') +
+            '? This cannot be undone.'
+          "
+          confirmLabel="Delete task"
+          pendingLabel="Deleting…"
+          [pending]="taskManager.isSaving()"
+          [refusal]="taskManager.saveError()"
+          (confirmed)="confirmDeleteTask()"
+          (cancelled)="panel.set('task')"
+        />
+      }
+      @default {
+        <app-task-details
+          [selectedTask]="selectedTask()"
+          [editable]="true"
+          (editRequested)="editTask()"
+          (deleteRequested)="openDeleteTask()"
+          (closed)="closeSideNav()"
+        />
+      }
+    }
+  </div>
+</app-side-panel>

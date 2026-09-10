@@ -1,0 +1,198 @@
+@if (selectedTask()) {
+  <!--
+    The heading is the task. It used to be the word "Task details" at 2.5 rem
+    above the title at half that, so the largest text on the panel named the
+    container rather than what was in it, and the two forms that share this
+    panel led with a heading of their own, at a third size again.
+  -->
+  <div class="task-header">
+    <h2 class="header-title">{{ selectedTask()!.title }}</h2>
+    <div class="task-header-actions">
+      @if (editable()) {
+        <button
+          mat-icon-button
+          class="edit-btn"
+          aria-label="Edit this task"
+          (click)="onEditClick()"
+        >
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          class="delete-btn"
+          aria-label="Delete this task"
+          (click)="onDeleteClick()"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      }
+      <button
+        mat-icon-button
+        class="close-btn"
+        aria-label="Close the task details"
+        (click)="onCloseClick()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="task-content">
+    <!--
+      The same two marks the tables draw, from the same components. They were
+      `mat-chip`s here and grey lowercase words there: one idea rendered twice
+      and agreeing on nothing.
+    -->
+    <div class="task-meta">
+      <app-status-badge [status]="selectedTask()!.status" />
+      <app-priority-badge [priority]="selectedTask()!.priority" />
+    </div>
+
+    <mat-divider class="section-divider"></mat-divider>
+
+    <mat-tab-group class="details-tabs" mat-stretch-tabs="false">
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">info</mat-icon>
+          Preview
+        </ng-template>
+
+        <div class="tab-content">
+          @if (selectedTask()!.description) {
+            <div class="detail-section">
+              <div class="section-header">
+                <mat-icon>description</mat-icon>
+                <h3>Description</h3>
+              </div>
+              <div class="description-content">
+                <p>{{ selectedTask()!.description }}</p>
+              </div>
+            </div>
+          }
+          @if (selectedTask()!.dueDate) {
+            <div class="detail-section">
+              <div class="section-header">
+                <mat-icon
+                  [class.overdue]="
+                    presentation.isOverdue(
+                      selectedTask()!.dueDate,
+                      selectedTask()?.status
+                    )
+                  "
+                >
+                  schedule
+                </mat-icon>
+                <h3>Due date</h3>
+              </div>
+              @if (selectedTask()!.dueDate) {
+                <div
+                  class="due-date-content"
+                  [class.overdue]="
+                    presentation.isOverdue(
+                      selectedTask()!.dueDate,
+                      selectedTask()?.status
+                    )
+                  "
+                >
+                  <span>{{
+                    presentation.formatDate(selectedTask()!.dueDate!)
+                  }}</span>
+                  @if (
+                    presentation.isOverdue(
+                      selectedTask()!.dueDate,
+                      selectedTask()?.status
+                    )
+                  ) {
+                    <mat-icon class="warning-icon">warning</mat-icon>
+                  }
+                </div>
+              }
+            </div>
+          }
+          @if (
+            selectedTask()!.assignedUserIds &&
+            selectedTask()!.assignedUserIds!.length > 0
+          ) {
+            <div class="detail-section">
+              <div class="section-header">
+                <mat-icon>people</mat-icon>
+                <h3>Assigned users</h3>
+              </div>
+              <div class="users-content">
+                @for (userId of selectedTask()!.assignedUserIds; track userId) {
+                  <app-user-chip [userId]="userId" />
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- Details Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">settings</mat-icon>
+          Details
+        </ng-template>
+        <div class="tab-content">
+          <div class="metadata-grid">
+            <div class="metadata-item">
+              <div class="metadata-label">
+                <mat-icon>fingerprint</mat-icon>
+                <strong>Task ID</strong>
+              </div>
+              <span class="metadata-value">{{ selectedTask()!.id }}</span>
+            </div>
+
+            <div class="metadata-item">
+              <div class="metadata-label">
+                <mat-icon>folder</mat-icon>
+                <strong>Project</strong>
+              </div>
+              <span class="metadata-value">{{ projectName() }}</span>
+            </div>
+
+            <div class="metadata-item">
+              <div class="metadata-label">
+                <mat-icon>business</mat-icon>
+                <strong>Organisation</strong>
+              </div>
+              <span class="metadata-value">{{
+                selectedTask()!.organizationId
+              }}</span>
+            </div>
+
+            <div class="metadata-item">
+              <div class="metadata-label">
+                <mat-icon>add_circle</mat-icon>
+                <strong>Created</strong>
+              </div>
+              <span class="metadata-value">{{
+                presentation.formatDate(selectedTask()!.createdAt)
+              }}</span>
+            </div>
+
+            <div class="metadata-item">
+              <div class="metadata-label">
+                <mat-icon>edit</mat-icon>
+                <strong>Updated</strong>
+              </div>
+              <span class="metadata-value">{{
+                presentation.formatDate(selectedTask()!.updatedAt)
+              }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+} @else {
+  <!--
+    The one shared empty state, like every list has. This used to be thirty
+    lines of its own with an icon and a heading, a second design of empty for
+    a panel that is empty far less often than any list is.
+  -->
+  <p class="empty-state">
+    Pick a task from the board or a table, and it opens here.
+  </p>
+}

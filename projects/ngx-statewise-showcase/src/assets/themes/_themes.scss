@@ -1,11 +1,29 @@
-@use "@angular/material" as mat;
+@use '@angular/material' as mat;
 
+/*
+ * The two themes, and the three values the application decides for itself on
+ * top of Material's own.
+ *
+ * `--rail-border` and `--icon-active` are new here only in the sense that they
+ * were written as literals inside `nav-shell.component.scss`: a near-black
+ * `#232125` rule and a mid-grey `#746e7c` label. Both survived into the light
+ * theme unchanged, so the rail drew a hard black hairline down a white page.
+ *
+ * The surface override is declared **after** `mat.theme()` rather than before
+ * it, which is what lets it drop the `!important` it used to carry. A
+ * `!important` on a custom property, in the block that then calls the mixin
+ * meant to set it. And light now gets one too: without it, `--mat-sys-surface`
+ * came out of the magenta palette and every card was faintly pink in light
+ * while being neutral grey in dark. The same component had two identities.
+ */
 .light {
   background-color: var(--mat-sys-background);
   color: var(--mat-sys-on-background);
-  
+
   --color-secondary: #746e7c;
-  --Icon-active: #0f0f11;
+  --icon-active: #0f0f11;
+  --rail-border: #e3e0da;
+
   @include mat.theme(
     (
       color: (
@@ -14,8 +32,10 @@
         theme-type: light,
       ),
     ),
-    $overrides: ("on-background": #333, "background": white)
+    $overrides: ('on-background': #333, 'background': white)
   );
+
+  --mat-sys-surface: #f6f6f7;
 }
 
 .dark {
@@ -23,8 +43,9 @@
   color: var(--mat-sys-on-background);
 
   --color-secondary: rgb(164, 160, 170);
-  --Icon-active: #f3f3f3;
-  --mat-sys-surface: #262627 !important;
+  --icon-active: #f3f3f3;
+  --rail-border: #232125;
+
   @include mat.theme(
     (
       color: (
@@ -34,19 +55,31 @@
       ),
     ),
     $overrides: (
-      "on-background": #f3f3f3,
-      "on-surface-variant": #f3f3f3,
-      "background": #0f0f11
+      'on-background': #f3f3f3,
+      'on-surface-variant': #f3f3f3,
+      'background': #0f0f11
     )
   );
-}
 
+  --mat-sys-surface: #262627;
+}
 
 .color-secondary {
   color: var(--color-secondary);
 }
 
+/*
+ * The generic family at the end is what a machine falls back on when the icon
+ * font has not loaded. Without one the browser picks whatever its default is,
+ * which for a ligature font is how a page ends up reading the word "delete"
+ * where an icon belongs.
+ */
 mat-icon {
-  font-family: "Material Symbols Outlined";
-  font-variation-settings: "FILL" 0, "wght" 200, "GRAD" 0, "opsz" 24, "STRK" 3 !important;
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 200,
+    'GRAD' 0,
+    'opsz' 24,
+    'STRK' 3 !important;
 }

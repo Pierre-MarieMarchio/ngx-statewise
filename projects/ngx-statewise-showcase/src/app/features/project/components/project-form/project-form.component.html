@@ -1,0 +1,27 @@
+<form [formGroup]="form" (ngSubmit)="handleSubmit()">
+  <app-panel-form
+    [heading]="editing() ? 'Edit project' : 'New project'"
+    [submitLabel]="editing() ? 'Save changes' : 'Create project'"
+    [pendingLabel]="editing() ? 'Saving…' : 'Creating…'"
+    [pending]="pending()"
+    [refusal]="refusal()"
+    (cancelled)="cancelled.emit()"
+  >
+    <mat-form-field subscriptSizing="dynamic" appearance="outline">
+      <mat-label>Title</mat-label>
+      <input formControlName="title" matInput required aria-label="Title" />
+      @if (form.controls.title.hasError('required')) {
+        <mat-error>A title is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field subscriptSizing="dynamic" appearance="outline">
+      <mat-label>Colour</mat-label>
+      <mat-select formControlName="color">
+        @for (color of colors; track color) {
+          <mat-option [value]="color">{{ color }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </app-panel-form>
+</form>

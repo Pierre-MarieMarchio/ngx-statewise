@@ -3,17 +3,25 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "rootDir": "./projects",
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,
+    /* Reading past the end of an array, or off a map with a key that is not
+       there, hands back `undefined`. Without this, the fake backend's handler
+       map typed a two-level index as always present and a DELETE would have
+       thrown a TypeError on the second level. */
+    "noUncheckedIndexedAccess": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "ngx-statewise": ["./dist/ngx-statewise"],
+      "ngx-statewise/testing": ["./dist/ngx-statewise/testing"],
       "@shared/*": ["./projects/ngx-statewise-showcase/src/app/shared/*"],
       "@assets/*": ["./projects/ngx-statewise-showcase/src/assets/*"],
       "@app/*": ["./projects/ngx-statewise-showcase/src/app/*"],
+      "@testing/*": ["./projects/ngx-statewise-showcase/src/testing/*"],
       "@themes/*": [
         "./projects/ngx-statewise-showcase/src/assets/styles/themes/*"
       ]

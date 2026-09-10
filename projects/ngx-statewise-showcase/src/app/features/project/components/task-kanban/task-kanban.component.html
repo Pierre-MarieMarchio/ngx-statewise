@@ -1,0 +1,21 @@
+<div class="kanban-task-container">
+  <!--
+    The tab label names this board on screen, so the heading is only read.
+    Without it the page went from the h1 of /task straight to the h3 of a
+    kanban column.
+  -->
+  <h2 class="visually-hidden">Task kanban</h2>
+
+  <app-kanban
+    [columns]="columns()"
+    [cardTypeFor]="cardTypeFor"
+    [labelFor]="labelFor"
+    [reorderable]="true"
+    (itemMoved)="onTaskMoved($event)"
+    (columnReordered)="onColumnReordered($event)"
+  >
+    <ng-template #kanbanCard let-task>
+      <app-task-card-body [task]="task" />
+    </ng-template>
+  </app-kanban>
+</div>

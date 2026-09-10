@@ -1,0 +1,235 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  injectStatewise,
+  provideStatewise,
+  type Statewise,
+} from 'ngx-statewise';
+import { fakeTaskManager } from '@testing/fake-managers';
+import { noticeActions, noticeUpdater } from '@app/features/inspection/states';
+import { tallyUpdater } from '@app/features/inspection/states';
+import {
+  InspectionHistoryPageComponent,
+  MAX_PAYLOAD_LENGTH,
+  TRACKED_ACTION_TYPES,
+} from './inspection-history-page.component';
+import { TaskManager } from '@app/features/project/states/task/task.manager';
+import { at } from '@testing/at';
+import { pressKey } from '@testing/keyboard';
+
+describe('InspectionHistoryPageComponent', () => {
+  let fixture: ComponentFixture<InspectionHistoryPageComponent>;
+  let outside: Statewise;
+
+  const host = (): HTMLElement => fixture.nativeElement as HTMLElement;
+
+  const rows = (): string[][] =>
+    Array.from(host().querySelectorAll('tr[mat-row]')).map((row) =>
+      Array.from(row.querySelectorAll('td')).map(
+        (cell) => cell.textContent?.trim() ?? '',
+      ),
+    );
+
+  const click = (label: string): void => {
+    Array.from(host().querySelectorAll<HTMLButtonElement>('button'))
+      .find((candidate) => candidate.textContent?.trim() === label)
+      ?.click();
+
+    fixture.detectChanges();
+  };
+
+  const readout = (name: string): string =>
+    host().querySelector(`[data-readout="${name}"]`)?.textContent?.trim() ?? '';
+
+  const selectedChips = (): string[] =>
+    Array.from(host().querySelectorAll<HTMLElement>('[data-tracked]'))
+      .filter((chip) => chip.querySelector('[aria-selected="true"]'))
+      .map((chip) => chip.getAttribute('data-tracked') ?? '');
+
+  /** The option is the focusable element; the chip host is presentational. */
+  const pressEnter = (type: string): void => {
+    const option = host().querySelector(
+      `[data-tracked="${type}"] [role="option"]`,
+    );
+
+    if (!option) {
+      throw new Error(`no chip option for ${type}`);
+    }
+
+    pressKey(option, 'Enter');
+    fixture.detectChanges();
+  };
+
+  /** The columns, named: reading a row by a bare index rots on every change. */
+  const POSITION = 0;
+  const TYPE = 1;
+  const PAYLOAD = 3;
+
+  const cell = (row: number, column: number): string =>
+    at(at(rows(), row), column);
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [InspectionHistoryPageComponent],
+      providers: [
+        provideStatewise({
+          updaters: [noticeUpdater],
+          history: { limit: 50 },
+        }),
+        { provide: TaskManager, useValue: fakeTaskManager() },
+      ],
+    }).compileComponents();
+
+    outside = TestBed.runInInjectionContext(() =>
+      injectStatewise(tallyUpdater),
+    );
+
+    fixture = TestBed.createComponent(InspectionHistoryPageComponent);
+    fixture.detectChanges();
+  });
+
+  /**
+   * The labels must never repeat a type name the creator already owns, which
+   * is what `ofType` is for.
+   */
+  it('names the tracked types off their creators', () => {
+    expect(TRACKED_ACTION_TYPES.map((tracked) => tracked.type)).toEqual([
+      'NOTICE_RAISED',
+      'NOTICE_CLEARED',
+      'TALLY_INCREMENTED',
+      'TASK_SUCCESS',
+      'PROJECT_SUCCESS',
+    ]);
+  });
+
+  it('shows nothing before the history has been read', () => {
+    expect(rows()).toEqual([]);
+    expect(readout('empty').length).toBeGreaterThan(0);
+  });
+
+  it('lists an action once the history is read', () => {
+    click('Raise a notice');
+
+    // The cascade column shows the path the engine walked. A dispatch from a
+    // component is a cascade of one, so it reads as its own type.
+    expect(rows()).toEqual([
+      ['1', 'NOTICE_RAISED', 'NOTICE_RAISED', '"raised from the history"'],
+    ]);
+    expect(readout('total')).toBe('1');
+  });
+
+  it('records the actions of every handle, not only its own', () => {
+    outside.dispatch(noticeActions.raised('from elsewhere'));
+    click('Refresh');
+
+    expect(rows().map((row) => row[TYPE])).toEqual(['NOTICE_RAISED']);
+    expect(cell(0, PAYLOAD)).toBe('"from elsewhere"');
+  });
+
+  /**
+   * `snapshot()` is a plain array: an action dispatched after the last
+   * read stays invisible until the next one.
+   */
+  it('keeps showing the last snapshot until it is read again', () => {
+    click('Raise a notice');
+    expect(readout('total')).toBe('1');
+
+    outside.dispatch(noticeActions.raised('unseen'));
+    fixture.detectChanges();
+
+    expect(readout('total')).toBe('1');
+
+    click('Refresh');
+
+    expect(readout('total')).toBe('2');
+  });
+
+  it('counts the actions of each tracked type', () => {
+    click('Raise a notice');
+    click('Increment the tally');
+    click('Increment the tally');
+
+    const counts = fixture.componentInstance.counts();
+
+    expect(
+      counts
+        .filter((tracked) => tracked.count > 0)
+        .map((tracked) => [tracked.type, tracked.count]),
+    ).toEqual([
+      ['NOTICE_RAISED', 1],
+      ['TALLY_INCREMENTED', 2],
+    ]);
+  });
+
+  /**
+   * Pressing the chip, not calling the method: the filter used to hang off a
+   * `(click)` on `<mat-chip-option>` that ENTER never produces, so it could be
+   * cleared by keyboard but never set.
+   */
+  it('narrows the table to the type filtered on, and back again', () => {
+    click('Raise a notice');
+    click('Increment the tally');
+
+    expect(rows().length).toBe(2);
+
+    pressEnter('TALLY_INCREMENTED');
+
+    expect(rows().map((row) => row[TYPE])).toEqual(['TALLY_INCREMENTED']);
+    expect(readout('filter')).toBe('TALLY_INCREMENTED');
+
+    pressEnter('TALLY_INCREMENTED');
+
+    expect(fixture.componentInstance.selectedType()).toBeNull();
+    expect(rows().length).toBe(2);
+  });
+
+  it('renumbers the rows it shows while a filter is on', () => {
+    click('Increment the tally');
+    click('Raise a notice');
+    click('Increment the tally');
+
+    fixture.componentInstance.filterBy('TALLY_INCREMENTED');
+    fixture.detectChanges();
+
+    expect(rows().map((row) => row[POSITION])).toEqual(['1', '2']);
+  });
+
+  /**
+   * The chip and the filter used to be two states: the option carried its own
+   * `[selected]`, so clearing one left the other showing.
+   */
+  it('clears the filter, and the chip with it', () => {
+    click('Raise a notice');
+    pressEnter('NOTICE_RAISED');
+
+    expect(selectedChips()).toEqual(['NOTICE_RAISED']);
+
+    click('Clear the filter');
+
+    expect(fixture.componentInstance.selectedType()).toBeNull();
+    expect(selectedChips()).toEqual([]);
+  });
+
+  it('leaves the payload column empty for an action carrying none', () => {
+    outside.dispatch(noticeActions.cleared());
+    click('Refresh');
+
+    expect(rows()).toEqual([['1', 'NOTICE_CLEARED', 'NOTICE_CLEARED', '']]);
+  });
+
+  it('cuts a long payload short rather than flooding the row', () => {
+    outside.dispatch(noticeActions.raised('x'.repeat(MAX_PAYLOAD_LENGTH * 2)));
+    click('Refresh');
+
+    const payload = cell(0, PAYLOAD);
+
+    expect(payload.length).toBe(MAX_PAYLOAD_LENGTH + 1);
+    expect(payload.endsWith('…')).toBe(true);
+  });
+
+  it('leaves a short payload whole', () => {
+    outside.dispatch(noticeActions.raised('short'));
+    click('Refresh');
+
+    expect(cell(0, PAYLOAD)).toBe('"short"');
+  });
+});

@@ -1,0 +1,27 @@
+/* A pair of shadows at the edges of anything that scrolls sideways, each one
+   hidden by a patch of the surface colour until there is something in that
+   direction to reach. The patches are attached to the content and the shadows
+   to the box, which is what makes them appear and disappear on their own,
+   no scroll listener, and nothing to run on a prerendered page.
+
+   Without this a table that runs off the edge of a phone looks like a table
+   that ends there.
+
+   Its own partial rather than a corner of styles.scss: a component that wants
+   the mixin would otherwise have to `@use` the whole global sheet, and inline
+   every rule in it. */
+@mixin scroll-shadows($surface) {
+  background:
+    linear-gradient(to right, #{$surface} 40%, transparent) 0 0 / 2.5rem 100%
+      no-repeat local,
+    linear-gradient(to left, #{$surface} 40%, transparent) 100% 0 / 2.5rem 100%
+      no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / 14%), rgb(0 0 0 / 0%)) 0
+      0 / 0.75rem 100% no-repeat scroll,
+    radial-gradient(
+        farthest-side at 100% 50%,
+        rgb(0 0 0 / 14%),
+        rgb(0 0 0 / 0%)
+      )
+      100% 0 / 0.75rem 100% no-repeat scroll;
+}

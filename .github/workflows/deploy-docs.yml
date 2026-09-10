@@ -1,0 +1,162 @@
+name: Deploy docs
+
+# main, not dev: the site is the guide of the *published* library, and main is
+# what release.yml publishes to npm as `latest`. Deploying from dev would
+# document an API that is not released yet, to readers the npm page sends here.
+#
+# Two ways in, because a deploy answers two questions. release.yml calls this
+# once a publish has succeeded, so the site never states a version npm does not
+# have. And a push to main that changes what the site is built from deploys on
+# its own, so a corrected sentence does not wait for a release that may be
+# weeks away.
+on:
+  push:
+    branches: [main]
+    paths:
+      # The site itself.
+      - 'projects/ngx-statewise-docs/**'
+      # The library, which the site resolves to dist and therefore bundles: a
+      # change here changes the bytes a reader downloads, even when no page
+      # was edited.
+      - 'projects/ngx-statewise/**'
+      # What the build is configured by. tsconfig.json is here because the
+      # site's tsconfig.app.json extends it.
+      - 'angular.json'
+      - 'tsconfig.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/deploy-docs.yml'
+  workflow_call:
+    inputs:
+      after-release:
+        description: >-
+          Set by release.yml once the publish succeeded. It is what tells the
+          release commit's own push to stand down, so the site is deployed
+          once — by the run that knows npm has the version the site states.
+        type: boolean
+        default: false
+  workflow_dispatch:
+
+# Never cancel a run that may already be deploying: queue instead.
+concurrency:
+  group: deploy-docs
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build the site
+    runs-on: ubuntu-latest
+
+    # A release would otherwise reach this twice: once through the call
+    # release.yml makes after publishing, and once as the push of the version
+    # commit it merges — which writes the version into both the manifest and
+    # the site, so it matches the paths above. Only the call knows whether the
+    # publish succeeded, so the push defers to it. `contains` rather than
+    # `startsWith` because that commit arrives on main inside a merge commit,
+    # which quotes the pull request's title.
+    if: >-
+      inputs.after-release ||
+      !contains(github.event.head_commit.message, 'chore(release):')
+
+    permissions:
+      contents: read
+      pages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          # `github.sha` is the commit that started the run, and after a
+          # release that is one commit behind: the version commit reached the
+          # branch through a pull request the release workflow merged while
+          # this run's ref was already fixed. The site has to describe the
+          # version that was published, so it is built from the branch tip.
+          ref: ${{ inputs.after-release && github.ref_name || github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v6
+        with:
+          # Turns Pages on the first time this runs, so the site does not wait
+          # on someone flipping a switch in the repository settings.
+          enablement: true
+
+      # `--ignore-scripts`: no dependency here needs a lifecycle script to
+      # build, and the only one the workspace declares is husky, which
+      # installs git hooks a runner has no use for.
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      # The docs site resolves `ngx-statewise` to dist, like the showcase does.
+      - name: Build the library
+        run: npm run build:library
+
+      # What `npm run check` proves about the site, minus the showcase. The
+      # version claim is the one that earns this step: a release rewrites it,
+      # and a site deployed with the old one sends readers to a version that
+      # is no longer what npm installs. The other two are cheap beside a
+      # deployment that is hard to take back.
+      - name: Verify the site against the library it documents
+        run: |
+          npm run verify:docs
+          npm run verify:claims
+          npm run test:docs
+
+      - name: Build the documentation site
+        run: npm run build:docs
+
+      # Pages answers its own 404 for any path that is not a file, which is
+      # every route the prerender did not emit — a renamed guide slug, a link
+      # printed in an old release note. index.csr.html is the same shell with
+      # the same base href and no prerendered content, so serving it there
+      # lets the application boot and its `**` route take the reader home.
+      - name: Serve the application shell for unknown paths
+        run: |
+          cp dist/ngx-statewise-docs/browser/index.csr.html \
+             dist/ngx-statewise-docs/browser/404.html
+
+      - name: Upload the prerendered site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist/ngx-statewise-docs/browser
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+      - name: Summarise the run
+        if: always()
+        run: |
+          {
+            echo "## Documentation site"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| URL | ${{ steps.deployment.outputs.page_url }} |"
+            echo "| Commit | \`${{ github.sha }}\` |"
+            echo "| Trigger | ${{ inputs.after-release && 'a published release' || github.event_name }} |"
+            echo "| Outcome | ${{ job.status }} |"
+          } >> "$GITHUB_STEP_SUMMARY"

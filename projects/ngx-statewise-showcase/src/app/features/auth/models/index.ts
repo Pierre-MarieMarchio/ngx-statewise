@@ -5,3 +5,4 @@ export type {
   AuthenticateResponses,
 } from './auth-responses.model';
 export type { LoginSubmit } from './form-submits.model';
+export type { User } from './auth-user.model';

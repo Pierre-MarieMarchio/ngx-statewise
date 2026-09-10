@@ -1,0 +1,124 @@
+<div class="live-state-container">
+  <h1 class="live-state-header">State</h1>
+  <p class="live-state-intro">
+    Read straight from the managers' signals, so this page redraws itself as the
+    state moves, with no refresh anywhere. That is the difference with the
+    history page, which reads a snapshot and has to be asked.
+  </p>
+
+  <div class="live-state-actions">
+    <button class="primary-btn" mat-stroked-button (click)="reloadTasks()">
+      Reload the tasks
+    </button>
+    <button class="primary-btn" mat-stroked-button (click)="reloadProjects()">
+      Reload the projects
+    </button>
+    <button
+      class="primary-btn"
+      mat-stroked-button
+      (click)="dispatchMisrouted()"
+    >
+      Dispatch a misrouted action
+    </button>
+  </div>
+
+  <div class="live-state-grid">
+    <mat-card class="live-state-card" appearance="outlined">
+      <h2 class="live-state-card-title">Auth</h2>
+      <dl class="live-state-readout" aria-live="polite" data-card="auth">
+        @for (reading of authReadings(); track reading.label) {
+          <dt>{{ reading.label }}</dt>
+          <dd [attr.data-reading]="reading.label">{{ reading.value }}</dd>
+        }
+      </dl>
+    </mat-card>
+
+    <mat-card class="live-state-card" appearance="outlined">
+      <h2 class="live-state-card-title">Tasks</h2>
+      <dl class="live-state-readout" aria-live="polite" data-card="tasks">
+        @for (reading of taskReadings(); track reading.label) {
+          <dt>{{ reading.label }}</dt>
+          <dd [attr.data-reading]="reading.label">{{ reading.value }}</dd>
+        }
+      </dl>
+    </mat-card>
+
+    <mat-card class="live-state-card" appearance="outlined">
+      <h2 class="live-state-card-title">Projects</h2>
+      <dl class="live-state-readout" aria-live="polite" data-card="projects">
+        @for (reading of projectReadings(); track reading.label) {
+          <dt>{{ reading.label }}</dt>
+          <dd [attr.data-reading]="reading.label">{{ reading.value }}</dd>
+        }
+      </dl>
+    </mat-card>
+
+    <mat-card class="live-state-card" appearance="outlined">
+      <h2 class="live-state-card-title">Current project</h2>
+      <p class="live-state-card-note">
+        Stored nowhere: a derivation over the chosen id, the project list and
+        the tasks. Choose a project on the task page and every line here moves.
+      </p>
+      <dl
+        class="live-state-readout"
+        aria-live="polite"
+        data-card="current-project"
+      >
+        @for (reading of currentProjectReadings(); track reading.label) {
+          <dt>{{ reading.label }}</dt>
+          <dd [attr.data-reading]="reading.label">{{ reading.value }}</dd>
+        }
+      </dl>
+    </mat-card>
+
+    <mat-card class="live-state-card" appearance="outlined">
+      <h2 class="live-state-card-title">Notice</h2>
+      <p class="live-state-card-note">
+        Registered globally, owned by no manager, so any handle reaches it.
+      </p>
+      <app-notice-demo />
+    </mat-card>
+
+    <mat-card class="live-state-card" appearance="outlined">
+      <h2 class="live-state-card-title">Tally</h2>
+      <p class="live-state-card-note">
+        Plain properties, not signals: these numbers only look live because
+        clicking redraws the page.
+      </p>
+      <app-tally-demo />
+    </mat-card>
+
+    <mat-card class="live-state-card" appearance="outlined">
+      <h2 class="live-state-card-title">Reported failures</h2>
+      <p class="live-state-card-note">
+        Everything the library reports reaches Angular's ErrorHandler, and this
+        application keeps it as state rather than dropping it in the console.
+        The misrouted dispatch above lands here: TASK_REQUEST belongs to the
+        task manager, so a handle owning no updater is refused instead of
+        silently skipping its state update.
+      </p>
+      <!--
+        A failure lands here without anything else on the page moving, so the
+        panel is the live region. The button stays outside it: it is an action,
+        not news.
+      -->
+      <div aria-live="polite">
+        @if (!reported().length) {
+          <p class="empty-state">Nothing has failed yet.</p>
+        } @else {
+          <dl class="live-state-readout" data-card="errors">
+            @for (failure of reported(); track $index) {
+              <dt>{{ failure.at }}</dt>
+              <dd>{{ failure.message }}</dd>
+            }
+          </dl>
+        }
+      </div>
+      @if (reported().length) {
+        <button mat-stroked-button (click)="clearReported()">
+          clear failures
+        </button>
+      }
+    </mat-card>
+  </div>
+</div>

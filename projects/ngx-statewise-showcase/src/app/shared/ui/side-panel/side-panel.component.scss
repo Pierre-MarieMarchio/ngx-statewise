@@ -1,0 +1,27 @@
+/*
+ * As wide as its content, not as wide as the screen.
+ *
+ * It was `60vw`, which is 864 px at 1440, for a form of six fields and a description
+ * that fits on one line. What that bought was a table with every column but
+ * the title covered, and a refusal banner cut in half by the panel's edge.
+ * 34 rem holds the longest form comfortably; below 38 rem of window it takes
+ * what there is.
+ */
+.side-panel-content {
+  width: min(34rem, 92vw) !important;
+  border-radius: 0px !important;
+  padding: var(--space-4);
+  background-color: var(--mat-sys-background, #fff);
+}
+
+.view-content {
+  box-sizing: border-box;
+  height: 100vh;
+  padding-left: 3rem;
+  padding-right: 2rem;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+.panel-content {
+  height: 100vh;
+}

@@ -1,0 +1,116 @@
+/* ---------------------------------------------------------------------------
+   The palette comes from the project's own logo, sampled from
+   public/icon-logo.png: the shield runs #dd0031 to #582bc3, red into violet.
+
+   The two brand colours are given jobs rather than sprinkled about.
+
+     red:    the synchronous half of the library (an action, and the updater
+              that writes the state) and, everywhere else on the site, "you are
+              here": the current page, the current heading, the focus ring.
+     violet: the asynchronous half (an effect, and the actions it returns) and
+              every link, which is the other thing that takes you elsewhere.
+
+   The gradient between them appears exactly once, on the arrow from updater to
+   effect in the landing diagram, because that arrow is where the library
+   crosses from synchronous to asynchronous. It is the only decoration on the
+   site that carries information.
+
+   No `mat.theme()` here. The site uses no Material component, only the tokens
+   it emits, and those derive every surface from the primary hue. In the dark
+   theme they resolve to #161215 and #231e22, both faintly pink, which reads
+   warm under long-form prose.
+
+   The neutrals are cut on the violet's hue (258deg) at a chroma low enough to
+   read as grey. Both ramps were measured, not estimated: every text-on-surface
+   pair in this file clears 4.5:1.
+   --------------------------------------------------------------------------- */
+
+.light {
+  color-scheme: light;
+
+  /* Surfaces. The page is a paper rather than a white, so a white code block
+     or menu can sit on it and read as raised without a shadow. */
+  --surface-page: #fbfafc;
+  --surface-subtle: #f2f1f6;
+  --surface-raised: #ffffff;
+  --surface-sunken: #eceaf2;
+  --surface-hover: rgb(24 18 40 / 5%);
+  --surface-code: #f2f1f6;
+
+  /* Hairlines: one that separates, one that merely suggests. */
+  --border: #e5e3ec;
+  --border-strong: #d1cddc;
+
+  /* Text. Ratios against --surface-page. */
+  --text-strong: #16151c; /* 17.4:1 */
+  --text: #35323f; /* 12.0:1 */
+  --text-muted: #615c72; /*  6.2:1 */
+  --text-faint: #6a6579; /*  5.4:1, still AA on the tinted surfaces */
+
+  /* "You are here", and the synchronous half of the flow. */
+  --mark: #dd0031; /*  4.9:1 */
+  --mark-hover: #b80028;
+  --on-mark: #ffffff; /*  5.1:1 on --mark */
+  --mark-soft: #fdeef1;
+
+  /* Links, and the asynchronous half of the flow. Also the primary button:
+     it takes you somewhere, which is the opposite of what red means here. */
+  --link: #582bc3; /*  7.9:1 */
+  --link-hover: #44209b;
+  --link-soft: #f0ecfb;
+  --on-link: #ffffff; /*  8.2:1 on --link */
+
+  /* Callout accents. Re-cut from the GitHub set to clear AA on the paper. */
+  --danger: #b3261e; /*  6.3:1 */
+  --success: #1f7a55; /*  5.1:1 */
+  --caution: #8a5a00; /*  5.7:1 */
+
+  --shadow-raised:
+    0 1px 2px rgb(20 16 34 / 6%), 0 8px 24px -6px rgb(20 16 34 / 10%);
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* Lifted off pure black, and cut cool: #f2f1f6 on #131218 is 16.6:1, and
+     pure white on near-black halates over a column of prose. */
+  --surface-page: #131218;
+  --surface-subtle: #191821;
+  --surface-raised: #1e1d27;
+  --surface-sunken: #0e0d12;
+  --surface-hover: rgb(255 255 255 / 6%);
+  --surface-code: #0e0d12;
+
+  --border: #292733;
+  --border-strong: #3b3848;
+
+  --text-strong: #f2f1f6; /* 16.6:1 */
+  --text: #d5d2de; /* 12.5:1 */
+  --text-muted: #9c98ac; /*  6.7:1 */
+  --text-faint: #8b8699; /*  5.3:1 */
+
+  /* Same hues as the logo, 347deg and 258deg, lightened until they read.
+     The logo values themselves are 3.5:1 and 2.2:1 here, so they are kept for
+     the mark and replaced for anything carrying words. */
+  --mark: #ff5c80; /*  6.3:1 */
+  --mark-hover: #ff7d99;
+  --on-mark: #3d0010; /*  5.9:1 on --mark */
+  --mark-soft: #2b1620;
+
+  --link: #b49bff; /*  8.1:1 */
+  --link-hover: #c9b7ff;
+  --link-soft: #201c2e;
+  --on-link: #1b1030; /*  7.8:1 on --link */
+
+  --danger: #ffb4ab; /* 11.0:1 */
+  --success: #5cc79a; /*  9.0:1 */
+  --caution: #e0a63c; /*  8.6:1 */
+
+  --shadow-raised:
+    0 1px 2px rgb(0 0 0 / 45%), 0 10px 28px -8px rgb(0 0 0 / 55%);
+}
+
+/* Utility for the muted tier, so a template need not know the token name. */
+.text-muted {
+  color: var(--text-muted);
+}

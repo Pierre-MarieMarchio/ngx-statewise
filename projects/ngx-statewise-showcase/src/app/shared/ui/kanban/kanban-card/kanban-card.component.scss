@@ -1,0 +1,75 @@
+/* The host is the drag handle and the list item, so it has to be a box. */
+:host {
+  display: block;
+  list-style: none;
+}
+
+.kanban-card {
+  background-color: var(--mat-sys-background, #fff);
+}
+
+.card-type-indicator {
+  border-left: 4px solid;
+  border-radius: 0.5rem;
+}
+
+.indicator-high {
+  border-left-color: var(--priority-high);
+}
+
+.indicator-medium {
+  border-left-color: var(--priority-medium);
+}
+
+.indicator-low {
+  border-left-color: var(--priority-low);
+}
+
+/* The card is a tab stop, so where the focus sits has to be visible. */
+:host(:focus-visible) {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
+
+/*
+ * The three states the CDK puts on this host while a card is being dragged.
+ * They live here rather than on the board because they are how a card looks
+ * lifted, and because the CDK moves the preview to the document body, where
+ * only this component's own host attribute still reaches it.
+ */
+
+/*
+ * The hole the card leaves behind. The CDK clones the element in place under
+ * this class and applies no style of its own, and `angular.json` loads no
+ * prebuilt CDK sheet: without this rule the clone stayed a full card, and the
+ * same task was visible in the column and under the cursor at once.
+ */
+:host(.cdk-drag-placeholder) {
+  border-radius: 0.3rem;
+  border: 1px dashed var(--mat-sys-outline);
+  background-color: var(--mat-sys-surface-variant);
+  opacity: 0.35;
+}
+
+:host(.cdk-drag-placeholder) .kanban-card {
+  visibility: hidden;
+}
+
+/* What follows the cursor: the card, lifted off the board. */
+:host(.cdk-drag-preview) {
+  border-radius: 0.3rem;
+  box-shadow:
+    0 8px 10px -5px rgb(0 0 0 / 20%),
+    0 16px 24px 2px rgb(0 0 0 / 14%),
+    0 6px 30px 5px rgb(0 0 0 / 12%);
+}
+
+/*
+ * On for the length of the drop animation, and off again. The template used to
+ * carry it as a static class, so every card animated every reflow of its
+ * column and the CDK could no longer tell the animated state from the resting
+ * one.
+ */
+:host(.cdk-drag-animating) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.3, 1);
+}

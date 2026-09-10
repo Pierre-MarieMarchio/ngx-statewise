@@ -1,0 +1,60 @@
+name: Angular compatibility
+
+# The published peer range promises three Angular majors; this workspace holds
+# one. This is where the other two stop being an assumption: the packed library
+# is installed into a throwaway application and built and tested against each
+# major in turn. See tools/angular-compat/README.md for what that does and does
+# not prove.
+#
+# Not on pull requests, on purpose: no diff here changes what npm resolves for
+# Angular 20. What changes is the registry, which is a clock rather than an
+# event — so this runs weekly, on demand, and as a gate the release workflow
+# calls before it publishes anything.
+on:
+  schedule:
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+  # Called by release.yml, which will not publish unless this passes. Being
+  # one workflow rather than two copies is what keeps the matrix from drifting
+  # apart from the one a release actually verifies.
+  workflow_call:
+
+# Qualified by the calling workflow: under `workflow_call` this is the caller's
+# name, so a release gate and the weekly run never cancel one another.
+concurrency:
+  group: angular-compat-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  compat:
+    name: Angular ${{ matrix.angular }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Each major answers on its own. A break on 20 must not hide the result
+      # on 21, or the report says less than the run measured.
+      fail-fast: false
+      matrix:
+        angular: ['20', '21', '22']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      # `--ignore-scripts`: no dependency here needs a lifecycle script to
+      # build, and the only one the workspace declares is husky, which
+      # installs git hooks a runner has no use for.
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build, pack and exercise against Angular ${{ matrix.angular }}
+        run: npm run verify:angular -- ${{ matrix.angular }}

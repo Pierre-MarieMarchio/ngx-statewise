@@ -1,0 +1,312 @@
+:host {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--toc-width);
+  gap: var(--space-8);
+  align-items: start;
+}
+
+/* The column the guide runs in. Prose stops well short of this, at --measure;
+   code blocks, tables and callouts use all of it. */
+.guide {
+  min-width: 0;
+  max-width: var(--column);
+}
+
+/* --- Breadcrumb --------------------------------------------------------- */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+  color: var(--text-faint);
+  font-size: var(--text-base);
+}
+
+.breadcrumb__link {
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-sm);
+  color: inherit;
+  text-decoration: none;
+  transition: var(--transition-hover);
+
+  &:hover {
+    background-color: var(--surface-hover);
+    color: var(--text);
+  }
+}
+
+.breadcrumb__separator {
+  width: 0.9rem;
+  height: 0.9rem;
+  opacity: 0.7;
+}
+
+/* --- Untranslated notice ------------------------------------------------ */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  max-width: var(--column);
+  margin-bottom: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--link);
+  border-radius: var(--radius);
+  background-color: var(--surface-subtle);
+  color: var(--text-muted);
+  font-size: var(--text-base);
+}
+
+.notice__icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.2rem;
+  flex: none;
+  color: var(--link);
+}
+
+.notice__text {
+  margin: 0;
+
+  strong {
+    color: var(--text-strong);
+    font-weight: var(--weight-semibold);
+  }
+}
+
+/* --- Edit link ---------------------------------------------------------- */
+.edit-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-7);
+  padding: var(--space-1) var(--space-2);
+  margin-left: calc(var(--space-2) * -1);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--text-base);
+  text-decoration: none;
+  transition: var(--transition-hover);
+
+  &:hover {
+    background-color: var(--surface-hover);
+    color: var(--text-strong);
+  }
+}
+
+.edit-link__icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* --- Pager ---------------------------------------------------------------
+   Two links under a rule, not two cards. What the reader needs at the foot of
+   a page is the name of the next one; a box around it adds an outline and no
+   information. */
+.pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  max-width: var(--column);
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+}
+
+.pager__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  color: var(--text-strong);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--link);
+  }
+
+  /* The chevron leans toward its direction on hover. The one motion here, and
+     it points at what happens next. */
+  &:hover .pager__icon {
+    color: var(--link);
+  }
+
+  &:hover .pager__title {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+}
+
+.pager__link--previous {
+  grid-column: 1;
+
+  &:hover .pager__icon {
+    transform: translateX(-2px);
+  }
+}
+
+.pager__link--next {
+  grid-column: 2;
+  justify-content: flex-end;
+  text-align: right;
+
+  &:hover .pager__icon {
+    transform: translateX(2px);
+  }
+}
+
+.pager__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pager__icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: none;
+  color: var(--text-faint);
+  transition:
+    transform var(--duration-fast) var(--ease-emphasised),
+    color var(--duration-instant) var(--ease-out);
+}
+
+.pager__label {
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+}
+
+.pager__title {
+  overflow: hidden;
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Table of contents -------------------------------------------------- */
+.toc {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-7));
+  max-height: calc(100vh - var(--header-height) - var(--space-9));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-size: var(--text-base);
+}
+
+.toc__title {
+  margin: 0 0 var(--space-2);
+  padding-left: var(--space-3);
+  color: var(--text-strong);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.toc__list {
+  margin: 0;
+  padding: 0;
+  /* An empty marker string rather than `none`: Safari drops list semantics from
+     a list whose marker is `none`, which is what a redundant `role="list"` used
+     to have to put back. Every engine that never had the bug honours the string
+     too, so the role is no longer carrying anything. */
+  list-style: none;
+  list-style-type: '';
+  border-left: 1px solid var(--border);
+}
+
+.toc__item--nested .toc__link {
+  padding-left: var(--space-6);
+}
+
+.toc__link {
+  position: relative;
+  display: block;
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+  text-decoration: none;
+  transition: color var(--duration-instant) var(--ease-out);
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: var(--space-1);
+    bottom: var(--space-1);
+    width: 2px;
+    border-radius: 1px;
+    background-color: var(--mark);
+    opacity: 0;
+    transform: scaleY(0.4);
+    transform-origin: center;
+    transition:
+      opacity var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-emphasised);
+  }
+
+  &:hover {
+    color: var(--text-strong);
+  }
+}
+
+/* "Letting a fire-and-forget dispatch settle" is 41 characters; two lines is
+   the most the column can give it. The full text stays in the title. */
+.toc__text {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.toc__link--active {
+  color: var(--mark);
+  font-weight: var(--weight-medium);
+
+  &::before {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+/* --- Narrow ------------------------------------------------------------- */
+@media (max-width: 72rem) {
+  :host {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .toc {
+    display: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .pager {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .pager__link--previous,
+  .pager__link--next {
+    grid-column: 1;
+  }
+}
+
+/* Nothing of the site's chrome belongs on paper. */
+@media print {
+  :host {
+    display: block;
+  }
+
+  .toc,
+  .pager,
+  .edit-link,
+  .breadcrumb {
+    display: none;
+  }
+
+  .guide {
+    max-width: none;
+  }
+}

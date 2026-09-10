@@ -7,36 +7,31 @@ import { LocalStorageService } from '@app/core/services';
   providedIn: 'root',
 })
 export class AuthTokenService extends LocalStorageService {
-
   public setAccessToken(value: string): void {
     this.setItem(environment.ACCESS_TOKEN_KEY, value);
   }
 
-  public getAccessToken(): string {
-    return this.getItem(environment.ACCESS_TOKEN_KEY) as string;
+  /** `null` when there is none, which is what a cold start looks like. */
+  public getAccessToken(): string | null {
+    return (this.getItem(environment.ACCESS_TOKEN_KEY) as string) ?? null;
   }
 
   public clearAccessToken(): void {
     this.removeItem(environment.ACCESS_TOKEN_KEY);
   }
 
-  public setRefreshToken(value: string): void {
-    this.setItem(environment.REFRESH_TOKEN_KEY, value);
-  }
-
-  public getRefreshToken(): string {
-    return this.getItem(environment.REFRESH_TOKEN_KEY) as string;
-  }
-
-  public clearRefreshToken(): void {
-    this.removeItem(environment.REFRESH_TOKEN_KEY);
-  }
-
-  public setNewAccessTokenFromResponse(res: HttpResponse<any>): string {
+  public setNewAccessTokenFromResponse(
+    res: HttpResponse<{ accessToken: string }>,
+  ): string {
     const newToken = res.body?.accessToken;
-    if (newToken) {
-      this.setAccessToken(newToken);
+
+    if (!newToken) {
+      // No credentials in the response: the caller's decode() rejects it.
+      return '';
     }
+
+    this.setAccessToken(newToken);
+
     return newToken;
   }
 }

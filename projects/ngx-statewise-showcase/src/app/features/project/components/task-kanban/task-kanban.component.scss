@@ -1,0 +1,13 @@
+/*
+ * Six selectors went from this sheet when the board moved into `shared/ui`
+ * under its own class names, and the accordion around it went when choosing a
+ * project became the page's job. What is left is the box the one board sits
+ * in.
+ */
+.kanban-task-container {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: var(--page-body-height);
+  margin-right: 1rem;
+}
