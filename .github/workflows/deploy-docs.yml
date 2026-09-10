@@ -1,17 +1,31 @@
 name: Deploy docs
 
-# main, not dev: the site is the guide of the *published* library, and main is
-# what release.yml publishes to npm as `latest`. Deploying from dev would
-# document an API that is not released yet, to readers the npm page sends here.
+# Never dev: the site is the guide of a *published* library, and dev publishes
+# nothing. It would document an API no one can install, to readers the npm page
+# sends here.
+#
+# main and next, because both publish. main is `latest`; next is the `beta`
+# dist-tag, installable as `ngx-statewise@beta`. next earns its place here for
+# as long as the 1.0 is in beta: main is hundreds of commits behind and
+# describes 0.6.4, so a site built from it would document the older of the two
+# published APIs — the one the guide's migration page migrates away from.
+#
+# THE COST, ACCEPTED KNOWINGLY: both branches deploy to one GitHub Pages site,
+# so the last run wins. While next is ahead, the site describes the beta, and a
+# reader who runs `npm install ngx-statewise` gets 0.6.4 instead. That is the
+# trade for having any site at all before the stable ships.
+#
+# REVISIT AT THE 1.0 STABLE: once main carries the stable, next keeps running
+# ahead of it, and this trigger would put unreleased pages over released ones.
+# Drop `next` from the list then.
 #
 # Two ways in, because a deploy answers two questions. release.yml calls this
 # once a publish has succeeded, so the site never states a version npm does not
-# have. And a push to main that changes what the site is built from deploys on
-# its own, so a corrected sentence does not wait for a release that may be
-# weeks away.
+# have. And a push that changes what the site is built from deploys on its own,
+# so a corrected sentence does not wait for a release that may be weeks away.
 on:
   push:
-    branches: [main]
+    branches: [main, next]
     paths:
       # The site itself.
       - 'projects/ngx-statewise-docs/**'
