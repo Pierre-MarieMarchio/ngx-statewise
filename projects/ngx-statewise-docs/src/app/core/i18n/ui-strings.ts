@@ -1,9 +1,6 @@
 import { DEFAULT_LOCALE, type LocaleCode } from './locale';
-import { DE } from './strings/de';
 import { EN } from './strings/en';
-import { ES } from './strings/es';
 import { FR } from './strings/fr';
-import { PT_BR } from './strings/pt-br';
 
 /**
  * Every string of the interface. The guide itself is markdown, so this covers
@@ -48,8 +45,6 @@ export interface UiStrings {
   readonly footerLicence: string;
   readonly changelog: string;
   readonly versionLabel: string;
-  /** Shown only where the interface was translated automatically. */
-  readonly machineTranslated: string;
   readonly homeSubtitle: string;
   readonly homeThesis: string;
   readonly homeTagline: string;
@@ -93,9 +88,6 @@ export interface UiStrings {
 const BY_LOCALE: Record<LocaleCode, UiStrings> = {
   en: EN,
   fr: FR,
-  es: ES,
-  de: DE,
-  'pt-BR': PT_BR,
 };
 
 export function uiStrings(code: LocaleCode): UiStrings {

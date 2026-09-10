@@ -475,14 +475,6 @@
   margin: 0;
 }
 
-/* Said once, quietly, beside the licence: a reader should know the words
-   around them were not written by someone who speaks their language. */
-.footer__note {
-  margin: 0 0 var(--space-2);
-  color: var(--text-faint);
-  font-size: var(--text-sm);
-}
-
 .footer__link {
   color: inherit;
   text-underline-offset: 0.2em;

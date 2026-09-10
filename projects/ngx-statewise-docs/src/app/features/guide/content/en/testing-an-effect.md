@@ -3,15 +3,9 @@ slug: testing-an-effect
 title:
   en: Testing an effect
   fr: Tester un effect
-  es: Probar un effect
-  de: Einen Effect testen
-  pt-BR: Testar um effect
 summary:
   en: A worked suite: what it returns, the cascade, and the failure.
   fr: Une suite complète : ce qu’il renvoie, la cascade, et l’échec.
-  es: Una suite completa: lo que devuelve, la cascada y el fallo.
-  de: Eine ausgearbeitete Suite: Rückgabe, Kaskade und Fehlerfall.
-  pt-BR: Uma suíte completa: o que devolve, a cascata e a falha.
 ---
 
 # Testing an effect

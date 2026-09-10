@@ -39,8 +39,6 @@ export const FR: UiStrings = {
   footerLicence: 'ngx-statewise est publié sous licence GPL-3.0.',
   changelog: 'Journal des versions',
   versionLabel: 'Version publiée',
-  machineTranslated:
-    'Cette interface a été traduite automatiquement. Les corrections sont bienvenues.',
   homeSubtitle: 'Gestion d’état pour Angular',
   homeThesis: 'L’état est déjà écrit quand vos effects démarrent.',
   homeTagline:

@@ -3,15 +3,9 @@ slug: api
 title:
   en: API reference
   fr: Référence d’API
-  es: Referencia de API
-  de: API-Referenz
-  pt-BR: Referência da API
 summary:
   en: Every export, with the signature the compiler sees.
   fr: Chaque export, avec la signature que voit le compilateur.
-  es: Cada export, con la firma que ve el compilador.
-  de: Jeder Export, mit der Signatur, die der Compiler sieht.
-  pt-BR: Cada export, com a assinatura que o compilador vê.
 ---
 
 # API reference
@@ -372,6 +366,21 @@ configuring anything.
 off for a suite that deliberately dispatches an action whose updater it has not
 attached.
 
+### StatewiseTestingConfig
+
+```typescript
+interface StatewiseTestingConfig extends StatewiseConfig {
+  readonly strict?: boolean;
+}
+```
+
+Every option `provideStatewise` takes, plus `strict`. Write it out to annotate
+a helper that builds a config for several suites; a config passed inline needs
+no annotation.
+
+`misroutedDispatch` is accepted and has no effect here, because `strict` is
+applied after it.
+
 ### drainEffects
 
 ```typescript
@@ -431,8 +440,8 @@ described is inferred.
 | `StatewiseHistoryOptions`   | The `history` option.                           |
 | `MisroutedDispatchReaction` | `'throw' \| 'report' \| 'ignore'`.              |
 
-`StatewiseTestingConfig` comes from `ngx-statewise/testing`, and extends
-`StatewiseConfig` with `strict`.
+The list is the main entry point's. `ngx-statewise/testing` exports one type of
+its own, [`StatewiseTestingConfig`](/guide/api#statewisetestingconfig).
 
 > [!NOTE]
 > One place the inference needs a hand, and it needs no library type. An

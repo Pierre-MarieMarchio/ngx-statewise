@@ -3,15 +3,9 @@ slug: migration
 title:
   en: Migrating from 0.6.x
   fr: Migrer depuis 0.6.x
-  es: Migrar desde 0.6.x
-  de: Migration von 0.6.x
-  pt-BR: Migrar do 0.6.x
 summary:
   en: What the rewrite renamed, and the four behaviours it changed.
   fr: Ce que la réécriture a renommé, et les quatre comportements changés.
-  es: Qué renombró la reescritura y los cuatro comportamientos que cambió.
-  de: Was die Neufassung umbenannt hat, und die vier geänderten Verhalten.
-  pt-BR: O que a reescrita renomeou, e os quatro comportamentos que mudou.
 ---
 
 # Migrating from 0.6.x

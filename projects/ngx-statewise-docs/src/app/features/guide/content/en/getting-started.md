@@ -3,15 +3,9 @@ slug: getting-started
 title:
   en: Getting started
   fr: Démarrage
-  es: Empezar
-  de: Loslegen
-  pt-BR: Começar
 summary:
   en: Install the package and wire provideStatewise.
   fr: Installer le paquet et brancher provideStatewise.
-  es: Instalar el paquete y conectar provideStatewise.
-  de: Das Paket installieren und provideStatewise verdrahten.
-  pt-BR: Instalar o pacote e ligar provideStatewise.
 ---
 
 # Getting started

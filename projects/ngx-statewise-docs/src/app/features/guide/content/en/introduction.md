@@ -3,15 +3,9 @@ slug: introduction
 title:
   en: Introduction
   fr: Introduction
-  es: Introducción
-  de: Einführung
-  pt-BR: Introdução
 summary:
   en: What ngx-statewise is, and the flow it is built around.
   fr: Ce qu’est ngx-statewise, et le flux qui le structure.
-  es: Qué es ngx-statewise y el flujo sobre el que está construido.
-  de: Was ngx-statewise ist und der Ablauf, um den herum es gebaut ist.
-  pt-BR: O que é ngx-statewise e o fluxo em torno do qual foi construído.
 ---
 
 # Introduction

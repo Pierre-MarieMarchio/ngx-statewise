@@ -89,8 +89,9 @@ npm run check
 
 Format check, lint, the documentation site's own checks, library tests with
 coverage, both library entry points built, the compatibility fixture
-type-checked, the site's claims about the library remeasured, showcase tests,
-showcase built, docs tests, docs built. It must exit 0 from a clean tree.
+type-checked, the site's claims about the library remeasured, the API page
+checked against the built surface, showcase tests, showcase built, docs tests,
+docs built. It must exit 0 from a clean tree.
 
 Never check it with `npm run check | tail`: the exit status you would read is
 `tail`'s, so a failing run reports 0. Redirect to a file instead.
@@ -157,15 +158,9 @@ slug: interceptors
 title:
   en: Interceptors
   fr: Interceptors
-  es: Interceptors
-  de: Interceptors
-  pt-BR: Interceptors
 summary:
   en: Asking before an updater applies.
   fr: Demander avant qu'un updater s'applique.
-  es: Preguntar antes de que un updater se aplique.
-  de: Fragen, bevor ein Updater greift.
-  pt-BR: Perguntar antes de um updater se aplicar.
 ---
 
 # Interceptors
@@ -173,10 +168,10 @@ summary:
 The first heading repeats the English title, and a spec holds you to it.
 ```
 
-The title and the summary are needed in all five locales because the interface
-is translated even though the guide is not: they are what the sidebar, the
-landing page's contents and the browser tab show. The prose itself stays in
-English, with the banner every page carries.
+The title and the summary are needed in both locales because the interface is
+translated even though the guide is not: they are what the sidebar, the landing
+page's contents and the browser tab show. The prose itself stays in English,
+with the banner every page carries.
 
 A value runs to the end of its line, so a colon inside a summary needs no
 quoting. Only `slug`, `title` and `summary` are read; anything else in the
@@ -213,7 +208,7 @@ between pages are absolute, `](/guide/effects#scope)`, never bare anchors.
 
 Nothing about a page is checked by eye:
 
-- a missing title or summary in any locale, a slug that could not be a URL
+- a missing title or summary in either locale, a slug that could not be a URL
   segment, or two pages claiming one slug **fails the prerender and every
   spec** — the metadata is read while the module loads;
 - an import you forgot to place in a section is an unused binding, so
@@ -223,6 +218,21 @@ Nothing about a page is checked by eye:
   those against the filesystem;
 - a page whose first heading is not its English title fails
   `guide-pages.spec.ts`.
+
+### The API page is checked, in both directions
+
+`api.md` is written by hand on purpose: a generated reference gives a signature
+and never says why you would reach for the thing. What it costs is drift, so
+`npm run verify:api` reads the built `.d.ts` of both entry points and holds the
+page to it.
+
+It fails two ways. An export with no entry ships undocumented, findable only by
+reading the type definitions. An entry naming no export sends a reader to write
+code against a name that is not there.
+
+An entry is a `### <name>` section, or a row of the exported-types table for a
+type that needs no signature of its own. Names prefixed with `ɵ` are skipped,
+since both the README and the page say they are outside the contract.
 
 To translate a page's prose rather than add one, put the translation at
 `content/<locale>/<slug>.md` — body only, no metadata block — and give the

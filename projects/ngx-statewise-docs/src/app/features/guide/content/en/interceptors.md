@@ -3,15 +3,9 @@ slug: interceptors
 title:
   en: Interceptors
   fr: Interceptors
-  es: Interceptors
-  de: Interceptors
-  pt-BR: Interceptors
 summary:
   en: Asking before an updater applies, and refusing the action.
   fr: Demander avant qu’un updater s’applique, et refuser l’action.
-  es: Preguntar antes de que un updater se aplique, y rechazar la action.
-  de: Fragen, bevor ein Updater greift, und die Action ablehnen.
-  pt-BR: Perguntar antes de um updater se aplicar, e recusar a action.
 ---
 
 # Interceptors
