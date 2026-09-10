@@ -1,4 +1,9 @@
-<dialog #dialog class="dialog" (click)="onDialogClick($event)">
+<dialog
+  #dialog
+  class="dialog"
+  (click)="onDialogClick($event)"
+  (keydown)="onDialogKeydown($event)"
+>
   <div class="palette">
     <div class="palette__field">
       <docs-icon class="palette__icon" name="search" />

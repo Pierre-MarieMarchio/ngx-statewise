@@ -43,8 +43,11 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
 
+      # `--ignore-scripts`: no dependency here needs a lifecycle script to
+      # build, and the only one the workspace declares is husky, which
+      # installs git hooks a runner has no use for.
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Check formatting, lint, tests, coverage and builds
         run: npm run check
