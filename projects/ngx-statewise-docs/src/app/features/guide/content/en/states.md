@@ -120,4 +120,7 @@ export const authUpdater = defineUpdater(AuthState, (on) => {
   Scoping is decided by where the manager is provided, not here — see
   [attaching updaters](/guide/updaters#attaching-updaters).
 
+Storage is the question a state class raises next, and the answer is that it
+belongs to an effect. See [Persisting state](/guide/persisting-state).
+
 Next: [Actions](/guide/actions).

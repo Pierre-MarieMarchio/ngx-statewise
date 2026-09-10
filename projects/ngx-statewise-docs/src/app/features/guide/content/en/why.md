@@ -83,11 +83,6 @@ need conventions everyone follows, and cannot spend a week teaching them.
 Five cases, and they are real. If you are in one of them, something else will
 serve you better.
 
-Not on this list any more, because it was measured and it was wrong: wanting
-only the action helpers. Through Angular's production pipeline they cost
-**0.2 kB gzipped** on their own, engine excluded — the package tree-shakes.
-See [what it weighs](/guide/why#what-it-weighs).
-
 **You need one serialisable state tree**, for time-travel debugging or for
 replaying a session. State here is spread across injectables, and no single
 object holds it.
@@ -126,10 +121,15 @@ the same application built without the library at all — reproduce it with
 | every public export     | 4.2 kB        |
 
 The first row is the interesting one, and it corrects something this project
-believed about itself: a measurement taken with a plain bundler over the whole
+believed about itself. A measurement taken with a plain bundler over the whole
 barrel put the irreducible floor at three quarters of the total. Through
 Angular's own pipeline there is no such floor. Import `defineActionsGroup` and
 `payload` and the engine does not come with them.
+
+That correction removed a sixth case from the list above. Wanting only the
+action helpers used to be a reason to look elsewhere, on the belief that the
+engine came with them. It does not: the package tree-shakes, and the helpers
+cost 0.2 kB on their own.
 
 > [!NOTE]
 > None of these is a performance argument. The library does almost nothing at

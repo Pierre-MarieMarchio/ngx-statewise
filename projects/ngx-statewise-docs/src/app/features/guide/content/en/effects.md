@@ -286,6 +286,10 @@ that first parameter, so such a handler reads `(_, { abortSignal })`.
 - Two racing dispatches run side by side unless the effect says otherwise.
   `concurrency: 'latest'` is what makes the newest answer win.
 
+[Cancelling a request](/guide/cancelling-requests) puts `concurrency`, `key`,
+`cancelOn` and `abortSignal` to work on one search box, which is the fastest
+way to see why each exists.
+
 The showcase declares five effects in one file and uses every option between
 them. See [the task board](/guide/showcase#task-board).
 

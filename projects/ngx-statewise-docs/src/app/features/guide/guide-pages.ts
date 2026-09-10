@@ -12,7 +12,6 @@ import optimisticUpdatesEn from './content/en/optimistic-updates.md';
 import persistingStateEn from './content/en/persisting-state.md';
 import showcaseEn from './content/en/showcase.md';
 import statesEn from './content/en/states.md';
-import testingAnEffectEn from './content/en/testing-an-effect.md';
 import testingEn from './content/en/testing.md';
 import updatersEn from './content/en/updaters.md';
 import whyEn from './content/en/why.md';
@@ -121,12 +120,7 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = defineGuideSections([
       en: 'Recipes',
       fr: 'Recettes',
     },
-    pages: [
-      cancellingRequestsEn,
-      persistingStateEn,
-      optimisticUpdatesEn,
-      testingAnEffectEn,
-    ],
+    pages: [cancellingRequestsEn, persistingStateEn, optimisticUpdatesEn],
   },
   {
     title: {
