@@ -204,7 +204,12 @@
 .toc__list {
   margin: 0;
   padding: 0;
+  /* An empty marker string rather than `none`: Safari drops list semantics from
+     a list whose marker is `none`, which is what a redundant `role="list"` used
+     to have to put back. Every engine that never had the bug honours the string
+     too, so the role is no longer carrying anything. */
   list-style: none;
+  list-style-type: '';
   border-left: 1px solid var(--border);
 }
 

@@ -99,7 +99,7 @@
 
         @for (section of sections; track section.title.en) {
           <p class="sidebar__section">{{ section.title[locale.code] }}</p>
-          <ul class="sidebar__list" role="list">
+          <ul class="sidebar__list">
             @for (page of section.pages; track page.slug) {
               <li>
                 <a
@@ -126,11 +126,13 @@
       <div class="sidebar__footer">
         <div class="setting">
           <p class="setting__label" id="theme-label">{{ text().theme }}</p>
-          <div
-            class="setting__choices"
-            role="group"
-            aria-labelledby="theme-label"
-          >
+          <!--
+            A native fieldset rather than `role="group"`: it is the element the
+            role was standing in for, and the paragraph above still names it.
+            No legend, because the name is already on screen and a legend
+            inside a grid lays out differently per engine.
+          -->
+          <fieldset class="setting__choices" aria-labelledby="theme-label">
             @for (option of themeOptions(); track option.choice) {
               <button
                 class="setting__choice"
@@ -143,18 +145,16 @@
                 <docs-icon [name]="option.icon" />
               </button>
             }
-          </div>
+          </fieldset>
         </div>
 
         <div class="setting">
           <p class="setting__label" id="language-label">
             {{ text().language }}
           </p>
-          <div
-            class="setting__choices"
-            role="group"
-            aria-labelledby="language-label"
-          >
+          <!-- Links to the same page in another language: a navigation
+               landmark says that, where `role="group"` only grouped them. -->
+          <nav class="setting__choices" aria-labelledby="language-label">
             @for (option of localeOptions(); track option.locale.code) {
               <a
                 class="setting__choice setting__choice--text"
@@ -168,7 +168,7 @@
                 {{ option.locale.short }}
               </a>
             }
-          </div>
+          </nav>
         </div>
       </div>
     </div>

@@ -142,7 +142,12 @@
   max-width: 46rem;
   margin: 0;
   padding: 0;
+  /* An empty marker string rather than `none`: Safari drops list semantics from
+     a list whose marker is `none`, which is what a redundant `role="list"` used
+     to have to put back. Every engine that never had the bug honours the string
+     too, so the role is no longer carrying anything. */
   list-style: none;
+  list-style-type: '';
 }
 
 .shape__step {
@@ -219,7 +224,14 @@
   letter-spacing: -0.02em;
 }
 
+/* A fieldset, so its border, padding, inline margin and `min-content` floor
+   are undone here. The floor is the one that matters: it would size the
+   wrapper to the table and there would be nothing left to scroll. */
 .compare__scroll {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
   overflow-x: auto;
   @include shadows.scroll-shadows(var(--surface-page));
 }
@@ -299,7 +311,12 @@
   gap: var(--space-4);
   margin: 0;
   padding: 0;
+  /* An empty marker string rather than `none`: Safari drops list semantics from
+     a list whose marker is `none`, which is what a redundant `role="list"` used
+     to have to put back. Every engine that never had the bug honours the string
+     too, so the role is no longer carrying anything. */
   list-style: none;
+  list-style-type: '';
 }
 
 @media (min-width: 60rem) {
@@ -335,7 +352,12 @@
   gap: var(--space-4);
   margin: 0;
   padding: 0;
+  /* An empty marker string rather than `none`: Safari drops list semantics from
+     a list whose marker is `none`, which is what a redundant `role="list"` used
+     to have to put back. Every engine that never had the bug honours the string
+     too, so the role is no longer carrying anything. */
   list-style: none;
+  list-style-type: '';
 }
 
 @media (min-width: 48rem) {
@@ -410,7 +432,12 @@
 .contents__list {
   margin: 0;
   padding: 0;
+  /* An empty marker string rather than `none`: Safari drops list semantics from
+     a list whose marker is `none`, which is what a redundant `role="list"` used
+     to have to put back. Every engine that never had the bug honours the string
+     too, so the role is no longer carrying anything. */
   list-style: none;
+  list-style-type: '';
 }
 
 /* A fixed title column, not one sized to its content: each row is its own

@@ -51,7 +51,7 @@
 <section class="shape" aria-labelledby="shape-title">
   <h2 class="shape__title" id="shape-title">{{ text().homeShapeTitle }}</h2>
 
-  <ol class="shape__steps" role="list">
+  <ol class="shape__steps">
     <li class="shape__step shape__step--sync">
       <p class="shape__step-name">{{ text().homeFlowAction }}</p>
       <div class="code-block">
@@ -114,14 +114,14 @@
   </h2>
 
   <!--
-    A group, not a region: the section around it is already a landmark with
-    this name, and two landmarks sharing one name cannot be told apart. The
-    tabindex is what a keyboard needs to scroll it; the role is not.
+    A fieldset, not a region: the section around it is already a landmark with
+    this name, and two landmarks sharing one name cannot be told apart. It is
+    the element `role="group"` was standing in for, and it is not a landmark.
+    The tabindex is what a keyboard needs to scroll it.
   -->
-  <div
+  <fieldset
     class="compare__scroll"
     tabindex="0"
-    role="group"
     [attr.aria-label]="text().homeCompareTitle"
   >
     <table class="compare__table">
@@ -142,7 +142,7 @@
         }
       </tbody>
     </table>
-  </div>
+  </fieldset>
 </section>
 
 <section class="not-for" aria-labelledby="not-for-title">
@@ -151,7 +151,7 @@
   </h2>
   <p class="not-for__lead">{{ text().homeNotForLead }}</p>
 
-  <ul class="not-for__list" role="list">
+  <ul class="not-for__list">
     @for (reason of notFor; track reason.en) {
       <li class="not-for__item">{{ reason[locale.code] }}</li>
     }
@@ -161,7 +161,7 @@
 <section class="doors" aria-labelledby="doors-title">
   <h2 class="doors__title" id="doors-title">{{ text().homeDoorsTitle }}</h2>
 
-  <ul class="doors__list" role="list">
+  <ul class="doors__list">
     @for (door of doors; track door.title.en) {
       <li>
         <ng-template #doorBody>
@@ -197,7 +197,7 @@
       <h3 class="contents__section-title">
         {{ section.title[locale.code] }}
       </h3>
-      <ul class="contents__list" role="list">
+      <ul class="contents__list">
         @for (page of section.pages; track page.slug) {
           <li>
             <a class="contents__link" [routerLink]="pageLink(page.slug)">
