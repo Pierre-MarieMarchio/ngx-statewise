@@ -120,8 +120,8 @@ export const DOORS: readonly Door[] = [
       fr: 'Comprendre le flux',
     },
     text: {
-      en: 'The five steps every change goes through, and the two consequences.',
-      fr: 'Les cinq étapes de chaque changement, et les deux conséquences.',
+      en: 'The order every change goes through, and the two consequences.',
+      fr: 'L’ordre que suit chaque changement, et les deux conséquences.',
     },
     slug: 'introduction',
   },

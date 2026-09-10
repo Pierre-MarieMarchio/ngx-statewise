@@ -91,8 +91,9 @@ catch {
 ```
 
 Returning the triggering action flips the value back **and starts the effect
-again**, which fails again, which flips again. That is an infinite cascade, and
-nothing stops it for you.
+again**. That call fails too, and flips again. The cascade bound stops the loop
+at 50 actions and raises the path it took, so the symptom is an error naming
+the cycle rather than a dead tab.
 
 ```typescript prefer title="task.effect.ts"
 catch (error) {
@@ -125,7 +126,12 @@ inside it would make the same action mean two different things.
 ## When the answer carries data
 
 If the server returns the authoritative row, take it rather than trusting the
-optimistic guess:
+optimistic guess. The confirmation then carries the row instead of the id, so
+the action is the thing that changes first:
+
+```typescript title="task.actions.ts"
+toggleConfirmed: payload<Task>(), // was payload<string>()
+```
 
 ```typescript title="task.updater.ts"
 on(taskActions.toggleConfirmed, (state, task) => {
@@ -134,7 +140,9 @@ on(taskActions.toggleConfirmed, (state, task) => {
 });
 ```
 
-The optimistic write was for the eye. The confirmation is for the record.
+The effect returns `taskActions.toggleConfirmed(saved)` with whatever the API
+answered. The optimistic write was for the eye; the confirmation is for the
+record.
 
 ## Key notes
 

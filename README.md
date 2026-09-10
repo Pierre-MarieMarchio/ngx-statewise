@@ -11,6 +11,11 @@ NgRx, more structured than DIY.
 npm install ngx-statewise
 ```
 
+> **This repository documents 1.0, which is not released yet.** The command
+> above installs 0.6.4, whose API is the one
+> [Migrating from 0.6.x](https://pierre-mariemarchio.github.io/ngx-statewise/guide/migration)
+> migrates away from. Delete this note in the release that ships 1.0.
+
 ## What it looks like
 
 State is a plain injectable holding signals. An action carries what changed, an
@@ -104,9 +109,6 @@ its `test` target in [`angular.json`](angular.json).
 [`.github/workflows/deploy-docs.yml`](.github/workflows/deploy-docs.yml)
 prerenders the documentation site and publishes it to GitHub Pages on every
 push to `main`.
-
-Coming from 0.6.x? See
-[Migrating](https://pierre-mariemarchio.github.io/ngx-statewise/guide/migration).
 
 ## Contributing
 

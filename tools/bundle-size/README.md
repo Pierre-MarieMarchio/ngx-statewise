@@ -45,9 +45,13 @@ bundler, which concluded that three quarters of the package's weight was
 irreducible and that the action helpers could not be had without the engine.
 
 Through Angular's own pipeline that is not so: the helpers cost **0.2 kB
-gzipped** on their own. The floor was an artefact of bundling the whole barrel.
-`doc/library-findings.md` 2.5 carries the correction and keeps the original, so
-the method that produced the wrong answer stays readable.
+gzipped** on their own. The floor was an artefact of bundling the whole barrel,
+which retains every export whether an application imports it or not.
+
+Both methods are still here, which is the point of keeping two. The barrel
+measurement is `scripts/verify-site-claims.mjs` and answers "how big is this
+package"; this directory answers "what does importing it cost me". Neither
+number is wrong, and the guide says which is which.
 
 ## The ceiling
 
