@@ -16,7 +16,7 @@ import type { RegisteredEffect } from './registered-effect';
  * actions, directly or through a Promise or a one-shot Observable.
  *
  * The context comes last, after the payload. An action carrying no payload
- * still has that first parameter — `undefined` — so such a handler reads
+ * still has that first parameter, `undefined`, so such a handler reads
  * `(_, { abortSignal })`. One call shape for every effect means the engine
  * never guesses where the context goes, and a handler written before the
  * context existed keeps compiling untouched.
@@ -43,8 +43,8 @@ interface EffectRunPolicy {
    * a subscribed source is unsubscribed, and whatever they were about to
    * answer never reaches an updater.
    *
-   * Cancellation is scoped like dispatch — a manager abandons the runs it
-   * started, never those of another one — and it abandons every key at once.
+   * Cancellation is scoped like dispatch, so a manager abandons the runs it
+   * started and never those of another one. It abandons every key at once.
    */
   readonly cancelOn?: AnyActionCreator | readonly AnyActionCreator[];
   /**
@@ -53,8 +53,8 @@ interface EffectRunPolicy {
    *
    * A one-shot source completing without emitting yields no action, and that
    * reaches the engine as a deliberate absence of one. Nothing then answers
-   * the request, so whatever its updater set on the way in — an `isLoading`,
-   * typically — is never cleared, and nothing says so. Declare this on any
+   * the request, so whatever its updater set on the way in, typically an
+   * `isLoading`, is never cleared and nothing says so. Declare this on any
    * effect whose pipeline is supposed to always produce something; leave it
    * off for an effect that only performs a side effect.
    *

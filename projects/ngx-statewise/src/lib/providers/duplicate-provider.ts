@@ -50,7 +50,7 @@ export function duplicateProviderError(): Error {
       `injector. It provides its own effect registry, so the effects ` +
       `declared here register into a registry no dispatch of the ` +
       `application reaches: their updaters still apply, and their effects ` +
-      `never run — which looks like it worked, because the state moves. ` +
+      `never run. That looks like it worked, because the state moves. ` +
       `Call provideStatewise() once, at the application root. An effect ` +
       `class scoped to a lazy route or to a component needs no second call: ` +
       `createEffect() registers into the root registry from wherever it is ` +

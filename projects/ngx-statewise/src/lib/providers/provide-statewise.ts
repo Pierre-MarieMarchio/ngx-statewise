@@ -48,8 +48,8 @@ export interface StatewiseHistoryOptions {
    * Replaces an action before it is recorded, so what the history keeps need
    * not be what was dispatched. Return the action untouched to keep it.
    *
-   * The history is verbatim by design, so whatever an action carries — a
-   * password, a token — is kept with it. This is where to strip that.
+   * The history is verbatim by design, so whatever an action carries is kept
+   * with it, a password or a token included. This is where to strip that.
    */
   readonly redact?: ActionRedaction;
 }
@@ -61,8 +61,8 @@ export interface StatewiseConfig {
    * Interceptor classes, instantiated at startup so their interceptors
    * register.
    *
-   * Mechanically the same as `effects` — a class the application instantiates
-   * eagerly — and separate for one reason: a class declaring nothing but
+   * Mechanically the same as `effects`, a class the application instantiates
+   * eagerly, and separate for one reason: a class declaring nothing but
    * interceptors had to be listed under `effects`, which named it wrong at
    * every call site. `effects` still accepts one, so nothing has to move.
    */
@@ -101,8 +101,8 @@ export interface StatewiseConfig {
 /**
  * Wires the execution engine, the effects and the global updaters.
  *
- * Call it once, at the application root. A second call in a child injector —
- * the providers of a lazy route, typically — builds a second engine with its
+ * Call it once, at the application root. A second call in a child injector,
+ * typically the providers of a lazy route, builds a second engine with its
  * own effect registry, which no dispatch of the application reaches; the
  * initializer below refuses that rather than letting it detach in silence.
  */

@@ -18,7 +18,7 @@ export type EffectConcurrency =
   | 'latest'
   /**
    * The oldest run wins: while it is in flight, a new dispatch runs no
-   * handler at all. Its updater is applied all the same — the policy governs
+   * handler at all. Its updater is applied all the same, since the policy governs
    * effects, not state.
    */
   | 'first';

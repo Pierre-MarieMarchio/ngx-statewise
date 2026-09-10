@@ -21,13 +21,13 @@ interface RequestActions {
  *
  * The two flags are read from the state rather than written through setters,
  * because signals are the shape the guide tells you to reach for. An updater
- * holding plain properties writes its three handlers by hand — this helper is
+ * holding plain properties writes its three handlers by hand, and this helper is
  * entirely optional and does not narrow what the library supports.
  *
  * The three handlers are optional and take the payload of their own action.
  * They exist because `defineUpdater` allows one handler per action type, so
  * without them, adopting this helper would mean giving up everything else
- * those three actions do — starting with the data a `success` carries.
+ * those three actions do, starting with the data a `success` carries.
  */
 interface RequestStatus<State, Actions extends RequestActions> {
   readonly loading: (state: State) => WritableSignal<boolean>;
@@ -55,12 +55,12 @@ interface RequestStatus<State, Actions extends RequestActions> {
  * });
  * ```
  *
- * The flags are written first, then your handler runs — so it sees them
+ * The flags are written first, then your handler runs, so it sees them
  * already settled and can overrule one if it has to.
  *
  * The guarantee that earns this helper its place: **`request` clears the error
  * of the previous attempt.** Forgetting that one line by hand is not
- * hypothetical — this repository's own showcase shipped it, and a reload that
+ * hypothetical. This repository's own showcase shipped it, and a reload that
  * succeeded left a stale failure on screen until the next logout, with no test
  * noticing.
  *
