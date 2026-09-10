@@ -9,6 +9,7 @@ that links here.
 ```bash
 npm run start:docs   # serve it
 npm run verify:docs  # what its build cannot check about itself
+npm run verify:api   # the API page against the library's built surface
 ```
 
 To add or change a page of the guide, see
