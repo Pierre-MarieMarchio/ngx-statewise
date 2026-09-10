@@ -13,8 +13,8 @@ summary:
 An action states an intent: something happened, and this is what came with it.
 You never write its type string by hand.
 
-An action carries a type — a string identifying the event — and an optional
-payload. Declare them in a group when they belong to one flow, or on their own
+An action carries a type, which is a string identifying the event, and an
+optional payload. Declare them in a group when they belong to one flow, or on their own
 when they stand alone, and the library generates the types.
 
 ## Action groups
@@ -100,8 +100,9 @@ ofType(logoutAction); // 'LOGOUT_ACTION'
 ofType({ type: 'MY_ACTION' }); // 'MY_ACTION'
 ```
 
-You rarely need it in application code — an updater and an effect both take the
-creator, not its string. It earns its place in tests and in logging.
+You rarely need it in application code, since an updater and an effect both
+take the creator rather than its string. It earns its place in tests and in
+logging.
 
 ## Key notes
 
@@ -110,7 +111,7 @@ creator, not its string. It earns its place in tests and in logging.
 - Grouping `request` / `success` / `failure` under one source keeps a flow
   readable, and keeps its types from colliding with another feature's.
 - An action nothing handles is still valid. It exists to trigger effects, and
-  nothing warns you about it — see
+  nothing warns you about it. See
   [what the check cannot see](/guide/updaters#what-the-check-cannot-see).
 
 Next: [Updaters](/guide/updaters).

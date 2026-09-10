@@ -202,7 +202,7 @@ interface EffectRef {
 ```
 
 Unregisters the effect before its injector is destroyed. Ignoring the returned
-handle is fine — the injector cleans up on its own.
+handle is fine, since the injector cleans up on its own.
 
 ## Interceptors
 
@@ -242,7 +242,7 @@ interface InterceptorRef {
 ```
 
 Unregisters the interceptor before its injector is destroyed. Ignoring the
-returned handle is fine — the injector cleans up on its own.
+returned handle is fine, since the injector cleans up on its own.
 
 ## Dispatching
 
@@ -263,12 +263,12 @@ See [Managers](/guide/managers).
 The handle `injectStatewise` returns. Everything on it is scoped to that
 handle: what it dispatches, and the effects it waits for.
 
-| Member                  | Returns         | What it does                                                                                                                                  |
-| ----------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dispatch(action)`      | `void`          | Runs the updater, then starts the effects without waiting for them.                                                                           |
-| `dispatchAsync(action)` | `Promise<void>` | The same, and resolves once the whole cascade has settled — manager boundaries included, for a dispatch a synchronous effect handler emitted. |
-| `waitForEffect(action)` | `Promise<void>` | Resolves when the effect for that action type has settled.                                                                                    |
-| `waitForAllEffects()`   | `Promise<void>` | Resolves when every effect this handle started has settled.                                                                                   |
+| Member                  | Returns         | What it does                                                                                                                                |
+| ----------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dispatch(action)`      | `void`          | Runs the updater, then starts the effects without waiting for them.                                                                         |
+| `dispatchAsync(action)` | `Promise<void>` | The same, and resolves once the whole cascade has settled, manager boundaries included for a dispatch a synchronous effect handler emitted. |
+| `waitForEffect(action)` | `Promise<void>` | Resolves when the effect for that action type has settled.                                                                                  |
+| `waitForAllEffects()`   | `Promise<void>` | Resolves when every effect this handle started has settled.                                                                                 |
 
 `waitForEffect` takes anything carrying a `type`, so an action creator and an
 action both work.
@@ -294,12 +294,12 @@ interface HistoryEntry {
 The last dispatched actions, oldest first. Injectable, application-wide, and
 empty unless `provideStatewise` was given a `history` option.
 
-An entry is an envelope, not an enriched `Action`: reading the history and
-dispatching are two different things, and an `Action` that carried a cascade
-would make every action look like it does.
+An entry wraps the action rather than enriching it. Reading the history and
+dispatching are two different things, and an `Action` carrying a cascade would
+make every action look as though it did.
 
-`cascade` is the chain of action types that led to the entry, this action last
-— the same path the cascade-bound error prints. A single dispatch reads as one
+`cascade` is the chain of action types that led to the entry, this action last.
+It is the same path the cascade-bound error prints. A single dispatch reads as one
 entry; a cascade of three reads as three whose paths extend each other, which
 is what relates them. `recordedAt` is `Date.now()` at the moment of recording,
 and is what tells two concurrent dispatches of one action type apart.
@@ -310,7 +310,7 @@ payload, never a path.
 > [!NOTE]
 > Both are frozen, the path included: an entry already handed out cannot be
 > rewritten through the array `snapshot` returns. The payload keeps its
-> identity — see the note on `redact` below.
+> identity, for which see the note on `redact` below.
 
 ## Setting up
 
@@ -411,7 +411,7 @@ See [Testing](/guide/testing).
 **The rule that selects them: a type is exported when a consumer has to write
 it to annotate a declaration they cannot leave inferred.** Everything else is
 inferred, and exporting it would only invite people to write out what the
-compiler already knows — and would freeze it into the contract.
+compiler already knows. It would also freeze that name into the contract.
 
 That is nineteen names. Fifteen more used to be here and were removed in 1.0;
 they are still declared, and still serve these signatures, they are simply not
@@ -447,8 +447,8 @@ its own, [`StatewiseTestingConfig`](/guide/api#statewisetestingconfig).
 > One place the inference needs a hand, and it needs no library type. An
 > updater handler passed inline is contextually typed, so it compiles as
 > written. Pulled out into a constant it loses that context, and an arrow with
-> no `return` infers `void` where the collector wants `undefined` — so annotate
-> the return, `(state: State, value: number): undefined => { ... }`.
+> no `return` infers `void` where the collector wants `undefined`. Annotate the
+> return instead: `(state: State, value: number): undefined => { ... }`.
 > `undefined` is a language keyword, which is why `StateUpdate` did not have to
 > stay exported for this.
 

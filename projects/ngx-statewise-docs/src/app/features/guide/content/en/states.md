@@ -11,7 +11,7 @@ summary:
 # States
 
 A plain injectable class holding the data of one feature. There is nothing to
-register and no shape to declare — the fields on the class are the state.
+register and no shape to declare. The fields on the class are the state.
 
 ```typescript title="auth.state.ts"
 @Injectable({ providedIn: 'root' })
@@ -33,7 +33,7 @@ A component reading a signal in its template re-renders when an updater writes
 to it, with nothing to subscribe to and nothing to tear down. This is the
 shape to reach for.
 
-Derived values are `computed`, on the state or on the manager — there is no
+Derived values are `computed`, on the state or on the manager. There is no
 selector layer, and none is needed:
 
 ```typescript title="auth.state.ts"
@@ -61,7 +61,7 @@ rather than assumed, in [the showcase's](/guide/showcase#state)
 
 Zoneless does not make this impossible, only manual: `markForCheck` notifies
 Angular's own scheduler, and no Zone.js is involved. **`detectChanges()` alone
-does not do it** — an `OnPush` component nothing has marked is not re-rendered
+does not do it.** An `OnPush` component nothing has marked is not re-rendered
 by it, which is the trap worth knowing about.
 
 ```typescript avoid title="auth.state.ts"
@@ -80,7 +80,7 @@ export class AuthState {
 }
 ```
 
-Mixing the two in one class is legitimate for data no template reads — an
+Mixing the two in one class is legitimate for data no template reads: an
 access token, a cursor, a cache key. Reach for it deliberately, not by default.
 
 ## What belongs here
@@ -117,7 +117,7 @@ export const authUpdater = defineUpdater(AuthState, (on) => {
 - Signals unless you have a reason; `computed` for anything derived.
 - No writers other than updaters. No asynchronous work.
 - Two managers of the same feature share the instance the injector gives them.
-  Scoping is decided by where the manager is provided, not here — see
+  Scoping is decided by where the manager is provided, not here. See
   [attaching updaters](/guide/updaters#attaching-updaters).
 
 Storage is the question a state class raises next, and the answer is that it

@@ -51,14 +51,14 @@ Always in this order.
 
 An effect that returns an action starts a cascade. A login action updates the
 state, its effect calls the API, and the action it returns updates the state
-again. One `dispatchAsync` awaits the whole chain — including the part of it a
-synchronous handler started through another feature's manager, which is how a
+again. One `dispatchAsync` awaits the whole chain, including the part a
+synchronous handler started through another feature's manager. That is how a
 cascade crosses a feature boundary.
 
 > [!IMPORTANT]
 > Two consequences follow from that order, and they are the reason the order
 > exists. An effect never sees stale state, because the updater has already
-> run. And an action that no updater handles is still valid — it exists to
+> run. And an action that no updater handles is still valid: it exists to
 > trigger effects, and nothing warns you about it.
 
 ## What it looks like
@@ -168,7 +168,7 @@ to read through it.
 Three habits to unlearn. An effect returns its next action instead of mapping a
 stream into one, and it is read once rather than subscribed. A dispatch goes to
 the manager owning the state, not to a global store, and sending it to the
-wrong one is reported rather than ignored. And there is no `select` — a
+wrong one is reported rather than ignored. And there is no `select`: a
 component reads a signal the manager exposes.
 
 The one thing with no equivalent is the devtools timeline. The
