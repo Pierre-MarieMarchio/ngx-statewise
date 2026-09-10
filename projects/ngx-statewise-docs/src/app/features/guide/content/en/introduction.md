@@ -110,7 +110,7 @@ Nothing wires those three together. They find each other through the action.
 The library is opinionated about one thing: an updater is synchronous and does
 nothing but write state. Everything else belongs in an effect.
 
-```typescript avoid title="auth.updater.ts"
+```typescript avoid compile-error title="auth.updater.ts"
 on(loginActions.success, async (state, session) => {
   state.user.set(session.user);
   await this.profile.load(session.user.id);

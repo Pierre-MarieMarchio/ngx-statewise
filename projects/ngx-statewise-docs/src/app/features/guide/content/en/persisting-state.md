@@ -138,7 +138,7 @@ write. Storage is a side effect; effects are where side effects go.
 access inside the service, as above, and guard it there so nothing else has to
 know:
 
-```typescript title="settings.storage.ts"
+```typescript fragment title="settings.storage.ts"
 private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
 public read(): Settings | null {

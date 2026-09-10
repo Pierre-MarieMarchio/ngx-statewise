@@ -22,7 +22,7 @@ uses, and `ngx-statewise/testing` holds the three helpers a `TestBed` needs.
 ### defineActionsGroup
 
 <!-- prettier-ignore -->
-```typescript
+```typescript signature
 function defineActionsGroup<Source, Events>(config: {
   source: Source;
   events: Events;
@@ -38,7 +38,7 @@ See [Actions](/guide/actions#action-groups).
 ### defineSingleAction
 
 <!-- prettier-ignore -->
-```typescript
+```typescript signature
 function defineSingleAction<Source, Definition>(
   source: Source,
   payloadDefinition: Definition,
@@ -52,7 +52,7 @@ See [Actions](/guide/actions#single-actions).
 
 ### payload
 
-```typescript
+```typescript signature
 function payload<T>(): ValuePayloadFn<T>;
 ```
 
@@ -62,7 +62,7 @@ creator is called.
 
 ### emptyPayload
 
-```typescript
+```typescript signature
 const emptyPayload: EmptyPayloadFn;
 ```
 
@@ -71,7 +71,7 @@ updater handler and effect handler take no payload parameter.
 
 ### ofType
 
-```typescript
+```typescript signature
 function ofType<Type>(action: { type: Type }): Type;
 function ofType<Creator>(action: Creator): ReturnType<Creator>['type'];
 ```
@@ -89,7 +89,7 @@ ofType({ type: 'MY_ACTION' }); // 'MY_ACTION'
 ### defineUpdater
 
 <!-- prettier-ignore -->
-```typescript
+```typescript signature
 function defineUpdater<State>(
   stateToken: ProviderToken<State>,
   configure: (on: On<State>) => void,
@@ -108,7 +108,7 @@ See [Updaters](/guide/updaters).
 
 ### requestStatus
 
-```typescript
+```typescript signature
 function requestStatus<State, Actions>(
   on: On<State>,
   actions: Actions,
@@ -136,7 +136,7 @@ after the flags are settled. See
 ### createEffect
 
 <!-- prettier-ignore -->
-```typescript
+```typescript signature
 function createEffect<Creator>(
   action: Creator,
   handler: EffectHandler<Creator>,
@@ -209,7 +209,7 @@ handle is fine, since the injector cleans up on its own.
 ### createInterceptor
 
 <!-- prettier-ignore -->
-```typescript
+```typescript signature
 function createInterceptor<Creator>(
   action: Creator,
   handler: InterceptorHandler<Creator>,
@@ -248,7 +248,7 @@ returned handle is fine, since the injector cleans up on its own.
 
 ### injectStatewise
 
-```typescript
+```typescript signature
 function injectStatewise(...updaters: Updater<unknown>[]): Statewise;
 ```
 
@@ -278,7 +278,7 @@ scoped handle is the wrong place to read it from.
 
 ### ActionHistory
 
-```typescript
+```typescript signature
 class ActionHistory {
   record(action: Action, cascade: readonly string[]): void;
   snapshot(): readonly HistoryEntry[];
@@ -316,7 +316,7 @@ payload, never a path.
 
 ### provideStatewise
 
-```typescript
+```typescript signature
 function provideStatewise(config?: StatewiseConfig): EnvironmentProviders;
 ```
 
@@ -352,7 +352,7 @@ Imported from `ngx-statewise/testing`.
 ### provideStatewiseTesting
 
 <!-- prettier-ignore -->
-```typescript
+```typescript signature
 function provideStatewiseTesting(
   config?: StatewiseTestingConfig,
 ): EnvironmentProviders;
@@ -383,7 +383,7 @@ applied after it.
 
 ### drainEffects
 
-```typescript
+```typescript signature
 function drainEffects(): Promise<void>;
 ```
 
@@ -393,7 +393,7 @@ settle before an assertion.
 
 ### captureStatewiseDeclarations
 
-```typescript
+```typescript signature
 function captureStatewiseDeclarations(): () => void;
 ```
 

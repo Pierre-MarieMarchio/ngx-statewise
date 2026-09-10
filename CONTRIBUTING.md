@@ -90,8 +90,9 @@ npm run check
 Format check, lint, the documentation site's own checks, library tests with
 coverage, both library entry points built, the compatibility fixture
 type-checked, the site's claims about the library remeasured, the API page
-checked against the built surface, showcase tests, showcase built, docs tests,
-docs built. It must exit 0 from a clean tree.
+checked against the built surface, the guide's examples type-checked against
+it, showcase tests, showcase built, docs tests, docs built. It must exit 0 from
+a clean tree.
 
 Never check it with `npm run check | tail`: the exit status you would read is
 `tail`'s, so a failing run reports 0. Redirect to a file instead.
@@ -233,6 +234,37 @@ code against a name that is not there.
 An entry is a `### <name>` section, or a row of the exported-types table for a
 type that needs no signature of its own. Names prefixed with `ɵ` are skipped,
 since both the README and the page say they are outside the contract.
+
+### The examples are compiled
+
+`npm run verify:api` has a companion. `npm run verify:examples` extracts every
+`typescript` block from the guide and type-checks it against
+`dist/ngx-statewise`, through the same `exports` map a consumer resolves.
+
+An example is not a program, so it is not compiled as one. A block of `on(...)`
+handlers is wrapped in a `defineUpdater`, a block of class members in a class,
+a run of statements in a method. The wrapper is read off the block's first
+line, so nothing has to be declared on the fence. The world every example
+names without introducing it — `AuthState`, `loginActions`, `this.api` — is
+declared once in `scripts/guide-examples/fixture.ts`, and a name the guide
+starts using goes there.
+
+Three words on a fence change what happens. The site's renderer ignores words
+it does not know, so none of them shows on the page:
+
+| Flag            | What it means                                                                                                                    |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `signature`     | The block is a type signature rather than code, as most of the API page is. Not compiled.                                        |
+| `fragment`      | The block cannot stand alone: a piece of a larger literal, or an action the page deliberately shows at two shapes. Not compiled. |
+| `compile-error` | The block **must fail** to compile. Four blocks carry this, and each is somewhere the prose says "that is a compile error".      |
+
+`compile-error` is the one worth understanding. The guide claims in four places
+that the compiler refuses something, and this is what holds it to the claim: if
+the library ever starts accepting an `async` updater handler, the check fails
+on the page that says it does not.
+
+Reach for `fragment` last. An example that cannot be compiled is an example
+nothing checks, and the flag is how coverage quietly drops.
 
 To translate a page's prose rather than add one, put the translation at
 `content/<locale>/<slug>.md`, body only and no metadata block, then give the

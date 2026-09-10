@@ -42,7 +42,7 @@ ignore.
 
 An updater class becomes a declaration, and loses its `ofType` keys:
 
-```typescript title="0.6.x"
+```typescript fragment title="0.6.x"
 @Injectable({ providedIn: 'root' })
 export class AuthUpdator implements IUpdator<AuthState> {
   public readonly state = inject(AuthState);
@@ -65,7 +65,7 @@ export const authUpdater = defineUpdater(AuthState, (on) => {
 
 A manager takes a handle instead of calling global functions:
 
-```typescript title="0.6.x"
+```typescript fragment title="0.6.x"
 export class AuthManager {
   private readonly authUpdator = inject(AuthUpdator);
 
