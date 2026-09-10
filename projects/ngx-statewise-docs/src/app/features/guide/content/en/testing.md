@@ -187,5 +187,10 @@ Prefer `strict: false` when you only want the check off. It is scoped to one
 - Assert on the state the manager exposes, not on the actions, unless the
   actions are what you are testing.
 
+The showcase has four suites written this way, under `src/integration/`. They
+test the library's behaviour rather than a component, and each is short enough
+to read as documentation. See
+[the integration suites](/guide/showcase#the-integration-suites).
+
 Next: [Migrating from 0.6.x](/guide/migration), or the
 [API reference](/guide/api).

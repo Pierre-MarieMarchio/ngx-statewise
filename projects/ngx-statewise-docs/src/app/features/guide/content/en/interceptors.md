@@ -48,7 +48,7 @@ export class TallyGuard {
 }
 ```
 
-That is the showcase's `TallyGuard`, in full. `tallyActions.incremented`
+That is [the showcase's](/guide/showcase#state) `TallyGuard`, in full. `tallyActions.incremented`
 carries a `number`, so `step` is one: the handler's parameter is inferred from
 the action creator. An action carrying nothing gives the handler one parameter
 typed `undefined`, and leaving it out is the usual form.

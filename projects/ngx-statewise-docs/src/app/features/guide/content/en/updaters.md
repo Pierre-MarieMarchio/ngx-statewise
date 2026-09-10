@@ -253,8 +253,8 @@ runs, so it can overrule one if it has a reason to.
 > It is optional, and it is deliberately not the answer to everything. A flow
 > whose rollback point is per entity, or whose failure has to reconcile an
 > optimistic write, is still three handlers written out — and it should be.
-> That is logic, not boilerplate. The showcase keeps both shapes side by side
-> for exactly that reason.
+> That is logic, not boilerplate. [The showcase](/guide/showcase#task-board)
+> keeps both shapes side by side in one updater, for exactly that reason.
 
 It needs signals, because it reads the two flags off the state and writes them.
 An updater holding plain properties writes its handlers by hand.

@@ -228,4 +228,7 @@ protected async submit(): Promise<void> {
   cascade. Past an `await`, hand the promise back.
 - A manager method other features call returns `Promise<void>`.
 
+The showcase crosses a feature boundary exactly this way, through two ports
+rather than an import. See [the dashboard](/guide/showcase#dashboard).
+
 Next: [Testing](/guide/testing).
