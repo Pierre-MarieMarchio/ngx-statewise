@@ -1,11 +1,12 @@
 # ngx-statewise
 
-A lightweight and intuitive state management library for Angular. Simpler than
-NgRx, more structured than DIY.
+State management for Angular, built on signals.
 
-**📖 [Read the documentation](https://pierre-mariemarchio.github.io/ngx-statewise/)**
-— the guide lives on the site, which is its single source of truth. This page
-is the overview: install it, see the shape of it, and follow the links.
+An action says what happened. An updater applies it to state, synchronously. An
+effect does the asynchronous work.
+
+**📖 [Read the documentation](https://pierre-mariemarchio.github.io/ngx-statewise/)**.
+This page is the overview. The guide is on the site.
 
 ## Installation
 
@@ -43,14 +44,14 @@ updater applies it, an effect handles everything else, and a manager is what
 your components talk to.
 
 ```typescript
-// State — signals, so components re-render on their own
+// State: signals, so components re-render on their own
 @Injectable({ providedIn: 'root' })
 export class AuthState {
   public user = signal<User | null>(null);
   public isLoading = signal(false);
 }
 
-// Actions — the types LOGIN_REQUEST, LOGIN_SUCCESS and LOGIN_FAILURE
+// Actions: the types LOGIN_REQUEST, LOGIN_SUCCESS and LOGIN_FAILURE
 export const loginActions = defineActionsGroup({
   source: 'LOGIN',
   events: {
@@ -60,7 +61,7 @@ export const loginActions = defineActionsGroup({
   },
 });
 
-// Updater — synchronous, and the only place state changes
+// Updater: synchronous, and the only place state changes
 export const authUpdater = defineUpdater(AuthState, (on) => {
   on(loginActions.request, (state) => state.isLoading.set(true));
   on(loginActions.success, (state, user) => {
@@ -69,7 +70,7 @@ export const authUpdater = defineUpdater(AuthState, (on) => {
   });
 });
 
-// Effect — the asynchronous work, returning the next action
+// Effect: the asynchronous work, returning the next action
 @Injectable({ providedIn: 'root' })
 export class AuthEffect {
   private readonly repository = inject(AuthRepository);
@@ -83,7 +84,7 @@ export class AuthEffect {
   });
 }
 
-// Manager — exposes the state and dispatches, in its own scope
+// Manager: exposes the state and dispatches, in its own scope
 @Injectable({ providedIn: 'root' })
 export class AuthManager {
   private readonly state = inject(AuthState);
@@ -108,13 +109,13 @@ possibly more actions**. The state is settled before any effect runs, and
 The full guide is on the site, with a sidebar. Four entry points, depending on
 what you came for:
 
-- **[Introduction](https://pierre-mariemarchio.github.io/ngx-statewise/guide/introduction)** —
+- **[Introduction](https://pierre-mariemarchio.github.io/ngx-statewise/guide/introduction)**:
   the flow, and a mapping table if you are coming from NgRx.
-- **[Getting started](https://pierre-mariemarchio.github.io/ngx-statewise/guide/getting-started)** —
+- **[Getting started](https://pierre-mariemarchio.github.io/ngx-statewise/guide/getting-started)**:
   installation, every `provideStatewise` option, and a first feature.
-- **[API reference](https://pierre-mariemarchio.github.io/ngx-statewise/guide/api)** —
+- **[API reference](https://pierre-mariemarchio.github.io/ngx-statewise/guide/api)**:
   every export, with the signature the compiler sees.
-- **[Why ngx-statewise](https://pierre-mariemarchio.github.io/ngx-statewise/guide/why)** —
+- **[Why ngx-statewise](https://pierre-mariemarchio.github.io/ngx-statewise/guide/why)**:
   what it costs you in lines, measured, and five cases where something else
   serves you better.
 
@@ -136,8 +137,8 @@ wiring are not. Four behaviours changed beyond the renames:
   owns them, and `waitForEffect` no longer takes a raw action-type string.
 - **The action history left the dispatch handle.** `statewise.recordedActions()`
   is gone; inject `ActionHistory` and call `snapshot()`, which answers
-  `readonly HistoryEntry[]` — the action, the cascade path that led to it, and
-  when it was recorded.
+  `readonly HistoryEntry[]`. Each entry carries the action, the cascade path
+  that led to it, and when it was recorded.
 
 → [Migrating from 0.6.x](https://pierre-mariemarchio.github.io/ngx-statewise/guide/migration)
 has the full rename table and before/after examples.
@@ -170,24 +171,25 @@ builds and passes its specs on all three supported majors.
 
 The library has no coupling to Zone.js. Its single mention anywhere is a comment
 explaining why a promise is duck-typed rather than checked with `instanceof`, so
-that Zone.js's `ZoneAwarePromise` still works — and that compatibility is held by
-a test rather than by intent: `effect-outcome.spec.ts` > _awaits a promise that
-is not an instance of the global Promise_, which builds a promise its own global
-constructor disowns.
+that Zone.js's `ZoneAwarePromise` still works. A test holds that compatibility
+rather than intent: `effect-outcome.spec.ts` > _awaits a promise that is not an
+instance of the global Promise_ builds a promise its own global constructor
+disowns.
 
 **SSR is safe, with one caveat worth stating.** The engine's seven classes are
-provided without `providedIn`, so there is one set per environment injector —
-one per request on a server. No browser API is touched anywhere: no `window`, no
+provided without `providedIn`, so there is one set per environment injector,
+which on a server means one per request. No browser API is touched anywhere: no
+`window`, no
 `document`, no `localStorage`, no `navigator`, no `location`. The only global is
 `AbortController`.
 
 The caveat: the one piece of module-level mutable state in the whole library is
 the `Set` of action types that updaters have declared, used to detect a dispatch
 that reached the wrong manager. **That `Set` is shared by the process**, so two
-distinct applications served by one server share the list of declared types. The
-consequence is bounded — a false "misrouted" positive if the two share an action
-type name — and it is never a data leak: it holds names, never payloads and
-never state.
+distinct applications served by one server share the list of declared types.
+The consequence is bounded. Two applications sharing an action type name can
+produce a false "misrouted" positive, and that is the whole of it. It is never
+a data leak: the `Set` holds names, never payloads and never state.
 
 ## What 1.0 promises
 
@@ -203,7 +205,7 @@ included. If your code names one, it is depending on an internal.
 
 **Exported types are committed exactly as much as the functions.** A type is
 exported when a consumer has to write it to annotate a declaration they cannot
-leave inferred, and it is nineteen names — the rule and the list are on the
+leave inferred, and it is nineteen names. The rule and the list are on the
 [API page](https://pierre-mariemarchio.github.io/ngx-statewise/guide/api).
 Everything else is inferred and is not yours to name.
 
@@ -215,7 +217,8 @@ when that is.
 **The Angular peer range covers three majors.** The oldest is dropped when a new
 one enters, in a **minor** release of this library, not a major: a peer range is
 a statement about what is verified, and the verification is a weekly job plus a
-gate on every publish — three real installs against three real majors. Dropping
+gate on every publish, which is three real installs against three real majors.
+Dropping
 a major you no longer use costs you nothing, and holding the range hostage to
 this library's own major would mean either verifying nothing or never moving.
 

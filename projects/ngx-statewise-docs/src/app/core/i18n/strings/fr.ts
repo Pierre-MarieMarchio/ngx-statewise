@@ -42,7 +42,7 @@ export const FR: UiStrings = {
   homeSubtitle: 'Gestion d’état pour Angular',
   homeThesis: 'L’état est déjà écrit quand vos effects démarrent.',
   homeTagline:
-    'Des signals pour l’état, des actions pour l’intention, des effects pour tout le reste. Plus structuré qu’à la main, sans l’appareillage d’un framework.',
+    'Une action dit ce qui s’est passé. Un updater l’applique à l’état, de façon synchrone. Un effect fait le travail asynchrone.',
   homeGetStarted: 'Commencer',
   homeReadTheGuide: 'Lire le guide',
   homeFlowTitle: 'Tout le flux',
