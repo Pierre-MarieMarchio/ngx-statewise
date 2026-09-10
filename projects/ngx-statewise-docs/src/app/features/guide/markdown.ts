@@ -39,7 +39,7 @@ export interface RenderGuideOptions {
 export type FenceStance = 'prefer' | 'avoid';
 
 /** Depths kept in the on-page table of contents. `h1` is the page title. */
-const TOC_DEPTHS = [2, 3];
+const TOC_DEPTHS = new Set([2, 3]);
 
 /**
  * GitHub's heading-anchor algorithm, so the anchors the guide already used
@@ -91,7 +91,7 @@ export function renderGuide(
       used.set(base, seen + 1);
       const id = seen === 0 ? base : `${base}-${String(seen)}`;
 
-      if (TOC_DEPTHS.includes(token.depth)) {
+      if (TOC_DEPTHS.has(token.depth)) {
         headings.push({ id, text: token.text, depth: token.depth });
       }
 
@@ -117,42 +117,21 @@ export function renderGuide(
         : '';
       const label = escapeAttribute(options.copyCodeLabel);
 
-      // A title beats a bare language: on a docs site, knowing which file a
-      // snippet belongs in is most of the answer. A stance beats both: the
-      // block is not an example, it is a rule.
-      const stanceLabel =
-        stance === 'prefer'
-          ? options.preferLabel
-          : stance === 'avoid'
-            ? options.avoidLabel
-            : undefined;
-      // What the region announces: the file and the stance where they exist,
-      // because "auth.updater.ts" twice tells a screen reader nothing.
-      const regionName =
-        title === undefined
-          ? stanceLabel === undefined
-            ? `${options.codeRegionLabel} ${String(codeRegions)}`
-            : `${stanceLabel}: ${options.codeRegionLabel} ${String(codeRegions)}`
-          : stanceLabel === undefined
-            ? title
-            : `${stanceLabel}: ${title}`;
-
-      const caption =
-        stanceLabel !== undefined
-          ? `<span class="code-block__stance">${escapeHtml(stanceLabel)}</span>${
-              title === undefined
-                ? ''
-                : `<span class="code-block__title">${escapeHtml(title)}</span>`
-            }`
-          : title !== undefined
-            ? `<span class="code-block__title">${escapeHtml(title)}</span>`
-            : `<span class="code-block__language">${escapeHtml(language)}</span>`;
+      const stanceLabel = stanceLabelOf(stance, options);
+      const regionName = codeRegionName(
+        title,
+        stanceLabel,
+        `${options.codeRegionLabel} ${String(codeRegions)}`,
+      );
+      const caption = codeCaption(title, stanceLabel, language);
+      const stanceClass = stance === undefined ? '' : ` code-block--${stance}`;
+      const titled = title === undefined ? '' : ' data-titled';
 
       // The copy button is plain markup: this HTML is injected with innerHTML,
       // so an Angular component could not live inside it. The page listens for
       // the click instead.
       return [
-        `<div class="code-block${stance === undefined ? '' : ` code-block--${stance}`}"${title !== undefined ? ' data-titled' : ''}>`,
+        `<div class="code-block${stanceClass}"${titled}>`,
         '<div class="code-block__bar">',
         caption,
         `<button class="code-block__copy" type="button" data-copy-code title="${label}" aria-label="${label}">`,
@@ -185,8 +164,13 @@ export function renderGuide(
         )
         .join('');
 
+      const preferredName = `${options.tableRegionLabel} ${String(tableRegions)}`;
+      const regionLabel = escapeAttribute(
+        uniqueRegionName(preferredName, tableRegions),
+      );
+
       return [
-        `<div class="table-scroll" tabindex="0" role="region" aria-label="${escapeAttribute(uniqueRegionName(`${options.tableRegionLabel} ${String(tableRegions)}`, tableRegions))}">`,
+        `<div class="table-scroll" tabindex="0" role="region" aria-label="${regionLabel}">`,
         `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`,
         '</div>',
       ].join('');
@@ -258,19 +242,76 @@ export function parseFenceInfo(info: string): {
   };
 }
 
+/**
+ * A title beats a bare language: on a docs site, knowing which file a snippet
+ * belongs in is most of the answer. A stance beats both: the block is not an
+ * example, it is a rule.
+ */
+function stanceLabelOf(
+  stance: FenceStance | undefined,
+  options: RenderGuideOptions,
+): string | undefined {
+  if (stance === 'prefer') {
+    return options.preferLabel;
+  }
+
+  if (stance === 'avoid') {
+    return options.avoidLabel;
+  }
+
+  return undefined;
+}
+
+/**
+ * What the region announces: the file and the stance where they exist, because
+ * "auth.updater.ts" twice tells a screen reader nothing. `fallback` is the
+ * ordinal name a block with no title is left with.
+ */
+function codeRegionName(
+  title: string | undefined,
+  stanceLabel: string | undefined,
+  fallback: string,
+): string {
+  const named = title ?? fallback;
+
+  return stanceLabel === undefined ? named : `${stanceLabel}: ${named}`;
+}
+
+/** The bar above a block: its stance and file, or the language on its own. */
+function codeCaption(
+  title: string | undefined,
+  stanceLabel: string | undefined,
+  language: string,
+): string {
+  const titleSpan =
+    title === undefined
+      ? ''
+      : `<span class="code-block__title">${escapeHtml(title)}</span>`;
+
+  if (stanceLabel !== undefined) {
+    return `<span class="code-block__stance">${escapeHtml(stanceLabel)}</span>${titleSpan}`;
+  }
+
+  if (title !== undefined) {
+    return titleSpan;
+  }
+
+  return `<span class="code-block__language">${escapeHtml(language)}</span>`;
+}
+
 function escapeHtml(value: string): string {
   return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
 function escapeAttribute(value: string): string {
   return value
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
 }

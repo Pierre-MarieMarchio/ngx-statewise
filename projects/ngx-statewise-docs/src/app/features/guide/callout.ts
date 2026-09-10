@@ -43,7 +43,7 @@ export function calloutExtension(labels: CalloutLabels): MarkedExtension {
         level: 'block',
 
         start(source: string) {
-          return source.match(/^> ?\[!/m)?.index;
+          return /^> ?\[!/m.exec(source)?.index;
         },
 
         tokenizer(source: string) {
@@ -139,7 +139,7 @@ const CALLOUT_ICONS: Record<CalloutKind, string> = {
 
 function escapeText(value: string): string {
   return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
 }
