@@ -66,14 +66,16 @@ function exportsOf(declarationFile) {
   }
 
   return listed
-    .map(
-      (name) =>
-        name
-          .trim()
-          .split(/\s+as\s+/)
-          .pop()
-          ?.trim() ?? '',
-    )
+    .map((name) => {
+      // `X as Y` publishes Y, and Y is the only name a consumer can write.
+      // Found by index rather than by splitting on a pattern: `\s+as\s+`
+      // backtracks super-linearly, and an export list is one long line.
+      const aliased = name.lastIndexOf(' as ');
+
+      return (
+        aliased === -1 ? name : name.slice(aliased + ' as '.length)
+      ).trim();
+    })
     .filter((name) => name.length > 0 && !name.startsWith('ɵ'));
 }
 
@@ -132,7 +134,9 @@ if (documented.size === 0) {
 // --- both directions -------------------------------------------------------
 const undocumented = [...published]
   .filter((name) => !documented.has(name))
-  .sort();
+  // Compared as strings, rather than through the default sort's string
+  // conversion of whatever it was handed.
+  .sort((left, right) => left.localeCompare(right));
 
 if (undocumented.length > 0) {
   fail(
@@ -145,7 +149,7 @@ if (undocumented.length > 0) {
 
 const phantom = [...documented.keys()]
   .filter((name) => !published.has(name))
-  .sort();
+  .sort((left, right) => left.localeCompare(right));
 
 if (phantom.length > 0) {
   fail(
