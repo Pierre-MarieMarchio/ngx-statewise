@@ -99,9 +99,9 @@ export class AuthManager {
 }
 ```
 
-The flow is one-way: **action → updater → effect → possibly more actions**. The
-state is settled before any effect runs, and `dispatchAsync` awaits the entire
-chain.
+The flow is one-way: **action → optional interceptor → updater → effect →
+possibly more actions**. The state is settled before any effect runs, and
+`dispatchAsync` awaits the entire chain.
 
 ## The guide
 
@@ -114,6 +114,7 @@ chain.
 | [Actions](https://pierre-mariemarchio.github.io/ngx-statewise/guide/actions)                 | Action groups, single actions, generated types  |
 | [Updaters](https://pierre-mariemarchio.github.io/ngx-statewise/guide/updaters)               | State updates, scope, and misrouted dispatches  |
 | [Effects](https://pierre-mariemarchio.github.io/ngx-statewise/guide/effects)                 | Promises, observables, scope and lifecycle      |
+| [Interceptors](https://pierre-mariemarchio.github.io/ngx-statewise/guide/interceptors)       | Refusing an action before its updater applies   |
 | [Managers](https://pierre-mariemarchio.github.io/ngx-statewise/guide/managers)               | `dispatch`, `dispatchAsync`, and error handling |
 | [Testing](https://pierre-mariemarchio.github.io/ngx-statewise/guide/testing)                 | The `ngx-statewise/testing` entry point         |
 
