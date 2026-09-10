@@ -32,7 +32,7 @@ abandoned, its answer is dropped before it reaches an updater, and its
 `abortSignal` fires so the request itself can stop:
 
 <!-- prettier-ignore -->
-```typescript title="search.effect.ts"
+```typescript fragment title="search.effect.ts"
 public readonly queryEffect = createEffect(
   searchActions.query,
   async (query, { abortSignal }) => {
@@ -162,9 +162,7 @@ already dropped it.
 ## What not to do
 
 ```typescript avoid title="search.effect.ts"
-createEffect(searchActions.query, (query) =>
-  this.api.search$(query).pipe(switchMap(...)),
-);
+createEffect(searchActions.query, (query) => this.api.search$(query).pipe(switchMap((results) => of(searchActions.answered({ attempt: 0, results })))));
 ```
 
 `switchMap` cancels between emissions of one observable. Here every dispatch
@@ -172,7 +170,7 @@ produces a _new_ observable, and the library reads one emission from each, so
 there is nothing for it to switch away from. Two dispatches are two independent
 effects.
 
-```typescript avoid title="search.updater.ts"
+```typescript avoid compile-error title="search.updater.ts"
 on(searchActions.answered, async (state, { results }) => {
   if (await this.stillCurrent()) {
     state.results.set(results);

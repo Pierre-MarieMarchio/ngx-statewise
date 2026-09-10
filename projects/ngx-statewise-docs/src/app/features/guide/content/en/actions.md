@@ -84,9 +84,20 @@ from a group:
 ```typescript
 statewise.dispatch(logoutAction());
 statewise.dispatch(selectItemAction(42));
+```
 
-on(logoutAction, (state) => { ... });
-createEffect(selectItemAction, (id) => { ... });
+An updater and an effect take it the same way a group's creator is taken:
+
+```typescript
+on(logoutAction, (state) => {
+  state.isLoggedIn.set(false);
+});
+```
+
+```typescript
+createEffect(selectItemAction, (id) => {
+  this.router.navigate(['/items', id]);
+});
 ```
 
 ## Reading a type

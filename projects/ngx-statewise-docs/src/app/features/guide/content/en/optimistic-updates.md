@@ -84,7 +84,10 @@ export class TaskEffect {
 ## Why the revert is a different action
 
 ```typescript avoid title="task.effect.ts"
-catch {
+try {
+  await this.api.setDone(id, true);
+  return taskActions.toggleConfirmed(id);
+} catch {
   // The same action that triggered this effect.
   return taskActions.toggleDone(id);
 }
@@ -96,7 +99,10 @@ at 50 actions and raises the path it took, so the symptom is an error naming
 the cycle rather than a dead tab.
 
 ```typescript prefer title="task.effect.ts"
-catch (error) {
+try {
+  await this.api.setDone(id, true);
+  return taskActions.toggleConfirmed(id);
+} catch (error) {
   return taskActions.toggleReverted({ id, reason: String(error) });
 }
 ```
@@ -129,11 +135,11 @@ If the server returns the authoritative row, take it rather than trusting the
 optimistic guess. The confirmation then carries the row instead of the id, so
 the action is the thing that changes first:
 
-```typescript title="task.actions.ts"
+```typescript fragment title="task.actions.ts"
 toggleConfirmed: payload<Task>(), // was payload<string>()
 ```
 
-```typescript title="task.updater.ts"
+```typescript fragment title="task.updater.ts"
 on(taskActions.toggleConfirmed, (state, task) => {
   state.items.update((items) => replace(items, task));
   state.pending.update((pending) => without(pending, task.id));

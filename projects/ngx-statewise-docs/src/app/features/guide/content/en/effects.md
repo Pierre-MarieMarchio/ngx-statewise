@@ -130,8 +130,12 @@ updater.
 
 ```typescript
 // AUTH_LOADED is handled by authUpdater, attached to AuthManager.
-createEffect(authActions.loaded, () => { ... });
+createEffect(authActions.loaded, () => {
+  this.audit.record('auth loaded');
+});
+```
 
+```typescript
 authManager.dispatch(authActions.loaded()); // the effect runs
 taskManager.dispatch(authActions.loaded()); // misrouted: nothing runs
 ```
@@ -158,8 +162,10 @@ earlier:
 
 ```typescript
 @Injectable()
-export class AuthEffects {
-  private readonly loginEffect = createEffect(loginActions.request, ...);
+export class LoginEffects {
+  private readonly loginEffect = createEffect(loginActions.request, async (credentials) => loginActions.success(await this.repository.login(credentials)));
+
+  private readonly repository = inject(AuthRepository);
 
   public stopListening(): void {
     this.loginEffect.destroy();
@@ -180,7 +186,7 @@ every run goes on side by side.
 ```typescript title="task.effect.ts"
 public readonly getAllTaskRequestEffect = createEffect(
   getAllTaskActions.request,
-  async () => { ... },
+  async () => getAllTaskActions.success(await this.api.list()),
   { concurrency: 'latest', cancelOn: taskReset, mustAnswer: true },
 );
 ```
@@ -213,12 +219,16 @@ one. `key` splits them into independent groups, one per string it returns, so
 two dispatches concerning two different entities never compete:
 
 ```typescript title="task.effect.ts"
-{
-  concurrency: 'latest',
-  key: (task) => task.id,
-  cancelOn: taskReset,
-  mustAnswer: true,
-}
+public readonly toggleDoneEffect = createEffect(
+  taskActions.toggleDone,
+  async (id) => taskActions.toggleConfirmed(id),
+  {
+    concurrency: 'latest',
+    key: (id) => id,
+    cancelOn: taskReset,
+    mustAnswer: true,
+  },
+);
 ```
 
 Dragging a second card no longer abandons the write of the first, while
@@ -262,7 +272,9 @@ The handler's last parameter is the context of its own run:
 ```typescript title="write.effect.ts"
 createEffect(
   writeActions.request,
-  async ({ value }, { abortSignal }) => { ... },
+  async ({ value }, { abortSignal }) => {
+    await this.api.search(value, abortSignal);
+  },
   { concurrency: 'latest' },
 );
 ```

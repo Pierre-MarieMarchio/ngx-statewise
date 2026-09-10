@@ -52,7 +52,7 @@ Handlers are inferred from the action creator. There is nothing to annotate.
   a handler with no second parameter.
 - A handler must be synchronous.
 
-```typescript avoid title="auth.updater.ts"
+```typescript avoid compile-error title="auth.updater.ts"
 on(loginActions.request, async (state) => {
   state.isLoading.set(true);
   await this.api.login();
@@ -72,7 +72,7 @@ on(loginActions.request, (state) => {
 The payload is the other thing you cannot get wrong. An action carrying nothing
 gives the handler no second parameter, so asking for one does not compile:
 
-```typescript avoid title="auth.updater.ts"
+```typescript avoid compile-error title="auth.updater.ts"
 on(logoutAction, (state, payload) => {
   state.user.set(null);
 });

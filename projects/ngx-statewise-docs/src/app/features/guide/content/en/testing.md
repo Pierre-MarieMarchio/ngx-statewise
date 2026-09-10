@@ -76,10 +76,12 @@ it('loads the tasks', async () => {
 for them:
 
 ```typescript title="task.manager.spec.ts"
-manager.refresh(); // calls statewise.dispatch(...)
+const tasks = manager();
+
+tasks.refresh(); // calls statewise.dispatch(...)
 await drainEffects();
 
-expect(manager.items()).toHaveLength(3);
+expect(tasks.items()).toHaveLength(3);
 ```
 
 > [!TIP]
@@ -135,7 +137,7 @@ class FakeTaskApi {
   public list = vi.fn().mockResolvedValue([task('a'), task('b')]);
 }
 
-function manager(api = new FakeTaskApi()): {
+function suite(api = new FakeTaskApi()): {
   tasks: TaskManager;
   api: FakeTaskApi;
 } {
@@ -162,7 +164,7 @@ returned action is an implementation detail; the state is the contract.
 <!-- prettier-ignore -->
 ```typescript title="task.effect.spec.ts"
 it('marks the task done once the server agrees', async () => {
-  const { tasks, api } = manager();
+  const { tasks, api } = suite();
 
   await tasks.toggleDoneAndSettle('a');
 
@@ -178,7 +180,7 @@ read them from the history, which `provideStatewiseTesting` enables for you:
 
 ```typescript title="task.effect.spec.ts"
 it('confirms rather than reverting', async () => {
-  const { tasks } = manager();
+  const { tasks } = suite();
 
   await tasks.toggleDoneAndSettle('a');
 
@@ -200,7 +202,7 @@ it('puts the task back when the server refuses', async () => {
   const api = new FakeTaskApi();
   api.setDone.mockRejectedValue(new Error('nope'));
 
-  const { tasks } = manager(api);
+  const { tasks } = suite(api);
 
   await tasks.toggleDoneAndSettle('a');
 
@@ -286,7 +288,11 @@ afterEach(() => restoreDeclarations());
 ```typescript avoid title="updater.spec.ts"
 // Declarations from this suite stay visible to every suite that follows.
 beforeEach(() => {
-  defineUpdater(SomeStates, (on) => { ... });
+  defineUpdater(SomeStates, (on) => {
+    on(counterActions.increment, (state) => {
+      state.value.update((value) => value + 1);
+    });
+  });
 });
 ```
 
