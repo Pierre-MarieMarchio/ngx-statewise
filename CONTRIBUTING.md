@@ -89,8 +89,9 @@ npm run check
 
 Format check, lint, the documentation site's own checks, library tests with
 coverage, both library entry points built, the compatibility fixture
-type-checked, the site's claims about the library remeasured, showcase tests,
-showcase built, docs tests, docs built. It must exit 0 from a clean tree.
+type-checked, the site's claims about the library remeasured, the API page
+checked against the built surface, showcase tests, showcase built, docs tests,
+docs built. It must exit 0 from a clean tree.
 
 Never check it with `npm run check | tail`: the exit status you would read is
 `tail`'s, so a failing run reports 0. Redirect to a file instead.
@@ -217,6 +218,21 @@ Nothing about a page is checked by eye:
   those against the filesystem;
 - a page whose first heading is not its English title fails
   `guide-pages.spec.ts`.
+
+### The API page is checked, in both directions
+
+`api.md` is written by hand on purpose: a generated reference gives a signature
+and never says why you would reach for the thing. What it costs is drift, so
+`npm run verify:api` reads the built `.d.ts` of both entry points and holds the
+page to it.
+
+It fails two ways. An export with no entry ships undocumented, findable only by
+reading the type definitions. An entry naming no export sends a reader to write
+code against a name that is not there.
+
+An entry is a `### <name>` section, or a row of the exported-types table for a
+type that needs no signature of its own. Names prefixed with `ɵ` are skipped,
+since both the README and the page say they are outside the contract.
 
 To translate a page's prose rather than add one, put the translation at
 `content/<locale>/<slug>.md` — body only, no metadata block — and give the
