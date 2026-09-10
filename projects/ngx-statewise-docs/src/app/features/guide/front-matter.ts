@@ -81,29 +81,10 @@ function parseFields(
 
     // Line 1 is the opening fence, so the first field is on line 2.
     const where = `line ${String(offset + 2)} of a guide page's metadata`;
-    const colon = line.indexOf(':');
-
-    if (colon === -1) {
-      throw new Error(`${where} is not a "key: value" pair: "${line.trim()}"`);
-    }
-
-    const key = line.slice(0, colon).trim();
-    const value = unquote(line.slice(colon + 1).trim());
-
-    if (key.length === 0) {
-      throw new Error(`${where} has no name before its colon`);
-    }
+    const { key, value } = splitField(line, where);
 
     if (/^\s/.test(line)) {
-      if (nested === undefined) {
-        throw new Error(`${where} is indented under nothing: "${key}"`);
-      }
-
-      if (nested.has(key)) {
-        throw new Error(`${where} gives "${key}" a second value`);
-      }
-
-      nested.set(key, value);
+      addNested(nested, key, value, where);
       continue;
     }
 
@@ -123,6 +104,44 @@ function parseFields(
   }
 
   return fields;
+}
+
+/** One `key: value` line, with the quotes a YAML habit adds taken back off. */
+function splitField(
+  line: string,
+  where: string,
+): { readonly key: string; readonly value: string } {
+  const colon = line.indexOf(':');
+
+  if (colon === -1) {
+    throw new Error(`${where} is not a "key: value" pair: "${line.trim()}"`);
+  }
+
+  const key = line.slice(0, colon).trim();
+
+  if (key.length === 0) {
+    throw new Error(`${where} has no name before its colon`);
+  }
+
+  return { key, value: unquote(line.slice(colon + 1).trim()) };
+}
+
+/** An indented line belongs to the block the last unindented name opened. */
+function addNested(
+  block: Map<string, string> | undefined,
+  key: string,
+  value: string,
+  where: string,
+): void {
+  if (block === undefined) {
+    throw new Error(`${where} is indented under nothing: "${key}"`);
+  }
+
+  if (block.has(key)) {
+    throw new Error(`${where} gives "${key}" a second value`);
+  }
+
+  block.set(key, value);
 }
 
 function unquote(value: string): string {

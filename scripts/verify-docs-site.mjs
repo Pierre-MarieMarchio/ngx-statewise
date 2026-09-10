@@ -38,9 +38,9 @@ const locale = readFileSync(
   join(guide, '..', '..', 'core', 'i18n', 'locale.ts'),
   'utf8',
 );
-const codes = [...locale.matchAll(/^\s*(?:\{\s*)?code: '([^']+)'/gm)].map(
-  (match) => match[1],
-);
+const codes = [
+  ...locale.matchAll(/^[^\S\n]*(?:\{[^\S\n]*)?code: '([^']+)'/gm),
+].map((match) => match[1]);
 
 if (codes.length === 0) {
   fail('no locales found in i18n/locale.ts — this script is out of step');
@@ -130,14 +130,14 @@ for (const name of pagesOf(defaultCode)) {
     continue;
   }
 
-  const slug = /^slug:[ \t]*(.+?)[ \t]*$/m.exec(block[1]);
+  const slug = /^slug:[ \t]*(.*)$/m.exec(block[1]);
 
   if (slug === null) {
     fail(`content/${defaultCode}/${name}.md declares no slug`);
     continue;
   }
 
-  const claimed = slug[1].replace(/^['"]|['"]$/g, '');
+  const claimed = slug[1].trim().replace(/^['"]|['"]$/g, '');
 
   if (claimed !== name) {
     fail(
@@ -167,7 +167,7 @@ if (docsGroups === null) {
 const named = [
   ...(docsGroups?.[1] ?? '').matchAll(/'\*\*\/features\/([a-z0-9-]+)'/g),
 ]
-  .map((match) => match[1])
+  .map((match) => match[1] ?? '')
   // Compared as strings on purpose, rather than through the default sort's
   // string conversion of whatever it was handed.
   .sort((left, right) => left.localeCompare(right));
@@ -176,15 +176,19 @@ const unnamed = features.filter((feature) => !named.includes(feature));
 const stale = named.filter((feature) => !features.includes(feature));
 
 if (unnamed.length > 0) {
+  const missing = unnamed.map((feature) => `features/${feature}`).join(', ');
+
   fail(
-    `eslint.config.js does not name ${unnamed.map((f) => `features/${f}`).join(', ')} in the docs site's cross-feature rule, so nothing stops another feature importing it.\n` +
+    `eslint.config.js does not name ${missing} in the docs site's cross-feature rule, so nothing stops another feature importing it.\n` +
       `  Give it a group in DOCS_GROUPS — '**/features/${unnamed[0]}', '**/features/${unnamed[0]}/**', '**/${unnamed[0]}', '**/${unnamed[0]}/**' — and a row in DOCS_ZONES denying the others.`,
   );
 }
 
 if (stale.length > 0) {
+  const gone = stale.map((feature) => `features/${feature}`).join(', ');
+
   fail(
-    `eslint.config.js names ${stale.map((f) => `features/${f}`).join(', ')} in the docs site's cross-feature rule, and there is no such feature. Remove it.`,
+    `eslint.config.js names ${gone} in the docs site's cross-feature rule, and there is no such feature. Remove it.`,
   );
 }
 

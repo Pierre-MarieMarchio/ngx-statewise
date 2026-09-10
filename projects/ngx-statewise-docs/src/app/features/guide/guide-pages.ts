@@ -252,8 +252,10 @@ function refuseUnknownFields(
   const unknown = [...metadata.keys()].filter((key) => !FIELDS.includes(key));
 
   if (unknown.length > 0) {
+    const quoted = unknown.map((key) => JSON.stringify(key)).join(', ');
+
     throw new Error(
-      `${where} declares ${unknown.map((key) => `"${key}"`).join(', ')}, which nothing reads. A page declares ${FIELDS.join(', ')}, and only those.`,
+      `${where} declares ${quoted}, which nothing reads. A page declares ${FIELDS.join(', ')}, and only those.`,
     );
   }
 }
@@ -271,7 +273,9 @@ function requireSlug(
   }
 
   if (typeof slug !== 'string') {
-    throw new Error(`${where} indents values under "slug", which takes one`);
+    throw new TypeError(
+      `${where} indents values under "slug", which takes one`,
+    );
   }
 
   if (!SLUG.test(slug)) {
@@ -297,7 +301,7 @@ function requireTranslated(
   }
 
   if (typeof value === 'string') {
-    throw new Error(
+    throw new TypeError(
       `${where} gives "${field}" a single value. It needs one per locale, indented under "${field}:".`,
     );
   }
@@ -335,7 +339,7 @@ function translated(
  * first heading, which is the one thing every page has.
  */
 function name(body: string): string {
-  const title = /^#\s+(.+)$/m.exec(body)?.[1];
+  const title = /^#[^\S\n]+(.+)$/m.exec(body)?.[1];
 
   return title === undefined
     ? 'a guide page with no heading'

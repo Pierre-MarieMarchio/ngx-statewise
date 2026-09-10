@@ -173,8 +173,9 @@ export class ShellComponent {
   /** The current page's path, in the given locale. */
   private pathIn(locale: Locale): string {
     const suffix = this.currentPage.path();
+    const rest = suffix.length > 0 ? `/${suffix}` : '';
 
-    return `/${locale.code}${suffix.length > 0 ? `/${suffix}` : ''}`;
+    return `/${locale.code}${rest}`;
   }
 
   /**
