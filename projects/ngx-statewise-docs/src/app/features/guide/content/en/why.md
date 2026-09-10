@@ -3,15 +3,9 @@ slug: why
 title:
   en: Why ngx-statewise
   fr: Pourquoi ngx-statewise
-  es: Por qué ngx-statewise
-  de: Warum ngx-statewise
-  pt-BR: Por que ngx-statewise
 summary:
   en: What the design buys you, and when it fits.
   fr: Ce que la conception apporte, et quand elle convient.
-  es: Qué te aporta el diseño y cuándo encaja.
-  de: Was der Entwurf dir bringt und wann er passt.
-  pt-BR: O que o desenho te dá, e quando ele serve.
 ---
 
 # Why ngx-statewise

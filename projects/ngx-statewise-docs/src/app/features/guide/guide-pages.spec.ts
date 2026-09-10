@@ -168,9 +168,6 @@ describe('the guide registry', () => {
 const SECTION: Translated = {
   en: 'Section',
   fr: 'Section',
-  es: 'Sección',
-  de: 'Abschnitt',
-  'pt-BR': 'Seção',
 };
 
 /** A page whose metadata block is complete, for a spec to spoil one line of. */
@@ -180,15 +177,9 @@ const COMPLETE = [
   'title:',
   '  en: Effects',
   '  fr: Effects',
-  '  es: Effects',
-  '  de: Effects',
-  '  pt-BR: Effects',
   'summary:',
   '  en: One line.',
   '  fr: Une ligne.',
-  '  es: Una línea.',
-  '  de: Eine Zeile.',
-  '  pt-BR: Uma linha.',
   '---',
   '',
   '# Effects',
@@ -205,7 +196,7 @@ describe('declaring a guide page', () => {
     );
 
     expect(at(section.pages, 0).slug).toBe('effects');
-    expect(at(section.pages, 0).title.de).toBe('Effects');
+    expect(at(section.pages, 0).title.fr).toBe('Effects');
     expect(at(section.pages, 0).content.en).toBe('# Effects');
   });
 
@@ -222,8 +213,8 @@ describe('declaring a guide page', () => {
   });
 
   it('refuses a summary missing in one locale, and says which', () => {
-    expect(declaring(COMPLETE.replace('  de: Eine Zeile.\n', ''))).toThrow(
-      /has no summary in de/,
+    expect(declaring(COMPLETE.replace('  fr: Une ligne.\n', ''))).toThrow(
+      /has no summary in fr/,
     );
   });
 
@@ -269,6 +260,16 @@ describe('declaring a guide page', () => {
 
     expect(at(section.pages, 0).content.fr).toBe('# Effects, en français');
     expect(guideContent(at(section.pages, 0), 'fr').isFallback).toBe(false);
-    expect(guideContent(at(section.pages, 0), 'de').isFallback).toBe(true);
+  });
+
+  it('falls back to the default locale for a page carrying no translation', () => {
+    const section = at(
+      defineGuideSections([{ title: SECTION, pages: [COMPLETE] }]),
+    );
+    const content = guideContent(at(section.pages, 0), 'fr');
+
+    expect(content.isFallback).toBe(true);
+    expect(content.locale).toBe('en');
+    expect(content.markdown).toBe('# Effects');
   });
 });

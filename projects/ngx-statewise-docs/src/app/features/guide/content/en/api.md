@@ -3,15 +3,9 @@ slug: api
 title:
   en: API reference
   fr: Référence d’API
-  es: Referencia de API
-  de: API-Referenz
-  pt-BR: Referência da API
 summary:
   en: Every export, with the signature the compiler sees.
   fr: Chaque export, avec la signature que voit le compilateur.
-  es: Cada export, con la firma que ve el compilador.
-  de: Jeder Export, mit der Signatur, die der Compiler sieht.
-  pt-BR: Cada export, com a assinatura que o compilador vê.
 ---
 
 # API reference

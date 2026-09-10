@@ -171,8 +171,8 @@ describe('ShellComponent', () => {
       '.sidebar__footer [aria-current="true"]',
     );
 
-    // The button prints the code and is named by the language, so five of
-    // them fit in the navigation column.
+    // The button prints the code and is named by the language, so they fit
+    // side by side in the navigation column.
     expect(current?.textContent?.trim()).toBe('EN');
     expect(current?.getAttribute('aria-label')).toBe('English');
 

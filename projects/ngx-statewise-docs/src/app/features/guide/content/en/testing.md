@@ -3,15 +3,9 @@ slug: testing
 title:
   en: Testing
   fr: Tests
-  es: Pruebas
-  de: Tests
-  pt-BR: Testes
 summary:
   en: The ngx-statewise/testing entry point in a TestBed.
   fr: Le point d’entrée ngx-statewise/testing dans un TestBed.
-  es: El punto de entrada ngx-statewise/testing en un TestBed.
-  de: Der Einstiegspunkt ngx-statewise/testing in einem TestBed.
-  pt-BR: O ponto de entrada ngx-statewise/testing em um TestBed.
 ---
 
 # Testing

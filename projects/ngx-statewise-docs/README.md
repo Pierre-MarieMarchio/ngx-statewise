@@ -21,7 +21,7 @@ is about how the application is arranged.
 src/app/
   app.routes.ts                       the only file that reaches into pages/
   core/
-    i18n/                             the five locales and the interface strings
+    i18n/                             the two locales and the interface strings
     ui-state/                         the theme and the drawers
       states/docs-ui/                 action, effect, manager, state, updater
       models/theme.model.ts           the theme's types and constants
@@ -120,15 +120,15 @@ extglob. A pattern that guards no import is worse than no pattern, so
 These are not preferences, and each of them has something that fails when it
 is broken.
 
-- **Everything is prerendered.** `outputMode: 'static'`, 66 routes, no server.
+- **Everything is prerendered.** `outputMode: 'static'`, 37 routes, no server.
   What is above the fold has to exist in the served HTML with no JavaScript.
 - **Zoneless.** No `zone.js`, no `provideZoneChangeDetection`.
 - **Offline build.** `npm run check` never reaches the network. The fonts are
   Fontsource packages pinned in `package.json`, not a stylesheet from a CDN.
 - **No Angular Material.**
-- **Five locales — the interface only.** The guide stays in English and every
+- **Two locales, the interface only.** The guide stays in English and every
   page carries the banner saying so. `guide-pages.ts` refuses a page missing a
-  title or a summary in any of the five.
+  title or a summary in either of them.
 - **AA contrast (4.5:1) in both themes.** Measure it; do not assume it.
 - **The rendered guide is trusted HTML.** `bypassSecurityTrustHtml` is
   deliberate: Angular's sanitizer strips `id` attributes, which are exactly

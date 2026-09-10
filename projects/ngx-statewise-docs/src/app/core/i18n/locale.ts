@@ -1,24 +1,18 @@
 import { InjectionToken } from '@angular/core';
 
-export type LocaleCode = 'en' | 'fr' | 'es' | 'de' | 'pt-BR';
+export type LocaleCode = 'en' | 'fr';
 
 export interface Locale {
   readonly code: LocaleCode;
   /** The language's own name, used as the accessible name of its button. */
   readonly label: string;
   /**
-   * What the switcher actually prints. Five language names side by side are
-   * wider than the navigation column; five codes are not.
+   * What the switcher actually prints. Language names side by side are wider
+   * than the navigation column; codes are not.
    */
   readonly short: string;
   /** Value of the `lang` attribute, and of `hreflang` on the alternates. */
   readonly htmlLang: string;
-  /**
-   * The interface was translated automatically rather than written by someone
-   * who speaks it. The site says so where it applies, instead of passing the
-   * translation off as reviewed.
-   */
-  readonly machineAssisted?: boolean;
 }
 
 /**
@@ -26,9 +20,12 @@ export interface Locale {
  * The first one is the default: `/` redirects to it, and a page with no
  * translation falls back to it.
  *
- * Adding a locale is an entry here plus a file under `strings/`. The guide
- * itself stays in English: eleven pages retranslated on every API change is
- * not maintainable by one person, and the untranslated banner already says
+ * Adding a locale is an entry here plus a file under `strings/`. Both are
+ * written by someone who speaks the language, which is what limits the list to
+ * two.
+ *
+ * The guide itself stays in English. Sixteen pages retranslated on every API
+ * change is not maintainable by one person, and the untranslated banner says
  * so on every page. Only the interface is localised.
  */
 /* A non-empty tuple, so "the first one is the default" is something the type
@@ -36,27 +33,6 @@ export interface Locale {
 export const LOCALES: readonly [Locale, ...Locale[]] = [
   { code: 'en', label: 'English', short: 'EN', htmlLang: 'en' },
   { code: 'fr', label: 'Français', short: 'FR', htmlLang: 'fr' },
-  {
-    code: 'es',
-    label: 'Español',
-    short: 'ES',
-    htmlLang: 'es',
-    machineAssisted: true,
-  },
-  {
-    code: 'de',
-    label: 'Deutsch',
-    short: 'DE',
-    htmlLang: 'de',
-    machineAssisted: true,
-  },
-  {
-    code: 'pt-BR',
-    label: 'Português',
-    short: 'PT',
-    htmlLang: 'pt-BR',
-    machineAssisted: true,
-  },
 ];
 
 export const DEFAULT_LOCALE = LOCALES[0];

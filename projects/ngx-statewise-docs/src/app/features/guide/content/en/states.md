@@ -3,15 +3,9 @@ slug: states
 title:
   en: States
   fr: States
-  es: States
-  de: States
-  pt-BR: States
 summary:
   en: Where the data lives, with signals or plain properties.
   fr: Où vivent les données, en signals ou en propriétés simples.
-  es: Dónde viven los datos, con signals o propiedades simples.
-  de: Wo die Daten liegen, mit Signals oder einfachen Feldern.
-  pt-BR: Onde os dados moram, com signals ou propriedades simples.
 ---
 
 # States
