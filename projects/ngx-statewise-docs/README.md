@@ -3,7 +3,7 @@
 The documentation site, served at
 <https://pierre-mariemarchio.github.io/ngx-statewise/>. It is a third Angular
 application in this workspace, private, prerendered to static files, and it is
-the guide's single source of truth — the library's own README is an overview
+the guide's single source of truth. The library's own README is an overview
 that links here.
 
 ```bash
@@ -48,7 +48,7 @@ Two groupings, both the showcase's:
 - **a component lives in a folder carrying its name**, and a folder that holds
   more than components groups them under `components/`. A page component sits
   directly in its page's folder, because there is only ever one of it.
-- **the library's own files live under `states/<name>/`** — the action, the
+- **the library's own files live under `states/<name>/`**: the action, the
   updater, the effect, the manager and the state of one thing, together. It is
   five files for one concept, so they are the fastest way to make a folder
   unreadable when they are loose in it, and a second state would double that.
@@ -66,7 +66,7 @@ moves nothing.
 Same four layers as
 [the showcase](../ngx-statewise-showcase), because a reader who knows one
 application in this workspace should not have to learn another. What is **not**
-taken from it is the subdivision inside a feature — `guards/`, `interceptors/`,
+taken from it is the subdivision inside a feature: `guards/`, `interceptors/`,
 `models/`, `pages/`, `services/`, `states/`. The showcase has real guards and
 real interceptors; this site has none, and folders holding one file each are
 ceremony. The layering carries information here; the subdivision would not.
@@ -100,7 +100,7 @@ The law is not a convention here. It is
 [`no-restricted-imports`](../../eslint.config.js), generated from a table of
 zones where each row says what that zone may not reach for, so breaking it
 fails `npm run lint`. The showcase has the same four layers and the same
-mechanism — `zoneLaws()` serves both, and the two applications differ only in
+mechanism: `zoneLaws()` serves both, and the two applications differ only in
 their table, because a second scheme beside it would be a second thing to keep
 true.
 
@@ -108,11 +108,11 @@ A pattern there matches the import string, not a resolved path. That is why
 the cross-feature rule names each feature one by one, and names it at any
 depth. `../flow-demo/index` climbs out of `features/guide/` without ever
 writing the word `features`, and how far it climbs depends on how deep the
-importing file sits — `../../../guide/guide-pages` from a component two folders
+importing file sits: `../../../guide/guide-pages` from a component two folders
 down. A relative pattern pins the depth and lets the deeper file through, which
 is what happened when `components/<name>/` was introduced, so the sibling
-patterns are `**`-prefixed. The shape that would say it generically —
-`../!(..)/**` — matches nothing, because `no-restricted-imports` does not read
+patterns are `**`-prefixed. The shape that would say it generically,
+`../!(..)/**`, matches nothing, because `no-restricted-imports` does not read
 extglob. A pattern that guards no import is worse than no pattern, so
 `npm run verify:docs` fails when that list and `app/features/` stop agreeing.
 
@@ -138,7 +138,7 @@ is broken.
   Two specs fail if the bypass is removed.
 - **A component must not `@use` the global sheet.** It would inline all of it
   into that component's styles. `assets/_scroll-shadows.scss` exists for
-  exactly that reason — the mixin lives on its own so a component can take it
+  exactly that reason: the mixin lives on its own so a component can take it
   without taking the sheet.
 - **`outputHashing: "bundles"`, not `"all"`.** A `<link rel="preload">` cannot
   name a file whose hash it does not know.

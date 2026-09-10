@@ -64,8 +64,8 @@ bytes.
 
 ## Why it is not in `npm run check`
 
-It needs a full `npm install` of a fixture outside the repository — minutes per
-run, spent re-answering a question most diffs do not ask. What moves the answer
+It needs a full `npm install` of a fixture outside the repository, which is
+minutes per run spent re-answering a question most diffs do not ask. What moves the answer
 is a new export or a new dependency edge, which is a slow clock rather than an
 event, so `bundle-size.yml` runs it weekly and on demand. That workflow also
 declares `workflow_call`, so it can be made a release gate the way the

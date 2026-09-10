@@ -58,9 +58,9 @@ provideStatewise({
 ```
 
 `ShowcaseErrorHandler` replaces Angular's `ErrorHandler`, so everything the
-library reports — a misrouted dispatch, an effect that declared `mustAnswer`
-and produced none — becomes state the `/state` page renders instead of a
-console line nobody reads.
+library reports becomes state the `/state` page renders instead of a console
+line nobody reads. A misrouted dispatch and an effect that declared
+`mustAnswer` and produced none both land there.
 
 ## The layers
 
@@ -88,7 +88,7 @@ declares a port and the composition root answers it. `features/auth` reloads
 tasks through `TASK_RELOAD`, an injection token aliased onto `TaskManager` with
 `useExisting`, and never names `features/project` at all.
 
-The library's own files sit together under `features/<name>/states/<name>/` —
+The library's own files sit together under `features/<name>/states/<name>/`:
 the action, the state, the updater, the effect and the manager of one thing.
 Five files for one concept, so they get a folder rather than being loose beside
 the components. The documentation site uses the same layout, so reading one
