@@ -42,7 +42,7 @@ export const EN: UiStrings = {
   homeSubtitle: 'Angular state management',
   homeThesis: 'The state is already written when your effects run.',
   homeTagline:
-    'Signals for state, actions for intent, effects for everything else. More structure than doing it by hand, without the apparatus of a framework.',
+    'An action says what happened. An updater applies it to state, synchronously. An effect does the asynchronous work.',
   homeGetStarted: 'Get started',
   homeReadTheGuide: 'Read the guide',
   homeFlowTitle: 'The whole flow',

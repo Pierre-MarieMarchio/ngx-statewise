@@ -1,7 +1,7 @@
 {
   "name": "ngx-statewise",
   "version": "0.6.4",
-  "description": "A lightweight and intuitive state management for Angular. Simpler than NgRx, more structured than DIY.",
+  "description": "State management for Angular, built on signals. An action says what happened, an updater applies it synchronously, an effect does the asynchronous work.",
   "peerDependencies": {
     "@angular/core": "^20.0.0 || ^21.0.0 || ^22.0.0",
     "rxjs": "^7.4.0"
@@ -31,10 +31,8 @@
     "reactivity",
     "rxjs",
     "observable",
-    "lightweight",
     "modular",
     "scalable",
-    "intuitive",
     "clean-architecture",
     "ngrx",
     "ngxs",

@@ -1,11 +1,13 @@
 # ngx-statewise
 
-A lightweight and intuitive state management library for Angular. Simpler than
-NgRx, more structured than DIY.
+State management for Angular, built on signals.
 
-**📖 [Read the documentation](https://pierre-mariemarchio.github.io/ngx-statewise/)**
-— the guide lives on the site, which is its single source of truth. The
-[package README](projects/ngx-statewise/README.md) is the overview npm shows.
+An action says what happened. An updater applies it to state, synchronously. An
+effect does the asynchronous work.
+
+**📖 [Read the documentation](https://pierre-mariemarchio.github.io/ngx-statewise/)**.
+The guide lives on the site. The
+[package README](projects/ngx-statewise/README.md) is what npm shows.
 
 ```bash
 npm install ngx-statewise
@@ -18,8 +20,8 @@ npm install ngx-statewise
 
 ## What it looks like
 
-State is a plain injectable holding signals. An action carries what changed, an
-updater applies it, an effect handles everything else.
+State is a plain injectable holding signals. Nothing wires the three
+declarations below together; they find each other through the action.
 
 ```typescript
 // The actions
@@ -32,7 +34,7 @@ export const loginActions = defineActionsGroup({
   },
 });
 
-// The state update — synchronous, and the only place state changes
+// The state update: synchronous, and the only place state changes
 export const authUpdater = defineUpdater(AuthState, (on) => {
   on(loginActions.request, (state) => {
     state.isLoading.set(true);
@@ -43,7 +45,7 @@ export const authUpdater = defineUpdater(AuthState, (on) => {
   });
 });
 
-// The side effect — returns the next action
+// The side effect: returns the next action
 @Injectable({ providedIn: 'root' })
 export class AuthEffect {
   private readonly repository = inject(AuthRepository);
@@ -57,7 +59,7 @@ export class AuthEffect {
   });
 }
 
-// The manager — the only thing your components talk to
+// The manager: the only thing your components talk to
 @Injectable({ providedIn: 'root' })
 export class AuthManager {
   private readonly state = inject(AuthState);
@@ -74,8 +76,8 @@ export class AuthManager {
 ```
 
 The flow is one-way: **action → interceptor → updater → effect → possibly more
-actions**. An interceptor — synchronous, and free to refuse the action — is the
-one step that runs ahead of the state; past it, the state is settled before any
+actions**. The interceptor is the one step that runs ahead of the state. It is
+synchronous and may refuse the action. Past it the state is settled before any
 effect runs, and `dispatchAsync` awaits the entire chain.
 
 ## Where things are
@@ -113,7 +115,7 @@ push to `main`.
 ## Contributing
 
 Contributions are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) is the whole
-workflow — the `dev` → `next` → `main` promotion, the commit convention, and the
+workflow: the `dev` → `next` → `main` promotion, the commit convention, and the
 two rules that break a release if they are ignored. Read the first section even
 if you read nothing else.
 
