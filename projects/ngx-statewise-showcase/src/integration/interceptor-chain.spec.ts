@@ -26,7 +26,7 @@ const forAdmin = { params: { userId: ADMIN.id } };
  *
  * It lives outside `app/` because that is what it tests. The subject is the
  * application's wiring, not one feature's unit, so it composes across zones the
- * way `pages/` does — and the dependency law that forbids a feature from
+ * way `pages/` does, and the dependency law that forbids a feature from
  * reaching for the fake backend stays absolute for the code that ships.
  */
 describe('accessTokenInterceptor', () => {
@@ -104,7 +104,7 @@ describe('accessTokenInterceptor', () => {
   it('puts the bearer on the request it sends', async () => {
     tokens.setAccessToken('a-token-the-backend-does-not-know');
 
-    // Unknown to the backend, so it answers 401 — which only happens if the
+    // Unknown to the backend, so it answers 401, which only happens if the
     // header reached it at all.
     await firstValueFrom(http.get<unknown[]>(TASKS_URL, forAdmin));
 

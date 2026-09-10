@@ -21,7 +21,7 @@ describe('KanbanCardComponent', () => {
 
   /**
    * The board puts the drag on this host, so the card must not bring one of
-   * its own — two `cdkDrag` in one card is how the placeholder ended up inside
+   * its own. Two `cdkDrag` in one card is how the placeholder ended up inside
    * the element that was supposed to move.
    */
   it('carries no drag of its own', async () => {

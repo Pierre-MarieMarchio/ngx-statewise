@@ -480,7 +480,7 @@ describe('public execution contract', () => {
    * change putting an awaited step in front of the updater would pass
    * unnoticed.
    *
-   * The first and the last are real gates — verified by inserting one awaited
+   * The first and the last are real gates, verified by inserting one awaited
    * step before `applyUpdater`, which turns both red. The two ordering specs
    * are weaker: they hold trivially while the code is synchronous, and a
    * uniform delay in front of every updater keeps them green. Only a delay

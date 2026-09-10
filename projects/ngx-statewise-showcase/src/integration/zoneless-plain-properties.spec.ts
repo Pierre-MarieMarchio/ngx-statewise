@@ -27,13 +27,13 @@ import { provideStatewiseTesting } from 'ngx-statewise/testing';
  * and the library never calls `markForCheck` or `ApplicationRef.tick` itself.
  *
  * It holds. `markForCheck()` is what a zoneless application has to do, and it
- * is enough — Angular's own scheduler takes the notification. The three specs
+ * is enough, because Angular's own scheduler takes the notification. The three specs
  * below are the difference between a documented cost and a documented lie.
  *
  * Caveat on the measurement, stated because it is real: the showcase's test
  * polyfills still load Zone.js, so this exercises zoneless *change detection*
  * rather than a build with no Zone.js at all. The first spec is what says that
- * distinction does not matter here — if the Zone-driven tick were running, the
+ * distinction does not matter here. If the Zone-driven tick were running, the
  * DOM would follow on its own, and it does not.
  */
 const stateActions = defineActionsGroup({

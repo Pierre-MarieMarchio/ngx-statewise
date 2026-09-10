@@ -3,7 +3,7 @@ import { STATUSES, Task, TaskStatus } from '../models';
 
 /**
  * Which tasks a view is looking at. Pure criteria, so nothing here depends on
- * who is signed in — that is [AssignedTasksService]'s question.
+ * who is signed in. That is [AssignedTasksService]'s question.
  */
 @Injectable({ providedIn: 'root' })
 export class TaskSelectionService {

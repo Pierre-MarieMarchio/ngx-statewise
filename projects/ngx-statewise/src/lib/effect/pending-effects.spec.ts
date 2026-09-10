@@ -22,8 +22,8 @@ function gate(): Gate {
 /**
  * The action types the instance still holds, read from inside it.
  *
- * A retention invariant has no observable surface — `waitFor` resolves on a
- * finished occurrence whether or not its entry was dropped — so the only
+ * A retention invariant has no observable surface, since `waitFor` resolves
+ * on a finished occurrence whether or not its entry was dropped, so the only
  * assertion that can hold it is one that knows the shape of the class it
  * tests.
  */
@@ -162,8 +162,8 @@ describe('PendingEffects', () => {
 
   /**
    * The costly one of the two retention invariants. This map is strong, and
-   * every entry holds the dispatch scope it was tagged with — hence, through
-   * `StateBoundHandler.state`, the consumer's own state objects. Left
+   * every entry holds the dispatch scope it was tagged with, and hence,
+   * through `StateBoundHandler.state`, the consumer's own state objects. Left
    * unpurged, an application accumulates one entry per dispatch, for ever,
    * with nothing observable to show for it.
    */

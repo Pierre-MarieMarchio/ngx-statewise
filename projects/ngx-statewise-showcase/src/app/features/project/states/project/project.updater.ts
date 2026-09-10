@@ -33,8 +33,8 @@ export const projectUpdater = defineUpdater(ProjectState, (on) => {
       /*
        * A selection the reload no longer holds is no selection.
        *
-       * Leaving the id would not show the wrong project — the derivation finds
-       * nothing and answers null — but every list scoped by that id would
+       * Leaving the id would not show the wrong project, since the derivation
+       * finds nothing and answers null, but every list scoped by that id would
        * filter down to nothing, so the screens would go empty rather than back
        * to showing everything.
        */

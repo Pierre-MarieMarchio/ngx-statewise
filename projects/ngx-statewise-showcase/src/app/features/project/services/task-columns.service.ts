@@ -85,8 +85,8 @@ export class TaskColumnsService {
 
   /**
    * What a table renders: the columns the role may see, then the action that
-   * opens a row. The action is not one of `all` — no role decides it and it
-   * reads nothing off the task — but it is the keyboard path to the detail
+   * opens a row. The action is not one of `all`, since no role decides it and
+   * it reads nothing off the task, but it is the keyboard path to the detail
    * panel, so every table ends with it.
    */
   public readonly displayedColumns = computed(() => [

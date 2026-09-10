@@ -6,7 +6,7 @@ import { DEFAULT_LOCALE, LOCALE, LOCALES } from './core/i18n';
 import { ShellComponent } from './pages/shell/shell.component';
 
 // Every locale's `/guide` redirects here, so a guide declaring no page is a
-// build with nowhere to send them — said out loud rather than read off an
+// build with nowhere to send them. Said out loud rather than read off an
 // empty array.
 const [firstPage] = GUIDE_PAGES;
 

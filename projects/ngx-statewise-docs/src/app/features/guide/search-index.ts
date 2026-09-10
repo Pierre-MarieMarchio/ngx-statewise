@@ -60,7 +60,7 @@ export function buildSearchIndex(code: LocaleCode): readonly SearchEntry[] {
 
 /**
  * Ranks a query against the index. A prefix match on the title beats a match
- * anywhere in it, which beats a match in the surrounding context — so typing
+ * anywhere in it, which beats a match in the surrounding context, so typing
  * "eff" offers the Effects page before a section that merely mentions it.
  */
 export function searchIndex(

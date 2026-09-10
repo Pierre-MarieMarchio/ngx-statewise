@@ -8,7 +8,7 @@ import { TaskSelectionService } from './task-selection.service';
  *
  * A derivation over two states and nothing else: which project is current is
  * the project state's, which tasks exist is the task state's, and neither has
- * any business knowing about the other. Nothing is stored here — the moment a
+ * any business knowing about the other. Nothing is stored here, so the moment a
  * task moves or the choice changes, every reader of these signals is right
  * again without anyone having to remember to recompute.
  *
@@ -25,8 +25,8 @@ export class CurrentProjectService {
   public readonly projectId = this.projectManager.selectedProjectId;
 
   /**
-   * The tasks on screen for the current project — and the search still
-   * applies, because `visibleTasks` is what a filter left behind. Two
+   * The tasks on screen for the current project. The search still applies,
+   * because `visibleTasks` is what a filter left behind. Two
    * narrowings compose; neither cancels the other.
    */
   public readonly tasks = computed(() => {

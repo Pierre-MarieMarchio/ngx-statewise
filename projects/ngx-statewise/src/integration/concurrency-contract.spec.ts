@@ -217,7 +217,7 @@ describe('effect concurrency contract', () => {
     TestBed.resetTestingModule();
   });
 
-  describe("'latest' — the newest answer wins", () => {
+  describe("'latest': the newest answer wins", () => {
     /**
      * The bug this exists for: a slow request answering after a fast one used
      * to overwrite it, so the state ended up holding the older intent.
@@ -331,7 +331,7 @@ describe('effect concurrency contract', () => {
     });
   });
 
-  describe("'first' — the run in flight wins", () => {
+  describe("'first': the run in flight wins", () => {
     it('starts no second run while the first is in flight', async () => {
       const first = manager.dispatchAsync(submitActions.request('once'));
       await started('once');

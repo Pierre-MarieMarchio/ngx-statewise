@@ -21,7 +21,7 @@ import {
  *
  * **Narrow doubles** stand in for a port of the shared kernel: three members
  * at most, provided against its token, and used by the feature on the far side
- * of the boundary. They are deliberately as small as the port — a spec that
+ * of the boundary. They are deliberately as small as the port, so a spec that
  * needs more than these is a spec whose subject is reaching too far.
  *
  * **Wide doubles** stand in for a manager, provided against the class itself,

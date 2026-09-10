@@ -23,8 +23,8 @@ import { TaskManager } from '@app/features/project/states/task/task.manager';
  *
  * It used to be the task page again: every task in a table, every task on a
  * board, both of them a second copy of what `/task` shows better. What a
- * dashboard is for is the view from above — which projects exist and what is
- * in them, and which of it is yours — and then getting out of the way.
+ * dashboard is for is the view from above: which projects exist, what is in
+ * them, and which of it is yours. Then getting out of the way.
  */
 @Component({
   selector: 'app-dashboard-page',
@@ -75,7 +75,7 @@ export class DashboardPageComponent {
   }
 
   /**
-   * Choosing a project here is choosing it everywhere — the state is one — so
+   * Choosing a project here is choosing it everywhere, since the state is one, so
    * the only thing left to do is go where it can be worked on.
    */
   public async openBoard(): Promise<void> {

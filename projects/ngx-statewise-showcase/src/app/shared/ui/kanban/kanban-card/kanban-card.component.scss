@@ -34,7 +34,7 @@
 /*
  * The three states the CDK puts on this host while a card is being dragged.
  * They live here rather than on the board because they are how a card looks
- * lifted, and because the CDK moves the preview to the document body — where
+ * lifted, and because the CDK moves the preview to the document body, where
  * only this component's own host attribute still reaches it.
  */
 

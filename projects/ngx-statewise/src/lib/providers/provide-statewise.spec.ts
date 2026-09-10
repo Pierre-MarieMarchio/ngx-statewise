@@ -83,7 +83,7 @@ class CycleEffect {
 let interceptorAsks: number[];
 
 /**
- * A class declaring nothing but interceptors — the shape that had to travel in
+ * A class declaring nothing but interceptors, the shape that had to travel in
  * `effects`, which named it wrong at every call site.
  */
 @Injectable()
@@ -97,9 +97,9 @@ class PingGuard {
 }
 
 /**
- * The class a lazy route would provide alongside a second `provideStatewise()`
- * — the shape the guide used to recommend without saying what the second call
- * costs.
+ * The class a lazy route would provide alongside a second
+ * `provideStatewise()`, the shape the guide used to recommend without saying
+ * what the second call costs.
  */
 @Injectable()
 class LazyRouteEffect {
@@ -161,7 +161,7 @@ describe('provideStatewise', () => {
   });
 
   /**
-   * The two lists do the same thing — instantiate a class eagerly — and both
+   * The two lists do the same thing, instantiating a class eagerly, and both
    * have to keep working, or the option is breaking for nothing.
    */
   describe('interceptor classes', () => {
@@ -343,7 +343,7 @@ describe('provideStatewise', () => {
   /**
    * The quietest trap the library had. A second call builds a second effect
    * registry, invisible to the root engine, so the effects declared with it
-   * never run — while their updaters still apply, which makes the action look
+   * never run, while their updaters still apply, which makes the action look
    * like it worked.
    */
   describe('a second provideStatewise', () => {
@@ -354,7 +354,7 @@ describe('provideStatewise', () => {
           ? [provideStatewise({ effects: [LazyRouteEffect] })]
           : [
               provideStatewise({ effects: [LazyRouteEffect] }),
-              // Provided after provideStatewise, so this value wins — the
+              // Provided after provideStatewise, so this value wins. The
               // same trick provideStatewiseTesting uses for the misrouted
               // reaction. A TestBed always runs in dev mode, so this is the
               // only way to reach the production arm.

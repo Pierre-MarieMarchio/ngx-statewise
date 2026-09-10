@@ -52,7 +52,7 @@ describe('BoardPageComponent', () => {
   };
 
   /**
-   * The page narrows to one project, and every tab narrows with it — a lens,
+   * The page narrows to one project, and every tab narrows with it. A lens,
    * not a fourth list. With none chosen it goes on showing all of them.
    */
   describe('the project the page is looking at', () => {
@@ -75,7 +75,7 @@ describe('BoardPageComponent', () => {
 
     /*
      * The choosing itself is the picker's, and its own spec presses the row.
-     * What belongs here is what the page does about it — asserted through the
+     * What belongs here is what the page does about it, asserted through the
      * method the template binds, because a tab body Material has not attached
      * yet holds no row to press.
      */
@@ -154,8 +154,8 @@ describe('BoardPageComponent', () => {
   });
 
   /**
-   * The panel used to hold a snapshot, so a card that moved — or one the
-   * server refused and the rollback put back — went on being shown the way it
+   * The panel used to hold a snapshot, so a card that moved, or one the
+   * server refused and the rollback put back, went on being shown the way it
    * had been when it was clicked.
    */
   describe('what the panel is looking at', () => {
@@ -348,7 +348,7 @@ describe('BoardPageComponent', () => {
 
   /**
    * One panel, four things to show. Opening a form has to displace the
-   * details, and picking a task has to displace the form — otherwise a single
+   * details, and picking a task has to displace the form. Otherwise a single
    * panel is only a single panel by accident.
    */
   describe('the one side panel', () => {

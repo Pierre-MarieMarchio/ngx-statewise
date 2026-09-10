@@ -37,7 +37,7 @@ export class TaskState {
   public isSearching = signal(false);
   public searchFailed = signal(false);
 
-  /** One creation at a time — see ProjectState for why a flag suffices. */
+  /** One creation at a time. See ProjectState for why a flag suffices. */
   public isCreating = signal(false);
 
   /** What the server said when it refused, so the form can repeat it. */

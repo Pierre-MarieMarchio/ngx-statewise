@@ -18,7 +18,7 @@ import {
 
 /**
  * A command palette over the guide. The whole corpus is already in the bundle,
- * so this needs no request, no service and no index to ship — which is the one
+ * so this needs no request, no service and no index to ship, which is the one
  * affordance a README cannot have at all.
  *
  * Uses a native `<dialog>`: focus trapping, the backdrop and Escape come with

@@ -140,7 +140,7 @@ export class InspectionHistoryPageComponent {
 /**
  * The history keeps payloads as they were dispatched, so this only shortens
  * them for reading. What must not be kept at all goes through the `redact`
- * hook instead — `app.config.ts` strips the login password there. What to put
+ * hook instead, and `app.config.ts` strips the login password there. What to put
  * in an action, and whether to enable the history, stay decisions for the
  * application.
  */

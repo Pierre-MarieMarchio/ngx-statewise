@@ -14,8 +14,9 @@ export class AuthState {
    * The organisation's members, which is not the session.
    *
    * They get no `isLoading` and no `isError` of their own: nothing waits on
-   * them, and a directory that failed to arrive shows ids instead of names —
-   * a degraded label, not a screen that has to say something went wrong.
+   * them, and a directory that failed to arrive shows ids instead of names.
+   * That is a degraded label, not a screen that has to say something went
+   * wrong.
    */
   public members = signal<User[]>([]);
 }

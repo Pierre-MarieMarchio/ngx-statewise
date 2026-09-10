@@ -131,7 +131,7 @@ describe('authUpdater', () => {
     /**
      * Emptied rather than kept: names nothing can confirm any more would go on
      * being shown as though the directory were current, and an id is honest.
-     * Neither flag of the session moves — a directory that failed to arrive is
+     * Neither flag of the session moves. A directory that failed to arrive is
      * not a session in error.
      */
     it('is emptied when the read fails, and says nothing else', () => {

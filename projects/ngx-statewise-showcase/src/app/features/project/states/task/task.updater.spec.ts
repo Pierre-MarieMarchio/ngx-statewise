@@ -80,7 +80,7 @@ describe('taskUpdater', () => {
   /**
    * `isError` belongs to reading the list, like `isLoading` beside it. A
    * refused write used to light that banner, which reads "the tasks could not
-   * be loaded" and offers a "Try again" that reloads everything — an answer to
+   * be loaded" and offers a "Try again" that reloads everything, an answer to
    * a question nobody had asked.
    */
   it('says why it was refused without claiming the list failed', () => {

@@ -7,7 +7,7 @@ import { MatCardModule } from '@angular/material/card';
  *
  * It carries no `cdkDrag` of its own. The board puts one on this host, because
  * the host is what the drop list holds and what carries the card's label and
- * its id — so it has to be what moves.
+ * its id, so it has to be what moves.
  *
  * An attribute selector on an `<li>`, so a column can be a real `<ul>`: the
  * host used to be an `<app-kanban-card>` carrying `role="listitem"` inside a

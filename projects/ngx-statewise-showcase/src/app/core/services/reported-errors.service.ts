@@ -13,9 +13,9 @@ export interface ReportedError {
  * console: keeps it as state, so a view can render it like any other state.
  *
  * Everything reaches here through Angular's `ErrorHandler`, which is the
- * channel the library already reports to — a misrouted dispatch, an effect
- * that answered nothing while promising one, the cause behind a failure
- * action.
+ * channel the library already reports to. A misrouted dispatch, an effect
+ * that answered nothing while promising one, and the cause behind a failure
+ * action all arrive that way.
  */
 @Injectable({ providedIn: 'root' })
 export class ReportedErrors {
@@ -47,7 +47,7 @@ export class ReportedErrors {
  *
  * `HttpErrorResponse` **implements** `Error` without extending it, so an
  * `instanceof Error` test never catches one and `String()` rendered every
- * refused request as `[object Object]` — in the one panel whose whole job is
+ * refused request as `[object Object]`, in the one panel whose whole job is
  * naming what failed. It gets asked first, and its server's own words are
  * preferred over the transport's sentence: "a project is already called
  * \"HR Platform\"" says more than "Http failure response … 400 Bad Request".

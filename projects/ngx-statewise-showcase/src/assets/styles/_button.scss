@@ -2,7 +2,7 @@
  * Two levels, and only two.
  *
  * `.primary-btn` is the ordinary one: an outline. It is on every action that
- * opens a panel, reloads a list or raises a notice — several per page, none of
+ * opens a panel, reloads a list or raises a notice. Several per page, none of
  * them the one thing the page is for.
  *
  * `.action-primary` is the one thing a surface is for: the submit of a form,
@@ -10,7 +10,7 @@
  * application before this, and it was hidden in a panel.
  *
  * It is filled in ink rather than in the theme's magenta on purpose. The
- * magenta is the library's voice now — it marks what the library just did —
+ * magenta is the library's voice now, marking what the library just did,
  * and a colour cannot mean "this is the library" and "press me" at once. The
  * strongest thing on a page is the strongest contrast, which needs no hue.
  */
@@ -21,7 +21,7 @@
 /*
  * Painted directly rather than through the button's own tokens: Material reads
  * those from its theme and answers a filled button in the theme's primary
- * whatever the custom properties say — measured, magenta on the page while
+ * whatever the custom properties say. Measured: magenta on the page while
  * `--mdc-filled-button-container-color` held the ink colour.
  */
 .action-primary.mat-mdc-unelevated-button {
@@ -30,7 +30,7 @@
   /*
    * `:not(:disabled)` to match the specificity of the rule this overrides:
    * Material paints its filled button in the theme's primary from a selector
-   * of exactly that shape, and a plainer one lost the cascade — measured,
+   * of exactly that shape, and a plainer one lost the cascade. Measured,
    * magenta on the page while the declaration below sat unused.
    */
   &:not(:disabled) {

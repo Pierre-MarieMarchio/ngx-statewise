@@ -376,7 +376,7 @@ describe('StatewiseEngine', () => {
     /**
      * The library's headline guarantee: an effect always reads state its
      * updater has already settled. Asserted on what the handler saw on its
-     * synchronous entry, not on the state once the cascade is over — the
+     * synchronous entry, not on the state once the cascade is over. The
      * latter holds whichever order the engine applies the two in.
      */
     it('has applied the updater before an effect handler starts', async () => {
@@ -472,8 +472,8 @@ describe('StatewiseEngine', () => {
     /**
      * Three effects on one action: one failing late, one failing early, one
      * succeeding late. The arrangement separates two guarantees a single
-     * failing effect cannot tell apart — "waits for every sibling" and
-     * "reports the first failure, not the fastest" — so each is asserted on
+     * failing effect cannot tell apart, "waits for every sibling" and
+     * "reports the first failure, not the fastest", so each is asserted on
      * its own.
      */
     describe('several effects failing on one action', () => {
@@ -882,7 +882,7 @@ describe('StatewiseEngine', () => {
 
     /**
      * The bound is checked before anything is applied, so the action it
-     * refuses leaves nothing behind — otherwise a half-applied cascade would
+     * refuses leaves nothing behind. Otherwise a half-applied cascade would
      * be harder to reason about than the one that was stopped.
      */
     it('leaves no trace of the action it refused', async () => {
@@ -935,7 +935,7 @@ describe('StatewiseEngine', () => {
    * The guide forbids returning another feature's action and prescribes
    * calling that feature's manager instead. That call leaves the tree of
    * promises the dispatch is holding, so the cascade it starts has to be
-   * adopted back into it — which is what these three specs pin, limit
+   * adopted back into it, which is what these three specs pin, limit
    * included.
    */
   describe('across manager boundaries', () => {
@@ -991,8 +991,8 @@ describe('StatewiseEngine', () => {
      * The measured limit of the mechanism, and it does not move: a dispatch
      * emitted past an `await` cannot be attributed to the handler that
      * emitted it, because no asynchronous context survives here. This spec
-     * exists so nobody later believes the limit went away — and the limit
-     * falls exactly where the caller already holds a promise of its own, an
+     * exists so nobody later believes the limit went away. The limit falls
+     * exactly where the caller already holds a promise of its own, an
      * `await` having necessarily given it one.
      */
     it('does not wait for a cascade started past an await', async () => {
@@ -1018,7 +1018,7 @@ describe('StatewiseEngine', () => {
 
     /**
      * The bound counts a path, and a call to a third-party manager used to
-     * arrive with an empty one — so a cycle closing through two managers was
+     * arrive with an empty one, so a cycle closing through two managers was
      * a fresh cascade of depth one at every turn, and it span until the stack
      * gave way, 327 turns in, while the dispatch that started it resolved
      * normally and the caller learnt nothing.
@@ -1041,7 +1041,7 @@ describe('StatewiseEngine', () => {
       expect(pings).toBeLessThanOrEqual(6);
 
       // Every intermediate manager dispatched fire-and-forget, so each is
-      // told of the refusal as well — that is what `dispatch()` asks for.
+      // told of the refusal as well, which is what `dispatch()` asks for.
       // What must be gone is what used to happen instead: a stack overflow,
       // escaping as a rejection nobody observes.
       expect(

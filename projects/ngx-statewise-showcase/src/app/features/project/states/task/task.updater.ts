@@ -14,7 +14,7 @@ import { TaskState } from './task.state';
 /*
  * `isLoading` belongs to reading the list, and nothing else touches it. A write
  * in flight shows through `pendingWrites`, which the manager derives `isSaving`
- * from — a single flag would be cleared by the first answer of N writes, and
+ * from. A single flag would be cleared by the first answer of N writes, and
  * the spinner would stop while the rest were still going.
  */
 
@@ -100,7 +100,7 @@ export const taskUpdater = defineUpdater(TaskState, (on) => {
 
   /*
    * An updater with no effect behind it: emptying the box is a decision, not a
-   * request. It also cancels a search in flight — see the effect's `cancelOn`.
+   * request. It also cancels a search in flight. See the effect's `cancelOn`.
    */
   on(searchCleared, (state) => {
     state.matches.set(null);

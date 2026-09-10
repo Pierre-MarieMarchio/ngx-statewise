@@ -1,7 +1,7 @@
 /*
  * The one page whose whole content is a single card, so it centres it itself.
  *
- * The template used to say `class="d-flex center"` — two Bootstrap class names
+ * The template used to say `class="d-flex center"`: two Bootstrap class names
  * no stylesheet in this repository defines. Nothing applied, so the card sat
  * where the shell's own centring left it: the empty `app-data-state` beside it
  * is a flex item too, and it pushed the card about sixty pixels off centre.

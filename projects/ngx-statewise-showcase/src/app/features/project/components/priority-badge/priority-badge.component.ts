@@ -10,7 +10,7 @@ import { TaskPriority } from '../../models';
 import { TaskPresentationService } from '../../services';
 
 /**
- * How urgent a task is — the warm half of the two scales: sand, orange, red.
+ * How urgent a task is, and the warm half of the two scales: sand, orange, red.
  *
  * The tint is taken at a quarter of the hue, like a status, so a row of both
  * reads as one family of marks with two temperatures rather than as two

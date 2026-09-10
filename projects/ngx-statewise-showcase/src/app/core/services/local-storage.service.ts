@@ -7,7 +7,7 @@ import { isSerializable } from '../utils/json.utils';
  * recover from it.
  *
  * Failures go to the `ErrorHandler` rather than the console, so whatever the
- * application plugged into it — a logger, Sentry — hears about them.
+ * application plugged into it hears about them, a logger or Sentry included.
  */
 @Injectable({
   providedIn: 'root',

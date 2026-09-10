@@ -25,7 +25,7 @@ import {
 
 /**
  * The one form a project is written in, whether it is being created or
- * renamed — the same arrangement as `app-task-form`, and for the same reason:
+ * renamed. The same arrangement as `app-task-form`, and for the same reason:
  * two fields written twice is two places for them to drift.
  */
 @Component({

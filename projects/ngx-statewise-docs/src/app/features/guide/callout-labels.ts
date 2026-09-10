@@ -7,7 +7,7 @@ import { CALLOUT_KINDS, type CalloutKind, type CalloutLabels } from './callout';
  * This lives on the guide's side rather than in the interface strings: the
  * five kinds are a markdown concept, and the strings module has no business
  * knowing they exist. It reads the translations, which is the direction that
- * holds — the guide depends on the interface, never the other way round.
+ * holds: the guide depends on the interface, never the other way round.
  */
 export function calloutLabels(code: LocaleCode): CalloutLabels {
   const strings = uiStrings(code);

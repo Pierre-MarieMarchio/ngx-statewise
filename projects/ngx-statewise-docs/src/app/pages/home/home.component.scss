@@ -8,7 +8,7 @@
   display: block;
   max-width: 76rem;
   /* The shell centres this in a flex row below 72rem, and a flex item defaults
-     to min-width: auto — which the comparison table's own minimum then pushes
+     to min-width: auto, which the comparison table's own minimum then pushes
      past the viewport. */
   min-width: 0;
 }
@@ -100,7 +100,7 @@
 
 /* A measured number rather than an adjective, and the only claim on the page
    that could rot: `npm run verify:size` rebuilds it from the package on every
-   check. Set quietly — it is a fact, not a badge. */
+   check. Set quietly, because it is a fact rather than a badge. */
 .hero__size {
   margin: var(--space-3) 0 0;
   color: var(--text-faint);
@@ -443,7 +443,7 @@
 /* A fixed title column, not one sized to its content: each row is its own
    grid, so `max-content` gives every row a different split and the summaries
    come out on a ragged left edge. 11rem clears the longest title in either
-   language — "Migrating from 0.6.x" measures 150px — and one straight edge
+   language, where "Migrating from 0.6.x" measures 150px, and one straight edge
    down the middle is what makes a table of contents scannable. */
 .contents__link {
   display: grid;

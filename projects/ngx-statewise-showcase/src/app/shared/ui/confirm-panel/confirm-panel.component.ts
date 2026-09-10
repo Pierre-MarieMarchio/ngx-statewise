@@ -10,14 +10,14 @@ import { PanelFormComponent } from '../panel-form';
 /**
  * The panel that asks before something is destroyed.
  *
- * It wears the same shell as the forms beside it — `app-panel-form` — so a
+ * It wears the same shell as the forms beside it, `app-panel-form`, so a
  * question and a form look like the same panel doing two things rather than
  * two panels that nearly match. What it adds is the question, and the fact
  * that its one action is destructive.
  *
  * `FormsModule` is imported for a form with no controls in it: `(ngSubmit)`
  * exists only where a form directive does, and without one it is a listener on
- * an event nothing raises — so the button would have looked live and done
+ * an event nothing raises, so the button would have looked live and done
  * nothing at all.
  */
 @Component({

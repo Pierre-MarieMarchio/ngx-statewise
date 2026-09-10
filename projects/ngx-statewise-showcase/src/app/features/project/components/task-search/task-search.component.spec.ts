@@ -54,7 +54,7 @@ describe('TaskSearchComponent', () => {
     expect(box.queried).toEqual(['angular']);
   });
 
-  /** Emptying the box is not a query — it says there is no filter at all. */
+  /** Emptying the box is not a query. It says there is no filter at all. */
   it('reports a clear rather than an empty query', async () => {
     const box = await mount();
 

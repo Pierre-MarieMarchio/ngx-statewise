@@ -36,7 +36,7 @@ export class AuthEffect {
    * double click and used to produce two navigations and two reloads, and the
    * dashboard user picker, where a second click is a deliberate switch to
    * another user. `'first'` would fix the double click by ignoring the switch,
-   * which is the wrong answer for the picker — so the earlier attempt is
+   * which is the wrong answer for the picker, so the earlier attempt is
    * abandoned instead, and only the last one reaches the state.
    */
   public readonly loginRequestEffect = createEffect(
@@ -154,7 +154,7 @@ export class AuthEffect {
   /**
    * `'latest'` and keyed by nobody: there is one organisation to read at a
    * time, and a cold start that both renews a token and signs in asks twice
-   * for the same list. A failure is reported but says nothing on screen —
+   * for the same list. A failure is reported but says nothing on screen, and
    * the panel falls back to ids.
    */
   public readonly getMembersRequestEffect = createEffect(

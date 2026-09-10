@@ -3,7 +3,7 @@
  *
  * `display: none` and `visibility: hidden` would take it out of the
  * accessibility tree along with the layout; this leaves it there, which is the
- * whole point — it names a column, or a heading, that the design does not draw.
+ * whole point: it names a column, or a heading, that the design does not draw.
  */
 .visually-hidden {
   position: absolute;

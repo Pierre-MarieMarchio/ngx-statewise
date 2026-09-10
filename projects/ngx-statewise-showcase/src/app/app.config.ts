@@ -41,9 +41,9 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([accessTokenInterceptor, fakeBackendInterceptor]),
     ),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    // Everything the library reports — a misrouted dispatch, an effect that
-    // promised an action and produced none, the cause behind a failure
-    // action — becomes state the state page renders.
+    // Everything the library reports becomes state the state page renders: a
+    // misrouted dispatch, an effect that promised an action and produced
+    // none, the cause behind a failure action.
     { provide: ErrorHandler, useClass: ShowcaseErrorHandler },
     provideRouter(routes),
     provideStatewise({

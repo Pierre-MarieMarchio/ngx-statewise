@@ -58,7 +58,7 @@ export interface GuideSection {
 /**
  * A page in the reading order. The imported markdown on its own is the usual
  * case; the object form is for the day a page has translations beside it,
- * which carry prose and nothing else — the metadata is declared once, in the
+ * which carry prose and nothing else. The metadata is declared once, in the
  * default locale's file.
  */
 export type GuideSource =
@@ -78,7 +78,7 @@ interface SectionSource {
  *
  * This is all a new page needs here: its markdown, in the section and at the
  * position it should be read at. Its slug, title and summary are declared in
- * the file itself, beside the prose they describe — see
+ * the file itself, beside the prose they describe. See
  * `content/en/effects.md` for the shape, and CONTRIBUTING.md for the walk
  * through. Nothing about a page is spelled out twice.
  *
@@ -176,8 +176,8 @@ export function guideContent(page: GuidePage, code: LocaleCode): GuideContent {
  * This runs while the module is loading, which is the point: a page missing a
  * summary in one locale, or carrying a slug that cannot be a URL, fails the
  * prerender and every spec in the suite rather than shipping a blank sidebar
- * entry. Two things it cannot see from inside the bundle — a markdown file
- * nobody imported, and a slug that disagrees with its filename — are what
+ * entry. Two things it cannot see from inside the bundle, a markdown file
+ * nobody imported and a slug that disagrees with its filename, are what
  * `npm run verify:docs` checks against the filesystem instead.
  */
 export function defineGuideSections(

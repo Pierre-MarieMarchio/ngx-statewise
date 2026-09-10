@@ -73,7 +73,7 @@ export class TaskManager implements ITaskReload {
 
   /**
    * The counts over every task. The same rule scoped to one project is
-   * `CurrentProjectService`'s, and both ask `TaskSelectionService` — a manager
+   * `CurrentProjectService`'s, and both ask `TaskSelectionService`. A manager
    * may inject a service of its own feature when the alternative is writing
    * its rule twice.
    */
@@ -84,8 +84,8 @@ export class TaskManager implements ITaskReload {
   /**
    * Resolves once the reload this manager started has settled.
    *
-   * A cascade from another feature — a login reloading the tasks — dispatches
-   * through this manager's own handle, and observation is scoped exactly like
+   * A cascade from another feature, such as a login reloading the tasks,
+   * dispatches through this manager's own handle, and observation is scoped exactly like
    * dispatch. So awaiting the action that started the cascade does not cover
    * it, and this is what does.
    */
@@ -102,8 +102,8 @@ export class TaskManager implements ITaskReload {
   }
 
   /**
-   * Asks the server. The debounce is the caller's — how long to wait for a
-   * typist to stop is a question about a keyboard, not about state.
+   * Asks the server. The debounce is the caller's, because how long to wait
+   * for a typist to stop is a question about a keyboard rather than about state.
    */
   public search(query: string): void {
     this.statewise.dispatch(searchTaskActions.request(query));
@@ -118,7 +118,7 @@ export class TaskManager implements ITaskReload {
     this.statewise.dispatch(updateTaskActions.request(task));
   }
 
-  /** Not on the shared kernel's port — see ProjectManager.createProject. */
+  /** Not on the shared kernel's port. See ProjectManager.createProject. */
   public createTask(draft: TaskDraft): Promise<void> {
     return this.statewise.dispatchAsync(createTaskActions.request(draft));
   }

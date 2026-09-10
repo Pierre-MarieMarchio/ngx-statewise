@@ -4,7 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 /**
  * A small labelled mark: an icon, a word, and a tint behind them.
  *
- * The markup of one lived in three places — the details panel drew coloured
+ * The markup of one lived in three places. The details panel drew coloured
  * `mat-chip`s, the tables printed the same values as grey lowercase text, and
  * a card drew a 4 px stripe with no legend at all. Three renderings of one
  * idea, and only one of them said what it meant.
@@ -31,6 +31,6 @@ export class ChipComponent {
   public readonly label = input.required<string>();
   public readonly icon = input('');
 
-  /** The colour behind it, as a CSS value — the caller owns the meaning. */
+  /** The colour behind it, as a CSS value. The caller owns the meaning. */
   public readonly tint = input('transparent');
 }

@@ -77,7 +77,7 @@ describe('requestStatus', () => {
    * The guarantee that earns this helper its place. Written by hand, this is
    * the line people forget: the showcase shipped a flow whose `request` never
    * cleared the flag, so a reload that succeeded left a stale failure on
-   * screen until the next logout — and no test noticed.
+   * screen until the next logout, and no test noticed.
    */
   it('clears the error of the previous attempt when a new one starts', () => {
     apply(loadActions.request.type);
@@ -116,7 +116,7 @@ describe('requestStatus', () => {
 
   /**
    * The flags settle before the handler runs, so a flow that has a reason to
-   * disagree with one of them can say so — and a reader knows which write
+   * disagree with one of them can say so, and a reader knows which write
    * wins without having to look here.
    */
   it('settles the flags before running the handler', () => {

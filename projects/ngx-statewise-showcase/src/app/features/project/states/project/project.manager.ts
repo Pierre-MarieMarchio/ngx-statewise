@@ -31,7 +31,7 @@ export class ProjectManager implements IProjectReload {
 
   /**
    * The project the screens are looking at, derived from the id and the list
-   * rather than stored beside them — so a reload that renamed it shows the new
+   * rather than stored beside them, so a reload that renamed it shows the new
    * name, and one that dropped it answers null.
    */
   public readonly selectedProject = computed<Project | null>(
@@ -48,8 +48,8 @@ export class ProjectManager implements IProjectReload {
 
   /**
    * Resolves once every effect this manager started has settled, whichever
-   * action started it. The task manager waits on one action type instead —
-   * both are scoped to the handle, so neither hears the other.
+   * action started it. The task manager waits on one action type instead.
+   * Both are scoped to the handle, so neither hears the other.
    */
   public settled(): Promise<void> {
     return this.statewise.waitForAllEffects();
