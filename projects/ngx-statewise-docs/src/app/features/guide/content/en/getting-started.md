@@ -169,3 +169,5 @@ A component injects the manager, reads `count()` in its template and calls
 - [Actions](/guide/actions) for groups, single actions and the types they
   generate.
 - [Effects](/guide/effects) as soon as your feature needs to call an API.
+- [The showcase](/guide/showcase) to read all of it working in one
+  application.

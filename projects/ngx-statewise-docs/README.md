@@ -121,7 +121,7 @@ extglob. A pattern that guards no import is worse than no pattern, so
 These are not preferences, and each of them has something that fails when it
 is broken.
 
-- **Everything is prerendered.** `outputMode: 'static'`, 37 routes, no server.
+- **Everything is prerendered.** `outputMode: 'static'`, 39 routes, no server.
   What is above the fold has to exist in the served HTML with no JavaScript.
 - **Zoneless.** No `zone.js`, no `provideZoneChangeDetection`.
 - **Offline build.** `npm run check` never reaches the network. The fonts are

@@ -47,7 +47,8 @@ dispatch aimed at the wrong manager throws in development and reaches your
 file, no module, no store to register a slice with.
 
 **And a fair amount to write, for yours.** This is the claim to be careful
-with, so it is measured rather than felt — on this repository's own showcase,
+with, so it is measured rather than felt — on [this repository's own
+showcase](/guide/showcase),
 and re-measured by `npm run check`, so these numbers cannot rot:
 
 | What                                                      | Measured           |

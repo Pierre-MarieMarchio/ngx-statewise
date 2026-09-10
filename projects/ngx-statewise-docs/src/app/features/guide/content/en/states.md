@@ -50,7 +50,8 @@ Updaters write plain properties too. The cost is that a component reading one
 has no way of knowing it changed, so you mark it for check yourself.
 
 That cost is the same under zoneless change detection, and it is measured
-rather than assumed — `zoneless-plain-properties.spec.ts` in the showcase:
+rather than assumed, in [the showcase's](/guide/showcase#state)
+`zoneless-plain-properties.spec.ts`:
 
 | What the component does | State | View      |
 | ----------------------- | ----- | --------- |

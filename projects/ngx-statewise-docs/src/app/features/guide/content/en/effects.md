@@ -288,4 +288,7 @@ that first parameter, so such a handler reads `(_, { abortSignal })`.
 - Two racing dispatches run side by side unless the effect says otherwise.
   `concurrency: 'latest'` is what makes the newest answer win.
 
+The showcase declares five effects in one file and uses every option between
+them. See [the task board](/guide/showcase#task-board).
+
 Next: [Interceptors](/guide/interceptors).

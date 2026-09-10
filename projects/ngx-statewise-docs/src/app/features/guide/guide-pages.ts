@@ -10,6 +10,7 @@ import managersEn from './content/en/managers.md';
 import migrationEn from './content/en/migration.md';
 import optimisticUpdatesEn from './content/en/optimistic-updates.md';
 import persistingStateEn from './content/en/persisting-state.md';
+import showcaseEn from './content/en/showcase.md';
 import statesEn from './content/en/states.md';
 import testingAnEffectEn from './content/en/testing-an-effect.md';
 import testingEn from './content/en/testing.md';
@@ -113,7 +114,7 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = defineGuideSections([
       en: 'Guides',
       fr: 'Guides',
     },
-    pages: [testingEn, migrationEn],
+    pages: [showcaseEn, testingEn, migrationEn],
   },
   {
     title: {
