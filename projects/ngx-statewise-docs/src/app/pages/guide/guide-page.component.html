@@ -10,7 +10,11 @@
   </nav>
 
   @if (content().isFallback) {
-    <aside class="notice" role="note">
+    <aside
+      class="notice"
+      role="note"
+      [attr.aria-label]="text().untranslatedTitle"
+    >
       <docs-icon class="notice__icon" name="info" />
       <p class="notice__text">
         <strong>{{ text().untranslatedTitle }}</strong>

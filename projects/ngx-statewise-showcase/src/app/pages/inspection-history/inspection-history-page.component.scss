@@ -1,3 +1,8 @@
+/* <output> carries the status role natively, and is inline by default. */
+.history-page-readout {
+  display: block;
+}
+
 .history-page-container {
   padding: 0 2rem 2rem;
   max-width: 70rem;
