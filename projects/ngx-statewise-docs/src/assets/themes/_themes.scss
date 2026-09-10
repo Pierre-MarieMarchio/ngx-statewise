@@ -4,10 +4,10 @@
 
    The two brand colours are given jobs rather than sprinkled about.
 
-     red    — the synchronous half of the library (an action, and the updater
+     red:    the synchronous half of the library (an action, and the updater
               that writes the state) and, everywhere else on the site, "you are
               here": the current page, the current heading, the focus ring.
-     violet — the asynchronous half (an effect, and the actions it returns) and
+     violet: the asynchronous half (an effect, and the actions it returns) and
               every link, which is the other thing that takes you elsewhere.
 
    The gradient between them appears exactly once, on the arrow from updater to
@@ -16,7 +16,7 @@
    site that carries information.
 
    No `mat.theme()` here. The site uses no Material component, only the tokens
-   it emits, and those derive every surface from the primary hue — in the dark
+   it emits, and those derive every surface from the primary hue. In the dark
    theme they resolve to #161215 and #231e22, both faintly pink, which reads
    warm under long-form prose.
 
@@ -45,7 +45,7 @@
   --text-strong: #16151c; /* 17.4:1 */
   --text: #35323f; /* 12.0:1 */
   --text-muted: #615c72; /*  6.2:1 */
-  --text-faint: #6a6579; /*  5.4:1 — still AA on the tinted surfaces */
+  --text-faint: #6a6579; /*  5.4:1, still AA on the tinted surfaces */
 
   /* "You are here", and the synchronous half of the flow. */
   --mark: #dd0031; /*  4.9:1 */
@@ -89,7 +89,7 @@
   --text-muted: #9c98ac; /*  6.7:1 */
   --text-faint: #8b8699; /*  5.3:1 */
 
-  /* Same hues as the logo — 347deg and 258deg — lightened until they read.
+  /* Same hues as the logo, 347deg and 258deg, lightened until they read.
      The logo values themselves are 3.5:1 and 2.2:1 here, so they are kept for
      the mark and replaced for anything carrying words. */
   --mark: #ff5c80; /*  6.3:1 */

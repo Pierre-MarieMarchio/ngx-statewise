@@ -11,9 +11,9 @@ import { MatIconModule } from '@angular/material/icon';
  * The shell every form in the side panel wears: a heading, the fields, what
  * the server said when it refused, and one row of actions.
  *
- * The two creation forms wrote all of that twice under two prefixes — four
+ * The two creation forms wrote all of that twice under two prefixes: four
  * identical SCSS rules each, the same `role="alert"` paragraph, the same
- * Cancel-and-submit row — and only their fields differed. Editing a task and
+ * Cancel-and-submit row. Only their fields differed. Editing a task and
  * editing a project add two more callers, so the shell earns its place before
  * they arrive rather than after.
  *

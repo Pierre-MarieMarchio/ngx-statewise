@@ -2,7 +2,7 @@
  * The metadata block a guide page opens with.
  *
  * This is deliberately not a YAML parser. A page needs scalars and one level
- * of nesting — a name, and one line per locale — and a dependency that reads
+ * of nesting, a name and one line per locale, and a dependency that reads
  * the whole language would be a large answer to a small question. What it
  * accepts is exactly this, and nothing else:
  *
@@ -20,7 +20,7 @@
  * A value runs to the end of its line, so a colon inside one needs no
  * quoting: `summary: A worked suite: what it returns` is read whole. Matching
  * single or double quotes around a value are stripped, because that is what a
- * YAML habit puts there, and nothing inside them is unescaped — quoting is
+ * YAML habit puts there, and nothing inside them is unescaped, so quoting is
  * never necessary here, so it never has to be clever.
  *
  * Every other shape throws. A line this cannot read is a page that would

@@ -11,7 +11,7 @@ interface TaskTableFixture {
  * Presses the action button of the first row, and reports what the table said.
  *
  * The four tables answer this the same way, so the assertion lives here once:
- * the button's accessible name, and the ids it emitted — one of them, since
+ * the button's accessible name, and the ids it emitted. One of them, since
  * the press must not also reach the row's click.
  */
 export function openFirstRow(fixture: TaskTableFixture): {

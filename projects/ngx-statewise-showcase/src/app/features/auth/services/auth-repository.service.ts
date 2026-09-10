@@ -40,8 +40,9 @@ export class AuthRepositoryService {
    * Everyone in the asking user's organisation.
    *
    * The one call here that answers with a list of people rather than with a
-   * session. It is auth's to make — a user's name is auth's to know — and what
-   * a task does with the answer is another feature's business entirely.
+   * session. It is auth's to make, because a user's name is auth's to know,
+   * and what a task does with the answer is another feature's business
+   * entirely.
    */
   public members(userId: string): Observable<User[]> {
     return this.http.get<User[]>(`${this.API_BASE_URL}/User`, {

@@ -6,7 +6,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
  *
  * Whether it is open is a `model`, not three methods behind a `@ViewChild`.
  * The caller already keeps *what* the panel shows in a signal; it had to reach
- * into the component to say *whether* to show it — two mechanisms for one
+ * into the component to say *whether* to show it: two mechanisms for one
  * panel, and a non-null assertion in each caller to make the query typecheck.
  *
  * One signal does both jobs, and it does one more: the drawer writes back when

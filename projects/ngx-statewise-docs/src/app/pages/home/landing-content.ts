@@ -11,7 +11,7 @@ export interface ComparisonRow {
 
 /**
  * What the library replaces, compared against writing the same thing with
- * plain services — not against another library. The comparison that matters to
+ * plain services, not against another library. The comparison that matters to
  * someone arriving here is with what they are doing now.
  */
 export const COMPARISON: readonly ComparisonRow[] = [
@@ -25,8 +25,8 @@ export const COMPARISON: readonly ComparisonRow[] = [
       fr: 'Un service, avec les champs dont il a besoin.',
     },
     withLibrary: {
-      en: 'The same service — and an updater is the only thing allowed to write to it.',
-      fr: 'Le même service — et un updater est seul autorisé à y écrire.',
+      en: 'The same service, and an updater is the only thing allowed to write to it.',
+      fr: 'Le même service, et un updater est seul autorisé à y écrire.',
     },
   },
   {

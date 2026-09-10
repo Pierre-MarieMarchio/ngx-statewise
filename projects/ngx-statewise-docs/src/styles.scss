@@ -146,8 +146,8 @@ main:focus {
   }
 }
 
-/* Violet, not red. Red means "you are here" everywhere else on the site — on
-   the current page in the sidebar, on the current heading, on the focus ring —
+/* Violet, not red. Red means "you are here" everywhere else on the site: on
+   the current page in the sidebar, on the current heading, on the focus ring,
    and a primary button means the opposite of that. Violet is the colour of
    everything that takes you somewhere. */
 .button--primary {
@@ -322,7 +322,7 @@ main:focus {
      paragraph. A tint and the mono face are enough to say "this is code".
 
      Deliberately the same colour and weight as the prose around it. Darker or
-     heavier and every paragraph reads as speckled — worst on the migration
+     heavier and every paragraph reads as speckled, worst on the migration
      page, where most table cells are an identifier. */
   :not(pre) > code {
     padding: 0.05em 0.28em;
@@ -486,7 +486,7 @@ main:focus {
   white-space: nowrap;
 }
 
-/* The language is the word the fence was written with — `typescript`, `bash` —
+/* The language is the word the fence was written with, `typescript` or `bash`,
    so it is set as the token it is rather than shouted as a label. */
 .code-block__language {
   font-size: var(--text-xs);
@@ -496,7 +496,7 @@ main:focus {
   color: var(--text-muted);
 }
 
-/* An empty bar — no language, no title — is chrome for nothing. */
+/* An empty bar, with no language and no title, is chrome for nothing. */
 .code-block__language:empty {
   display: none;
 }

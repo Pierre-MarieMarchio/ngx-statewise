@@ -15,7 +15,7 @@ import { TaskOpenColumnComponent } from '../task-open-column/task-open-column.co
 import { UserChipComponent } from '../user-chip/user-chip.component';
 
 /**
- * A table of tasks — the one table of tasks in this application.
+ * A table of tasks, and the one table of tasks in this application.
  *
  * Four templates used to write the same twenty-two lines: the loop over the
  * columns, the two `matColumnDef` cells, the action column and the two row

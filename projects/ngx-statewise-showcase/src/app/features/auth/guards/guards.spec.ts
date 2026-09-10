@@ -15,8 +15,8 @@ import { loggedOutGuard } from './logged-out.guard';
  * everyone through, or inverting either condition, failed nothing.
  *
  * Both guards read a signal and answer synchronously, so they are called
- * directly in an injection context rather than through a router navigation —
- * what is under test is the decision, not Angular's routing.
+ * directly in an injection context rather than through a router navigation.
+ * What is under test is the decision, not Angular's routing.
  */
 describe('the route guards', () => {
   let authManager: FakeAuthManager;

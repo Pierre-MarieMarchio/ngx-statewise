@@ -1,7 +1,7 @@
 /* A pair of shadows at the edges of anything that scrolls sideways, each one
    hidden by a patch of the surface colour until there is something in that
    direction to reach. The patches are attached to the content and the shadows
-   to the box, which is what makes them appear and disappear on their own —
+   to the box, which is what makes them appear and disappear on their own,
    no scroll listener, and nothing to run on a prerendered page.
 
    Without this a table that runs off the edge of a phone looks like a table

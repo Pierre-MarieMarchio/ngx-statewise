@@ -41,7 +41,7 @@ export class TaskRepositoryService {
    * does understand: unsubscription. `takeUntil` on the abort event tears the
    * subscription down and Angular cancels the request underneath. Without it,
    * `concurrency: 'latest'` would drop the superseded answer but leave its
-   * request running to completion — which is the difference the guide draws
+   * request running to completion, which is the difference the guide draws
    * between abandoning a promise and stopping the work.
    *
    * On abort the source completes without emitting, so the promise rejects.
@@ -49,9 +49,9 @@ export class TaskRepositoryService {
    *
    * One honest caveat about the demo: the stand-in server is an interceptor, so
    * nothing reaches the network and there is no socket for the browser to drop.
-   * The teardown is real all the same — `task-repository.service.spec.ts`
+   * The teardown is real all the same. `task-repository.service.spec.ts`
    * asserts it through `HttpTestingController`, which reports the request as
-   * `cancelled` — and against a real server it is what cancels the request.
+   * `cancelled`, and against a real server it is what cancels the request.
    */
   search(
     query: string,

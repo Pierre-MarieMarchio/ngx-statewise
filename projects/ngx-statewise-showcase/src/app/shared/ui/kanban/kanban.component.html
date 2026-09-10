@@ -1,11 +1,11 @@
 <!--
   One grid for the whole board: the headers fill its first row and the columns
   its second, so a header cannot drift from the column it names. They used to
-  be a `mat-grid-list` of N tiles above a flex row of N columns — two layout
+  be a `mat-grid-list` of N tiles above a flex row of N columns: two layout
   systems for one grid, lined up only because the widths came out equal.
 -->
 <!--
-  Only drawn on a narrow board — see the container query in the sheet. It is a
+  Only drawn on a narrow board. See the container query in the sheet. It is a
   row of buttons rather than a `mat-tab-group`: the board is in `shared/ui` and
   owes nothing to Material, and three buttons need no tab machinery.
 -->
@@ -53,8 +53,8 @@
       @for (item of column.items; track item.id) {
         <!--
           `cdkDrag` is on the host, not on the `<mat-card>` inside it. The host
-          is what the drop list holds and what carries the card's identity —
-          its role, its label, its `data-card-id` — so it has to be what moves.
+          is what the drop list holds and what carries the card's identity:
+          its role, its label, its `data-card-id`. So it has to be what moves.
           On the inner card the CDK left the host in the flow and put its
           placeholder inside it, which is half of why one task appeared twice.
         -->
@@ -83,7 +83,7 @@
 
 <!--
   Where a keyboard move is read out. It is in the template rather than raised
-  on the spot, so the region exists before its text changes — a live region
+  on the spot, so the region exists before its text changes. A live region
   inserted along with its content is announced by no screen reader reliably.
 -->
 <output class="visually-hidden">{{ announcement() }}</output>

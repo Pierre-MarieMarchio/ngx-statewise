@@ -4,7 +4,7 @@ import { FlowDemoState } from './flow-demo.state';
 
 /**
  * The only place the demo's state changes, and every handler here is
- * synchronous — which is what lets the panel beside the diagram claim that the
+ * synchronous, which is what lets the panel beside the diagram claim that the
  * state is settled before the effect starts.
  */
 export const flowDemoUpdater = defineUpdater(FlowDemoState, (on) => {

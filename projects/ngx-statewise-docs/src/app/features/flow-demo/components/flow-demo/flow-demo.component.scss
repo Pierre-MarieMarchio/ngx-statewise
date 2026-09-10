@@ -216,7 +216,7 @@
   }
 }
 
-/* Sits under Effect, which is where the path leaves from — centred in the box
+/* Sits under Effect, which is where the path leaves from, centred in the box
    it read as belonging to Updater, which is the one station it has nothing to
    do with. */
 .cycle__return-text {
@@ -338,7 +338,7 @@
   text-decoration-color: color-mix(in srgb, currentcolor 45%, transparent);
 }
 
-/* Only the drawn path dims before the demo has run — fading the element would
+/* Only the drawn path dims before the demo has run. Fading the element would
    take its label with it, and a 45% label fails contrast outright. */
 .cycle__return::before,
 .cycle__return::after {
@@ -410,7 +410,7 @@
 
 /* A value the updater has written, against one still at its initial value.
    Qualified by the element, or `.readout__field dd` above wins on specificity
-   and the whole point of the panel — watching a field change — is lost. */
+   and the whole point of the panel, watching a field change, is lost. */
 .readout__field dd.readout__value--set {
   color: var(--mark);
   font-weight: var(--weight-medium);

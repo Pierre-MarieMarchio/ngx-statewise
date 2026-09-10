@@ -10,8 +10,8 @@ export const TALLY_CEILING = 20;
 /**
  * Where a refusal belongs: before the updater.
  *
- * A step that would carry the tally past its ceiling leaves no trace at all —
- * no state change, no effect, no history entry — which is what makes an
+ * A step that would carry the tally past its ceiling leaves no trace at all:
+ * no state change, no effect, no history entry. That is what makes an
  * interceptor different from an updater that clamps. A clamp records something
  * that did not happen; a refusal records nothing.
  *

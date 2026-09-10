@@ -47,7 +47,7 @@ describe('TaskDetailsComponent', () => {
   });
 
   /**
-   * The same two marks the tables draw, from the same components — they were
+   * The same two marks the tables draw, from the same components. They were
    * `mat-chip`s here and grey lowercase words there, one idea rendered twice.
    * Each carries the tint of its own scale: cold for a status, warm for a
    * priority, so neither can be read as the other.
@@ -148,7 +148,7 @@ describe('TaskDetailsComponent', () => {
 
     /*
      * The project's name sits behind the second tab, and Material attaches an
-     * inactive tab body only once its tab is activated — so there is no DOM
+     * inactive tab body only once its tab is activated, so there is no DOM
      * here to read it off, and the derivation is what this asserts.
      */
     it('names the project, and falls back to its id', async () => {

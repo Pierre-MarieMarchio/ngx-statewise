@@ -11,7 +11,7 @@ import { Project, PROJECT, Task, TASKS, User, USERS } from './db.data';
  * The rows a stand-in server keeps.
  *
  * `new FakeBackend(...)` runs once per request, so a copy taken in a DB's field
- * initialiser forgot every write the moment it answered — a created task was
+ * initialiser forgot every write the moment it answered. A created task was
  * gone by the next reload, and a status change only looked like it stuck
  * because the updater had applied it optimistically. These live as long as the
  * tab, which is what a server looks like from here. The constants in
@@ -177,9 +177,9 @@ export class FakeBackend {
      * One rule a drag can actually break, which is what the rollback needed.
      *
      * Every handler used to answer 200 to anything a signed-in user could ask,
-     * so `pendingWrites` keeping the version it replaced — the care that lets a
-     * failure restore its own card and leave the others where the user dropped
-     * them — had no path a click could reach. Six of the nine tasks in the
+     * so `pendingWrites` keeping the version it replaced had no path a click
+     * could reach. That is the care that lets a failure restore its own card
+     * and leave the others where the user dropped them. Six of the nine tasks in the
      * fixture carry nobody, so dragging one to Done finds this straight away.
      *
      * Checked before the write, so a refusal leaves the row untouched.
@@ -209,9 +209,9 @@ export class FakeBackend {
   /**
    * A server that refuses.
    *
-   * Everything the showcase does most carefully — the optimistic rollback,
-   * `isError` on both domains, the two "Try again" buttons — had no path a
-   * click could reach, because every handler answered 200 to anything a
+   * Everything the showcase does most carefully had no path a click could
+   * reach: the optimistic rollback, `isError` on both domains, the two "Try
+   * again" buttons. Every handler answered 200 to anything a
    * signed-in user could ask. A creation is the one place a refusal is
    * ordinary: a blank title, or a name already taken.
    */
@@ -356,7 +356,7 @@ export class FakeBackend {
    * A refusal with a way out, which is the point of it.
    *
    * Deleting the tasks along with the project would be one line here and no
-   * question anywhere — and it would also be the one destructive thing this
+   * question anywhere, and it would also be the one destructive thing this
    * demo does, done silently. Refusing says what stands in the way, and the
    * task panel is where it is cleared.
    */
@@ -549,7 +549,7 @@ class UsersDB {
    *
    * The admin branch used to hand back the storage array itself. So a `GET`
    * answered with the very array the module keeps, `state.set(response)` gave
-   * the signal that array to hold, and the next `create()` pushed into it —
+   * the signal that array to hold, and the next `create()` pushed into it,
    * putting a row into the application's state with no action dispatched.
    * Then the success handler appended it again, and one creation showed up
    * twice with one id. A filtered branch was never affected, because `filter`

@@ -38,14 +38,14 @@ describe('SidePanelComponent', () => {
 
   /**
    * The reason the panel takes a `model` rather than three methods: the ways
-   * the drawer closes itself — the backdrop, ESC — have to reach whoever asked
-   * for it to open.
+   * the drawer closes itself, the backdrop and ESC, have to reach whoever
+   * asked for it to open.
    *
    * The drawer is asked to report directly rather than clicked: it raises
    * `openedChange` off its own `transitionend`, which never fires under jsdom.
    * So the binding is what this asserts, and the transition that drives it is
    * Material's to keep. And `openedChange` is an async emitter, so the write
-   * back lands a macrotask later — hence the wait rather than a bare
+   * back lands a macrotask later, hence the wait rather than a bare
    * `detectChanges`.
    */
   it('follows the drawer back down when it closes itself', async () => {

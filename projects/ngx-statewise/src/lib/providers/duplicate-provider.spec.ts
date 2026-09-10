@@ -11,7 +11,7 @@ describe('duplicate provider', () => {
 
     /**
      * A `TestBed` always runs in development mode, so this arm is only
-     * reachable by calling the function — which is why it takes the flag
+     * reachable by calling the function, which is why it takes the flag
      * instead of reading it.
      */
     it('reports in production, where taking the app down would be worse', () => {

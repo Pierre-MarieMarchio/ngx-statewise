@@ -166,8 +166,8 @@ describe('projectUpdater', () => {
     });
 
     /**
-     * Leaving a dangling id would not show the wrong project — the derivation
-     * finds nothing — but every list scoped by it filters down to nothing, so
+     * Leaving a dangling id would not show the wrong project, since the
+     * derivation finds nothing, but every list scoped by it filters down to nothing, so
      * the screens would go empty rather than back to showing everything.
      */
     it('drops a choice the next read no longer holds', () => {

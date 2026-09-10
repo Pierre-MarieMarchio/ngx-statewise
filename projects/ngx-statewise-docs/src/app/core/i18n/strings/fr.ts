@@ -73,7 +73,7 @@ export const FR: UiStrings = {
   demoStatusDone:
     'L’effect a répondu par une action, et son updater a réécrit l’état.',
   demoNote:
-    'Ceci tourne sur la vraie librairie. L’action et l’updater tiennent dans un seul tick synchrone, ils sont donc terminés avant que l’effect démarre — l’attente que vous voyez, c’est l’effect, et rien d’autre.',
+    'Ceci tourne sur la vraie librairie. L’action et l’updater tiennent dans un seul tick synchrone, ils sont donc terminés avant que l’effect démarre. L’attente que vous voyez, c’est l’effect, et rien d’autre.',
   homeCompareTitle: 'Ce que ça remplace',
   homeCompareByHand: 'À la main',
   homeCompareWith: 'Avec ngx-statewise',

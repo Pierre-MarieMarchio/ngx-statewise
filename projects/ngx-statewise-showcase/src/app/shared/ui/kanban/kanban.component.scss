@@ -94,7 +94,7 @@
 /*
  * Where the card being dragged may be dropped. The CDK puts `receiving` on
  * every connected list other than the one it came from, so the highlight
- * names the choices rather than restating where the card already is —
+ * names the choices rather than restating where the card already is.
  * `dragging`, on the source column, is deliberately left plain.
  */
 .kanban-column.cdk-drop-list-receiving {
@@ -102,7 +102,7 @@
 }
 
 /*
- * One column at a time, under the width where three stop being readable —
+ * One column at a time, under the width where three stop being readable,
  * measured at 390 px: three columns of about 110, a card title one word to a
  * line, and the column labels overlapping each other.
  *

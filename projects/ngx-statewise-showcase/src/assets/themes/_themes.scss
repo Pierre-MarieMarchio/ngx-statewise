@@ -10,7 +10,7 @@
  * theme unchanged, so the rail drew a hard black hairline down a white page.
  *
  * The surface override is declared **after** `mat.theme()` rather than before
- * it, which is what lets it drop the `!important` it used to carry — a
+ * it, which is what lets it drop the `!important` it used to carry. A
  * `!important` on a custom property, in the block that then calls the mixin
  * meant to set it. And light now gets one too: without it, `--mat-sys-surface`
  * came out of the magenta palette and every card was faintly pink in light
@@ -70,7 +70,7 @@
 
 /*
  * The generic family at the end is what a machine falls back on when the icon
- * font has not loaded — without one the browser picks whatever its default is,
+ * font has not loaded. Without one the browser picks whatever its default is,
  * which for a ligature font is how a page ends up reading the word "delete"
  * where an icon belongs.
  */

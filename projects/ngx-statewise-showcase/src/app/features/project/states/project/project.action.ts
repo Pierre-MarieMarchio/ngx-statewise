@@ -45,7 +45,7 @@ export const updateProjectActions = defineActionsGroup({
 });
 
 /**
- * Removing one, by id — and the id again on the way back, since the row it
+ * Removing one, by id, and the id again on the way back, since the row it
  * names is gone by then and there is nothing else to say which it was.
  */
 export const deleteProjectActions = defineActionsGroup({
@@ -60,8 +60,8 @@ export const deleteProjectActions = defineActionsGroup({
 /**
  * Which project the screens are looking at, and `null` for all of them.
  *
- * The one action in this application with no effect behind it — choosing is a
- * decision, not a request, and nothing has to be asked of the server to make
+ * The one action in this application with no effect behind it. Choosing is a
+ * decision rather than a request, and nothing has to be asked of the server to make
  * it true. It travels as an action all the same, so it shows up in the history
  * beside the reads it changes the meaning of.
  */

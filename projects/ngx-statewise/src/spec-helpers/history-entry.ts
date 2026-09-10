@@ -7,8 +7,8 @@ import type { Action } from '../lib/action';
  * that is about it.
  *
  * A clock value asserted everywhere would say nothing and break whenever it
- * ticked, so `expect.any(Number)` stands in for it — while the fields the
- * entry exists for, the action and its cascade path, are asserted exactly.
+ * ticked, so `expect.any(Number)` stands in for it. The fields the entry
+ * exists for, the action and its cascade path, are asserted exactly.
  */
 export function historyEntry(
   action: Action,

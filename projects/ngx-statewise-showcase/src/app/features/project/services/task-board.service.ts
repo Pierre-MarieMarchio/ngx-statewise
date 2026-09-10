@@ -4,10 +4,10 @@ import { STATUSES, Task, TaskStatus } from '../models';
 /**
  * What a column of the task board means.
  *
- * The geometry — laying the columns out, moving a card between them, wiring
- * the drop lists — belongs to the reusable board, which knows nothing of
- * tasks. What is left here is the translation: a column id is a task status,
- * and a card in another column is a task with another status.
+ * The geometry belongs to the reusable board, which knows nothing of tasks:
+ * laying the columns out, moving a card between them, wiring the drop lists.
+ * What is left here is the translation. A column id is a task status, and a
+ * card in another column is a task with another status.
  *
  * Plus the one ordering rule the reusable board cannot know, because a screen
  * shows several boards at once and it only ever sees its own.
@@ -34,8 +34,8 @@ export class TaskBoardService {
    *
    * A reorder rearranges one column of one board and nothing else, so walk the
    * shown tasks and hand back that column's tasks in their new order as their
-   * slots come up. Everything outside the column — the other statuses, the
-   * other projects' boards — keeps its place.
+   * slots come up. Everything outside the column keeps its place: the other
+   * statuses, the other projects' boards.
    */
   public reordered(
     tasks: readonly Task[],

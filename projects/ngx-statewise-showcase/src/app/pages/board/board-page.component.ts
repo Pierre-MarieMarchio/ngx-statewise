@@ -57,7 +57,7 @@ export class BoardPageComponent {
   public readonly taskManager = inject(TaskManager);
   /**
    * Two of the four tabs group by project, so a project load that failed is
-   * this page's problem to report — it used to be invisible here, and
+   * this page's problem to report. It used to be invisible here, and
    * permanent.
    */
   public readonly projectManager = inject(ProjectManager);
@@ -71,7 +71,7 @@ export class BoardPageComponent {
 
   /**
    * Which tab is showing, held here because choosing a project on the last one
-   * has to bring the board it chose into view — a choice whose result is three
+   * has to bring the board it chose into view, a choice whose result is three
    * tabs away is a choice nobody sees the effect of.
    */
   public readonly selectedTab = signal(0);
@@ -96,8 +96,8 @@ export class BoardPageComponent {
   /**
    * The selected task as the state has it, not as it was when it was clicked.
    *
-   * It used to be a snapshot, so a card the user dragged — or one the server
-   * refused and the rollback put back — went on being shown in the panel the
+   * It used to be a snapshot, so a card the user dragged, or one the server
+   * refused and the rollback put back, went on being shown in the panel the
    * way it had been. An id and a derivation cost the same and cannot go stale.
    */
   public readonly selectedTask = computed<Task | null>(() => {
@@ -111,7 +111,7 @@ export class BoardPageComponent {
   /**
    * What the one side panel is showing. Details and the three forms share it
    * rather than each bringing a panel of its own, so opening one closes
-   * whatever was there — which is what a single panel means.
+   * whatever was there, which is what a single panel means.
    */
   public readonly panel = signal<
     | 'task'
@@ -181,7 +181,7 @@ export class BoardPageComponent {
    * The one write in this application that carries more than one field.
    *
    * The draft is merged onto the task the state holds, so `pendingWrites` puts
-   * that exact version back if the server refuses — which it does when a task
+   * that exact version back if the server refuses, which it does when a task
    * is marked done with nobody on it. The panel goes back to reading, and the
    * card reverts underneath it without the panel having to be told.
    */
@@ -220,7 +220,7 @@ export class BoardPageComponent {
     await this.projectManager.updateProject({ ...project, ...draft });
 
     // Kept open on a refusal, so the reason stays beside the field that
-    // caused it — the same rule the creation forms follow.
+    // caused it, the same rule the creation forms follow.
     if (this.projectManager.saveError() === null) {
       this.closeSideNav();
     }
@@ -258,8 +258,8 @@ export class BoardPageComponent {
 
     await this.taskManager.deleteTask(task.id);
 
-    // The panel has nothing left to show once the row is gone, so it shuts —
-    // and the details behind it would be looking at a task that no longer is.
+    // The panel has nothing left to show once the row is gone, so it shuts.
+    // The details behind it would be looking at a task that no longer is.
     if (this.taskManager.saveError() === null) {
       this.selectedTaskId.set(null);
       this.closeSideNav();

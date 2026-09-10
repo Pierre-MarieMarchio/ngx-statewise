@@ -11,7 +11,7 @@ import {
  *
  * It lives here because this is the only layer that may read both. The port is
  * declared by the feature that needs it, the names are owned by the feature
- * that has them, and neither imports the other — this file is the whole of the
+ * that has them, and neither imports the other. This file is the whole of the
  * join, and the dependency law is checked by lint on both sides of it.
  *
  * A file rather than a page: every page that renders a task needs the same

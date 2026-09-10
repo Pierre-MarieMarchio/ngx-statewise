@@ -13,8 +13,8 @@ function effectWith(
 /**
  * The groups this effect holds in this scope, read from inside the instance.
  *
- * A retention invariant has no observable surface — every behaviour is the
- * same whether or not an empty group is dropped — so the only assertion that
+ * A retention invariant has no observable surface, since every behaviour is
+ * the same whether or not an empty group is dropped, so the only assertion that
  * can hold it is one that knows the shape of the class it tests.
  */
 function groupsOf(

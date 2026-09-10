@@ -6,8 +6,8 @@ import { MatCardModule } from '@angular/material/card';
  *
  * The two panels of `/home` had the same shell in two sheets, to three
  * declarations: a transparent card laid out as a column, a coloured title
- * band, a minimum height and a body that scrolls. Which also means the band —
- * painted in a hue that already means three other things — now has one place
+ * band, a minimum height and a body that scrolls. Which also means the band,
+ * painted in a hue that already means three other things, now has one place
  * to be redrawn rather than two.
  */
 @Component({

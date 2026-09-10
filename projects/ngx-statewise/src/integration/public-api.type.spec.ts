@@ -143,9 +143,9 @@ function rejectedInterceptorShapes(): void {
  * Never called either. Fifteen plumbing types left the barrel in this change,
  * and this is what says a consumer never had to write one: every declaration
  * below compiles with no type annotation naming them, in the exact places they
- * would have been needed — a definition held in a constant, a creator held in a
- * constant, the `on` collector held in a constant, an effect handler held in a
- * constant.
+ * would have been needed: a definition held in a constant, a creator held in
+ * a constant, the `on` collector held in a constant, an effect handler held in
+ * a constant.
  */
 function inferredWithoutPlumbingTypes(): void {
   // `PayloadDefinition`, `ValuePayloadFn` and `EmptyPayloadFn` would go here.
@@ -158,7 +158,7 @@ function inferredWithoutPlumbingTypes(): void {
     events: { assigned: withValue, cleared: withNothing },
   });
 
-  // `GroupActionType` would go here — and the literal survives, which is the
+  // `GroupActionType` would go here, and the literal survives, which is the
   // whole reason the type exists.
   const groupType: 'INFERRED_ASSIGNED' = inferred.assigned.type;
 

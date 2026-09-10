@@ -34,7 +34,7 @@ import type {
  *
  * It knows nothing of what an item is: the caller says what the columns are,
  * what a card looks like, and what to do when one moves. And it holds no
- * state — a move is reported, never applied. That is what lets an optimistic
+ * state: a move is reported, never applied. That is what lets an optimistic
  * update render the move without this component keeping a copy of anything.
  */
 @Component({
@@ -75,8 +75,8 @@ export class KanbanComponent<Item extends KanbanCardData> {
 
   /**
    * What the live region reads out. A keyboard move changes nothing the eye
-   * can follow from the card that was pressed — the card is gone from where it
-   * was — so the result has to be said.
+   * can follow from the card that was pressed, since the card is gone from
+   * where it was, so the result has to be said.
    */
   public readonly announcement = signal('');
 
@@ -84,7 +84,7 @@ export class KanbanComponent<Item extends KanbanCardData> {
    * The grid's tracks, one per column, as a custom property the sheet reads.
    *
    * It used to be bound straight to `grid-template-columns`, which put it in
-   * an inline style — and an inline style cannot be overridden by the rule
+   * an inline style, and an inline style cannot be overridden by the rule
    * that lays this board out one column at a time on a narrow screen.
    */
   public readonly columnTracks = computed(
@@ -96,7 +96,7 @@ export class KanbanComponent<Item extends KanbanCardData> {
    *
    * Under about 900 px three columns are 110 px each: a card's title breaks
    * one word to a line and the columns' own labels overlap. So one column
-   * takes the whole width and a strip of buttons changes which — and the
+   * takes the whole width and a strip of buttons changes which, and the
    * keyboard path that already moves a card between columns becomes the way
    * everyone moves one, rather than a second way nobody could find.
    *
@@ -206,8 +206,8 @@ export class KanbanComponent<Item extends KanbanCardData> {
 
   /**
    * Puts the focus back on the card that moved, once the caller has redrawn
-   * the board. Changing column destroys the card — the two columns are two
-   * `@for` blocks — so without this the focus falls to the document and a
+   * the board. Changing column destroys the card, because the two columns are
+   * two `@for` blocks, so without this the focus falls to the document and a
    * second press goes nowhere.
    */
   private refocus(itemId: string): void {

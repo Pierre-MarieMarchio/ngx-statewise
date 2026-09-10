@@ -125,7 +125,7 @@ export class InspectionLivePageComponent {
    * `TASK_REQUEST` is claimed by the task updater, which is attached to the
    * task manager, and this handle owns no updater at all. So the engine
    * refuses it rather than letting the dispatch skip its state update in
-   * silence — which is what used to happen before the check existed.
+   * silence, which is what used to happen before the check existed.
    */
   public dispatchMisrouted(): void {
     try {

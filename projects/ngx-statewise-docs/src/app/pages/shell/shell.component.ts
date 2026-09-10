@@ -39,7 +39,7 @@ const OWNED_BY_SHELL = 'data-docs-alternate';
 
 /**
  * The chrome around every page. Routed rather than sitting above the router,
- * so it can read the `LOCALE` its route provides — the whole interface is
+ * so it can read the `LOCALE` its route provides. The whole interface is
  * localised from that one token.
  */
 @Component({
@@ -151,7 +151,7 @@ export class ShellComponent {
   }
 
   protected onKeydown(event: KeyboardEvent): void {
-    // Ctrl on Windows and Linux, Cmd on a Mac — metaKey covers the latter.
+    // Ctrl on Windows and Linux, Cmd on a Mac, and metaKey covers the latter.
     if (event.key.toLowerCase() === 'k' && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
       this.openSearch();

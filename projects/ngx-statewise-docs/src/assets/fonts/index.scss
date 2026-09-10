@@ -7,8 +7,8 @@
 // two and made 500 and 600 silently resolve to 400 and 700. The latin subset
 // of all three together is about 120 kB against Roboto's 293 kB.
 //
-// Each stylesheet declares the subsets it ships — latin, latin-ext,
-// vietnamese, and cyrillic for the mono — behind `unicode-range`, so a reader
+// Each stylesheet declares the subsets it ships behind `unicode-range`:
+// latin, latin-ext, vietnamese, and cyrillic for the mono. So a reader
 // of the English or French guide downloads the latin file and nothing else.
 //
 // The showcase self-hosts Material Symbols, a 3.8 MB variable font carrying

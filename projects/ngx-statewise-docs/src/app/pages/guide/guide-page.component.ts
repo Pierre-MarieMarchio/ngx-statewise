@@ -82,7 +82,7 @@ export class GuidePageComponent {
    * value is trusted here rather than rendered without its anchors.
    */
   protected readonly html = computed(
-    () => this.sanitizer.bypassSecurityTrustHtml(this.rendered().html), // NOSONAR — answered in the paragraph above
+    () => this.sanitizer.bypassSecurityTrustHtml(this.rendered().html), // NOSONAR: answered in the paragraph above
   );
 
   /** The heading currently under the top of the viewport, if any. */
@@ -287,7 +287,7 @@ export class GuidePageComponent {
 
 /**
  * The sticky header's height, read from the token rather than duplicated as a
- * literal — the scroll-spy band and `scroll-margin-top` have to agree.
+ * literal, because the scroll-spy band and `scroll-margin-top` have to agree.
  */
 function headerHeight(element: Element): number {
   const value = getComputedStyle(element).getPropertyValue('--header-height');

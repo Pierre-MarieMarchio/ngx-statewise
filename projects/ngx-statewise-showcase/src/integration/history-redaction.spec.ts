@@ -14,8 +14,8 @@ const CREDENTIALS = { email: 'admin@admin', password: 'admin' };
  * at all, while the history is on with `limit: 50` and rendered as it is on
  * /history.
  *
- * So this signs in through the real `appConfig` — the whole provider set, the
- * fake backend included — and reads what the history actually kept.
+ * So this signs in through the real `appConfig`, the whole provider set and
+ * the fake backend included, and reads what the history actually kept.
  */
 describe('the action history, as the application configures it', () => {
   beforeEach(() => {
@@ -42,7 +42,7 @@ describe('the action history, as the application configures it', () => {
 
   /**
    * The redaction replaces the action on its way into the history and must not
-   * touch the one the updaters and effects receive — otherwise a signed-in
+   * touch the one the updaters and effects receive. Otherwise a signed-in
    * session would be impossible.
    */
   it('signs in all the same', async () => {

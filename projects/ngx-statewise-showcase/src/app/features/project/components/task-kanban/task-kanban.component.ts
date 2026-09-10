@@ -27,7 +27,7 @@ import {
  * It used to draw one board per project inside an accordion, which meant five
  * boards stacked down the page, each folded shut, none of them wide enough to
  * be worth dragging on. Choosing a project is the page's job now, so what is
- * left here is one board — and it takes the whole width.
+ * left here is one board, and it takes the whole width.
  */
 @Component({
   selector: 'app-task-kanban',
@@ -46,7 +46,7 @@ export class TaskKanbanComponent {
 
   /**
    * The order the board shows. Reordering inside one column is presentation
-   * only — it has no counterpart on the server — so it lives here rather than
+   * only, with no counterpart on the server, so it lives here rather than
    * in the state, and `linkedSignal` drops it whenever the tasks themselves
    * change. Moving a card between columns goes through the manager instead,
    * and the updater applies it optimistically.

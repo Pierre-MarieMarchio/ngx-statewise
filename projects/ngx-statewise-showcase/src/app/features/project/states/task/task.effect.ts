@@ -55,7 +55,7 @@ export class TaskEffect {
   /**
    * One concurrency group per task: dragging a second card must not abandon
    * the write of the first, while dragging the same card twice must abandon
-   * its own earlier write — otherwise the slow answer lands last and the card
+   * its own earlier write. Otherwise the slow answer lands last and the card
    * goes back to where the user no longer wants it.
    */
   public readonly updateTaskRequestEffect = createEffect(
@@ -97,7 +97,7 @@ export class TaskEffect {
    *
    * Three effects here declare `concurrency: 'latest'` around an awaited
    * promise. That policy drops a superseded answer before it reaches an
-   * updater, which is enough to keep the state right — but the request itself
+   * updater, which is enough to keep the state right, but the request itself
    * runs to completion. Handing the signal on is what actually stops it, and
    * until this effect no one did.
    *
@@ -138,7 +138,7 @@ export class TaskEffect {
   );
 
   /**
-   * `'first'` rather than `'latest'` — see the project's create effect: a
+   * `'first'` rather than `'latest'`, as in the project's create effect: a
    * second click must not supersede a creation already on its way, leaving the
    * first with nothing watching for its answer.
    */

@@ -30,7 +30,7 @@ import { Task } from '../../models';
  * its columns in `ngAfterContentChecked`, so the definition has to be there by
  * `ngOnInit`, and a signal query is not resolved that early. The two cell
  * templates are handed over by hand for the same reason `CdkTextColumn` does
- * it — the column's own content queries do not see them from here, and the
+ * it: the column's own content queries do not see them from here, and the
  * row definition fails reading `template` off nothing.
  */
 @Component({

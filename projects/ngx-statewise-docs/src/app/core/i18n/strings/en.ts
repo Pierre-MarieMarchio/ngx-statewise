@@ -73,7 +73,7 @@ export const EN: UiStrings = {
   demoStatusDone:
     'The effect answered with an action, and its updater wrote the state again.',
   demoNote:
-    'This runs on the real library. The action and the updater are one synchronous tick, so they finish before the effect starts — the wait you can see is the effect, and nothing else.',
+    'This runs on the real library. The action and the updater are one synchronous tick, so they finish before the effect starts. The wait you can see is the effect, and nothing else.',
   homeCompareTitle: 'What it replaces',
   homeCompareByHand: 'By hand',
   homeCompareWith: 'With ngx-statewise',

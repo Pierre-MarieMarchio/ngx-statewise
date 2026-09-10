@@ -20,7 +20,7 @@ const SETTLE_MS = 150;
  *
  * The wait lives here rather than in the effect on purpose: how long to give a
  * typist is a question about a keyboard, not about state. And it is a plain
- * timer rather than an RxJS operator — the box holds one pending query, so
+ * timer rather than an RxJS operator, because the box holds one pending query, so
  * there is nothing a stream would add beyond a dependency.
  *
  * It deliberately does **not** debounce away the race. 150 ms of settling

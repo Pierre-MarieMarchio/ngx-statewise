@@ -3,7 +3,7 @@
  *
  * `[class]="'tag-' + project.color"` builds a class name out of this, and
  * `_accordion.scss` defines exactly these five. A plain `string` let a sixth
- * render unstyled and in silence — harmless while the only projects came from
+ * render unstyled and in silence, which was harmless while the only projects came from
  * a fixture, reachable the moment one can be created.
  */
 export type ProjectColor = 'orange' | 'green' | 'blue' | 'purple' | 'pink';

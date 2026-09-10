@@ -2,7 +2,7 @@
  * A keydown the component under test will actually read.
  *
  * Angular's `(keydown.enter)` reads `event.key`, while Angular Material still
- * reads the deprecated `event.keyCode` — `MatChipAction._handleKeydown` among
+ * reads the deprecated `event.keyCode`, `MatChipAction._handleKeydown` among
  * them. A `KeyboardEvent` built from an init object leaves `keyCode` at 0, so
  * a spec that only sets `key` silently exercises nothing on the Material side.
  */

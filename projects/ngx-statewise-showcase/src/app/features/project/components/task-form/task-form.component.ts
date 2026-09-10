@@ -60,7 +60,7 @@ export class TaskFormComponent implements OnInit {
    *
    * Read once, in `ngOnInit`, and never watched. The task this points at is
    * derived from the state, so an optimistic write and the rollback behind it
-   * both change it — and neither has any business reaching into a field
+   * both change it, and neither has any business reaching into a field
    * somebody is still typing in.
    */
   public readonly task = input<Task | null>(null);
@@ -77,7 +77,7 @@ export class TaskFormComponent implements OnInit {
   public readonly statuses = STATUSES;
   public readonly priorities = PRIORITIES;
 
-  /** Who a task may be assigned to — the port this feature declares. */
+  /** Who a task may be assigned to, through the port this feature declares. */
   public readonly directory = inject(TEAM_DIRECTORY);
 
   public readonly editing = computed(() => this.task() !== null);
@@ -137,7 +137,7 @@ export class TaskFormComponent implements OnInit {
      *
      * A creation leaves it out: an empty description is no description, and
      * `''` would store a blank one. An edit sends the empty string, because
-     * the update merges what it is handed — a field left out is a field left
+     * the update merges what it is handed, so a field left out is a field left
      * alone, so clearing one is the single thing an edit could not otherwise
      * do.
      */

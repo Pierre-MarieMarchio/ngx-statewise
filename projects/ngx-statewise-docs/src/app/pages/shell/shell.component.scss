@@ -102,7 +102,7 @@
 }
 
 /* One shape for every clickable thing in the header: a 28px target that fills
-   with a wash on hover. No lift — a docs header should not bounce. */
+   with a wash on hover. No lift: a docs header should not bounce. */
 .header__icon-button,
 .header__link {
   display: inline-flex;
@@ -260,8 +260,8 @@
 }
 
 /* The way back to the landing page, above the guide and not part of it. */
-/* Set exactly like the section titles under it — same size, weight, tracking
-   and left edge — because it belongs to that row of the hierarchy. It is a
+/* Set exactly like the section titles under it, same size, weight, tracking
+   and left edge, because it belongs to that row of the hierarchy. It is a
    link rather than a heading, so it takes a hover and a current state, and
    nothing else marks it out. The margin is the sections' own: the first one
    below is no longer `:first-child`, so it keeps its top margin and that is

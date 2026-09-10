@@ -7,7 +7,7 @@ import { AuthManager } from '@app/features/auth/states';
  * Signing in as somebody else, which is more than signing in.
  *
  * The login cascade reloads the tasks and the projects, but it does so through
- * each manager's own handle — and observation is scoped exactly like dispatch,
+ * each manager's own handle, and observation is scoped exactly like dispatch,
  * so `await login()` settles while both reloads are still in flight. A picker
  * that re-enables itself there is inviting the next click into a half-loaded
  * dashboard.

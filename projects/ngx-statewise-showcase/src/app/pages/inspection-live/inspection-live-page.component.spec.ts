@@ -172,7 +172,7 @@ describe('InspectionLivePageComponent', () => {
 
     /**
      * The check has existed for a while and the showcase had no executable
-     * demonstration of it — only prose and a code literal on the docs page.
+     * demonstration of it, only prose and a code literal on the docs page.
      */
     it('refuses it and says which manager owns the action', () => {
       expect(taskUpdater.handlers.size).toBeGreaterThan(0);

@@ -14,14 +14,14 @@ const ADMIN = { email: 'admin@admin', password: 'admin' };
  * could reach: the optimistic rollback, `isError` on the two domains, and the
  * two "Try again" buttons were exercised by unit tests alone.
  *
- * Two rules changed that, and this signs in through the real `appConfig` — the
- * whole provider set, the fake backend included — to prove a refusal actually
- * arrives.
+ * Two rules changed that, and this signs in through the real `appConfig`, the
+ * whole provider set and the fake backend included, to prove a refusal
+ * actually arrives.
  */
 describe('a server that refuses', () => {
   /*
    * The fake backend keeps its rows for as long as the module is loaded, which
-   * is what makes a creation survive a reload — and what makes a count taken in
+   * is what makes a creation survive a reload, and what makes a count taken in
    * one test wrong in the next. So each of these names what it created and
    * looks for that, and every title is its own.
    */
@@ -51,7 +51,7 @@ describe('a server that refuses', () => {
      *
      * `toContain` was chosen because the stand-in server keeps its rows for the
      * life of the module, so a test sees what the one before it created and a
-     * total is not stable. That reason still holds — but counting one title
+     * total is not stable. That reason still holds, but counting one title
      * nobody else uses satisfies both, and it is the assertion this suite was
      * missing: creating one project used to put two in the state, identical and
      * sharing an id, and every assertion here passed.
@@ -131,7 +131,7 @@ describe('a server that refuses', () => {
   /**
    * The one the rollback was written for. `pendingWrites` keeps the version
    * each write replaced, so a refusal restores its own card and leaves the
-   * others where the user dropped them — and until now nothing but a unit test
+   * others where the user dropped them, and until now nothing but a unit test
    * had ever made it run.
    */
   describe('moving a task the server will not close', () => {

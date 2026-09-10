@@ -35,7 +35,7 @@ export const updateTaskActions = defineActionsGroup({
   },
 });
 
-/** Pessimistic, and carrying the server's sentence — see createProjectActions. */
+/** Pessimistic, and carrying the server's sentence. See createProjectActions. */
 export const createTaskActions = defineActionsGroup({
   source: 'CREATE_TASK',
   events: {
@@ -46,7 +46,7 @@ export const createTaskActions = defineActionsGroup({
 });
 
 /**
- * A filtered search, asked of the server rather than computed here — which is
+ * A filtered search, asked of the server rather than computed here, which is
  * what makes it the case `concurrency: 'latest'` is for: two keystrokes put two
  * requests in flight, and only the last one's answer is wanted.
  */
@@ -62,7 +62,7 @@ export const searchTaskActions = defineActionsGroup({
 /**
  * Removing one. Pessimistic: a row taken off the screen before the server has
  * agreed is a row that has to reappear if it refuses, and reappear in its
- * place — which is more machinery than a delete is worth.
+ * place, which is more machinery than a delete is worth.
  *
  * It exists because deleting a project is refused while it still holds tasks.
  * A refusal with no way out is a dead end, and this is the way out.

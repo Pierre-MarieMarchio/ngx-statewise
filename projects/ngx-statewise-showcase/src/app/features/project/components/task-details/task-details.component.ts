@@ -42,7 +42,7 @@ export class TaskDetailsComponent {
 
   /**
    * Whether this caller offers editing. The dashboard's panel reads, the
-   * board's writes — and a button that emits into nothing is worse than no
+   * board's writes, and a button that emits into nothing is worse than no
    * button at all.
    */
   public readonly editable = input(false);
@@ -59,7 +59,7 @@ export class TaskDetailsComponent {
   private readonly projectManager = inject(ProjectManager);
 
   /**
-   * The project's title, and its id when the projects have not arrived — the
+   * The project's title, and its id when the projects have not arrived. The
    * panel showed the raw id either way until now, in a field labelled
    * "Project" that no reader could match to anything on screen.
    */

@@ -21,7 +21,7 @@ interface ProjectRow {
 /**
  * Where a project is chosen.
  *
- * This tab used to be five folded accordions with a table in each — the same
+ * This tab used to be five folded accordions with a table in each, showing the same
  * tasks the tab beside it already showed, cut five ways and none of them
  * usable. What a list of projects is for is choosing one, so that is what it
  * does: pressing a row makes it the current project, and every screen narrows
@@ -60,7 +60,7 @@ export class ProjectPickerComponent {
 
   public readonly total = computed(() => this.tasks().length);
 
-  /** "1 task", not "1 tasks" — the count is read as often as the name. */
+  /** "1 task", not "1 tasks". The count is read as often as the name. */
   public counted(total: number): string {
     return total === 1 ? '1 task' : `${String(total)} tasks`;
   }

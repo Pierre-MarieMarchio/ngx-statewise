@@ -13,7 +13,7 @@ import { TaskRepositoryService } from './task-repository.service';
  * merely dropping its answer.
  *
  * `HttpClient` takes no `AbortSignal`, so `search` bridges the signal to
- * unsubscription. Only the testing controller can see the difference — it
+ * unsubscription. Only the testing controller can see the difference: it
  * reports a torn-down request as `cancelled`, which is exactly the thing
  * `concurrency: 'latest'` alone does not achieve.
  */

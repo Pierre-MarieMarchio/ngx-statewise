@@ -11,7 +11,7 @@ interface RefusalBody {
  * A form that cannot repeat the reason cannot help: "something went wrong"
  * leaves the user to guess between an empty title and a name already taken.
  * So the server's own words travel, and the fallback is only for a failure
- * that carried none — a network that never answered, say.
+ * that carried none, such as a network that never answered.
  */
 export function refusalReason(
   error: unknown,

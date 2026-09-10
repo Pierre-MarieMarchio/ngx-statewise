@@ -117,7 +117,7 @@ describe('resolveEffectOutcome', () => {
 
       await expect(outcome).resolves.toEqual([]);
 
-      // The work goes on — a promise cannot be cancelled — and answers into
+      // The work goes on, because a promise cannot be cancelled, and answers into
       // the void.
       settle(first);
       await inFlight;

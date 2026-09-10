@@ -277,7 +277,7 @@ describe('TaskEffect', () => {
       /*
        * The statuses alone prove nothing here: the updater moves the card on
        * `request`, so both read the same whether the first write was abandoned
-       * or not. Its pending entry is what tells them apart — an abandoned run
+       * or not. Its pending entry is what tells them apart. An abandoned run
        * answers nothing, so nothing ever closes it, and the board would report
        * itself saving for good.
        */
