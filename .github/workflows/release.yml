@@ -56,7 +56,9 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
-          # Writes the .npmrc that picks up NODE_AUTH_TOKEN below.
+          # Names the registry the publish below authenticates against. No
+          # token is written: npm exchanges this job's OIDC identity for a
+          # short-lived one at publish time.
           registry-url: 'https://registry.npmjs.org'
 
       # `--ignore-scripts`: no dependency here needs a lifecycle script to
@@ -101,14 +103,23 @@ jobs:
       # Pushes the branch and the tag, publishes to npm, creates the GitHub
       # release. Only the version commit's arrival on ${{ github.ref_name }} is
       # left, and the step below does that.
+      #
+      # The publish carries no npm token. The account requires two-factor
+      # authentication to publish, which a token can only satisfy by holding a
+      # bypass npm is in the middle of withdrawing. So npm authenticates this
+      # job by its OIDC identity instead — configured as a trusted publisher on
+      # the package, pinned to this repository and this workflow file, and paid
+      # for by the `id-token: write` permission above. Provenance comes with it
+      # and needs no NPM_CONFIG_PROVENANCE.
+      #
+      # release-it's own npm preflight is off (`skipChecks` in
+      # .release-it.json): it runs `npm whoami`, which has nothing to answer
+      # with until the exchange happens inside `npm publish`.
       - name: Version, tag, publish and release
         id: release
         run: npm run ${{ github.ref_name == 'main' && 'release:stable' || 'release:beta' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          # The provenance attestation the id-token permission above pays for.
-          NPM_CONFIG_PROVENANCE: true
 
       # The tag and the package are already published at this point, which is
       # the one thing this ordering costs: a pull request that cannot merge
