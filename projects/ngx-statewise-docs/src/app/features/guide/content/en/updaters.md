@@ -268,6 +268,10 @@ runs, so it can overrule one if it has a reason to.
 It needs signals, because it reads the two flags off the state and writes them.
 An updater holding plain properties writes its handlers by hand.
 
+[Optimistic updates](/guide/optimistic-updates) is the flow the note above
+means: a write that goes in before the server agrees, and a revert that has to
+put one entity back.
+
 ## Key notes
 
 - One action type, one updater, within the same scope. A duplicate always

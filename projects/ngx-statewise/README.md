@@ -105,18 +105,22 @@ possibly more actions**. The state is settled before any effect runs, and
 
 ## The guide
 
-| Page                                                                                         | What it covers                                  |
-| -------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| [Introduction](https://pierre-mariemarchio.github.io/ngx-statewise/guide/introduction)       | The flow, and how it differs from NgRx and NGXS |
-| [Why ngx-statewise](https://pierre-mariemarchio.github.io/ngx-statewise/guide/why)           | What the design buys you, and when it fits      |
-| [Getting started](https://pierre-mariemarchio.github.io/ngx-statewise/guide/getting-started) | Installation and `provideStatewise`             |
-| [States](https://pierre-mariemarchio.github.io/ngx-statewise/guide/states)                   | Signals, or plain properties                    |
-| [Actions](https://pierre-mariemarchio.github.io/ngx-statewise/guide/actions)                 | Action groups, single actions, generated types  |
-| [Updaters](https://pierre-mariemarchio.github.io/ngx-statewise/guide/updaters)               | State updates, scope, and misrouted dispatches  |
-| [Effects](https://pierre-mariemarchio.github.io/ngx-statewise/guide/effects)                 | Promises, observables, scope and lifecycle      |
-| [Interceptors](https://pierre-mariemarchio.github.io/ngx-statewise/guide/interceptors)       | Refusing an action before its updater applies   |
-| [Managers](https://pierre-mariemarchio.github.io/ngx-statewise/guide/managers)               | `dispatch`, `dispatchAsync`, and error handling |
-| [Testing](https://pierre-mariemarchio.github.io/ngx-statewise/guide/testing)                 | The `ngx-statewise/testing` entry point         |
+The full guide is on the site, with a sidebar. Four entry points, depending on
+what you came for:
+
+- **[Introduction](https://pierre-mariemarchio.github.io/ngx-statewise/guide/introduction)** —
+  the flow, and a mapping table if you are coming from NgRx.
+- **[Getting started](https://pierre-mariemarchio.github.io/ngx-statewise/guide/getting-started)** —
+  installation, every `provideStatewise` option, and a first feature.
+- **[API reference](https://pierre-mariemarchio.github.io/ngx-statewise/guide/api)** —
+  every export, with the signature the compiler sees.
+- **[Why ngx-statewise](https://pierre-mariemarchio.github.io/ngx-statewise/guide/why)** —
+  what it costs you in lines, measured, and five cases where something else
+  serves you better.
+
+There is also a [showcase](https://pierre-mariemarchio.github.io/ngx-statewise/guide/showcase):
+a working application in the repository where every mechanism is used against a
+real feature.
 
 ## Migrating from 0.6.x
 

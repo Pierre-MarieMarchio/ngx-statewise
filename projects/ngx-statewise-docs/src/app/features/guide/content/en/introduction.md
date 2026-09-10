@@ -21,6 +21,17 @@ It sits between passing a handful of services around by hand and adopting a
 full state framework. If the first has stopped scaling and the second is more
 apparatus than you want, this is the gap it is built for.
 
+## Where to start
+
+This page is the shape of the library. Where you go from here depends on what
+you came for.
+
+| You are                                  | Read                                                                                                                                   |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| managing state by hand in services today | this page, then [Getting started](/guide/getting-started)                                                                              |
+| coming from NgRx or NGXS                 | [how it compares to a store](/guide/introduction#how-it-compares-to-a-store) below, then [Why ngx-statewise](/guide/why)               |
+| deciding whether to adopt it             | [Why ngx-statewise](/guide/why), which measures what it costs you in lines and names five cases where something else serves you better |
+
 ## The flow
 
 Always in this order.
@@ -135,8 +146,35 @@ about it, instead of travelling through something everything subscribes to.
 You follow less indirection reading unfamiliar code, and write less adding a
 feature. In exchange, no single object holds the whole application state. If
 you need one place to serialise it, replay it or inspect it, this is not the
-library for you — and [Why ngx-statewise](/guide/why) says where else that
-line falls.
+library for you, and [Why ngx-statewise](/guide/why) says where else that line
+falls.
+
+### Coming from NgRx
+
+Most of what you know transfers. Actions are actions, and effects are effects
+with a narrower job. What goes is the store itself, and everything that existed
+to read through it.
+
+| In NgRx                          | Here                                                                   |
+| -------------------------------- | ---------------------------------------------------------------------- |
+| `createAction`, `props`          | [`defineActionsGroup`](/guide/actions), `payload`                      |
+| `createReducer`, `on`            | [`defineUpdater`](/guide/updaters), which writes signals in place      |
+| `createSelector`                 | `computed`, on the state or on the manager. There is no selector layer |
+| `createEffect` + `ofType`        | [`createEffect`](/guide/effects), bound to one action creator          |
+| `Store.dispatch`                 | A method on the [manager](/guide/managers) owning the state            |
+| `StoreModule.forFeature`         | Nothing. A state is an injectable, and an updater names its token      |
+| `provideStore`, `provideEffects` | One [`provideStatewise`](/guide/getting-started) call                  |
+
+Three habits to unlearn. An effect returns its next action instead of mapping a
+stream into one, and it is read once rather than subscribed. A dispatch goes to
+the manager owning the state, not to a global store, and sending it to the
+wrong one is reported rather than ignored. And there is no `select` — a
+component reads a signal the manager exposes.
+
+The one thing with no equivalent is the devtools timeline. The
+[action history](/guide/api#actionhistory) reads back what was dispatched and
+the path it took, which answers "what happened" and does not let you step
+through it.
 
 ## What to expect
 

@@ -4,8 +4,8 @@ title:
   en: Testing
   fr: Tests
 summary:
-  en: The ngx-statewise/testing entry point in a TestBed.
-  fr: Le point d’entrée ngx-statewise/testing dans un TestBed.
+  en: The ngx-statewise/testing entry point, and a worked suite for an effect.
+  fr: Le point d’entrée ngx-statewise/testing, et une suite complète pour un effect.
 ---
 
 # Testing
@@ -64,6 +64,12 @@ it('loads the tasks', async () => {
 });
 ```
 
+> [!IMPORTANT]
+> List the effect class in `effects`. `createEffect` registers itself in the
+> injection context of the class declaring it, so a class nobody instantiates
+> registers nothing — and the test then passes for the wrong reason, because
+> the action does nothing at all.
+
 ## Letting a fire-and-forget dispatch settle
 
 `dispatch` returns nothing, so a test asserting on its side effects has to wait
@@ -86,23 +92,130 @@ expect(manager.items()).toHaveLength(3);
 
 The library's one guarantee is that the state is written before the effect
 runs. That is worth a test of its own, and it is written by reading the state
-from inside the effect rather than by watching the clock:
+between the dispatch and the settle rather than by waiting:
 
-```typescript title="auth.effect.spec.ts"
-it('runs on state the updater has already written', async () => {
-  const auth = manager();
+```typescript title="task.effect.spec.ts"
+it('leaves the state written before the effect runs', async () => {
+  const tasks = manager();
 
-  auth.login(credentials); // synchronous dispatch
+  tasks.toggleDone('a'); // synchronous dispatch
 
-  // The updater has been through before this line.
-  expect(auth.isLoading()).toBe(true);
+  // The updater has been through; the effect has not finished.
+  expect(tasks.pending().has('a')).toBe(true);
 
   await drainEffects();
 
-  expect(auth.isLoading()).toBe(false);
-  expect(auth.user()).not.toBeNull();
+  expect(tasks.pending().has('a')).toBe(false);
 });
 ```
+
+```typescript avoid title="task.effect.spec.ts"
+tasks.toggleDone('a');
+await new Promise((resolve) => setTimeout(resolve, 50));
+expect(tasks.pending().has('a')).toBe(false);
+```
+
+A timeout asserts that the machine was fast enough, which is a different claim
+and a flaky one. `drainEffects` resolves when the work is actually over.
+
+## A worked suite for an effect
+
+An effect can get three things wrong: the action it returns, the cascade it
+starts, and what it does when the call fails. The rest of this page is the
+suite you copy from.
+
+### Replacing what the effect talks to
+
+Provide the effect class, attach the updater, and substitute whatever the
+effect calls. Nothing else is special about a suite that exercises effects.
+
+```typescript title="task.effect.spec.ts"
+class FakeTaskApi {
+  public setDone = vi.fn().mockResolvedValue(undefined);
+  public list = vi.fn().mockResolvedValue([task('a'), task('b')]);
+}
+
+function manager(api = new FakeTaskApi()): {
+  tasks: TaskManager;
+  api: FakeTaskApi;
+} {
+  TestBed.resetTestingModule();
+  TestBed.configureTestingModule({
+    providers: [
+      provideStatewiseTesting({
+        effects: [TaskEffect],
+        updaters: [taskUpdater],
+      }),
+      { provide: TaskApi, useValue: api },
+    ],
+  });
+
+  return { tasks: TestBed.inject(TaskManager), api };
+}
+```
+
+### Testing what it returns
+
+Dispatch, let it settle, and assert on the state the manager exposes. The
+returned action is an implementation detail; the state is the contract.
+
+<!-- prettier-ignore -->
+```typescript title="task.effect.spec.ts"
+it('marks the task done once the server agrees', async () => {
+  const { tasks, api } = manager();
+
+  await tasks.toggleDoneAndSettle('a');
+
+  expect(api.setDone).toHaveBeenCalledWith('a', true);
+  expect(tasks.items()).toContainEqual(
+    expect.objectContaining({ id: 'a', done: true }),
+  );
+});
+```
+
+When the actions themselves are what you are testing — a cascade, an ordering —
+read them from the history, which `provideStatewiseTesting` enables for you:
+
+```typescript title="task.effect.spec.ts"
+it('confirms rather than reverting', async () => {
+  const { tasks } = manager();
+
+  await tasks.toggleDoneAndSettle('a');
+
+  const dispatched = TestBed.inject(ActionHistory)
+    .snapshot()
+    .map((entry) => entry.action.type);
+
+  expect(dispatched).toEqual(['TASK_TOGGLE_DONE', 'TASK_TOGGLE_CONFIRMED']);
+});
+```
+
+### Testing the failure path
+
+Make the fake fail, and assert the state came back:
+
+<!-- prettier-ignore -->
+```typescript title="task.effect.spec.ts"
+it('puts the task back when the server refuses', async () => {
+  const api = new FakeTaskApi();
+  api.setDone.mockRejectedValue(new Error('nope'));
+
+  const { tasks } = manager(api);
+
+  await tasks.toggleDoneAndSettle('a');
+
+  expect(tasks.items()).toContainEqual(
+    expect.objectContaining({ id: 'a', done: false }),
+  );
+  expect(tasks.lastError()).toContain('nope');
+});
+```
+
+> [!TIP]
+> If the effect lets the error escape instead of returning a revert action,
+> `dispatchAsync` rejects and `drainEffects` does not. Choose deliberately
+> which one the test awaits: `dispatchAsync` when the failure is the subject,
+> `drainEffects` when you only need the work to be over.
 
 ## Exercising an interceptor
 
@@ -141,9 +254,8 @@ here, so a suite can also assert that the refused action recorded no entry. See
 
 ## Dispatching without attaching an updater
 
-A test that only exercises effects can dispatch an action whose updater it
-never attached. The misrouted-dispatch check forbids exactly that, so turn it
-off for the suite:
+A suite exercising an effect in isolation may not want to attach the updater at
+all. The misrouted-dispatch check forbids exactly that, so turn it off:
 
 <!-- prettier-ignore -->
 ```typescript title="auth.effect.spec.ts"
@@ -153,6 +265,10 @@ TestBed.configureTestingModule({
   ],
 });
 ```
+
+Reach for it when the effect is the subject. Prefer attaching the real updater
+otherwise — a test that dispatches into a scope owning nothing proves less than
+it looks.
 
 ## Declaring updaters inside tests
 
@@ -183,8 +299,8 @@ Prefer `strict: false` when you only want the check off. It is scoped to one
   and interceptor classes the test needs — a class nobody instantiates
   registers nothing.
 - `await drainEffects()` after a `dispatch`, `await` the promise after a
-  `dispatchAsync`.
-- Assert on the state the manager exposes, not on the actions, unless the
+  `dispatchAsync`. Never a `setTimeout`.
+- Assert on the state the manager exposes. Read the history only when the
   actions are what you are testing.
 
 The showcase has four suites written this way, under `src/integration/`. They
